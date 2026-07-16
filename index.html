@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anthony's Supermarket — Command Center</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      text-align: center;
+      padding: 4rem 0;
+      animation: fadeInDown 1s ease;
+    }
+    
+    .logo {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .tagline {
+      font-size: 1.5rem;
+      color: #bdc3c7;
+      margin-bottom: 2rem;
+    }
+    
+    .contact {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #3498db;
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      background: rgba(52, 152, 219, 0.1);
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    
+    .contact-item:hover {
+      background: rgba(52, 152, 219, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+    
+    .app-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+    
+    .app-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(243, 156, 18, 0.5);
+      box-shadow: 0 20px 40px rgba(243, 156, 18, 0.2);
+    }
+    
+    .app-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .app-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #f39c12;
+    }
+    
+    .app-card p {
+      color: #bdc3c7;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .status-live {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+    
+    .status-dev {
+      background: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+    }
+    
+    .status-planned {
+      background: rgba(149, 165, 166, 0.2);
+      color: #95a5a6;
+    }
+    
+    .cta-section {
+      text-align: center;
+      padding: 4rem 0;
+      margin-top: 4rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.125rem;
+      transition: all 0.3s ease;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid #f39c12;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(243, 156, 18, 0.1);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 2rem;
+      margin-top: 4rem;
+      color: #7f8c8d;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    /* Three.js canvas background */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  
+  <div class="container">
+    <header>
+      <div class="logo floating">🦁</div>
+      <h1>Anthony's Supermarket</h1>
+      <p class="tagline">Immersive Grocery Shopping Experience</p>
+      <p style="color: #95a5a6; font-size: 1.125rem;">288 Kearny Ave, Kearny NJ 07032</p>
+      
+      <div class="contact">
+        <a href="tel:2014281745" class="contact-item">
+          📞 (201) 428-1745
+        </a>
+        <a href="https://anthonyssupermarket.com" class="contact-item" target="_blank">
+          🌐 anthonyssupermarket.com
+        </a>
+        <a href="https://instagram.com/anthony_supermarket" class="contact-item" target="_blank">
+          📷 @anthony_supermarket
+        </a>
+      </div>
+    </header>
+    
+    <section>
+      <h2 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">🚀 Command Center Apps</h2>
+      
+      <div class="apps-grid">
+        <div class="app-card" onclick="window.location.href='/pricing-hub/'">
+          <div class="app-icon">💰</div>
+          <h3>Pricing Hub</h3>
+          <p>Real-time wholesale cost tracking with AI invoice extraction and 65% markup calculator</p>
+          <span class="status status-live">● Live</span>
+        </div>
+        
+        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/anthony-superapp'">
+          <div class="app-icon">🚚</div>
+          <h3>Delivery System</h3>
+          <p>Full-featured delivery management with customer app, store dashboard, and rider tracking</p>
+          <span class="status status-live">● Live</span>
+        </div>
+        
+        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/inventree.AnthonysSuperApp'">
+          <div class="app-icon">📊</div>
+          <h3>Inventory Management</h3>
+          <p>Open-source inventory system with stock tracking, purchase orders, and barcode scanning</p>
+          <span class="status status-live">● Live</span>
+        </div>
+        
+        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/biomenu-Anthony-s-Supermarket-App'">
+          <div class="app-icon">📱</div>
+          <h3>Digital Menu</h3>
+          <p>D2C ordering interface with QR codes, online ordering, and DoorDash integration</p>
+          <span class="status status-live">● Live</span>
+        </div>
+        
+        <div class="app-card">
+          <div class="app-icon">🎮</div>
+          <h3>Three.js Store</h3>
+          <p>Immersive 3D grocery store walkthrough with interactive products and shopping cart</p>
+          <span class="status status-dev">● In Development</span>
+        </div>
+        
+        <div class="app-card">
+          <div class="app-icon">🎯</div>
+          <h3>Command Dashboard</h3>
+          <p>Unified business analytics with real-time sales, profit tracking, and inventory alerts</p>
+          <span class="status status-planned">○ Planned</span>
+        </div>
+      </div>
+    </section>
+    
+    <div class="cta-section">
+      <h2 style="font-size: 2rem; margin-bottom: 1rem;">Ready to Experience the Future?</h2>
+      <p style="color: #bdc3c7; margin-bottom: 2rem; font-size: 1.125rem;">
+        Explore our apps or check out the code on GitHub
+      </p>
+      <a href="/pricing-hub/" class="btn">Launch Pricing Hub</a>
+      <a href="https://github.com/JelfferyDuran/anthony-supermarket" class="btn btn-secondary" target="_blank">View on GitHub</a>
+    </div>
+    
+    <footer>
+      <p>© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny NJ 07032</p>
+      <p style="margin-top: 0.5rem;">
+        Built with 🦁 by 
+        <a href="https://github.com/JelfferyDuran" style="color: #3498db; text-decoration: none;">@JelfferyDuran</a>
+      </p>
+    </footer>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Simple Three.js background animation
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Create floating particles
+    const geometry = new THREE.BufferGeometry();
+    const particles = 1000;
+    const positions = new Float32Array(particles * 3);
+    
+    for (let i = 0; i < particles * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 10;
+      positions[i + 1] = (Math.random() - 0.5) * 10;
+      positions[i + 2] = (Math.random() - 0.5) * 10;
+    }
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const material = new THREE.PointsMaterial({
+      color: 0xf39c12,
+      size: 0.02,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    const particlesMesh = new THREE.Points(geometry, material);
+    scene.add(particlesMesh);
+    
+    camera.position.z = 3;
+    
+    // Mouse interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    document.addEventListener('mousemove', (event) => {
+      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    });
+    
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      particlesMesh.rotation.x += 0.001;
+      particlesMesh.rotation.y += 0.001;
+      
+      particlesMesh.rotation.x += mouseY * 0.0005;
+      particlesMesh.rotation.y += mouseX * 0.0005;
+      
+      renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

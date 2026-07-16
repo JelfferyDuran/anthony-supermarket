@@ -1,0 +1,27 @@
+{
+  "name": "anthony-supermarket",
+  "version": "1.0.0",
+  "description": "Anthony's Supermarket - Unified digital presence with Three.js immersive shopping",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:*\"",
+    "dev:pricing-hub": "cd apps/pricing-hub && npm run dev",
+    "dev:delivery": "cd apps/delivery && npm run dev",
+    "dev:menu": "cd apps/menu && npm run dev",
+    "dev:command-center": "cd apps/command-center && npm run dev",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "eslint": "^8.45.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
