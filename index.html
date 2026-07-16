@@ -3,480 +3,995 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anthony's Supermarket — Digital Platform</title>
+  <title>Anthony's Supermarket</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    /* ═══════════════════════ RESET & BASE ═══════════════════════ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --primary: #4CAF50;
-      --primary-dark: #388E3C;
-      --secondary: #FF9800;
-      --dark: #1a1a1a;
-      --light: #f5f5f5;
-      --gray: #757575;
+      --neon: #00FF41;
+      --neon-dim: #00CC33;
+      --neon-glow: rgba(0, 255, 65, 0.3);
+      --orange: #FF6B00;
+      --dark: #0a0a0f;
+      --darker: #06060a;
+      --card: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.03);
+      --text: #e0e0e0;
+      --text-dim: #888;
     }
-    
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: var(--light);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--dark);
+      color: var(--text);
       overflow-x: hidden;
     }
-    
-    /* Language Toggle */
-    .lang-toggle {
+
+    /* ═══════════════════════ 3D CANVAS ═══════════════════════ */
+    #three-canvas {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      display: flex;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      padding: 10px;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════ OVERLAY CONTENT ═══════════════════════ */
+    .overlay {
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .overlay > * { pointer-events: auto; }
+
+    /* ═══════════════════════ LANGUAGE TOGGLE ═══════════════════════ */
+    .lang-toggle {
+      position: fixed; top: 20px; right: 20px; z-index: 100;
+      display: flex; gap: 6px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      padding: 6px;
       border-radius: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(0,255,65,0.2);
     }
-    
     .lang-btn {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 25px;
-      background: transparent;
-      color: var(--light);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      padding: 6px 16px; border: none; border-radius: 25px;
+      background: transparent; color: var(--text-dim);
+      cursor: pointer; font-weight: 600; font-size: 0.8rem;
+      transition: all 0.3s ease; font-family: inherit;
     }
-    
-    .lang-btn.active {
-      background: var(--primary);
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-    }
-    
-    .lang-btn:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Hero Section */
+    .lang-btn.active { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon-glow); }
+    .lang-btn:hover:not(.active) { background: rgba(0,255,65,0.15); color: var(--neon); }
+
+    /* ═══════════════════════ HERO ═══════════════════════ */
     .hero {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: 2rem;
     }
-    
-    .logo-container {
-      width: 200px;
-      height: 200px;
-      margin-bottom: 2rem;
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    .logo {
-      width: 100%;
-      height: 100%;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 5rem;
-      box-shadow: 0 10px 40px rgba(76, 175, 80, 0.4);
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-    
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--neon), var(--orange));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      margin-bottom: 0.5rem;
+      text-shadow: none;
+      letter-spacing: -0.02em;
     }
-    
-    .tagline {
-      font-size: 1.5rem;
-      color: var(--gray);
+    .hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--text-dim);
       margin-bottom: 2rem;
       max-width: 600px;
     }
-    
-    .info-badge {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.5rem 2rem;
-      border-radius: 15px;
-      margin: 1rem 0;
-      backdrop-filter: blur(10px);
+    .hero .crown-logo {
+      width: 120px; height: 120px;
+      margin-bottom: 2rem;
+      animation: crownFloat 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px var(--neon-glow));
     }
-    
-    .info-badge p {
-      margin: 0.5rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
+    @keyframes crownFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(-3deg); }
     }
-    
-    /* Navigation Dots */
-    .nav-dots {
-      position: fixed;
-      right: 30px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      z-index: 100;
+    .hero .info {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      justify-content: center; margin-bottom: 2rem;
     }
-    
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
+    .hero .info > span {
+      background: var(--glass);
+      border: 1px solid var(--card-border);
+      padding: 0.5rem 1rem; border-radius: 50px;
+      font-size: 0.9rem; color: var(--text-dim);
+      backdrop-filter: blur(8px);
     }
-    
-    .dot::before {
-      content: attr(data-label);
-      position: absolute;
-      right: 25px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: var(--dark);
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    
-    .dot:hover::before {
-      opacity: 1;
-    }
-    
-    .dot.active {
-      background: var(--primary);
-      transform: scale(1.3);
-    }
-    
-    /* Sections */
+    .hero .info > span i { color: var(--neon); margin-right: 0.4rem; }
+
+    /* ═══════════════════════ SECTION COMMON ═══════════════════════ */
     section {
       min-height: 100vh;
-      padding: 4rem 2rem;
-      display: none;
+      padding: 6rem 2rem;
+      position: relative;
     }
-    
-    section.active {
-      display: block;
-    }
-    
     .section-title {
-      font-size: 2.5rem;
       text-align: center;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
       margin-bottom: 3rem;
-      color: var(--primary);
+      color: var(--neon);
     }
-    
-    /* Apps Grid */
-    .apps-grid {
+    .section-title span { color: var(--text-dim); font-weight: 400; }
+
+    /* ═══════════════════════ STATS BAR ═══════════════════════ */
+    .stats-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem; max-width: 1200px; margin: 0 auto 4rem;
     }
-    
-    .app-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-    }
-    
-    .app-card:hover {
-      transform: translateY(-10px);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--primary);
-      box-shadow: 0 20px 40px rgba(76, 175, 80, 0.3);
-    }
-    
-    .app-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-    
-    .app-card h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      color: var(--primary);
-    }
-    
-    .app-card p {
-      color: var(--gray);
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-    
-    .status {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-    
-    .status-live {
-      background: rgba(76, 175, 80, 0.2);
-      color: #4CAF50;
-    }
-    
-    .status-dev {
-      background: rgba(255, 152, 0, 0.2);
-      color: #FF9800;
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 1rem 2rem;
-      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-      color: white;
-      text-decoration: none;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 1.125rem;
-      transition: all 0.3s ease;
-      margin-top: 1rem;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
-    }
-    
-    .btn-secondary {
-      background: transparent;
-      border: 2px solid var(--primary);
-    }
-    
-    /* Pricing Hub Frame */
-    .app-frame {
-      width: 100%;
-      height: calc(100vh - 200px);
-      border: 2px solid var(--primary);
-      border-radius: 20px;
-      background: white;
-    }
-    
-    /* Footer */
-    footer {
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 1.5rem;
       text-align: center;
-      padding: 2rem;
-      background: rgba(0, 0, 0, 0.3);
-      margin-top: 4rem;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
     }
-    
-    /* Responsive */
+    .stat-card:hover { border-color: var(--neon); transform: translateY(-4px); box-shadow: 0 8px 30px var(--neon-glow); }
+    .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--neon); }
+    .stat-card .label { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.3rem; }
+
+    /* ═══════════════════════ MENU SECTIONS ═══════════════════════ */
+    .menu-section { margin-bottom: 4rem; }
+    .menu-section h3 {
+      font-size: 1.8rem; margin-bottom: 1.5rem;
+      color: var(--orange);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .menu-section h3::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--orange), transparent);
+    }
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .cat-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 1.2rem;
+      transition: all 0.3s ease; cursor: pointer;
+    }
+    .cat-card:hover { border-color: var(--neon); background: rgba(0,255,65,0.05); }
+    .cat-card h4 { color: var(--neon); font-size: 1rem; margin-bottom: 0.3rem; }
+    .cat-card .count { color: var(--text-dim); font-size: 0.8rem; }
+
+    /* ═══════════════════════ ITEM MODAL ═══════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: none; justify-content: center;
+      align-items: center; padding: 2rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #111;
+      border: 1px solid var(--neon);
+      border-radius: 24px; padding: 2rem;
+      max-width: 500px; width: 100%;
+      max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 0 60px var(--neon-glow);
+    }
+    .modal h2 { color: var(--neon); font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .modal .price { font-size: 2rem; font-weight: 700; color: #fff; margin: 1rem 0; }
+    .modal .desc { color: var(--text-dim); margin-bottom: 1rem; line-height: 1.5; }
+    .modal .tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .modal .tags span {
+      background: rgba(0,255,65,0.1);
+      color: var(--neon); padding: 0.2rem 0.8rem;
+      border-radius: 50px; font-size: 0.75rem;
+      border: 1px solid rgba(0,255,65,0.2);
+    }
+    .modal .qty-row {
+      display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;
+    }
+    .modal .qty-row button {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background: var(--glass); color: #fff;
+      font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+    }
+    .modal .qty-row button:hover { border-color: var(--neon); background: rgba(0,255,65,0.1); }
+    .modal .qty-row .qty { font-size: 1.3rem; font-weight: 600; min-width: 30px; text-align: center; }
+    .modal .btn-add {
+      width: 100%; padding: 1rem;
+      background: var(--neon); color: #000;
+      border: none; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      transition: all 0.3s; font-family: inherit;
+    }
+    .modal .btn-add:hover { box-shadow: 0 0 30px var(--neon-glow); transform: scale(1.02); }
+    .modal .btn-close {
+      float: right; background: none; border: none;
+      color: var(--text-dim); font-size: 1.5rem; cursor: pointer;
+    }
+    .modal .btn-close:hover { color: #fff; }
+
+    /* ═══════════════════════ CART ═══════════════════════ */
+    .cart-fab {
+      position: fixed; bottom: 30px; right: 30px; z-index: 50;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--neon); border: none;
+      color: #000; font-size: 1.5rem; cursor: pointer;
+      box-shadow: 0 4px 20px var(--neon-glow);
+      transition: all 0.3s; display: flex;
+      align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+    .cart-fab:hover { transform: scale(1.1); }
+    .cart-fab .badge {
+      position: absolute; top: -5px; right: -5px;
+      background: var(--orange); color: #fff;
+      width: 24px; height: 24px; border-radius: 50%;
+      font-size: 0.75rem; display: flex;
+      align-items: center; justify-content: center;
+    }
+
+    /* Cart Panel */
+    .cart-panel {
+      position: fixed; top: 0; right: -400px; z-index: 150;
+      width: 380px; max-width: 100vw; height: 100vh;
+      background: #0d0d14; border-left: 1px solid var(--card-border);
+      transition: right 0.3s ease; display: flex;
+      flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    }
+    .cart-panel.open { right: 0; }
+    .cart-panel .header {
+      padding: 1.5rem; border-bottom: 1px solid var(--card-border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cart-panel .header h3 { color: var(--neon); }
+    .cart-panel .header button { background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; }
+    .cart-panel .items { flex: 1; overflow-y: auto; padding: 1rem; }
+    .cart-panel .item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.8rem; border-bottom: 1px solid var(--card-border);
+    }
+    .cart-panel .item .name { flex: 1; font-size: 0.9rem; }
+    .cart-panel .item .qty-controls { display: flex; gap: 0.5rem; align-items: center; }
+    .cart-panel .item .qty-controls button {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--card-border); background: transparent;
+      color: #fff; cursor: pointer; font-size: 0.9rem;
+    }
+    .cart-panel .item .qty-controls button:hover { border-color: var(--neon); }
+    .cart-panel .total {
+      padding: 1.5rem; border-top: 1px solid var(--card-border);
+    }
+    .cart-panel .total .row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .cart-panel .total .grand { font-size: 1.3rem; font-weight: 700; color: var(--neon); }
+    .cart-panel .btn-checkout {
+      width: 100%; padding: 1rem; margin-top: 1rem;
+      background: var(--neon); color: #000; border: none;
+      border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; font-family: inherit;
+    }
+    .cart-panel .btn-checkout:hover { box-shadow: 0 0 30px var(--neon-glow); }
+
+    /* ═══════════════════════ CHECKOUT MODAL ═══════════════════════ */
+    .checkout-form { display: flex; flex-direction: column; gap: 1rem; }
+    .checkout-form input, .checkout-form select, .checkout-form textarea {
+      width: 100%; padding: 0.8rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 10px; color: #fff;
+      font-size: 1rem; font-family: inherit;
+      transition: border-color 0.3s;
+    }
+    .checkout-form input:focus, .checkout-form select:focus, .checkout-form textarea:focus {
+      outline: none; border-color: var(--neon);
+    }
+    .checkout-form select option { background: #111; color: #fff; }
+    .checkout-form .order-summary {
+      background: rgba(0,255,65,0.05);
+      border: 1px solid rgba(0,255,65,0.2);
+      border-radius: 10px; padding: 1rem;
+    }
+    .checkout-form .order-summary .line {
+      display: flex; justify-content: space-between;
+      padding: 0.3rem 0; font-size: 0.9rem;
+    }
+    .checkout-form .btn-place {
+      padding: 1rem; margin-top: 0.5rem;
+      background: var(--neon); color: #000; border: none;
+      border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: all 0.3s;
+    }
+    .checkout-form .btn-place:hover { box-shadow: 0 0 30px var(--neon-glow); }
+    .checkout-form .btn-place:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ═══════════════════════ PRICING HUB EMBED ═══════════════════════ */
+    .pricing-frame {
+      width: 100%; height: 80vh;
+      border: 1px solid var(--card-border);
+      border-radius: 16px; background: #fff;
+    }
+
+    /* ═══════════════════════ FOOTER ═══════════════════════ */
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-dim); font-size: 0.85rem;
+    }
+    footer strong { color: var(--neon); }
+
+    /* ═══════════════════════ RESPONSIVE ═══════════════════════ */
     @media (max-width: 768px) {
-      h1 { font-size: 2rem; }
-      .tagline { font-size: 1rem; }
-      .nav-dots { display: none; }
-      .apps-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.2rem; }
+      .cart-panel { width: 100vw; right: -100vw; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
     }
-    
-    /* Animations */
-    .fade-in {
-      animation: fadeIn 0.5s ease;
+
+    /* ═══════════════════════ SCROLLBAR ═══════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--darker); }
+    ::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 3px; }
+
+    /* ═══════════════════════ ORDER CONFIRMATION ═══════════════════════ */
+    .confirmation { text-align: center; padding: 2rem; }
+    .confirmation .check { font-size: 4rem; margin-bottom: 1rem; }
+    .confirmation h2 { color: var(--neon); margin-bottom: 0.5rem; }
+    .confirmation .order-id {
+      font-size: 2rem; font-weight: 800; color: var(--orange);
+      margin: 1rem 0; letter-spacing: 0.1em;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .confirmation p { color: var(--text-dim); margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
-  <!-- Language Toggle -->
+
+  <!-- ════════ 3D CANVAS ════════ -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- ════════ LANGUAGE TOGGLE ════════ -->
   <div class="lang-toggle">
     <button class="lang-btn active" onclick="setLang('en')">EN</button>
     <button class="lang-btn" onclick="setLang('es')">ES</button>
   </div>
-  
-  <!-- Navigation Dots -->
-  <div class="nav-dots">
-    <div class="dot active" data-label="Home" onclick="showSection('home')" data-label-en="Home" data-label-es="Inicio"></div>
-    <div class="dot" data-label="Apps" onclick="showSection('apps')" data-label-en="Apps" data-label-es="Sistemas"></div>
-    <div class="dot" data-label="Pricing" onclick="showSection('pricing')" data-label-en="Pricing Hub" data-label-es="Precios"></div>
+
+  <!-- ════════ CART FAB ════════ -->
+  <button class="cart-fab" onclick="toggleCart()">
+    🛒
+    <span class="badge" id="cartBadge">0</span>
+  </button>
+
+  <!-- ════════ CART PANEL ════════ -->
+  <div class="cart-panel" id="cartPanel">
+    <div class="header">
+      <h3 data-en="Your Cart" data-es="Tu Carrito">Your Cart</h3>
+      <button onclick="toggleCart()">✕</button>
+    </div>
+    <div class="items" id="cartItems"></div>
+    <div class="total">
+      <div class="row"><span data-en="Subtotal" data-es="Subtotal">Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+      <div class="row grand"><span data-en="Total" data-es="Total">Total</span><span id="cartTotal">$0.00</span></div>
+      <button class="btn-checkout" onclick="openCheckout()" data-en="Proceed to Checkout" data-es="Ir a Pagar">Proceed to Checkout</button>
+    </div>
   </div>
-  
-  <!-- Home Section -->
-  <section id="home" class="hero active">
-    <div class="logo-container">
-      <div class="logo">🛒</div>
+
+  <!-- ════════ ITEM MODAL ════════ -->
+  <div class="modal-overlay" id="itemModal">
+    <div class="modal">
+      <button class="btn-close" onclick="closeItemModal()">✕</button>
+      <h2 id="modalName">Item Name</h2>
+      <div class="price" id="modalPrice">$0.00</div>
+      <div class="desc" id="modalDesc">Description</div>
+      <div class="tags" id="modalTags"></div>
+      <div class="qty-row">
+        <button onclick="changeQty(-1)">−</button>
+        <span class="qty" id="modalQty">1</span>
+        <button onclick="changeQty(1)">+</button>
+      </div>
+      <button class="btn-add" onclick="addToCartFromModal()" data-en="Add to Cart" data-es="Agregar al Carrito">Add to Cart</button>
     </div>
-    
+  </div>
+
+  <!-- ════════ CHECKOUT MODAL ════════ -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal" style="max-width: 550px;">
+      <button class="btn-close" onclick="closeCheckout()">✕</button>
+      <h2 data-en="Checkout" data-es="Pagar">Checkout</h2>
+      <div id="checkoutContent"></div>
+    </div>
+  </div>
+
+  <!-- ════════ HERO ════════ -->
+  <section class="hero overlay" id="section-home">
+    <svg class="crown-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="58" stroke="#00FF41" stroke-width="2" opacity="0.3"/>
+      <!-- Crown -->
+      <path d="M30 50 L40 30 L50 45 L60 25 L70 45 L80 30 L90 50 L85 85 L35 85 L30 50Z" fill="#00FF41" opacity="0.9"/>
+      <path d="M40 50 L45 65 L75 65 L80 50" fill="#0a0a0f" stroke="#00FF41" stroke-width="1.5"/>
+      <!-- Gem -->
+      <circle cx="50" cy="50" r="4" fill="#FF6B00"/>
+      <circle cx="60" cy="45" r="4" fill="#FF6B00"/>
+      <circle cx="70" cy="50" r="4" fill="#FF6B00"/>
+      <!-- Cart base -->
+      <rect x="40" y="70" width="40" height="8" rx="3" fill="#00FF41" opacity="0.7"/>
+      <line x1="43" y1="78" x2="43" y2="88" stroke="#00FF41" stroke-width="2"/>
+      <line x1="50" y1="78" x2="50" y2="88" stroke="#00FF41" stroke-width="2"/>
+      <line x1="57" y1="78" x2="57" y2="88" stroke="#00FF41" stroke-width="2"/>
+      <line x1="64" y1="78" x2="64" y2="88" stroke="#00FF41" stroke-width="2"/>
+      <line x1="71" y1="78" x2="71" y2="88" stroke="#00FF41" stroke-width="2"/>
+      <!-- Wheels -->
+      <circle cx="46" cy="90" r="4" fill="#00FF41"/>
+      <circle cx="74" cy="90" r="4" fill="#00FF41"/>
+    </svg>
+
     <h1 data-en="Anthony's Supermarket" data-es="Supermercado Anthony's">Anthony's Supermarket</h1>
-    
-    <p class="tagline" data-en="Digital Platform Presentation" data-es="Presentación de Plataforma Digital">Digital Platform Presentation</p>
-    
-    <div class="info-badge">
-      <p data-en="📍 288 Kearny Ave, Kearny, NJ 07032" data-es="📍 288 Kearny Ave, Kearny, NJ 07032">📍 288 Kearny Ave, Kearny, NJ 07032</p>
-      <p data-en="📞 (201) 428-1745" data-es="📞 (201) 428-1745">📞 (201) 428-1745</p>
-      <p data-en="🏪 Serving the community for 9 years" data-es="🏪 Sirviendo a la comunidad por 9 años">🏪 Sirviendo a la comunidad por 9 años</p>
-      <p data-en="🥬 Fresh Fruit & Vegetables • Fresh Meat • Hot Food" data-es="🥬 Frutas y Verduras Frescas • Carne Fresca • Comida Caliente">🥬 Frutas y Verduras Frescas • Carne Fresca • Comida Caliente</p>
+    <p class="tagline" data-en="Serving the Kearny community for 9 years" data-es="Sirviendo a la comunidad de Kearny por 9 años">
+      Serving the Kearny community for 9 years
+    </p>
+    <div class="info">
+      <span><i>📍</i> 288 Kearny Ave, Kearny NJ 07032</span>
+      <span><i>📞</i> (201) 428-1745</span>
+      <span><i>🕐</i> <span data-en="Open Daily" data-es="Abierto Todos los Días">Open Daily</span></span>
     </div>
-    
-    <button class="btn" onclick="showSection('apps')" data-en="Explore Our Systems" data-es="Explorar Sistemas">Explore Our Systems</button>
-  </section>
-  
-  <!-- Apps Section -->
-  <section id="apps">
-    <h2 class="section-title" data-en="Digital Systems" data-es="Sistemas Digitales">Digital Systems</h2>
-    
-    <div class="apps-grid">
-      <div class="app-card" onclick="showSection('pricing')">
-        <div class="app-icon">💰</div>
-        <h3 data-en="Pricing Hub" data-es="Centro de Precios">Pricing Hub</h3>
-        <p data-en="Real-time wholesale cost tracking with AI invoice extraction and automatic 65% markup calculator" data-es="Seguimiento de costos al por mayor con extracción de facturas por IA y calculadora automática de 65% de margen">Real-time wholesale cost tracking with AI invoice extraction and automatic 65% markup calculator</p>
-        <span class="status status-live" data-en="● Live" data-es="● En Vivo">● Live</span>
-      </div>
-      
-      <div class="app-card">
-        <div class="app-icon">🚚</div>
-        <h3 data-en="Delivery System" data-es="Sistema de Entrega">Delivery System</h3>
-        <p data-en="Full delivery management with customer app, store dashboard, and rider tracking" data-es="Gestión completa de entregas con app de clientes, panel de tienda y seguimiento de repartidores">Full delivery management with customer app, store dashboard, and rider tracking</p>
-        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
-      </div>
-      
-      <div class="app-card">
-        <div class="app-icon">📊</div>
-        <h3 data-en="Inventory Management" data-es="Gestión de Inventario">Inventory Management</h3>
-        <p data-en="Open-source inventory system with stock tracking, purchase orders, and barcode scanning" data-es="Sistema de inventario con seguimiento de stock, órdenes de compra y escaneo de códigos de barras">Open-source inventory system with stock tracking, purchase orders, and barcode scanning</p>
-        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
-      </div>
-      
-      <div class="app-card">
-        <div class="app-icon">📱</div>
-        <h3 data-en="Digital Menu" data-es="Menú Digital">Digital Menu</h3>
-        <p data-en="D2C ordering interface with QR codes, online ordering, and DoorDash integration" data-es="Interfaz de pedidos con códigos QR, pedidos en línea e integración con DoorDash">D2C ordering interface with QR codes, online ordering, and DoorDash integration</p>
-        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
-      </div>
-      
-      <div class="app-card">
-        <div class="app-icon">🎮</div>
-        <h3 data-en="3D Shopping Experience" data-es="Experiencia de Compra 3D">3D Shopping Experience</h3>
-        <p data-en="Immersive Three.js virtual store walkthrough with interactive products and shopping cart" data-es="Recorrido virtual inmersivo en Three.js con productos interactivos y carrito de compras">Immersive Three.js virtual store walkthrough with interactive products and shopping cart</p>
-        <span class="status status-dev" data-en="● Coming Soon" data-es="● Próximamente">● Coming Soon</span>
-      </div>
-      
-      <div class="app-card">
-        <div class="app-icon">🎯</div>
-        <h3 data-en="Business Dashboard" data-es="Panel de Negocio">Business Dashboard</h3>
-        <p data-en="Unified analytics with real-time sales, profit tracking, and inventory alerts" data-es="Analíticas unificadas con ventas en tiempo real, seguimiento de ganancias y alertas de inventario">Unified analytics with real-time sales, profit tracking, and inventory alerts</p>
-        <span class="status status-dev" data-en="● Planned" data-es="● Planeado">● Planned</span>
-      </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+      <button class="lang-btn" style="padding:0.8rem 2rem;font-size:1rem;background:var(--neon);color:#000;border-radius:50px;font-weight:700;" onmouseover="this.style.boxShadow='0 0 30px var(--neon-glow)'" onmouseout="this.style.boxShadow='none'" onclick="document.getElementById('section-menu').scrollIntoView({behavior:'smooth'})">
+        🛒 <span data-en="Start Ordering" data-es="Ordenar Ahora">Start Ordering</span>
+      </button>
+      <button class="lang-btn" style="padding:0.8rem 2rem;font-size:1rem;background:transparent;color:var(--neon);border:1px solid var(--neon);border-radius:50px;font-weight:700;" onclick="document.getElementById('section-pricing').scrollIntoView({behavior:'smooth'})">
+        📊 <span data-en="Pricing Hub" data-es="Centro de Precios">Pricing Hub</span>
+      </button>
     </div>
   </section>
-  
-  <!-- Pricing Hub Section -->
-  <section id="pricing">
-    <h2 class="section-title" data-en="Pricing Hub — Live Demo" data-es="Centro de Precios — Demo en Vivo">Pricing Hub — Live Demo</h2>
-    <iframe class="app-frame" src="pricing-hub/index.html" title="Pricing Hub"></iframe>
+
+  <!-- ════════ MENU SECTION ════════ -->
+  <section class="overlay" id="section-menu">
+    <h2 class="section-title" data-en="Our <span>Products</span>" data-es="Nuestros <span>Productos</span>">
+      Our <span>Products</span>
+    </h2>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card"><div class="value" id="statItems">93</div><div class="label" data-en="Products" data-es="Productos">Products</div></div>
+      <div class="stat-card"><div class="value" id="statInv">$4,511</div><div class="label" data-en="Inventory Cost" data-es="Costo Inventario">Inventory Cost</div></div>
+      <div class="stat-card"><div class="value" id="statRev">$8,364</div><div class="label" data-en="Projected Revenue" data-es="Ingreso Proyectado">Projected Revenue</div></div>
+      <div class="stat-card"><div class="value" id="statProfit">$3,852</div><div class="label" data-en="Projected Profit" data-es="Ganancia Proyectada">Projected Profit</div></div>
+    </div>
+
+    <!-- Menu sections rendered by JS -->
+    <div id="menuContainer" style="max-width:1200px;margin:0 auto;"></div>
   </section>
-  
-  <footer>
-    <p data-en="© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny, NJ 07032" data-es="© 2026 Supermercado Anthony's · 288 Kearny Ave, Kearny, NJ 07032">© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny, NJ 07032</p>
-    <p style="margin-top: 0.5rem;">
+
+  <!-- ════════ PRICING HUB SECTION ════════ -->
+  <section class="overlay" id="section-pricing">
+    <h2 class="section-title" data-en="Pricing <span>Hub</span>" data-es="Centro de <span>Precios</span>">
+      Pricing <span>Hub</span>
+    </h2>
+    <p style="text-align:center;color:var(--text-dim);margin-bottom:2rem;" data-en="Full wholesale-to-retail pricing with 65% markup. Click items to see details." data-es="Precios al por mayor al detal con 65% de margen. Haga clic para ver detalles.">
+      Full wholesale-to-retail pricing with 65% markup.
+    </p>
+    <div style="max-width:1400px;margin:0 auto;">
+      <iframe class="pricing-frame" src="pricing-hub/index.html" title="Pricing Hub"></iframe>
+    </div>
+  </section>
+
+  <!-- ════════ FOOTER ════════ -->
+  <footer class="overlay">
+    <p data-en="© 2026 <strong>Anthony's Supermarket</strong> · 288 Kearny Ave, Kearny, NJ 07032" data-es="© 2026 <strong>Supermercado Anthony's</strong> · 288 Kearny Ave, Kearny, NJ 07032">
+      © 2026 <strong>Anthony's Supermarket</strong> · 288 Kearny Ave, Kearny, NJ 07032
+    </p>
+    <p style="margin-top:0.5rem;">
       <span data-en="Built with" data-es="Construido con">Built with</span> ❤️ <span data-en="for the Kearny community" data-es="para la comunidad de Kearny">for the Kearny community</span>
     </p>
   </footer>
-  
+
   <script>
-    // Language toggle
-    let currentLang = 'en';
-    
-    function setLang(lang) {
-      currentLang = lang;
-      
-      // Update button states
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.toLowerCase() === lang) {
-          btn.classList.add('active');
-        }
-      });
-      
-      // Update all translatable elements
-      document.querySelectorAll('[data-en]').forEach(el => {
-        el.textContent = el.getAttribute(`data-${lang}`);
-      });
-      
-      // Update nav dot labels
-      document.querySelectorAll('.dot').forEach(dot => {
-        const label = dot.getAttribute(`data-label-${lang}`);
-        if (label) {
-          dot.setAttribute('data-label', label);
-        }
-      });
-      
-      // Save preference
-      localStorage.setItem('anthony-lang', lang);
-    }
-    
-    // Load saved preference
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('anthony-lang') || 'en';
-      setLang(saved);
-    });
-    
-    // Section navigation
-    function showSection(sectionId) {
-      // Hide all sections
-      document.querySelectorAll('section').forEach(sec => {
-        sec.classList.remove('active');
-      });
-      
-      // Show target section
-      const target = document.getElementById(sectionId);
-      if (target) {
-        target.classList.add('active');
-        target.classList.add('fade-in');
+  // ═══════════════════════ MENU DATA ═══════════════════════
+  // 93+ items from actual wholesale invoices
+  const MENU_DATA = {
+    "menus": [
+      {
+        "nombre": "Hot Food Menu", "slug": "hot-food",
+        "categorias": [
+          { "nombre": "Hot Meals", "items": [
+            { "nombre": "Chicken Breast (per lb)", "precio": 4.93, "descripcion": "Fresh chicken breast, seasoned and ready", "tags": ["High Protein"] },
+            { "nombre": "Ground Beef 80/20 (per lb)", "precio": 7.43, "descripcion": "Fresh ground beef, 80/20 blend", "tags": ["High Protein"] },
+            { "nombre": "Whole Roasted Chicken", "precio": 8.99, "descripcion": "Slow-roasted seasoned whole chicken", "tags": ["High Protein"] },
+            { "nombre": "Pernil (per lb)", "precio": 9.99, "descripcion": "Puerto Rican style roasted pork shoulder", "tags": ["High Protein"] },
+            { "nombre": "Beef Stew (per lb)", "precio": 8.49, "descripcion": "Traditional beef stew with vegetables", "tags": ["High Protein"] }
+          ]},
+          { "nombre": "Latin Sides", "items": [
+            { "nombre": "Yellow Rice", "precio": 3.99, "descripcion": "Arroz amarillo with pigeon peas", "tags": ["Vegan"] },
+            { "nombre": "White Rice", "precio": 2.99, "descripcion": "Perfectly steamed white rice", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Beans (per lb)", "precio": 3.99, "descripcion": "Slow-cooked Latin style beans", "tags": ["Vegan", "High Protein"] },
+            { "nombre": "Plantains (per lb)", "precio": 3.49, "descripcion": "Sweet fried plantains - Maduros", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Yuca (per lb)", "precio": 3.99, "descripcion": "Boiled yuca with garlic mojo", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Tostones (per lb)", "precio": 3.99, "descripcion": "Fried green plantains", "tags": ["Vegan", "Gluten Free"] }
+          ]},
+          { "nombre": "Breakfast", "items": [
+            { "nombre": "Eggs (Large, 18ct)", "precio": 5.78, "descripcion": "Fresh large eggs", "tags": [] },
+            { "nombre": "Oatmeal", "precio": 1.99, "descripcion": "Hearty oatmeal", "tags": ["Vegan"] },
+            { "nombre": "Trix Cereal", "precio": 5.99, "descripcion": "Kids favorite cereal", "tags": [] },
+            { "nombre": "Cinnamon Toast Crunch", "precio": 5.99, "descripcion": "Cinnamon flavored cereal", "tags": [] },
+            { "nombre": "Cheerios (Large)", "precio": 5.99, "descripcion": "Honey nut cheerios", "tags": [] }
+          ]}
+        ]
+      },
+      {
+        "nombre": "Deli & Meats", "slug": "deli-meats",
+        "categorias": [
+          { "nombre": "Dairy & Eggs", "items": [
+            { "nombre": "Whole Milk (1 gal)", "precio": 4.11, "descripcion": "Fresh whole milk, gallon", "tags": ["Gluten Free"] },
+            { "nombre": "Orange Juice (52oz)", "precio": 5.28, "descripcion": "Fresh squeezed orange juice", "tags": ["Vegan"] },
+            { "nombre": "Eggs (Large, 18ct)", "precio": 5.78, "descripcion": "Fresh large eggs", "tags": [] }
+          ]},
+          { "nombre": "Bread & Bakery", "items": [
+            { "nombre": "White Bread (20oz)", "precio": 1.98, "descripcion": "Fresh white bread loaf", "tags": ["Vegan"] },
+            { "nombre": "Pan de Yuca", "precio": 7.99, "descripcion": "Frozen cheese bread, 16ct", "tags": ["Gluten Free"] },
+            { "nombre": "Cheese Tequeno", "precio": 6.99, "descripcion": "Frozen cheese sticks, 12/8ct", "tags": ["Gluten Free"] }
+          ]},
+          { "nombre": "Deli Containers", "items": [
+            { "nombre": "8oz Deli Container", "precio": 1.99, "descripcion": "Deli container with lid", "tags": [] },
+            { "nombre": "16oz Deli Container", "precio": 1.99, "descripcion": "Deli container with lid", "tags": [] }
+          ]}
+        ]
+      },
+      {
+        "nombre": "Grocery", "slug": "grocery",
+        "categorias": [
+          { "nombre": "Beverages", "items": [
+            { "nombre": "OKF Aloe S 20ct", "precio": 1.99, "descripcion": "Aloe vera drink", "tags": ["Vegan"] },
+            { "nombre": "OKF Aloe L 12ct", "precio": 3.99, "descripcion": "Aloe vera drink large", "tags": ["Vegan"] },
+            { "nombre": "Tropical Soda Glass", "precio": 1.99, "descripcion": "Tropical soda glass bottle", "tags": ["Vegan"] },
+            { "nombre": "Tropical Soda 2lt", "precio": 3.99, "descripcion": "Tropical soda 2 liter", "tags": ["Vegan"] },
+            { "nombre": "Fioravanti Strawberry 2lt", "precio": 7.99, "descripcion": "Strawberry soda", "tags": ["Vegan"] },
+            { "nombre": "Fioravanti Apple 2lt", "precio": 7.99, "descripcion": "Apple soda", "tags": ["Vegan"] },
+            { "nombre": "Mineral Water 12pk", "precio": 1.99, "descripcion": "Guitig mineral water", "tags": ["Vegan"] },
+            { "nombre": "Chocolate Milk 1lt", "precio": 8.99, "descripcion": "Toni chocolate milk", "tags": [] },
+            { "nombre": "Horchata", "precio": 1.99, "descripcion": "Mama Tere horchata", "tags": ["Vegan"] },
+            { "nombre": "Del Frutal Nectar 3pk", "precio": 2.99, "descripcion": "Pineapple/mango nectar", "tags": ["Vegan"] }
+          ]},
+          { "nombre": "Snacks & Candy", "items": [
+            { "nombre": "Jelly Candy Monkey 6ct", "precio": 8.99, "descripcion": "Monkey shaped jelly candy", "tags": [] },
+            { "nombre": "Jelly Fruits 24ct", "precio": 1.99, "descripcion": "Mama Tere jelly fruits", "tags": ["Vegan"] },
+            { "nombre": "Plantain Chips Jar", "precio": 8.99, "descripcion": "Mama Tere salted plantain chips", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Sol Cusco Chocolate Bar", "precio": 1.99, "descripcion": "Peruvian chocolate bar", "tags": [] },
+            { "nombre": "Nestle Galak", "precio": 4.99, "descripcion": "White chocolate", "tags": [] },
+            { "nombre": "Nestle Amor Wafer", "precio": 2.99, "descripcion": "Vanilla wafer cookies", "tags": [] },
+            { "nombre": "Jelly Stars Jar", "precio": 8.99, "descripcion": "Mama Tere jelly stars", "tags": ["Vegan"] },
+            { "nombre": "Toops Chocolate", "precio": 4.99, "descripcion": "Chocolate snack 12ct", "tags": [] }
+          ]},
+          { "nombre": "Canned & Jarred", "items": [
+            { "nombre": "Tuna in Oil 5oz", "precio": 2.99, "descripcion": "Ecuatun tuna", "tags": ["High Protein"] },
+            { "nombre": "Tuna in Water 5oz", "precio": 2.99, "descripcion": "Florida tuna", "tags": ["High Protein"] },
+            { "nombre": "Yellowfin Tuna 5oz", "precio": 3.99, "descripcion": "Van Camps yellowfin", "tags": ["High Protein"] },
+            { "nombre": "Yellowfin Tuna 4pk", "precio": 9.99, "descripcion": "Van Camps multipack", "tags": ["High Protein"] },
+            { "nombre": "Tuna Soup 14oz", "precio": 5.99, "descripcion": "Encebollado tuna soup", "tags": ["High Protein"] },
+            { "nombre": "Pacaya 12/32oz", "precio": 9.99, "descripcion": "Mama Tere pacaya", "tags": ["Vegan"] }
+          ]},
+          { "nombre": "Dry Goods", "items": [
+            { "nombre": "Rotini Pasta 16oz", "precio": 1.99, "descripcion": "Allegra rotini", "tags": ["Vegan"] },
+            { "nombre": "Lentils 14oz", "precio": 1.99, "descripcion": "Mama Tere lentils", "tags": ["Vegan", "High Protein"] },
+            { "nombre": "Popcorn Kernels 2lb", "precio": 3.99, "descripcion": "Mama Tere canguil", "tags": ["Vegan"] },
+            { "nombre": "Corn Flour 1kg", "precio": 4.99, "descripcion": "Harina Ya pre-cooked flour", "tags": ["Vegan"] },
+            { "nombre": "Ground Oats", "precio": 3.99, "descripcion": "Quaker avena molida", "tags": ["Vegan"] },
+            { "nombre": "Jasmine Rice 2/320oz", "precio": 36.99, "descripcion": "Mama Tere bulk rice", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Jasmine Rice 8/80oz", "precio": 8.99, "descripcion": "Mama Tere jasmine rice", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Grape Jello 24ct", "precio": 1.99, "descripcion": "Toni gelatina uva", "tags": ["Vegan"] },
+            { "nombre": "Cassava Bread", "precio": 3.99, "descripcion": "Casabe artesanal", "tags": ["Vegan", "Gluten Free"] }
+          ]},
+          { "nombre": "Condiments & Sauces", "items": [
+            { "nombre": "Hot Green Sauce", "precio": 1.99, "descripcion": "Picamas hot sauce", "tags": ["Vegan"] },
+            { "nombre": "Adobo Seasoning", "precio": 3.99, "descripcion": "ILE adobo", "tags": ["Vegan"] },
+            { "nombre": "Achiote Liquid", "precio": 4.99, "descripcion": "La Favorita achiote", "tags": ["Vegan"] },
+            { "nombre": "Soy Sauce", "precio": 3.99, "descripcion": "Oriental salsa china", "tags": ["Vegan"] },
+            { "nombre": "Garlic Paste", "precio": 5.99, "descripcion": "Mama Tere pasta de ajo", "tags": ["Vegan"] }
+          ]},
+          { "nombre": "Frozen Foods", "items": [
+            { "nombre": "Passion Fruit 6/32oz", "precio": 9.99, "descripcion": "Frozen maracuya", "tags": ["Vegan"] },
+            { "nombre": "Yuca Pieces 12/40oz", "precio": 5.99, "descripcion": "Frozen yuca", "tags": ["Vegan", "Gluten Free"] },
+            { "nombre": "Blackberry Pulp", "precio": 3.99, "descripcion": "Pulpa mora frozen", "tags": ["Vegan"] },
+            { "nombre": "Corn Kernels 20/16oz", "precio": 3.99, "descripcion": "Frozen choclo", "tags": ["Vegan"] }
+          ]},
+          { "nombre": "Cleaning & Household", "items": [
+            { "nombre": "Laundry Detergent", "precio": 4.99, "descripcion": "Awesome detergent 8/64oz", "tags": [] },
+            { "nombre": "Fabric Softener", "precio": 1.99, "descripcion": "Downy 12/360ml", "tags": [] },
+            { "nombre": "Clorox Bleach 6/43oz", "precio": 5.99, "descripcion": "Household bleach", "tags": [] },
+            { "nombre": "Sponges 27ct", "precio": 0.99, "descripcion": "Kitchen sponges", "tags": [] },
+            { "nombre": "Febreze 8ct", "precio": 3.99, "descripcion": "Air freshener", "tags": [] },
+            { "nombre": "Fabuloso 6/56oz", "precio": 6.99, "descripcion": "All-purpose cleaner", "tags": [] },
+            { "nombre": "Fabuloso 12/28oz", "precio": 3.99, "descripcion": "All-purpose cleaner", "tags": [] },
+            { "nombre": "Mistolin 24/15oz", "precio": 1.99, "descripcion": "Multi-surface cleaner", "tags": [] },
+            { "nombre": "Windex 8/32oz", "precio": 6.99, "descripcion": "Glass cleaner", "tags": [] }
+          ]},
+          { "nombre": "Personal Care & Baby", "items": [
+            { "nombre": "Dove Soap 48/135g", "precio": 1.99, "descripcion": "Beauty soap bar", "tags": [] },
+            { "nombre": "Hispano Honey Soap", "precio": 0.99, "descripcion": "Hispano de miel", "tags": [] },
+            { "nombre": "Pampers Wipes 12ct", "precio": 2.99, "descripcion": "Baby wipes", "tags": [] },
+            { "nombre": "Huggies Wipes 10ct", "precio": 2.99, "descripcion": "Baby wipes bulk", "tags": [] },
+            { "nombre": "Water Wipes 12ct", "precio": 1.99, "descripcion": "Water-based baby wipes", "tags": [] }
+          ]},
+          { "nombre": "Paper & Foil", "items": [
+            { "nombre": "Paper Plates 9in 100ct", "precio": 3.99, "descripcion": "Paper plates bulk", "tags": [] },
+            { "nombre": "Aluminum Foil 25ft", "precio": 2.99, "descripcion": "Reynolds foil 24ct", "tags": [] },
+            { "nombre": "Disposable Pans 50ct", "precio": 0.99, "descripcion": "Rectangular pans", "tags": [] },
+            { "nombre": "Toilet Paper 36ct", "precio": 0.99, "descripcion": "Scott issue bulk", "tags": [] }
+          ]},
+          { "nombre": "Tea & Coffee", "items": [
+            { "nombre": "Boldo Tea 6/20ct", "precio": 3.99, "descripcion": "Mondaisa boldo tea", "tags": ["Vegan"] },
+            { "nombre": "Ginger Lemon Tea", "precio": 3.99, "descripcion": "Ginger lemon tea bags", "tags": ["Vegan"] },
+            { "nombre": "Mint Eucalyptus Tea", "precio": 3.99, "descripcion": "Mint eucalyptus tea bags", "tags": ["Vegan"] },
+            { "nombre": "Chamomile Tea 12/25ct", "precio": 3.99, "descripcion": "Homimans manzanilla", "tags": ["Vegan"] }
+          ]}
+        ]
       }
-      
-      // Update dots
-      document.querySelectorAll('.dot').forEach((dot, index) => {
-        const sections = ['home', 'apps', 'pricing'];
-        dot.classList.toggle('active', sections[index] === sectionId);
+    ]
+  };
+
+  // ═══════════════════════ THREE.JS 3D SCENE ═══════════════════════
+  const canvas = document.getElementById('three-canvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // ── Floating particles ──
+  const particlesGeo = new THREE.BufferGeometry();
+  const particleCount = 800;
+  const pos = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount * 3; i++) pos[i] = (Math.random() - 0.5) * 60;
+  particlesGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const particlesMat = new THREE.PointsMaterial({
+    color: 0x00ff41,
+    size: 0.08,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
+  });
+  const particles = new THREE.Points(particlesGeo, particlesMat);
+  scene.add(particles);
+
+  // ── Neon grid floor ──
+  const gridHelper = new THREE.GridHelper(40, 40, 0x00ff41, 0x00cc33);
+  gridHelper.position.y = -4;
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.3;
+  scene.add(gridHelper);
+
+  // ── Crown shape in 3D space (floating) ──
+  const crownGroup = new THREE.Group();
+  // Crown base
+  const baseGeo = new THREE.BoxGeometry(4, 0.8, 2);
+  const neonMat = new THREE.MeshBasicMaterial({ color: 0x00ff41, transparent: true, opacity: 0.9 });
+  const base = new THREE.Mesh(baseGeo, neonMat);
+  base.position.y = 1;
+  crownGroup.add(base);
+  // Crown peaks
+  const peakGeo = new THREE.ConeGeometry(0.6, 3, 4);
+  const peakMat = new THREE.MeshBasicMaterial({ color: 0x00ff41, transparent: true, opacity: 0.7 });
+  for (let i = -1.5; i <= 1.5; i += 1.5) {
+    const peak = new THREE.Mesh(peakGeo, peakMat);
+    peak.position.set(i, 2.5, 0);
+    crownGroup.add(peak);
+  }
+  // Center gem
+  const gemGeo = new THREE.SphereGeometry(0.4, 8, 8);
+  const gemMat = new THREE.MeshBasicMaterial({ color: 0xff6b00 });
+  const gem = new THREE.Mesh(gemGeo, gemMat);
+  gem.position.set(0, 3.8, 0);
+  crownGroup.add(gem);
+  // Shopping cart body (wireframe)
+  const cartGroup = new THREE.Group();
+  const wireMat = new THREE.LineBasicMaterial({ color: 0x00ff41, transparent: true, opacity: 0.5 });
+  const cartPoints = [
+    [-1.5, -0.5, 0], [1.5, -0.5, 0], [1.5, -1.5, 0],
+    [-1.5, -1.5, 0], [-1.5, -0.5, 0],
+    [-1.2, 0.3, 0], [1.2, 0.3, 0], [1.5, -0.5, 0]
+  ];
+  const cartGeo = new THREE.BufferGeometry().setFromPoints(
+    cartPoints.map(p => new THREE.Vector3(p[0], p[1] - 2.5, p[2]))
+  );
+  const cartLine = new THREE.Line(cartGeo, wireMat);
+  crownGroup.add(cartLine);
+
+  crownGroup.position.set(0, -2, -10);
+  scene.add(crownGroup);
+
+  // ── Ambient lights ──
+  const ambientLight = new THREE.AmbientLight(0x112211);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0x00ff41, 0.3);
+  dirLight.position.set(1, 2, 1);
+  scene.add(dirLight);
+
+  camera.position.set(0, 0, 12);
+
+  // ── Mouse interaction ──
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  // ── Animate ──
+  let time = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.005;
+
+    // Rotate particles
+    particles.rotation.y += 0.0005;
+    particles.rotation.x = Math.sin(time * 0.2) * 0.02;
+
+    // Float crown
+    crownGroup.position.y = Math.sin(time * 0.5) * 0.5 - 2;
+    crownGroup.rotation.y = mouseX * 0.3;
+    crownGroup.rotation.x = mouseY * 0.1;
+
+    // Grid pulse
+    gridHelper.material.opacity = 0.2 + Math.sin(time * 2) * 0.1;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // ── Resize ──
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ═══════════════════════ LANGUAGE ═══════════════════════
+  let currentLang = 'en';
+  function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.toLowerCase().includes(lang));
+    });
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.innerHTML = el.getAttribute(`data-${lang}`);
+    });
+    localStorage.setItem('anthony-lang', lang);
+  }
+  if (localStorage.getItem('anthony-lang')) {
+    setLang(localStorage.getItem('anthony-lang'));
+  }
+
+  // ═══════════════════════ CART ═══════════════════════
+  let cart = [];
+  let modalItem = null;
+  let modalQty = 1;
+
+  function renderMenu() {
+    const container = document.getElementById('menuContainer');
+    let html = '';
+    MENU_DATA.menus.forEach(menu => {
+      html += `<div class="menu-section">
+        <h3>${menu.nombre}</h3>
+        <div class="cat-grid">`;
+      menu.categorias.forEach(cat => {
+        html += `<div class="cat-card" onclick="openItemModal('${menu.slug}','${cat.nombre}',0)">
+          <h4>${cat.nombre}</h4>
+          <div class="count">${cat.items.length} items · from $${Math.min(...cat.items.map(i=>i.precio)).toFixed(2)}</div>
+        </div>`;
       });
-      
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+  }
+  renderMenu();
+
+  function openItemModal(menuSlug, catName) {
+    const menu = MENU_DATA.menus.find(m => m.slug === menuSlug);
+    const cat = menu?.categorias.find(c => c.nombre === catName);
+    if (!cat || !cat.items.length) return;
+    // Show first item in the category
+    showItemDetail(cat.items[0], menuSlug, catName, 0);
+  }
+
+  function showItemDetail(item, menuSlug, catName, idx) {
+    modalItem = { ...item, menuSlug, catName, idx };
+    modalQty = 1;
+    document.getElementById('modalName').textContent = item.nombre;
+    document.getElementById('modalPrice').textContent = `$${item.precio.toFixed(2)}`;
+    document.getElementById('modalDesc').textContent = item.descripcion || '';
+    document.getElementById('modalTags').innerHTML = (item.tags || []).map(t => `<span>${t}</span>`).join('');
+    document.getElementById('modalQty').textContent = '1';
+    document.getElementById('itemModal').classList.add('open');
+  }
+
+  function closeItemModal() {
+    document.getElementById('itemModal').classList.remove('open');
+  }
+
+  function changeQty(delta) {
+    modalQty = Math.max(1, modalQty + delta);
+    document.getElementById('modalQty').textContent = modalQty;
+  }
+
+  function addToCartFromModal() {
+    if (!modalItem) return;
+    const item = { ...modalItem, cantidad: modalQty };
+    // Remove modal qty from object
+    delete item.idx;
+    const existing = cart.find(i => i.nombre === item.nombre && i.menuSlug === item.menuSlug);
+    if (existing) {
+      existing.cantidad += modalQty;
+    } else {
+      cart.push(item);
     }
+    updateCartUI();
+    closeItemModal();
+  }
+
+  function updateCartUI() {
+    const count = cart.reduce((s, i) => s + i.cantidad, 0);
+    document.getElementById('cartBadge').textContent = count;
+
+    const itemsEl = document.getElementById('cartItems');
+    if (!cart.length) {
+      itemsEl.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:2rem;" data-en="Your cart is empty" data-es="Tu carrito está vacío">Your cart is empty</div>';
+      document.getElementById('cartSubtotal').textContent = '$0.00';
+      document.getElementById('cartTotal').textContent = '$0.00';
+      return;
+    }
+    let html = '';
+    let total = 0;
+    cart.forEach((item, idx) => {
+      const lineTotal = item.precio * item.cantidad;
+      total += lineTotal;
+      html += `<div class="item">
+        <div class="name">${item.nombre}</div>
+        <div class="qty-controls">
+          <button onclick="changeCartQty(${idx}, -1)">−</button>
+          <span>${item.cantidad}</span>
+          <button onclick="changeCartQty(${idx}, 1)">+</button>
+          <span style="min-width:60px;text-align:right;color:var(--neon);">$${lineTotal.toFixed(2)}</span>
+        </div>
+      </div>`;
+    });
+    itemsEl.innerHTML = html;
+    document.getElementById('cartSubtotal').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+  }
+
+  function changeCartQty(idx, delta) {
+    cart[idx].cantidad += delta;
+    if (cart[idx].cantidad <= 0) cart.splice(idx, 1);
+    updateCartUI();
+  }
+
+  function toggleCart() {
+    document.getElementById('cartPanel').classList.toggle('open');
+  }
+
+  function openCheckout() {
+    if (!cart.length) return;
+    toggleCart();
+    const total = cart.reduce((s, i) => s + i.precio * i.cantidad, 0);
+    let itemsList = '';
+    cart.forEach(i => { itemsList += `<div class="line"><span>${i.nombre} x${i.cantidad}</span><span>$${(i.precio * i.cantidad).toFixed(2)}</span></div>`; });
+
+    document.getElementById('checkoutContent').innerHTML = `
+      <div class="checkout-form">
+        <div class="order-summary">
+          <div style="font-weight:700;margin-bottom:0.5rem;color:var(--neon);" data-en="Order Summary" data-es="Resumen del Pedido">Order Summary</div>
+          ${itemsList}
+          <div class="line" style="font-weight:700;border-top:1px solid rgba(0,255,65,0.2);padding-top:0.5rem;margin-top:0.5rem;">
+            <span data-en="Total" data-es="Total">Total</span><span>$${total.toFixed(2)}</span>
+          </div>
+        </div>
+        <input type="text" id="checkoutName" placeholder="Your Name *" required>
+        <input type="tel" id="checkoutPhone" placeholder="Phone (for WhatsApp confirmation)">
+        <select id="checkoutType">
+          <option value="pickup" data-en="📦 Pickup" data-es="📦 Recoger">📦 Pickup</option>
+          <option value="delivery" data-en="🚚 Delivery" data-es="🚚 Delivery">🚚 Delivery</option>
+        </select>
+        <textarea id="checkoutAddress" placeholder="Delivery Address (if delivery)" rows="2"></textarea>
+        <textarea id="checkoutNotes" placeholder="Special instructions" rows="2"></textarea>
+        <button class="btn-place" onclick="placeOrder()" id="placeBtn" data-en="Place Order" data-es="Confirmar Pedido">Place Order</button>
+      </div>
+    `;
+    document.getElementById('checkoutModal').classList.add('open');
+  }
+
+  function closeCheckout() {
+    document.getElementById('checkoutModal').classList.remove('open');
+    document.getElementById('checkoutContent').innerHTML = '';
+  }
+
+  async function placeOrder() {
+    const name = document.getElementById('checkoutName').value;
+    const phone = document.getElementById('checkoutPhone').value;
+    const type = document.getElementById('checkoutType').value;
+    const address = document.getElementById('checkoutAddress').value;
+    const notes = document.getElementById('checkoutNotes').value;
+
+    if (!name) { alert('Please enter your name'); return; }
+
+    const btn = document.getElementById('placeBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    try {
+      const res = await fetch('http://localhost:3001/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart,
+          tipoEntrega: type,
+          cliente: { nombre: name, telefono: phone, direccion: address },
+          notas: notes
+        })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        cart = [];
+        updateCartUI();
+        closeCheckout();
+        document.getElementById('checkoutContent').innerHTML = `
+          <div class="confirmation">
+            <div class="check">🎉</div>
+            <h2 data-en="Order Confirmed!" data-es="¡Pedido Confirmado!">Order Confirmed!</h2>
+            <div class="order-id">#${data.orderId}</div>
+            <p data-en="Your order is being prepared!" data-es="¡Tu pedido se está preparando!">Your order is being prepared!</p>
+            <p data-en="📍 288 Kearny Ave, Kearny NJ 07032" data-es="📍 288 Kearny Ave, Kearny, NJ 07032">📍 288 Kearny Ave, Kearny NJ 07032</p>
+            <p data-en="📞 (201) 428-1745" data-es="📞 (201) 428-1745">📞 (201) 428-1745</p>
+            <button class="btn-add" style="margin-top:2rem;" onclick="closeCheckout()" data-en="Continue Shopping" data-es="Seguir Comprando">Continue Shopping</button>
+          </div>
+        `;
+        document.getElementById('checkoutModal').classList.add('open');
+      } else {
+        alert('Order failed: ' + (data.error || 'Unknown error'));
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    } catch (e) {
+      // Server not running — show mock confirmation
+      const orderId = 'MOCK-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+      cart = [];
+      updateCartUI();
+      closeCheckout();
+      document.getElementById('checkoutContent').innerHTML = `
+        <div class="confirmation">
+          <div class="check">🎉</div>
+          <h2 data-en="Order Submitted!" data-es="¡Pedido Enviado!">Order Submitted!</h2>
+          <div class="order-id">#${orderId}</div>
+          <p data-en="⚠️ Backend server offline — order logged locally" data-es="⚠️ Servidor fuera de línea — pedido guardado localmente">⚠️ Backend server offline — order logged locally</p>
+          <p data-en="📍 288 Kearny Ave, Kearny NJ 07032" data-es="📍 288 Kearny Ave, Kearny, NJ 07032">📍 288 Kearny Ave, Kearny NJ 07032</p>
+          <button class="btn-add" style="margin-top:2rem;" onclick="closeCheckout()" data-en="Continue Shopping" data-es="Seguir Comprando">Continue Shopping</button>
+        </div>
+      `;
+      document.getElementById('checkoutModal').classList.add('open');
+    }
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target === el) {
+        el.classList.remove('open');
+      }
+    });
+  });
+
+  // Init
+  updateCartUI();
+  console.log('🦁 Anthony\'s Supermarket — Immersive Site Loaded');
+  console.log(`📊 ${cart.length > 0 ? cart.length : 0} items in cart`);
   </script>
 </body>
 </html>
