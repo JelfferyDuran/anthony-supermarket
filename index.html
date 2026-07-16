@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anthony's Supermarket — Command Center</title>
+  <title>Anthony's Supermarket — Digital Platform</title>
   <style>
     * {
       margin: 0;
@@ -11,35 +11,98 @@
       box-sizing: border-box;
     }
     
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary: #FF9800;
+      --dark: #1a1a1a;
+      --light: #f5f5f5;
+      --gray: #757575;
+    }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #fff;
+      color: var(--light);
       min-height: 100vh;
       overflow-x: hidden;
     }
     
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
+    /* Language Toggle */
+    .lang-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    header {
+    .lang-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 25px;
+      background: transparent;
+      color: var(--light);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .lang-btn.active {
+      background: var(--primary);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .lang-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      padding: 4rem 0;
-      animation: fadeInDown 1s ease;
+      padding: 2rem;
+      position: relative;
+    }
+    
+    .logo-container {
+      width: 200px;
+      height: 200px;
+      margin-bottom: 2rem;
+      animation: float 3s ease-in-out infinite;
     }
     
     .logo {
-      font-size: 4rem;
-      margin-bottom: 1rem;
+      width: 100%;
+      height: 100%;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      box-shadow: 0 10px 40px rgba(76, 175, 80, 0.4);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
     }
     
     h1 {
-      font-size: 3rem;
+      font-size: 3.5rem;
       margin-bottom: 1rem;
-      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -47,40 +110,101 @@
     
     .tagline {
       font-size: 1.5rem;
-      color: #bdc3c7;
+      color: var(--gray);
       margin-bottom: 2rem;
+      max-width: 600px;
     }
     
-    .contact {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-      margin-top: 2rem;
+    .info-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem 2rem;
+      border-radius: 15px;
+      margin: 1rem 0;
+      backdrop-filter: blur(10px);
     }
     
-    .contact-item {
+    .info-badge p {
+      margin: 0.5rem 0;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
-      color: #3498db;
-      text-decoration: none;
-      padding: 0.75rem 1.5rem;
-      background: rgba(52, 152, 219, 0.1);
-      border-radius: 50px;
+    }
+    
+    /* Navigation Dots */
+    .nav-dots {
+      position: fixed;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 100;
+    }
+    
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
     
-    .contact-item:hover {
-      background: rgba(52, 152, 219, 0.2);
-      transform: translateY(-2px);
+    .dot::before {
+      content: attr(data-label);
+      position: absolute;
+      right: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--dark);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
     
+    .dot:hover::before {
+      opacity: 1;
+    }
+    
+    .dot.active {
+      background: var(--primary);
+      transform: scale(1.3);
+    }
+    
+    /* Sections */
+    section {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      display: none;
+    }
+    
+    section.active {
+      display: block;
+    }
+    
+    .section-title {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--primary);
+    }
+    
+    /* Apps Grid */
     .apps-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 2rem;
-      margin-top: 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
     }
     
     .app-card {
@@ -96,277 +220,263 @@
     .app-card:hover {
       transform: translateY(-10px);
       background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(243, 156, 18, 0.5);
-      box-shadow: 0 20px 40px rgba(243, 156, 18, 0.2);
+      border-color: var(--primary);
+      box-shadow: 0 20px 40px rgba(76, 175, 80, 0.3);
     }
     
     .app-icon {
-      font-size: 3rem;
+      font-size: 4rem;
       margin-bottom: 1rem;
     }
     
     .app-card h3 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
-      color: #f39c12;
+      color: var(--primary);
     }
     
     .app-card p {
-      color: #bdc3c7;
+      color: var(--gray);
       line-height: 1.6;
       margin-bottom: 1rem;
     }
     
     .status {
       display: inline-block;
-      padding: 0.25rem 0.75rem;
+      padding: 0.5rem 1rem;
       border-radius: 20px;
       font-size: 0.875rem;
       font-weight: 600;
     }
     
     .status-live {
-      background: rgba(46, 204, 113, 0.2);
-      color: #2ecc71;
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
     }
     
     .status-dev {
-      background: rgba(52, 152, 219, 0.2);
-      color: #3498db;
-    }
-    
-    .status-planned {
-      background: rgba(149, 165, 166, 0.2);
-      color: #95a5a6;
-    }
-    
-    .cta-section {
-      text-align: center;
-      padding: 4rem 0;
-      margin-top: 4rem;
+      background: rgba(255, 152, 0, 0.2);
+      color: #FF9800;
     }
     
     .btn {
       display: inline-block;
       padding: 1rem 2rem;
-      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
       color: white;
       text-decoration: none;
       border-radius: 50px;
       font-weight: 600;
       font-size: 1.125rem;
       transition: all 0.3s ease;
-      margin: 0.5rem;
+      margin-top: 1rem;
+      border: none;
+      cursor: pointer;
     }
     
     .btn:hover {
       transform: scale(1.05);
-      box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
+      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
     }
     
     .btn-secondary {
       background: transparent;
-      border: 2px solid #f39c12;
+      border: 2px solid var(--primary);
     }
     
-    .btn-secondary:hover {
-      background: rgba(243, 156, 18, 0.1);
+    /* Pricing Hub Frame */
+    .app-frame {
+      width: 100%;
+      height: calc(100vh - 200px);
+      border: 2px solid var(--primary);
+      border-radius: 20px;
+      background: white;
     }
     
+    /* Footer */
     footer {
       text-align: center;
       padding: 2rem;
+      background: rgba(0, 0, 0, 0.3);
       margin-top: 4rem;
-      color: #7f8c8d;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      .tagline { font-size: 1rem; }
+      .nav-dots { display: none; }
+      .apps-grid { grid-template-columns: 1fr; }
     }
     
-    .floating {
-      animation: floating 3s ease-in-out infinite;
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.5s ease;
     }
     
-    @keyframes floating {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    /* Three.js canvas background */
-    #bg-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      opacity: 0.5;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <canvas id="bg-canvas"></canvas>
-  
-  <div class="container">
-    <header>
-      <div class="logo floating">🦁</div>
-      <h1>Anthony's Supermarket</h1>
-      <p class="tagline">Immersive Grocery Shopping Experience</p>
-      <p style="color: #95a5a6; font-size: 1.125rem;">288 Kearny Ave, Kearny NJ 07032</p>
-      
-      <div class="contact">
-        <a href="tel:2014281745" class="contact-item">
-          📞 (201) 428-1745
-        </a>
-        <a href="https://anthonyssupermarket.com" class="contact-item" target="_blank">
-          🌐 anthonyssupermarket.com
-        </a>
-        <a href="https://instagram.com/anthony_supermarket" class="contact-item" target="_blank">
-          📷 @anthony_supermarket
-        </a>
-      </div>
-    </header>
-    
-    <section>
-      <h2 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">🚀 Command Center Apps</h2>
-      
-      <div class="apps-grid">
-        <div class="app-card" onclick="window.location.href='/pricing-hub/'">
-          <div class="app-icon">💰</div>
-          <h3>Pricing Hub</h3>
-          <p>Real-time wholesale cost tracking with AI invoice extraction and 65% markup calculator</p>
-          <span class="status status-live">● Live</span>
-        </div>
-        
-        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/anthony-superapp'">
-          <div class="app-icon">🚚</div>
-          <h3>Delivery System</h3>
-          <p>Full-featured delivery management with customer app, store dashboard, and rider tracking</p>
-          <span class="status status-live">● Live</span>
-        </div>
-        
-        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/inventree.AnthonysSuperApp'">
-          <div class="app-icon">📊</div>
-          <h3>Inventory Management</h3>
-          <p>Open-source inventory system with stock tracking, purchase orders, and barcode scanning</p>
-          <span class="status status-live">● Live</span>
-        </div>
-        
-        <div class="app-card" onclick="window.location.href='https://github.com/JelfferyDuran/biomenu-Anthony-s-Supermarket-App'">
-          <div class="app-icon">📱</div>
-          <h3>Digital Menu</h3>
-          <p>D2C ordering interface with QR codes, online ordering, and DoorDash integration</p>
-          <span class="status status-live">● Live</span>
-        </div>
-        
-        <div class="app-card">
-          <div class="app-icon">🎮</div>
-          <h3>Three.js Store</h3>
-          <p>Immersive 3D grocery store walkthrough with interactive products and shopping cart</p>
-          <span class="status status-dev">● In Development</span>
-        </div>
-        
-        <div class="app-card">
-          <div class="app-icon">🎯</div>
-          <h3>Command Dashboard</h3>
-          <p>Unified business analytics with real-time sales, profit tracking, and inventory alerts</p>
-          <span class="status status-planned">○ Planned</span>
-        </div>
-      </div>
-    </section>
-    
-    <div class="cta-section">
-      <h2 style="font-size: 2rem; margin-bottom: 1rem;">Ready to Experience the Future?</h2>
-      <p style="color: #bdc3c7; margin-bottom: 2rem; font-size: 1.125rem;">
-        Explore our apps or check out the code on GitHub
-      </p>
-      <a href="/pricing-hub/" class="btn">Launch Pricing Hub</a>
-      <a href="https://github.com/JelfferyDuran/anthony-supermarket" class="btn btn-secondary" target="_blank">View on GitHub</a>
-    </div>
-    
-    <footer>
-      <p>© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny NJ 07032</p>
-      <p style="margin-top: 0.5rem;">
-        Built with 🦁 by 
-        <a href="https://github.com/JelfferyDuran" style="color: #3498db; text-decoration: none;">@JelfferyDuran</a>
-      </p>
-    </footer>
+  <!-- Language Toggle -->
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
   </div>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Navigation Dots -->
+  <div class="nav-dots">
+    <div class="dot active" data-label="Home" onclick="showSection('home')" data-label-en="Home" data-label-es="Inicio"></div>
+    <div class="dot" data-label="Apps" onclick="showSection('apps')" data-label-en="Apps" data-label-es="Sistemas"></div>
+    <div class="dot" data-label="Pricing" onclick="showSection('pricing')" data-label-en="Pricing Hub" data-label-es="Precios"></div>
+  </div>
+  
+  <!-- Home Section -->
+  <section id="home" class="hero active">
+    <div class="logo-container">
+      <div class="logo">🛒</div>
+    </div>
+    
+    <h1 data-en="Anthony's Supermarket" data-es="Supermercado Anthony's">Anthony's Supermarket</h1>
+    
+    <p class="tagline" data-en="Digital Platform Presentation" data-es="Presentación de Plataforma Digital">Digital Platform Presentation</p>
+    
+    <div class="info-badge">
+      <p data-en="📍 288 Kearny Ave, Kearny, NJ 07032" data-es="📍 288 Kearny Ave, Kearny, NJ 07032">📍 288 Kearny Ave, Kearny, NJ 07032</p>
+      <p data-en="📞 (201) 428-1745" data-es="📞 (201) 428-1745">📞 (201) 428-1745</p>
+      <p data-en="🏪 Serving the community for 9 years" data-es="🏪 Sirviendo a la comunidad por 9 años">🏪 Sirviendo a la comunidad por 9 años</p>
+      <p data-en="🥬 Fresh Fruit & Vegetables • Fresh Meat • Hot Food" data-es="🥬 Frutas y Verduras Frescas • Carne Fresca • Comida Caliente">🥬 Frutas y Verduras Frescas • Carne Fresca • Comida Caliente</p>
+    </div>
+    
+    <button class="btn" onclick="showSection('apps')" data-en="Explore Our Systems" data-es="Explorar Sistemas">Explore Our Systems</button>
+  </section>
+  
+  <!-- Apps Section -->
+  <section id="apps">
+    <h2 class="section-title" data-en="Digital Systems" data-es="Sistemas Digitales">Digital Systems</h2>
+    
+    <div class="apps-grid">
+      <div class="app-card" onclick="showSection('pricing')">
+        <div class="app-icon">💰</div>
+        <h3 data-en="Pricing Hub" data-es="Centro de Precios">Pricing Hub</h3>
+        <p data-en="Real-time wholesale cost tracking with AI invoice extraction and automatic 65% markup calculator" data-es="Seguimiento de costos al por mayor con extracción de facturas por IA y calculadora automática de 65% de margen">Real-time wholesale cost tracking with AI invoice extraction and automatic 65% markup calculator</p>
+        <span class="status status-live" data-en="● Live" data-es="● En Vivo">● Live</span>
+      </div>
+      
+      <div class="app-card">
+        <div class="app-icon">🚚</div>
+        <h3 data-en="Delivery System" data-es="Sistema de Entrega">Delivery System</h3>
+        <p data-en="Full delivery management with customer app, store dashboard, and rider tracking" data-es="Gestión completa de entregas con app de clientes, panel de tienda y seguimiento de repartidores">Full delivery management with customer app, store dashboard, and rider tracking</p>
+        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
+      </div>
+      
+      <div class="app-card">
+        <div class="app-icon">📊</div>
+        <h3 data-en="Inventory Management" data-es="Gestión de Inventario">Inventory Management</h3>
+        <p data-en="Open-source inventory system with stock tracking, purchase orders, and barcode scanning" data-es="Sistema de inventario con seguimiento de stock, órdenes de compra y escaneo de códigos de barras">Open-source inventory system with stock tracking, purchase orders, and barcode scanning</p>
+        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
+      </div>
+      
+      <div class="app-card">
+        <div class="app-icon">📱</div>
+        <h3 data-en="Digital Menu" data-es="Menú Digital">Digital Menu</h3>
+        <p data-en="D2C ordering interface with QR codes, online ordering, and DoorDash integration" data-es="Interfaz de pedidos con códigos QR, pedidos en línea e integración con DoorDash">D2C ordering interface with QR codes, online ordering, and DoorDash integration</p>
+        <span class="status status-dev" data-en="● Development" data-es="● En Desarrollo">● Development</span>
+      </div>
+      
+      <div class="app-card">
+        <div class="app-icon">🎮</div>
+        <h3 data-en="3D Shopping Experience" data-es="Experiencia de Compra 3D">3D Shopping Experience</h3>
+        <p data-en="Immersive Three.js virtual store walkthrough with interactive products and shopping cart" data-es="Recorrido virtual inmersivo en Three.js con productos interactivos y carrito de compras">Immersive Three.js virtual store walkthrough with interactive products and shopping cart</p>
+        <span class="status status-dev" data-en="● Coming Soon" data-es="● Próximamente">● Coming Soon</span>
+      </div>
+      
+      <div class="app-card">
+        <div class="app-icon">🎯</div>
+        <h3 data-en="Business Dashboard" data-es="Panel de Negocio">Business Dashboard</h3>
+        <p data-en="Unified analytics with real-time sales, profit tracking, and inventory alerts" data-es="Analíticas unificadas con ventas en tiempo real, seguimiento de ganancias y alertas de inventario">Unified analytics with real-time sales, profit tracking, and inventory alerts</p>
+        <span class="status status-dev" data-en="● Planned" data-es="● Planeado">● Planned</span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Pricing Hub Section -->
+  <section id="pricing">
+    <h2 class="section-title" data-en="Pricing Hub — Live Demo" data-es="Centro de Precios — Demo en Vivo">Pricing Hub — Live Demo</h2>
+    <iframe class="app-frame" src="pricing-hub/index.html" title="Pricing Hub"></iframe>
+  </section>
+  
+  <footer>
+    <p data-en="© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny, NJ 07032" data-es="© 2026 Supermercado Anthony's · 288 Kearny Ave, Kearny, NJ 07032">© 2026 Anthony's Supermarket · 288 Kearny Ave, Kearny, NJ 07032</p>
+    <p style="margin-top: 0.5rem;">
+      <span data-en="Built with" data-es="Construido con">Built with</span> ❤️ <span data-en="for the Kearny community" data-es="para la comunidad de Kearny">for the Kearny community</span>
+    </p>
+  </footer>
+  
   <script>
-    // Simple Three.js background animation
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+    // Language toggle
+    let currentLang = 'en';
     
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
-    // Create floating particles
-    const geometry = new THREE.BufferGeometry();
-    const particles = 1000;
-    const positions = new Float32Array(particles * 3);
-    
-    for (let i = 0; i < particles * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 10;
-      positions[i + 1] = (Math.random() - 0.5) * 10;
-      positions[i + 2] = (Math.random() - 0.5) * 10;
+    function setLang(lang) {
+      currentLang = lang;
+      
+      // Update button states
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase() === lang) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // Update all translatable elements
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.textContent = el.getAttribute(`data-${lang}`);
+      });
+      
+      // Update nav dot labels
+      document.querySelectorAll('.dot').forEach(dot => {
+        const label = dot.getAttribute(`data-label-${lang}`);
+        if (label) {
+          dot.setAttribute('data-label', label);
+        }
+      });
+      
+      // Save preference
+      localStorage.setItem('anthony-lang', lang);
     }
     
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    
-    const material = new THREE.PointsMaterial({
-      color: 0xf39c12,
-      size: 0.02,
-      transparent: true,
-      opacity: 0.8
+    // Load saved preference
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('anthony-lang') || 'en';
+      setLang(saved);
     });
     
-    const particlesMesh = new THREE.Points(geometry, material);
-    scene.add(particlesMesh);
-    
-    camera.position.z = 3;
-    
-    // Mouse interaction
-    let mouseX = 0;
-    let mouseY = 0;
-    
-    document.addEventListener('mousemove', (event) => {
-      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-    });
-    
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
+    // Section navigation
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('section').forEach(sec => {
+        sec.classList.remove('active');
+      });
       
-      particlesMesh.rotation.x += 0.001;
-      particlesMesh.rotation.y += 0.001;
+      // Show target section
+      const target = document.getElementById(sectionId);
+      if (target) {
+        target.classList.add('active');
+        target.classList.add('fade-in');
+      }
       
-      particlesMesh.rotation.x += mouseY * 0.0005;
-      particlesMesh.rotation.y += mouseX * 0.0005;
+      // Update dots
+      document.querySelectorAll('.dot').forEach((dot, index) => {
+        const sections = ['home', 'apps', 'pricing'];
+        dot.classList.toggle('active', sections[index] === sectionId);
+      });
       
-      renderer.render(scene, camera);
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
-    animate();
-    
-    // Handle resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
   </script>
 </body>
 </html>

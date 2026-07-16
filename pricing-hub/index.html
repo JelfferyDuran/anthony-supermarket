@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing Hub — Anthony's Supermarket</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary: #FF9800;
+      --dark: #1a1a1a;
+      --light: #f5f5f5;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .logo {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 1.125rem;
+    }
+    
+    .pricing-table {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    
+    tr:hover {
+      background: #f9f9f9;
+    }
+    
+    .price {
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    
+    .cost {
+      color: #999;
+    }
+    
+    .margin {
+      background: rgba(76, 175, 80, 0.1);
+      color: var(--primary-dark);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    
+    .vendor-badge {
+      background: var(--secondary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">💰</div>
+      <h1>Pricing Hub</h1>
+      <p class="subtitle">Anthony's Supermarket — Wholesale Cost & Retail Price Tracker</p>
+    </header>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">93</div>
+        <div class="stat-label">Products Tracked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$4,511</div>
+        <div class="stat-label">Total Inventory Cost</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$8,364</div>
+        <div class="stat-label">Projected Revenue (65% markup)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$3,852</div>
+        <div class="stat-label">Projected Profit</div>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button class="btn" onclick="alert('Upload invoice feature coming soon!')">📤 Upload Invoice</button>
+      <button class="btn" onclick="alert('Export feature coming soon!')">📊 Export CSV</button>
+      <button class="btn" style="background: var(--secondary);">➕ Add Item</button>
+    </div>
+    
+    <div class="pricing-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Vendor</th>
+            <th>Cost/Unit</th>
+            <th>Retail Price</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Whole Milk (1 gallon)</td>
+            <td><span class="vendor-badge">Super Trading</span></td>
+            <td class="cost">$2.49</td>
+            <td class="price">$4.11</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>White Bread (20oz)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$1.20</td>
+            <td class="price">$1.98</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Eggs (Large, 18ct)</td>
+            <td><span class="vendor-badge">Super Trading</span></td>
+            <td class="cost">$3.50</td>
+            <td class="price">$5.78</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Chicken Breast (per lb)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$2.99</td>
+            <td class="price">$4.93</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Ground Beef 80/20 (per lb)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$4.50</td>
+            <td class="price">$7.43</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Orange Juice (52oz)</td>
+            <td><span class="vendor-badge">Super Trading</span></td>
+            <td class="cost">$3.20</td>
+            <td class="price">$5.28</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Cheddar Cheese (16oz)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$4.80</td>
+            <td class="price">$7.92</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Tomatoes (per lb)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$1.50</td>
+            <td class="price">$2.48</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Bananas (per lb)</td>
+            <td><span class="vendor-badge">Family Food</span></td>
+            <td class="cost">$0.60</td>
+            <td class="price">$0.99</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+          <tr>
+            <td>Paper Towels (6-pack)</td>
+            <td><span class="vendor-badge">Super Trading</span></td>
+            <td class="cost">$5.50</td>
+            <td class="price">$9.08</td>
+            <td><span class="margin">65%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
