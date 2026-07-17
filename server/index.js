@@ -9,6 +9,8 @@
 //   PORT=3001            (default)
 //   TELEGRAM_TOKEN=      (required for bot — get from @BotFather)
 //   N8N_WEBHOOK_URL=     (optional — dispatches orders to n8n)
+//   KITCHEN_CHAT_ID=     (optional — Telegram group ID for kitchen alerts)
+//   WHATSAPP_WEBHOOK=    (optional — URL for WhatsApp customer notifications)
 //   MENU_DATA_PATH=      (path to menu seed JSON)
 //
 // Run: node server/index.js
@@ -22,6 +24,8 @@ const { v4: uuidv4 } = require('uuid');
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
+const KITCHEN_CHAT_ID = process.env.KITCHEN_CHAT_ID || '';
+const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
 
@@ -147,6 +151,16 @@ app.post('/api/orders', async (req, res) => {
     dispatchToN8n(order).catch(e => console.error('n8n dispatch failed:', e.message));
   }
 
+  // Notify kitchen Telegram group
+  if (KITCHEN_CHAT_ID) {
+    notifyKitchen(order).catch(e => console.error('Kitchen notification failed:', e.message));
+  }
+
+  // Notify customer via WhatsApp
+  if (WHATSAPP_WEBHOOK) {
+    notifyWhatsApp(order).catch(e => console.error('WhatsApp notification failed:', e.message));
+  }
+
   console.log(`📦 Order #${order.id} — ${cliente.nombre} — $${order.total.toFixed(2)}`);
   res.json({ ok: true, orderId: order.id, total: order.total });
 });
@@ -169,7 +183,7 @@ async function dispatchToN8n(order) {
   const payload = {
     orderId: order.id,
     restaurantSlug: order.restaurantSlug,
-    restaurantNombre: menuData?.nombre || 'Anthony\'s Supermarket',
+    restaurantNombre: menuData?.nombre || "Anthony's Supermarket",
     total: order.total,
     moneda: order.moneda,
     tipoEntrega: order.tipoEntrega,
@@ -184,6 +198,68 @@ async function dispatchToN8n(order) {
     signal: AbortSignal.timeout(8000)
   });
   return res.ok;
+}
+
+// ─── Kitchen Notifications ──────────────────────────────────────────
+
+async function notifyKitchen(order) {
+  if (!bot || !KITCHEN_CHAT_ID) return;
+
+  const itemsList = order.items.map(i =>
+    `• ${i.nombre} x${i.cantidad} — _$${(i.precio * i.cantidad).toFixed(2)}_`
+  ).join('\n');
+
+  const message =
+    `👨‍🍳 *NEW ORDER #${order.id}* 🦁\n\n` +
+    `${itemsList}\n\n` +
+    `*Total:* $${order.total.toFixed(2)}\n` +
+    `*${order.tipoEntrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}*\n\n` +
+    `*Customer:* ${order.cliente.nombre}\n` +
+    (order.cliente.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
+    (order.cliente.direccion ? `*Address:* ${order.cliente.direccion}\n` : '') +
+    (order.notas ? `*Notes:* ${order.notas}\n` : '') +
+    `\n🕐 ${new Date(order.createdAt).toLocaleTimeString()}`;
+
+  try {
+    await bot.sendMessage(KITCHEN_CHAT_ID, message, { parse_mode: 'Markdown' });
+    console.log(`👨‍🍳 Kitchen notified for order #${order.id}`);
+  } catch (e) {
+    console.error(`❌ Kitchen notification failed: ${e.message}`);
+  }
+}
+
+async function notifyWhatsApp(order) {
+  if (!WHATSAPP_WEBHOOK) return;
+
+  const itemsList = order.items.map(i =>
+    `• ${i.nombre} x${i.cantidad}`
+  ).join('\n');
+
+  const message =
+    `🦁 *Order Confirmed!*\n\n` +
+    `Order #${order.id}\n` +
+    `Total: $${order.total.toFixed(2)}\n` +
+    `${order.tipoEntrega === 'pickup' ? '📦 Pickup at store' : '🚚 Delivery to your address'}\n\n` +
+    `${itemsList}\n\n` +
+    `📍 288 Kearny Ave, Kearny NJ 07032\n` +
+    `📞 (201) 428-1745\n\n` +
+    `We'll notify you when ready!`;
+
+  try {
+    const res = await fetch(WHATSAPP_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: order.cliente.telefono || '',
+        message: message,
+        orderId: order.id
+      }),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (res.ok) console.log(`📱 WhatsApp notified for order #${order.id}`);
+  } catch (e) {
+    console.error(`❌ WhatsApp notification failed: ${e.message}`);
+  }
 }
 
 // ─── Telegram Bot ─────────────────────────────────────────────────────
@@ -469,9 +545,68 @@ function startBot() {
         `/cart — View cart\n` +
         `/checkout — Place order\n` +
         `/clear — Clear cart\n` +
+        `/status — 🏪 Pending orders (kitchen only)\n` +
         `/help — This message`,
         { parse_mode: 'Markdown' }
       );
+    });
+
+    // ─── Kitchen: Status (order board) ────────────────────────────────
+    bot.onText(/\/status/, async (msg) => {
+      const chatId = msg.chat.id;
+      // Only respond if asked from the kitchen group or by admin
+      const orders = loadOrders();
+      const pending = orders.filter(o => o.estado === 'recibido' || o.estado === 'preparando');
+
+      if (!pending.length) {
+        return bot.sendMessage(chatId, '✅ No pending orders. All clear! 🦁');
+      }
+
+      let text = `👨‍🍳 *Kitchen — Order Board*\n\n`;
+      pending.forEach((o, i) => {
+        text += `*${i + 1}. #${o.id}* — ${o.estado === 'recibido' ? '🆕 New' : '👨‍🍳 Prep'}\n`;
+        text += `   ${o.cliente.nombre} — ${o.tipoEntrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}\n`;
+        text += `   Total: $${o.total.toFixed(2)}\n`;
+        o.items.forEach(item => {
+          text += `   • ${item.nombre} x${item.cantidad}\n`;
+        });
+        text += `   🕐 ${new Date(o.createdAt).toLocaleString()}\n\n`;
+      });
+
+      const keyboard = pending.map(o => [
+        { text: `✅ Mark #${o.id} Ready`, callback_data: `ready:${o.id}` }
+      ]);
+
+      await bot.sendMessage(chatId, text, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: keyboard }
+      });
+    });
+
+    // Kitchen: Mark order ready
+    bot.on('callback_query', async (query) => {
+      const chatId = query.message.chat.id;
+      const data = query.data || '';
+
+      if (data.startsWith('ready:')) {
+        const orderId = data.split(':')[1];
+        const orders = loadOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return bot.answerCallbackQuery(query.id, { text: 'Order not found' });
+
+        order.estado = 'listo';
+        saveOrders(orders);
+
+        await bot.answerCallbackQuery(query.id, { text: `✅ Order #${orderId} marked ready!` });
+        await bot.sendMessage(chatId,
+          `✅ *Order #${orderId} is READY!* 🎉\n\n` +
+          `${order.cliente.nombre} — ${order.tipoEntrega === 'pickup' ? '📦 Ready for pickup' : '🚚 Out for delivery'}`,
+          { parse_mode: 'Markdown' }
+        );
+
+        // Also notify customer if we have their chat ID stored
+        // (future enhancement: track customer chat IDs for order status updates)
+      }
     });
 
   } catch (e) {
@@ -488,5 +623,8 @@ const userCarts = {};
 app.listen(PORT, () => {
   console.log(`🦁 Anthony's Server running on http://localhost:${PORT}`);
   console.log(`📊 Menu: ${flatItems.length} items across ${menuData?.menus?.length || 0} menus`);
+  if (KITCHEN_CHAT_ID) console.log(`👨‍🍳 Kitchen notifications enabled (chat: ${KITCHEN_CHAT_ID})`);
+  if (WHATSAPP_WEBHOOK) console.log(`📱 WhatsApp notifications enabled`);
+  if (N8N_WEBHOOK_URL) console.log(`🔗 n8n webhook enabled`);
   startBot();
 });
