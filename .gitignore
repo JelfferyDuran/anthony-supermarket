@@ -47,3 +47,6 @@ apps/menu/
 # Documentation
 docs/invoices/*.pdf
 docs/pricing/*.csv
+
+# Runtime data
+server/data/
