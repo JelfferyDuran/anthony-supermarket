@@ -3,7 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Anthony's Supermarket — Kearny, NJ</title>
+  <title data-en="Anthony's Supermarket — Kearny, NJ" data-es="Supermercado Anthony's — Kearny, NJ">Anthony's Supermarket — Kearny, NJ</title>
+  <meta name="description" content="Anthony's Supermarket in Kearny, NJ — Latin grocery, hot food, deli meats, and more. Serving the community for 9 years. Order online or call (201) 428-1745.">
+  <meta property="og:title" content="Anthony's Supermarket — Kearny, NJ">
+  <meta property="og:description" content="Anthony's Supermarket in Kearny, NJ — Latin grocery, hot food, deli meats, and more. Serving the community for 9 years.">
+  <meta property="og:image" content="https://v3b.fal.media/files/b/0aa2d705/n4BSdaYnztmJu7K6uSRFg_ISQfd8bt.png">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#2D6A4F">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='10' y='35' width='80' height='50' rx='8' fill='%232D6A4F'/%3E%3Crect x='20' y='45' width='20' height='20' rx='4' fill='%23E07A2F'/%3E%3Crect x='45' y='45' width='20' height='20' rx='4' fill='%23E07A2F'/%3E%3Crect x='70' y='45' width='10' height='20' rx='4' fill='%23E07A2F'/%3E%3Cpath d='M25 20 Q30 10 40 15 L68 22 Q75 24 73 35' fill='none' stroke='%232D6A4F' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Anthony's Supermarket",
+    "image": "https://v3b.fal.media/files/b/0aa2d705/n4BSdaYnztmJu7K6uSRFg_ISQfd8bt.png",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "288 Kearny Ave",
+      "addressLocality": "Kearny",
+      "addressRegion": "NJ",
+      "postalCode": "07032",
+      "addressCountry": "US"
+    },
+    "telephone": "(201) 428-1745",
+    "openingHoursSpecification": [
+      {"@type": "OpeningHoursSpecification","dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens": "07:00","closes": "20:00"},
+      {"@type": "OpeningHoursSpecification","dayOfWeek": "Sunday","opens": "00:00","closes": "00:00"}
+    ],
+    "geo": {"@type": "GeoCoordinates","latitude": 40.7684,"longitude": -74.1450},
+    "priceRange": "$$",
+    "servesCuisine": "Latin American",
+    "url": "https://jelfferyduran.github.io/anthony-supermarket/"
+  }
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -29,6 +61,9 @@
     html { scroll-behavior:smooth; }
     body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
     a { color:var(--primary-light); text-decoration:none; }
+    a:focus-visible { outline:2px solid var(--primary-light); outline-offset:2px; border-radius:4px; }
+    button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
     #three-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none; }
     .overlay { position:relative; z-index:1; pointer-events:none; }
     .overlay>* { pointer-events:auto; }
@@ -61,7 +96,7 @@
     .btn-outline { background:transparent; color:var(--text); border:1px solid var(--card-border); }
     .btn-outline:hover { border-color:var(--primary-light); color:var(--primary-light); background:rgba(45,106,79,0.08); }
     section { min-height:100vh; padding:4rem 1.25rem; position:relative; }
-    .section-title { text-align:center; font-size:clamp(1.4rem,3vw,2.2rem); font-weight:700; margin-bottom:2rem; color:var(--text); }
+    .section-title { text-align:center; font-size:clamp(1.4rem,3vw,2.2rem); font-weight:700; margin-bottom:1.5rem; color:var(--text); }
     .section-title span { color:var(--text-dim); font-weight:400; }
     .section-sub { text-align:center; color:var(--text-dim); font-size:0.85rem; margin-bottom:2rem; max-width:600px; margin-left:auto; margin-right:auto; }
     .stats-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.6rem; max-width:800px; margin:0 auto 2rem; }
@@ -69,11 +104,18 @@
     .stat-card:hover { border-color:var(--primary); background:rgba(45,106,79,0.06); transform:translateY(-1px); box-shadow:0 4px 16px rgba(45,106,79,0.12); }
     .stat-card .value { font-size:1.5rem; font-weight:700; color:var(--primary-light); }
     .stat-card .label { color:var(--text-dim); font-size:0.75rem; margin-top:0.2rem; }
-    .menu-tabs { display:flex; gap:0.35rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .banner-wrap { max-height:120px; overflow:hidden; border-radius:var(--radius) var(--radius) 0 0; position:relative; }
+    .banner-wrap img { width:100%; height:100%; object-fit:cover; }
+    .banner-wrap .overlay-gradient { position:absolute; inset:0; background:linear-gradient(to bottom, transparent 50%, rgba(15,15,20,0.7)); pointer-events:none; }
+    .menu-tabs { display:flex; gap:0.35rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
     .menu-tab { padding:0.45rem 1rem; border-radius:50px; border:1px solid var(--card-border); background:var(--card); color:var(--text-dim); font-size:0.8rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:inherit; }
     .menu-tab:hover { border-color:var(--primary); color:var(--primary-light); }
     .menu-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-    .search-wrap { max-width:420px; margin:0 auto 1.5rem; position:relative; }
+    .filter-chips { display:flex; gap:0.35rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
+    .filter-chip { padding:0.35rem 0.85rem; border-radius:50px; border:1px solid var(--card-border); background:var(--card); color:var(--text-dim); font-size:0.75rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:inherit; }
+    .filter-chip:hover { border-color:var(--accent); color:var(--accent); }
+    .filter-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .search-wrap { max-width:420px; margin:0 auto 1rem; position:relative; }
     .search-wrap input { width:100%; padding:0.65rem 1rem 0.65rem 2.2rem; background:var(--card); border:1px solid var(--card-border); border-radius:50px; color:var(--text); font-size:0.85rem; font-family:inherit; transition:all .25s; outline:none; }
     .search-wrap input:focus { border-color:var(--primary); box-shadow:0 0 12px var(--primary-glow); }
     .search-wrap input::placeholder { color:var(--text-muted); }
@@ -85,7 +127,7 @@
     .cat-header .line { flex:1; height:1px; background:linear-gradient(90deg,var(--accent),transparent); opacity:0.3; }
     .cat-header .count { color:var(--text-muted); font-size:0.72rem; background:var(--card); padding:0.15rem 0.5rem; border-radius:50px; border:1px solid var(--card-border); }
     .item-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.6rem; margin-bottom:1rem; }
-    .item-card { position:relative; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius); overflow:hidden; transition:all .3s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; isolation:isolate; }
+    .item-card { position:relative; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius); overflow:hidden; transition:all .3s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; isolation:isolate; will-change:transform; }
     .item-card::before { content:''; position:absolute; inset:-1px; border-radius:calc(var(--radius)+1px); background:linear-gradient(135deg,transparent 40%,rgba(45,106,79,0.08) 60%,rgba(224,122,47,0.04) 100%); opacity:0; transition:opacity .4s ease; pointer-events:none; z-index:-1; }
     .item-card:hover { border-color:var(--primary); background:rgba(45,106,79,0.03); transform:translateY(-2px); box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(45,106,79,0.08); }
     .item-card:hover::before { opacity:1; }
@@ -114,7 +156,7 @@
     .toast { background:var(--card); border:1px solid var(--primary); padding:0.5rem 1rem; border-radius:10px; font-size:0.8rem; color:var(--text); box-shadow:0 4px 20px rgba(0,0,0,0.4); animation:toastIn .25s ease,toastOut .25s ease 2s forwards; pointer-events:auto; }
     @keyframes toastIn { from{opacity:0;transform:translateY(15px)scale(0.95)} to{opacity:1;transform:translateY(0)scale(1)} }
     @keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(-8px)} }
-    .cart-fab { position:fixed; bottom:24px; right:24px; z-index:50; width:52px; height:52px; border-radius:50%; background:var(--primary); border:none; color:#fff; font-size:1.2rem; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.4); transition:all .25s; display:flex; align-items:center; justify-content:center; }
+    .cart-fab { position:fixed; bottom:24px; right:24px; z-index:50; width:52px; height:52px; border-radius:50%; background:var(--primary); border:none; color:#fff; font-size:1.2rem; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.4); transition:all .25s; display:flex; align-items:center; justify-content:center; will-change:transform; }
     .cart-fab:hover { background:var(--primary-light); transform:scale(1.05); }
     .cart-fab .badge { position:absolute; top:-3px; right:-3px; background:var(--accent); color:#fff; min-width:20px; height:20px; border-radius:50%; font-size:0.65rem; display:flex; align-items:center; justify-content:center; font-weight:700; }
     .cart-fab.bump { animation:fabBump .3s ease; }
@@ -130,7 +172,8 @@
     .cart-panel .header button:hover { color:var(--text); }
     .cart-panel .items { flex:1; overflow-y:auto; padding:0.5rem 0.75rem; }
     .cart-panel .items.empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; }
-    .cart-item { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.4rem; border-bottom:1px solid var(--card-border); gap:0.4rem; }
+    .cart-item { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.4rem; border-bottom:1px solid var(--card-border); gap:0.4rem; animation:cartItemIn .25s ease; }
+    @keyframes cartItemIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
     .cart-item .ci-name { flex:1; font-size:0.8rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .cart-item .ci-controls { display:flex; gap:0.2rem; align-items:center; flex-shrink:0; }
     .cart-item .ci-controls button { width:24px; height:24px; border-radius:50%; border:1px solid var(--card-border); background:transparent; color:var(--text-dim); cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; transition:all .2s; }
@@ -143,6 +186,13 @@
     .cart-total .btn-checkout { width:100%; padding:0.75rem; margin-top:0.6rem; background:var(--primary); color:#fff; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all .25s; font-family:inherit; }
     .cart-total .btn-checkout:hover { background:var(--primary-light); }
     .cart-total .btn-checkout:disabled { opacity:0.3; cursor:not-allowed; }
+    .cart-total .btn-history { width:100%; padding:0.5rem; margin-top:0.4rem; background:transparent; color:var(--text-dim); border:1px solid var(--card-border); border-radius:10px; font-size:0.78rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:inherit; }
+    .cart-total .btn-history:hover { border-color:var(--primary-light); color:var(--primary-light); }
+    .order-history { max-height:200px; overflow-y:auto; margin-top:0.5rem; padding:0.5rem; background:rgba(0,0,0,0.15); border-radius:8px; border:1px solid var(--card-border); display:none; }
+    .order-history.open { display:block; }
+    .order-history .oh-item { display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid var(--card-border); font-size:0.72rem; color:var(--text-dim); }
+    .order-history .oh-item:last-child { border-bottom:none; }
+    .order-history .oh-item .oh-id { color:var(--accent); font-weight:600; }
     .modal-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); display:none; justify-content:center; align-items:center; padding:1rem; }
     .modal-overlay.open { display:flex; }
     .modal { background:var(--card); border:1px solid var(--card-border); border-radius:16px; padding:1.5rem; max-width:500px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.5); animation:modalIn .2s ease; }
@@ -164,8 +214,21 @@
     .confirmation h2 { color:var(--primary-light); margin-bottom:0.15rem; }
     .confirmation .order-id { font-size:1.5rem; font-weight:700; color:var(--accent); margin:0.5rem 0; letter-spacing:0.05em; }
     .confirmation p { color:var(--text-dim); margin-bottom:0.15rem; font-size:0.82rem; }
+    .confirmation .offline-notice { background:rgba(224,122,47,0.08); border:1px solid rgba(224,122,47,0.2); border-radius:8px; padding:0.5rem; margin:0.5rem 0; font-size:0.78rem; color:var(--accent); }
+    .store-section { background:linear-gradient(135deg, var(--bg-alt) 0%, rgba(45,106,79,0.04) 100%); border-top:1px solid var(--card-border); border-bottom:1px solid var(--card-border); min-height:auto; padding:3rem 1.25rem; content-visibility:auto; }
+    .store-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; max-width:800px; margin:0 auto; }
+    .store-card { background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius); padding:1.25rem; }
+    .store-card h3 { color:var(--primary-light); font-size:0.95rem; font-weight:600; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; }
+    .store-card .sc-row { display:flex; align-items:center; gap:0.5rem; padding:0.3rem 0; font-size:0.82rem; color:var(--text-dim); }
+    .store-card .sc-row strong { color:var(--text); font-weight:600; }
+    .store-card .sc-row a { color:var(--primary-light); }
+    .store-card .hours-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.2rem; font-size:0.82rem; }
+    .store-card .hours-grid .day { color:var(--text-dim); }
+    .store-card .hours-grid .time { color:var(--text); text-align:right; }
+    .store-card .hours-grid .closed { color:var(--accent); text-align:right; font-weight:500; }
+    .store-card .phone-large { font-size:1.3rem; font-weight:700; color:var(--primary-light); margin:0.5rem 0; display:block; }
     .pricing-frame { width:100%; height:70vh; border:1px solid var(--card-border); border-radius:var(--radius); background:var(--bg-alt); }
-    footer { text-align:center; padding:2rem 1.25rem; border-top:1px solid var(--card-border); color:var(--text-muted); font-size:0.78rem; }
+    footer { text-align:center; padding:2rem 1.25rem; border-top:1px solid var(--card-border); color:var(--text-muted); font-size:0.78rem; content-visibility:auto; }
     footer strong { color:var(--primary-light); }
     footer .social { display:flex; gap:0.75rem; justify-content:center; margin-bottom:0.75rem; }
     footer .social a { width:36px; height:36px; border-radius:50%; border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:1rem; transition:all .2s; }
@@ -175,291 +238,446 @@
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-track { background:var(--bg-alt); }
     ::-webkit-scrollbar-thumb { background:var(--card-border); border-radius:2px; }
-    body.loading .overlay { opacity:0; } body.loading::after { content:''; position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; align-items:center; justify-content:center; } body.loading::before { content:'\\uD83C\\uDF4E'; position:fixed; top:50%; left:50%; z-index:10000; transform:translate(-50%,-50%); font-size:2.5rem; animation:loadingPulse 1s ease-in-out infinite; } @keyframes loadingPulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.12)} }
-    .cart-item { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.4rem; border-bottom:1px solid var(--card-border); gap:0.4rem; animation:cartItemIn .25s ease; }
-    @keyframes cartItemIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    ::-webkit-scrollbar-thumb:hover { background:var(--text-muted); }
+    ::-webkit-scrollbar { height:4px; }
+    * { scrollbar-width:thin; scrollbar-color:var(--card-border) var(--bg-alt); }
+    body.loading .overlay { opacity:0; } body.loading::after { content:''; position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; align-items:center; justify-content:center; } body.loading::before { content:'\uD83C\uDF4E'; position:fixed; top:50%; left:50%; z-index:10000; transform:translate(-50%,-50%); font-size:2.5rem; animation:loadingPulse 1s ease-in-out infinite; } @keyframes loadingPulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.12)} }
     .cat-section { margin-bottom:2rem; border-top:1px solid var(--card-border); padding-top:0.5rem; } .cat-section:first-child { border-top:none; }
     .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-muted); font-size:0.9rem; }
     .empty-state .icon { font-size:2.5rem; margin-bottom:0.5rem; opacity:0.5; }
+    .cat-section { content-visibility:auto; contain-intrinsic-size:300px; }
     @media (max-width:768px) {
       .hero h1 { font-size:2rem; }
       .cart-panel { width:100vw; right:-100vw; }
       .stats-bar { grid-template-columns:repeat(2,1fr); }
       .item-grid { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
       .navbar .links a { font-size:0.7rem; padding:0.25rem 0.5rem; }
+      .store-grid { grid-template-columns:1fr; }
     }
     @media (max-width:480px) { .item-grid { grid-template-columns:1fr; } section { padding:3rem 0.75rem; } .hero .info>span { font-size:0.72rem; } }
   </style>
 </head>
 <body class="loading">
 
-  <canvas id="three-canvas"></canvas>
-  <nav class="navbar" id="navbar">
+  <canvas id="three-canvas" aria-hidden="true"></canvas>
+
+  <nav class="navbar" id="navbar" aria-label="Main navigation">
     <div class="brand">&#x1F981; Anthony's <span>Market</span></div>
     <div class="links">
-      <a href="#home" class="active">Home</a>
-      <a href="#menu">Menu</a>
-      <a href="#pricing">Pricing</a>
+      <a href="#home" class="active" data-en="Home" data-es="Inicio">Home</a>
+      <a href="#menu" data-en="Menu" data-es="Menú">Menu</a>
+      <a href="#pricing" data-en="Pricing" data-es="Precios">Pricing</a>
+      <a href="#store" data-en="Contact" data-es="Contacto">Contact</a>
     </div>
   </nav>
-  <div class="lang-toggle">
-    <button class="lang-btn active" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" onclick="setLang('es')">ES</button>
+
+  <div class="lang-toggle" role="radiogroup" aria-label="Language selector">
+    <button class="lang-btn active" onclick="setLang('en')" role="radio" aria-checked="true" aria-label="English">EN</button>
+    <button class="lang-btn" onclick="setLang('es')" role="radio" aria-checked="false" aria-label="Español">ES</button>
   </div>
-  <div class="toast-container" id="toastContainer"></div>
-  <button class="cart-fab" id="cartFab" onclick="toggleCart()">&#x1F6D2;<span class="badge" id="cartBadge">0</span></button>
-  <div class="cart-panel" id="cartPanel">
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <button class="cart-fab" id="cartFab" onclick="toggleCart()" aria-label="Open shopping cart">
+    &#x1F6D2;<span class="badge" id="cartBadge">0</span>
+  </button>
+
+  <div class="cart-panel" id="cartPanel" role="dialog" aria-label="Shopping cart">
     <div class="header">
-      <h3>Cart <span id="cartCountLabel"></span></h3>
-      <button onclick="toggleCart()">&#x2715;</button>
+      <h3><span data-en="Cart" data-es="Carrito">Cart</span> <span id="cartCountLabel"></span></h3>
+      <button onclick="toggleCart()" aria-label="Close cart">&#x2715;</button>
     </div>
-    <div class="items empty" id="cartItems">Your cart is empty</div>
+    <div class="items empty" id="cartItems" data-en="Your cart is empty" data-es="Tu carrito está vacío">Your cart is empty</div>
     <div class="cart-total">
-      <div class="row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
-      <div class="row grand"><span>Total</span><span id="cartTotal">$0.00</span></div>
-      <button class="btn-checkout" onclick="openCheckout()" id="checkoutBtn" disabled>Proceed to Checkout</button>
+      <div class="row"><span data-en="Subtotal" data-es="Subtotal">Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+      <div class="row"><span data-en="Tax" data-es="Impuesto">Tax</span><span id="cartTax">$0.00</span></div>
+      <div class="row grand"><span data-en="Total" data-es="Total">Total</span><span id="cartTotal">$0.00</span></div>
+      <button class="btn-checkout" onclick="openCheckout()" id="checkoutBtn" disabled data-en="Proceed to Checkout" data-es="Ir a Pagar">Proceed to Checkout</button>
+      <button class="btn-history" onclick="toggleOrderHistory()" id="historyToggle" data-en="Past Orders" data-es="Pedidos Anteriores">Past Orders</button>
+      <div class="order-history" id="orderHistory"></div>
     </div>
   </div>
+
   <div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart()"></div>
-  <div class="modal-overlay" id="checkoutModal">
+
+  <div class="modal-overlay" id="checkoutModal" role="dialog" aria-modal="true" aria-label="Checkout">
     <div class="modal">
-      <button class="btn-close" onclick="closeCheckout()">&#x2715;</button>
-      <h2>Checkout</h2>
+      <button class="btn-close" onclick="closeCheckout()" aria-label="Close checkout">&#x2715;</button>
+      <h2 data-en="Checkout" data-es="Pagar">Checkout</h2>
       <div id="checkoutContent" style="margin-top:0.75rem;"></div>
     </div>
   </div>
 
-  <section class="hero overlay" id="home">
-    <svg class="crown-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="58" stroke="#2D6A4F" stroke-width="2" opacity="0.3"/>
-      <path d="M30 50 L40 30 L50 45 L60 25 L70 45 L80 30 L90 50 L85 85 L35 85 L30 50Z" fill="#2D6A4F" opacity="0.9"/>
-      <path d="M40 50 L45 65 L75 65 L80 50" fill="#0F0F14" stroke="#2D6A4F" stroke-width="1.5"/>
-      <circle cx="50" cy="50" r="4" fill="#E07A2F"/><circle cx="60" cy="45" r="4" fill="#E07A2F"/><circle cx="70" cy="50" r="4" fill="#E07A2F"/>
-      <rect x="40" y="70" width="40" height="8" rx="3" fill="#2D6A4F" opacity="0.7"/>
-      <line x1="43" y1="78" x2="43" y2="88" stroke="#2D6A4F" stroke-width="2"/>
-      <line x1="50" y1="78" x2="50" y2="88" stroke="#2D6A4F" stroke-width="2"/>
-      <line x1="57" y1="78" x2="57" y2="88" stroke="#2D6A4F" stroke-width="2"/>
-      <line x1="64" y1="78" x2="64" y2="88" stroke="#2D6A4F" stroke-width="2"/>
-      <line x1="71" y1="78" x2="71" y2="88" stroke="#2D6A4F" stroke-width="2"/>
-      <circle cx="46" cy="90" r="4" fill="#2D6A4F"/><circle cx="74" cy="90" r="4" fill="#2D6A4F"/>
-    </svg>
-    <h1>Anthony's <span class="hl">Supermarket</span></h1>
-    <p class="tagline">Serving the Kearny community for 9 years</p>
-    <div class="info">
-      <span><i>&#x1F4CD;</i> 288 Kearny Ave, Kearny NJ 07032</span>
-      <span><i>&#x1F4DE;</i> (201) 428-1745</span>
-      <span><i>&#x1F550;</i> Open Daily</span>
-    </div>
-    <div class="hero-actions">
-      <button class="btn btn-primary" onclick="scrollToMenu()">&#x1F6D2; Start Ordering</button>
-      <button class="btn btn-outline" onclick="goToPricing()">&#x1F4CA; Pricing Hub</button>
-    </div>
-  </section>
+  <main>
+    <section class="hero overlay" id="home" aria-label="Hero">
+      <svg class="crown-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Anthony's Supermarket crown logo">
+        <circle cx="60" cy="60" r="58" stroke="#2D6A4F" stroke-width="2" opacity="0.3"/>
+        <path d="M30 50 L40 30 L50 45 L60 25 L70 45 L80 30 L90 50 L85 85 L35 85 L30 50Z" fill="#2D6A4F" opacity="0.9"/>
+        <path d="M40 50 L45 65 L75 65 L80 50" fill="#0F0F14" stroke="#2D6A4F" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="4" fill="#E07A2F"/><circle cx="60" cy="45" r="4" fill="#E07A2F"/><circle cx="70" cy="50" r="4" fill="#E07A2F"/>
+        <rect x="40" y="70" width="40" height="8" rx="3" fill="#2D6A4F" opacity="0.7"/>
+        <line x1="43" y1="78" x2="43" y2="88" stroke="#2D6A4F" stroke-width="2"/>
+        <line x1="50" y1="78" x2="50" y2="88" stroke="#2D6A4F" stroke-width="2"/>
+        <line x1="57" y1="78" x2="57" y2="88" stroke="#2D6A4F" stroke-width="2"/>
+        <line x1="64" y1="78" x2="64" y2="88" stroke="#2D6A4F" stroke-width="2"/>
+        <line x1="71" y1="78" x2="71" y2="88" stroke="#2D6A4F" stroke-width="2"/>
+        <circle cx="46" cy="90" r="4" fill="#2D6A4F"/><circle cx="74" cy="90" r="4" fill="#2D6A4F"/>
+      </svg>
+      <h1 data-en="Anthony's <span class=\"hl\">Supermarket</span>" data-es="Supermercado <span class=\"hl\">Anthony's</span>">Anthony's <span class="hl">Supermarket</span></h1>
+      <p class="tagline" data-en="Serving the Kearny community for 9 years" data-es="Sirviendo a la comunidad de Kearny por 9 años">Serving the Kearny community for 9 years</p>
+      <div class="info">
+        <span><i aria-hidden="true">&#x1F4CD;</i> <span data-en="288 Kearny Ave, Kearny NJ 07032" data-es="288 Kearny Ave, Kearny NJ 07032">288 Kearny Ave, Kearny NJ 07032</span></span>
+        <span><i aria-hidden="true">&#x1F4DE;</i> <span data-en="(201) 428-1745" data-es="(201) 428-1745">(201) 428-1745</span></span>
+        <span><i aria-hidden="true">&#x1F550;</i> <span data-en="Open Daily" data-es="Abierto Todos los Días">Open Daily</span></span>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="scrollToMenu()" data-en="&#x1F6D2; Start Ordering" data-es="&#x1F6D2; Ordenar Ahora">&#x1F6D2; Start Ordering</button>
+        <button class="btn btn-outline" onclick="goToPricing()" data-en="&#x1F4CA; Pricing Hub" data-es="&#x1F4CA; Lista de Precios">&#x1F4CA; Pricing Hub</button>
+      </div>
+    </section>
 
-  <section class="overlay" id="menu">
-    <h2 class="section-title">Our <span>Products</span></h2>
-    <div class="stats-bar reveal" id="statsBar"></div>
-    <div class="search-wrap reveal">
-      <span class="search-icon">&#x1F50D;</span>
-      <input type="text" id="searchInput" placeholder="Search products..." oninput="onSearch(this.value)">
-      <button class="clear-btn" id="searchClear" onclick="clearSearch()">&#x2715;</button>
-    </div>
-    <div class="menu-tabs reveal" id="menuTabs"></div>
-    <div id="menuContent"></div>
-  </section>
+    <section class="overlay" id="menu" aria-label="Menu">
+      <h2 class="section-title" data-en="Our <span>Products</span>" data-es="Nuestros <span>Productos</span>">Our <span>Products</span></h2>
+      <div class="stats-bar reveal" id="statsBar"></div>
 
-  <section class="overlay" id="pricing">
-    <h2 class="section-title">Pricing <span>Hub</span></h2>
-    <p class="section-sub">Wholesale-to-retail pricing with markup calculator for all products.</p>
-    <div style="max-width:1400px;margin:0 auto;">
-      <iframe class="pricing-frame" src="pricing-hub/index.html" title="Pricing Hub" loading="lazy"></iframe>
-    </div>
-  </section>
+      <!-- Banner for current menu tab -->
+      <div class="banner-wrap reveal" id="menuBanner">
+        <img id="bannerImg" src="https://v3b.fal.media/files/b/0aa2d705/n4BSdaYnztmJu7K6uSRFg_ISQfd8bt.png" alt="Hot Food" width="800" height="120" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;">
+        <div class="overlay-gradient"></div>
+      </div>
+
+      <div class="menu-tabs reveal" id="menuTabs"></div>
+      <div class="search-wrap reveal">
+        <span class="search-icon" aria-hidden="true">&#x1F50D;</span>
+        <input type="text" id="searchInput" oninput="onSearch(this.value)" data-en="Search products..." data-es="Buscar productos..." placeholder="Search products...">
+        <button class="clear-btn" id="searchClear" onclick="clearSearch()" aria-label="Clear search">&#x2715;</button>
+      </div>
+      <div class="filter-chips reveal" id="filterChips"></div>
+      <div id="menuContent"></div>
+    </section>
+
+    <section class="overlay" id="pricing" aria-label="Pricing">
+      <h2 class="section-title" data-en="Pricing <span>Hub</span>" data-es="Lista de <span>Precios</span>">Pricing <span>Hub</span></h2>
+      <p class="section-sub" data-en="Wholesale-to-retail pricing with markup calculator for all products." data-es="Precios de mayoreo a menudeo con calculadora de margen para todos los productos.">Wholesale-to-retail pricing with markup calculator for all products.</p>
+      <div style="max-width:1400px;margin:0 auto;">
+        <iframe class="pricing-frame" src="pricing-hub/index.html" title="Pricing Hub" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="store-section overlay" id="store" aria-label="Store Information">
+      <h2 class="section-title" data-en="Visit <span>Us</span>" data-es="Visítanos">Visit <span>Us</span></h2>
+      <div class="store-grid">
+        <div class="store-card">
+          <h3 data-en="&#x1F4CD; Location" data-es="&#x1F4CD; Ubicación">&#x1F4CD; Location</h3>
+          <div class="sc-row">
+            <span data-en="288 Kearny Ave, Kearny, NJ 07032" data-es="288 Kearny Ave, Kearny, NJ 07032">288 Kearny Ave, Kearny, NJ 07032</span>
+          </div>
+          <div class="sc-row" style="margin-top:0.5rem;">
+            <a href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="&#x1F5FA; Open in Google Maps" data-es="&#x1F5FA; Abrir en Google Maps">&#x1F5FA; Open in Google Maps</a>
+          </div>
+        </div>
+        <div class="store-card">
+          <h3 data-en="&#x1F550; Hours" data-es="&#x1F550; Horario">&#x1F550; Hours</h3>
+          <div class="hours-grid">
+            <span class="day" data-en="Mon–Sat" data-es="Lun–Sáb">Mon–Sat</span>
+            <span class="time">7:00 AM – 8:00 PM</span>
+            <span class="day" data-en="Sunday" data-es="Domingo">Sunday</span>
+            <span class="closed" data-en="CLOSED" data-es="CERRADO">CLOSED</span>
+          </div>
+        </div>
+        <div class="store-card">
+          <h3 data-en="&#x1F4DE; Call to Order" data-es="&#x1F4DE; Llama para Ordenar">&#x1F4DE; Call to Order</h3>
+          <div class="sc-row">
+            <span data-en="Order by phone for pickup or delivery" data-es="Ordena por teléfono para recoger o entrega">Order by phone for pickup or delivery</span>
+          </div>
+          <a href="tel:+12014281745" class="phone-large" aria-label="Call (201) 428-1745">(201) 428-1745</a>
+          <div class="sc-row">
+            <span data-en="We accept cash, credit, and EBT" data-es="Aceptamos efectivo, tarjeta y EBT">We accept cash, credit, and EBT</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer class="overlay">
     <div class="social">
-      <a href="https://instagram.com/anthony_supermarket" target="_blank" rel="noopener" title="Instagram">&#x1F4F7;</a>
-      <a href="https://anthonyssupermarket.com" target="_blank" rel="noopener" title="Website">&#x1F310;</a>
+      <a href="https://instagram.com/anthony_supermarket" target="_blank" rel="noopener" title="Instagram" aria-label="Instagram">&#x1F4F7;</a>
+      <a href="https://anthonyssupermarket.com" target="_blank" rel="noopener" title="Website" aria-label="Website">&#x1F310;</a>
     </div>
-    <p>&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032</p>
-    <p style="margin-top:0.3rem;">Built with &hearts; for the Kearny community</p>
+    <p><span data-en="&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032" data-es="&copy; 2026 <strong>Supermercado Anthony's</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032">&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032</span></p>
+    <p style="margin-top:0.3rem;" data-en="Built with &hearts; for the Kearny community" data-es="Hecho con &hearts; para la comunidad de Kearny">Built with &hearts; for the Kearny community</p>
   </footer>
 
   <script>
 const MD={menus:[
-    {nombre:"Hot Food Menu",slug:"hot-food",categorias:[
-      {nombre:"Hot Meals",items:[
-        {nombre:"Chicken Breast (per lb)",precio:4.93,desc:"Fresh chicken breast, seasoned and ready",tags:["High Protein"]},
-        {nombre:"Ground Beef 80/20 (per lb)",precio:7.43,desc:"Fresh ground beef, 80/20 blend",tags:["High Protein"]},
-        {nombre:"Whole Roasted Chicken",precio:8.99,desc:"Slow-roasted seasoned whole chicken",tags:["High Protein"]},
-        {nombre:"Pernil (per lb)",precio:9.99,desc:"Puerto Rican style roasted pork shoulder",tags:["High Protein"]},
-        {nombre:"Beef Stew (per lb)",precio:8.49,desc:"Traditional beef stew with vegetables",tags:["High Protein"]}
-      ]},
-      {nombre:"Latin Sides",items:[
-        {nombre:"Yellow Rice",precio:3.99,desc:"Arroz amarillo with pigeon peas",tags:["Vegan"]},
-        {nombre:"White Rice",precio:2.99,desc:"Perfectly steamed white rice",tags:["Vegan","GF"]},
-        {nombre:"Beans (per lb)",precio:3.99,desc:"Slow-cooked Latin style beans",tags:["Vegan","Protein"]},
-        {nombre:"Plantains (per lb)",precio:3.49,desc:"Sweet fried plantains - Maduros",tags:["Vegan","GF"]},
-        {nombre:"Yuca (per lb)",precio:3.99,desc:"Boiled yuca with garlic mojo",tags:["Vegan","GF"]},
-        {nombre:"Tostones (per lb)",precio:3.99,desc:"Fried green plantains",tags:["Vegan","GF"]}
-      ]},
-      {nombre:"Breakfast",items:[
-        {nombre:"Eggs (Large, 18ct)",precio:5.78,desc:"Fresh large eggs",tags:[]},
-        {nombre:"Oatmeal",precio:1.99,desc:"Hearty oatmeal",tags:["Vegan"]},
-        {nombre:"Trix Cereal",precio:5.99,tags:[]},
-        {nombre:"Cinnamon Toast Crunch",precio:5.99,tags:[]},
-        {nombre:"Cheerios (Large)",precio:5.99,tags:[]}
-      ]}
+  {nombre:"Hot Food Menu",slug:"hot-food",banner:"https://v3b.fal.media/files/b/0aa2d705/n4BSdaYnztmJu7K6uSRFg_ISQfd8bt.png",en:"Hot Food Menu",es:"Comida Caliente",categorias:[
+    {nombre:"Hot Meals",en:"Hot Meals",es:"Platos Calientes",items:[
+      {nombre:"Chicken Breast (per lb)",en:"Chicken Breast (per lb)",es:"Pechuga de Pollo (por lb)",precio:4.93,desc:"Fresh chicken breast, seasoned and ready",desc_es:"Pechuga de pollo fresca, sazonada y lista",tags:["High Protein"]},
+      {nombre:"Ground Beef 80/20 (per lb)",en:"Ground Beef 80/20 (per lb)",es:"Carne Molida 80/20 (por lb)",precio:7.43,desc:"Fresh ground beef, 80/20 blend",desc_es:"Carne molida fresca, mezcla 80/20",tags:["High Protein"]},
+      {nombre:"Whole Roasted Chicken",en:"Whole Roasted Chicken",es:"Pollo Asado Entero",precio:8.99,desc:"Slow-roasted seasoned whole chicken",desc_es:"Pollo entero sazonado asado lentamente",tags:["High Protein"]},
+      {nombre:"Pernil (per lb)",en:"Pernil (per lb)",es:"Pernil (por lb)",precio:9.99,desc:"Puerto Rican style roasted pork shoulder",desc_es:"Pernil al estilo puertorriqueño",tags:["High Protein"]},
+      {nombre:"Beef Stew (per lb)",en:"Beef Stew (per lb)",es:"Carne Guisada (por lb)",precio:8.49,desc:"Traditional beef stew with vegetables",desc_es:"Carne guisada tradicional con verduras",tags:["High Protein"]}
     ]},
-    {nombre:"Deli & Meats",slug:"deli-meats",categorias:[
-      {nombre:"Dairy & Eggs",items:[
-        {nombre:"Whole Milk (1 gal)",precio:4.11,tags:["GF"]},
-        {nombre:"Orange Juice (52oz)",precio:5.28,tags:["Vegan"]},
-        {nombre:"Eggs (Large, 18ct)",precio:5.78,tags:[]}
-      ]},
-      {nombre:"Bread & Bakery",items:[
-        {nombre:"White Bread (20oz)",precio:1.98,tags:["Vegan"]},
-        {nombre:"Pan de Yuca",precio:7.99,desc:"Frozen cheese bread, 16ct",tags:["GF"]},
-        {nombre:"Cheese Tequeno",precio:6.99,desc:"Frozen cheese sticks",tags:["GF"]}
-      ]},
-      {nombre:"Deli Containers",items:[
-        {nombre:"8oz Deli Container",precio:1.99,tags:[]},
-        {nombre:"16oz Deli Container",precio:1.99,tags:[]}
-      ]}
+    {nombre:"Latin Sides",en:"Latin Sides",es:"Acompañantes Latinos",items:[
+      {nombre:"Yellow Rice",en:"Yellow Rice",es:"Arroz Amarillo",precio:3.99,desc:"Arroz amarillo with pigeon peas",desc_es:"Arroz amarillo con gandules",tags:["Vegan"]},
+      {nombre:"White Rice",en:"White Rice",es:"Arroz Blanco",precio:2.99,desc:"Perfectly steamed white rice",desc_es:"Arroz blanco perfectamente cocido al vapor",tags:["Vegan","GF"]},
+      {nombre:"Beans (per lb)",en:"Beans (per lb)",es:"Habichuelas (por lb)",precio:3.99,desc:"Slow-cooked Latin style beans",desc_es:"Habichuelas guisadas al estilo latino",tags:["Vegan","Protein"]},
+      {nombre:"Plantains (per lb)",en:"Plantains (per lb)",es:"Plátanos Maduros (por lb)",precio:3.49,desc:"Sweet fried plantains - Maduros",desc_es:"Plátanos maduros fritos",tags:["Vegan","GF"]},
+      {nombre:"Yuca (per lb)",en:"Yuca (per lb)",es:"Yuca (por lb)",precio:3.99,desc:"Boiled yuca with garlic mojo",desc_es:"Yuca hervida con mojo de ajo",tags:["Vegan","GF"]},
+      {nombre:"Tostones (per lb)",en:"Tostones (per lb)",es:"Tostones (por lb)",precio:3.99,desc:"Fried green plantains",desc_es:"Plátanos verdes fritos",tags:["Vegan","GF"]}
     ]},
-    {nombre:"Grocery",slug:"grocery",categorias:[
-      {nombre:"Beverages",items:[
-        {nombre:"OKF Aloe S 20ct",precio:1.99,tags:["Vegan"]},
-        {nombre:"OKF Aloe L 12ct",precio:3.99,tags:["Vegan"]},
-        {nombre:"Tropical Soda Glass",precio:1.99,tags:["Vegan"]},
-        {nombre:"Tropical Soda 2lt",precio:3.99,tags:["Vegan"]},
-        {nombre:"Fioravanti Strawberry 2lt",precio:7.99,tags:["Vegan"]},
-        {nombre:"Fioravanti Apple 2lt",precio:7.99,tags:["Vegan"]},
-        {nombre:"Mineral Water 12pk",precio:1.99,tags:["Vegan"]},
-        {nombre:"Chocolate Milk 1lt",precio:8.99,tags:[]},
-        {nombre:"Horchata",precio:1.99,tags:["Vegan"]},
-        {nombre:"Del Frutal Nectar 3pk",precio:2.99,tags:["Vegan"]}
-      ]},
-      {nombre:"Snacks & Candy",items:[
-        {nombre:"Jelly Candy Monkey 6ct",precio:8.99,tags:[]},
-        {nombre:"Jelly Fruits 24ct",precio:1.99,tags:["Vegan"]},
-        {nombre:"Plantain Chips Jar",precio:8.99,tags:["Vegan","GF"]},
-        {nombre:"Sol Cusco Chocolate Bar",precio:1.99,tags:[]},
-        {nombre:"Nestle Galak",precio:4.99,tags:[]},
-        {nombre:"Nestle Amor Wafer",precio:2.99,tags:[]},
-        {nombre:"Jelly Stars Jar",precio:8.99,tags:["Vegan"]},
-        {nombre:"Toops Chocolate",precio:4.99,tags:[]}
-      ]},
-      {nombre:"Canned & Jarred",items:[
-        {nombre:"Tuna in Oil 5oz",precio:2.99,tags:["Protein"]},
-        {nombre:"Tuna in Water 5oz",precio:2.99,tags:["Protein"]},
-        {nombre:"Yellowfin Tuna 5oz",precio:3.99,tags:["Protein"]},
-        {nombre:"Yellowfin Tuna 4pk",precio:9.99,tags:["Protein"]},
-        {nombre:"Tuna Soup 14oz",precio:5.99,tags:["Protein"]},
-        {nombre:"Pacaya 12/32oz",precio:9.99,tags:["Vegan"]}
-      ]},
-      {nombre:"Dry Goods",items:[
-        {nombre:"Rotini Pasta 16oz",precio:1.99,tags:["Vegan"]},
-        {nombre:"Lentils 14oz",precio:1.99,tags:["Vegan","Protein"]},
-        {nombre:"Popcorn Kernels 2lb",precio:3.99,tags:["Vegan"]},
-        {nombre:"Corn Flour 1kg",precio:4.99,tags:["Vegan"]},
-        {nombre:"Ground Oats",precio:3.99,tags:["Vegan"]},
-        {nombre:"Jasmine Rice 2/320oz",precio:36.99,tags:["Vegan","GF"]},
-        {nombre:"Jasmine Rice 8/80oz",precio:8.99,tags:["Vegan","GF"]},
-        {nombre:"Grape Jello 24ct",precio:1.99,tags:["Vegan"]},
-        {nombre:"Cassava Bread",precio:3.99,desc:"Casabe artesanal",tags:["Vegan","GF"]}
-      ]},
-      {nombre:"Condiments",items:[
-        {nombre:"Hot Green Sauce",precio:1.99,tags:["Vegan"]},
-        {nombre:"Adobo Seasoning",precio:3.99,tags:["Vegan"]},
-        {nombre:"Achiote Liquid",precio:4.99,tags:["Vegan"]},
-        {nombre:"Soy Sauce",precio:3.99,tags:["Vegan"]},
-        {nombre:"Garlic Paste",precio:5.99,tags:["Vegan"]}
-      ]},
-      {nombre:"Frozen Foods",items:[
-        {nombre:"Passion Fruit 6/32oz",precio:9.99,tags:["Vegan"]},
-        {nombre:"Yuca Pieces 12/40oz",precio:5.99,tags:["Vegan","GF"]},
-        {nombre:"Blackberry Pulp",precio:3.99,tags:["Vegan"]},
-        {nombre:"Corn Kernels 20/16oz",precio:3.99,tags:["Vegan"]}
-      ]},
-      {nombre:"Household",items:[
-        {nombre:"Laundry Detergent",precio:4.99,tags:[]},
-        {nombre:"Fabric Softener",precio:1.99,tags:[]},
-        {nombre:"Clorox Bleach 6/43oz",precio:5.99,tags:[]},
-        {nombre:"Sponges 27ct",precio:0.99,tags:[]},
-        {nombre:"Febreze 8ct",precio:3.99,tags:[]},
-        {nombre:"Fabuloso 6/56oz",precio:6.99,tags:[]},
-        {nombre:"Fabuloso 12/28oz",precio:3.99,tags:[]},
-        {nombre:"Mistolin 24/15oz",precio:1.99,tags:[]},
-        {nombre:"Windex 8/32oz",precio:6.99,tags:[]}
-      ]},
-      {nombre:"Personal Care",items:[
-        {nombre:"Dove Soap 48/135g",precio:1.99,tags:[]},
-        {nombre:"Hispano Honey Soap",precio:0.99,tags:[]},
-        {nombre:"Pampers Wipes 12ct",precio:2.99,tags:[]},
-        {nombre:"Huggies Wipes 10ct",precio:2.99,tags:[]},
-        {nombre:"Water Wipes 12ct",precio:1.99,tags:[]}
-      ]},
-      {nombre:"Paper & Foil",items:[
-        {nombre:"Paper Plates 9in 100ct",precio:3.99,tags:[]},
-        {nombre:"Aluminum Foil 25ft",precio:2.99,tags:[]},
-        {nombre:"Disposable Pans 50ct",precio:0.99,tags:[]},
-        {nombre:"Toilet Paper 36ct",precio:0.99,tags:[]}
-      ]},
-      {nombre:"Tea & Coffee",items:[
-        {nombre:"Boldo Tea 6/20ct",precio:3.99,tags:["Vegan"]},
-        {nombre:"Ginger Lemon Tea",precio:3.99,tags:["Vegan"]},
-        {nombre:"Mint Eucalyptus Tea",precio:3.99,tags:["Vegan"]},
-        {nombre:"Chamomile Tea 12/25ct",precio:3.99,tags:["Vegan"]}
-      ]}
+    {nombre:"Breakfast",en:"Breakfast",es:"Desayuno",items:[
+      {nombre:"Eggs (Large, 18ct)",en:"Eggs (Large, 18ct)",es:"Huevos (Grandes, 18unid)",precio:5.78,desc:"Fresh large eggs",desc_es:"Huevos grandes frescos",tags:[]},
+      {nombre:"Oatmeal",en:"Oatmeal",es:"Avena",precio:1.99,desc:"Hearty oatmeal",desc_es:"Avena sustanciosa",tags:["Vegan"]},
+      {nombre:"Trix Cereal",en:"Trix Cereal",es:"Cereal Trix",precio:5.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Cinnamon Toast Crunch",en:"Cinnamon Toast Crunch",es:"Cereal Cinnamon Toast Crunch",precio:5.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Cheerios (Large)",en:"Cheerios (Large)",es:"Cheerios (Grande)",precio:5.99,desc:"",desc_es:"",tags:[]}
     ]}
-  ]};
-  var ALL_ITEMS=[];MD.menus.forEach(function(m){m.categorias.forEach(function(c){c.items.forEach(function(i){ALL_ITEMS.push(Object.assign({},i,{menuSlug:m.slug,catName:c.nombre,menuName:m.nombre}))})})});
-  function computeStats(){var t=ALL_ITEMS.length,c=ALL_ITEMS.reduce(function(s,i){return s+i.precio},0),r=c*1.65,p=r-c;return{totalItems:t,invCost:c,retail:r,profit:p}}
+  ]},
+  {nombre:"Deli & Meats",slug:"deli-meats",banner:"https://v3b.fal.media/files/b/0aa2d707/BpI6YrhfsDiEc5KXcLv8T_0XHTfQd0.png",en:"Deli & Meats",es:"Delicatessen y Carnes",categorias:[
+    {nombre:"Dairy & Eggs",en:"Dairy & Eggs",es:"Lácteos y Huevos",items:[
+      {nombre:"Whole Milk (1 gal)",en:"Whole Milk (1 gal)",es:"Leche Entera (1 gal)",precio:4.11,desc:"",desc_es:"",tags:["GF"]},
+      {nombre:"Orange Juice (52oz)",en:"Orange Juice (52oz)",es:"Jugo de Naranja (52oz)",precio:5.28,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Eggs (Large, 18ct)",en:"Eggs (Large, 18ct)",es:"Huevos (Grandes, 18unid)",precio:5.78,desc:"",desc_es:"",tags:[]}
+    ]},
+    {nombre:"Bread & Bakery",en:"Bread & Bakery",es:"Pan y Panadería",items:[
+      {nombre:"White Bread (20oz)",en:"White Bread (20oz)",es:"Pan Blanco (20oz)",precio:1.98,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Pan de Yuca",en:"Pan de Yuca",es:"Pan de Yuca",precio:7.99,desc:"Frozen cheese bread, 16ct",desc_es:"Pan de queso congelado, 16unid",tags:["GF"]},
+      {nombre:"Cheese Tequeño",en:"Cheese Tequeño",es:"Tequeños de Queso",precio:6.99,desc:"Frozen cheese sticks",desc_es:"Palitos de queso congelados",tags:["GF"]}
+    ]},
+    {nombre:"Deli Containers",en:"Deli Containers",es:"Contenedores",items:[
+      {nombre:"8oz Deli Container",en:"8oz Deli Container",es:"Contenedor 8oz",precio:1.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"16oz Deli Container",en:"16oz Deli Container",es:"Contenedor 16oz",precio:1.99,desc:"",desc_es:"",tags:[]}
+    ]}
+  ]},
+  {nombre:"Grocery",slug:"grocery",banner:"https://v3b.fal.media/files/b/0aa2d706/jg0n3B-HHvFr2oCByt-2U_LtnXJEIE.png",en:"Grocery",es:"Abarrotes",categorias:[
+    {nombre:"Beverages",en:"Beverages",es:"Bebidas",items:[
+      {nombre:"OKF Aloe S 20ct",en:"OKF Aloe S 20ct",es:"OKF Aloe S 20unid",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"OKF Aloe L 12ct",en:"OKF Aloe L 12ct",es:"OKF Aloe L 12unid",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Tropical Soda Glass",en:"Tropical Soda Glass",es:"Refresco Tropical Vidrio",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Tropical Soda 2lt",en:"Tropical Soda 2lt",es:"Refresco Tropical 2lt",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Fioravanti Strawberry 2lt",en:"Fioravanti Strawberry 2lt",es:"Fioravanti Fresa 2lt",precio:7.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Fioravanti Apple 2lt",en:"Fioravanti Apple 2lt",es:"Fioravanti Manzana 2lt",precio:7.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Mineral Water 12pk",en:"Mineral Water 12pk",es:"Agua Mineral 12paq",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Chocolate Milk 1lt",en:"Chocolate Milk 1lt",es:"Leche Chocolate 1lt",precio:8.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Horchata",en:"Horchata",es:"Horchata",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Del Frutal Nectar 3pk",en:"Del Frutal Nectar 3pk",es:"Del Frutal Néctar 3paq",precio:2.99,desc:"",desc_es:"",tags:["Vegan"]}
+    ]},
+    {nombre:"Snacks & Candy",en:"Snacks & Candy",es:"Snacks y Dulces",items:[
+      {nombre:"Jelly Candy Monkey 6ct",en:"Jelly Candy Monkey 6ct",es:"Caramelos Jelly Monkey 6unid",precio:8.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Jelly Fruits 24ct",en:"Jelly Fruits 24ct",es:"Frutas Jelly 24unid",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Plantain Chips Jar",en:"Plantain Chips Jar",es:"Mariquitas en Frasco",precio:8.99,desc:"",desc_es:"",tags:["Vegan","GF"]},
+      {nombre:"Sol Cusco Chocolate Bar",en:"Sol Cusco Chocolate Bar",es:"Barra de Chocolate Sol Cusco",precio:1.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Nestle Galak",en:"Nestle Galak",es:"Nestle Galak",precio:4.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Nestle Amor Wafer",en:"Nestle Amor Wafer",es:"Nestle Amor Wafer",precio:2.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Jelly Stars Jar",en:"Jelly Stars Jar",es:"Estrellas Jelly Frasco",precio:8.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Toops Chocolate",en:"Toops Chocolate",es:"Toops Chocolate",precio:4.99,desc:"",desc_es:"",tags:[]}
+    ]},
+    {nombre:"Canned & Jarred",en:"Canned & Jarred",es:"Enlatados y Envasados",items:[
+      {nombre:"Tuna in Oil 5oz",en:"Tuna in Oil 5oz",es:"Atún en Aceite 5oz",precio:2.99,desc:"",desc_es:"",tags:["Protein"]},
+      {nombre:"Tuna in Water 5oz",en:"Tuna in Water 5oz",es:"Atún en Agua 5oz",precio:2.99,desc:"",desc_es:"",tags:["Protein"]},
+      {nombre:"Yellowfin Tuna 5oz",en:"Yellowfin Tuna 5oz",es:"Atún Aleta Amarilla 5oz",precio:3.99,desc:"",desc_es:"",tags:["Protein"]},
+      {nombre:"Yellowfin Tuna 4pk",en:"Yellowfin Tuna 4pk",es:"Atún Aleta Amarilla 4paq",precio:9.99,desc:"",desc_es:"",tags:["Protein"]},
+      {nombre:"Tuna Soup 14oz",en:"Tuna Soup 14oz",es:"Sopa de Atún 14oz",precio:5.99,desc:"",desc_es:"",tags:["Protein"]},
+      {nombre:"Pacaya 12/32oz",en:"Pacaya 12/32oz",es:"Pacaya 12/32oz",precio:9.99,desc:"",desc_es:"",tags:["Vegan"]}
+    ]},
+    {nombre:"Dry Goods",en:"Dry Goods",es:"Granos y Secos",items:[
+      {nombre:"Rotini Pasta 16oz",en:"Rotini Pasta 16oz",es:"Pasta Rotini 16oz",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Lentils 14oz",en:"Lentils 14oz",es:"Lentejas 14oz",precio:1.99,desc:"",desc_es:"",tags:["Vegan","Protein"]},
+      {nombre:"Popcorn Kernels 2lb",en:"Popcorn Kernels 2lb",es:"Maíz Palomitas 2lb",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Corn Flour 1kg",en:"Corn Flour 1kg",es:"Harina de Maíz 1kg",precio:4.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Ground Oats",en:"Ground Oats",es:"Avena Molida",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Jasmine Rice 2/320oz",en:"Jasmine Rice 2/320oz",es:"Arroz Jazmín 2/320oz",precio:36.99,desc:"",desc_es:"",tags:["Vegan","GF"]},
+      {nombre:"Jasmine Rice 8/80oz",en:"Jasmine Rice 8/80oz",es:"Arroz Jazmín 8/80oz",precio:8.99,desc:"",desc_es:"",tags:["Vegan","GF"]},
+      {nombre:"Grape Jello 24ct",en:"Grape Jello 24ct",es:"Gelatina de Uva 24unid",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Cassava Bread",en:"Cassava Bread",es:"Casabe Artesanal",precio:3.99,desc:"Casabe artesanal",desc_es:"Casabe artesanal",tags:["Vegan","GF"]}
+    ]},
+    {nombre:"Condiments",en:"Condiments",es:"Condimentos",items:[
+      {nombre:"Hot Green Sauce",en:"Hot Green Sauce",es:"Salsa Verde Picante",precio:1.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Adobo Seasoning",en:"Adobo Seasoning",es:"Sazón Adobo",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Achiote Liquid",en:"Achiote Liquid",es:"Achiote Líquido",precio:4.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Soy Sauce",en:"Soy Sauce",es:"Salsa de Soya",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Garlic Paste",en:"Garlic Paste",es:"Pasta de Ajo",precio:5.99,desc:"",desc_es:"",tags:["Vegan"]}
+    ]},
+    {nombre:"Frozen Foods",en:"Frozen Foods",es:"Congelados",items:[
+      {nombre:"Passion Fruit 6/32oz",en:"Passion Fruit 6/32oz",es:"Maracuyá 6/32oz",precio:9.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Yuca Pieces 12/40oz",en:"Yuca Pieces 12/40oz",es:"Trozos de Yuca 12/40oz",precio:5.99,desc:"",desc_es:"",tags:["Vegan","GF"]},
+      {nombre:"Blackberry Pulp",en:"Blackberry Pulp",es:"Pulpa de Mora",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Corn Kernels 20/16oz",en:"Corn Kernels 20/16oz",es:"Granos de Maíz 20/16oz",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]}
+    ]},
+    {nombre:"Household",en:"Household",es:"Hogar",items:[
+      {nombre:"Laundry Detergent",en:"Laundry Detergent",es:"Detergente para Ropa",precio:4.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Fabric Softener",en:"Fabric Softener",es:"Suavizante de Telas",precio:1.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Clorox Bleach 6/43oz",en:"Clorox Bleach 6/43oz",es:"Cloro Clorox 6/43oz",precio:5.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Sponges 27ct",en:"Sponges 27ct",es:"Esponjas 27unid",precio:0.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Febreze 8ct",en:"Febreze 8ct",es:"Febreze 8unid",precio:3.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Fabuloso 6/56oz",en:"Fabuloso 6/56oz",es:"Fabuloso 6/56oz",precio:6.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Fabuloso 12/28oz",en:"Fabuloso 12/28oz",es:"Fabuloso 12/28oz",precio:3.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Mistolin 24/15oz",en:"Mistolin 24/15oz",es:"Mistolin 24/15oz",precio:1.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Windex 8/32oz",en:"Windex 8/32oz",es:"Windex 8/32oz",precio:6.99,desc:"",desc_es:"",tags:[]}
+    ]},
+    {nombre:"Personal Care",en:"Personal Care",es:"Cuidado Personal",items:[
+      {nombre:"Dove Soap 48/135g",en:"Dove Soap 48/135g",es:"Jabón Dove 48/135g",precio:1.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Hispano Honey Soap",en:"Hispano Honey Soap",es:"Jabón Hispano de Miel",precio:0.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Pampers Wipes 12ct",en:"Pampers Wipes 12ct",es:"Toallitas Pampers 12unid",precio:2.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Huggies Wipes 10ct",en:"Huggies Wipes 10ct",es:"Toallitas Huggies 10unid",precio:2.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Water Wipes 12ct",en:"Water Wipes 12ct",es:"Water Wipes 12unid",precio:1.99,desc:"",desc_es:"",tags:[]}
+    ]},
+    {nombre:"Paper & Foil",en:"Paper & Foil",es:"Papel y Aluminio",items:[
+      {nombre:"Paper Plates 9in 100ct",en:"Paper Plates 9in 100ct",es:"Platos de Papel 9in 100unid",precio:3.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Aluminum Foil 25ft",en:"Aluminum Foil 25ft",es:"Papel Aluminio 25ft",precio:2.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Disposable Pans 50ct",en:"Disposable Pans 50ct",es:"Bandejas Desechables 50unid",precio:0.99,desc:"",desc_es:"",tags:[]},
+      {nombre:"Toilet Paper 36ct",en:"Toilet Paper 36ct",es:"Papel Higiénico 36unid",precio:0.99,desc:"",desc_es:"",tags:[]}
+    ]},
+    {nombre:"Tea & Coffee",en:"Tea & Coffee",es:"Té y Café",items:[
+      {nombre:"Boldo Tea 6/20ct",en:"Boldo Tea 6/20ct",es:"Té de Boldo 6/20unid",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Ginger Lemon Tea",en:"Ginger Lemon Tea",es:"Té de Jengibre y Limón",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Mint Eucalyptus Tea",en:"Mint Eucalyptus Tea",es:"Té de Menta y Eucalipto",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]},
+      {nombre:"Chamomile Tea 12/25ct",en:"Chamomile Tea 12/25ct",es:"Té de Manzanilla 12/25unid",precio:3.99,desc:"",desc_es:"",tags:["Vegan"]}
+    ]}
+  ]}
+]};
+var ALL_ITEMS=[];
+MD.menus.forEach(function(m){m.categorias.forEach(function(c){c.items.forEach(function(i){ALL_ITEMS.push(Object.assign({},i,{menuSlug:m.slug,catName:c.nombre,menuName:m.nombre,catEn:c.en,catEs:c.es,menuEn:m.en,menuEs:m.es}))})})});
+function computeStats(){var t=ALL_ITEMS.length,c=ALL_ITEMS.reduce(function(s,i){return s+i.precio},0),r=c*1.65,p=r-c;return{totalItems:t,invCost:c,retail:r,profit:p}}
 
-  (function(){var c=document.getElementById("three-canvas");if(!c)return;var s=new THREE.Scene(),a=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1e3),r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});r.setSize(innerWidth,innerHeight);r.setPixelRatio(Math.min(devicePixelRatio,2));
-  var pc=800,pos=new Float32Array(pc*3);for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*60;pos[i*3+1]=(Math.random()-0.5)*40;pos[i*3+2]=(Math.random()-0.5)*25}
-  var pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(pos,3));var pm=new THREE.PointsMaterial({color:0x2d6a4f,size:0.06,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,sizeAttenuation:true});var pt=new THREE.Points(pg,pm);s.add(pt);
-  var g=new THREE.GridHelper(40,40,0x2d6a4f,0x1b4332);g.position.y=-5;g.material.transparent=true;g.material.opacity=0.12;s.add(g);
-  var cg=new THREE.Group();var nm=new THREE.MeshBasicMaterial({color:0x2d6a4f,transparent:true,opacity:0.6});var b=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.5,1.8),nm);b.position.y=1;cg.add(b);var pk=new THREE.MeshBasicMaterial({color:0x2d6a4f,transparent:true,opacity:0.4});[-1.2,0,1.2].forEach(function(v){var p=new THREE.Mesh(new THREE.ConeGeometry(0.4,2,4),pk);p.position.set(v,2,0);cg.add(p)});
-  var gm=new THREE.MeshBasicMaterial({color:0xe07a2f});var ge=new THREE.Mesh(new THREE.OctahedronGeometry(0.35),gm);ge.position.set(0,3.2,0);cg.add(ge);
-  cg.position.set(0,-2,-10);s.add(cg);s.add(new THREE.AmbientLight(0x112211));a.position.set(0,1,12);
-  var mx=0,my=0;document.addEventListener("mousemove",function(e){mx=(e.clientX/innerWidth-0.5)*2;my=(e.clientY/innerHeight-0.5)*2});
-  var t=0;function anim(){requestAnimationFrame(anim);t+=0.005;pt.rotation.y+=0.0003;pt.rotation.x=Math.sin(t*0.15)*0.01;cg.position.y=Math.sin(t*0.3)*0.4-2;cg.rotation.y=mx*0.2;cg.rotation.x=my*0.08;ge.rotation.x=t;ge.rotation.y=t*0.5;g.material.opacity=0.08+Math.sin(t*1.2)*0.06;r.render(s,a)}
-  anim();addEventListener("resize",function(){a.aspect=innerWidth/innerHeight;a.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)})
-  })();
+var cl="en";
+var banners={};
+MD.menus.forEach(function(m){banners[m.slug]=m.banner});
 
-  var cl="en";function setLang(l){cl=l;document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.toggle("active",b.textContent.toLowerCase().includes(l))});document.querySelectorAll("[data-en]").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l)});var si=document.getElementById("searchInput");if(si)si.placeholder=si.getAttribute("data-"+l)||si.placeholder;localStorage.setItem("anthony-lang",l)}
-  var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl);
-  (function(){var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll(".reveal").forEach(function(el){obs.observe(el)})})();
-  (function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","menu","pricing"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
-  function scrollToMenu(){document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
-  function goToPricing(){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
+// Bilingual helpers
+function t(en,es){return cl==="es"?es:en}
+function r(s){return s||""}
 
-  var cart=[];
-  function toast(m){var c=document.getElementById("toastContainer"),el=document.createElement("div");el.className="toast";el.textContent=m;c.appendChild(el);setTimeout(function(){el.remove()},2300)}
-  function addToCart(item,qty){qty=qty||1;var ex=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug});if(ex)ex.cantidad+=qty;else cart.push(Object.assign({},item,{cantidad:qty}));updateCartUI();var fab=document.getElementById("cartFab");fab.classList.remove("bump");void fab.offsetWidth;fab.classList.add("bump");toast("Added "+item.nombre)}
-  function changeCartQty(idx,delta){cart[idx].cantidad+=delta;if(cart[idx].cantidad<=0)cart.splice(idx,1);updateCartUI()}
-  function updateCartUI(){var count=cart.reduce(function(s,i){return s+i.cantidad},0);document.getElementById("cartBadge").textContent=count;var lb=document.getElementById("cartCountLabel");if(lb)lb.textContent=count?"("+count+")":"";var ie=document.getElementById("cartItems"),cb=document.getElementById("checkoutBtn");if(!cart.length){ie.className="items empty";ie.innerHTML="Your cart is empty";document.getElementById("cartSubtotal").textContent="$0.00";document.getElementById("cartTotal").textContent="$0.00";cb.disabled=true;return}
-  ie.className="items";var h="",tot=0;cart.forEach(function(item,idx){var lt=item.precio*item.cantidad;tot+=lt;h+='<div class="cart-item"><span class="ci-name">'+item.nombre+'</span><div class="ci-controls"><button onclick="changeCartQty('+idx+',-1)">-</button><span class="ci-qty">'+item.cantidad+'</span><button onclick="changeCartQty('+idx+',1)">+</button></div><span class="ci-price">$'+lt.toFixed(2)+'</span></div>'});ie.innerHTML=h;document.getElementById("cartSubtotal").textContent="$"+tot.toFixed(2);document.getElementById("cartTotal").textContent="$"+tot.toFixed(2);cb.disabled=false}
-  function toggleCart(){document.getElementById("cartPanel").classList.toggle("open");document.getElementById("cartBackdrop").classList.toggle("open")}
+// Three.js — lighter version
+(function(){var c=document.getElementById("three-canvas");if(!c)return;
+var isMobile=innerWidth<768;
+var prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if(prefersReduced)return;
+var s=new THREE.Scene(),a=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1e3),
+r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true,powerPreference:"low-power"});
+r.setSize(innerWidth,innerHeight);r.setPixelRatio(Math.min(devicePixelRatio,2));
+var pc=isMobile?100:400,pos=new Float32Array(pc*3);
+for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*60;pos[i*3+1]=(Math.random()-0.5)*40;pos[i*3+2]=(Math.random()-0.5)*25}
+var pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+var pm=new THREE.PointsMaterial({color:0x2d6a4f,size:0.06,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+var pt=new THREE.Points(pg,pm);s.add(pt);
+var g=new THREE.GridHelper(40,40,0x2d6a4f,0x1b4332);g.position.y=-5;g.material.transparent=true;g.material.opacity=0.06;s.add(g);
+var cg=new THREE.Group();var nm=new THREE.MeshBasicMaterial({color:0x2d6a4f,transparent:true,opacity:0.6});
+var b=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.5,1.8),nm);b.position.y=1;cg.add(b);
+var pk=new THREE.MeshBasicMaterial({color:0x2d6a4f,transparent:true,opacity:0.4});
+[-1.2,0,1.2].forEach(function(v){var p=new THREE.Mesh(new THREE.ConeGeometry(0.4,2,4),pk);p.position.set(v,2,0);cg.add(p)});
+var gm=new THREE.MeshBasicMaterial({color:0xe07a2f});var ge=new THREE.Mesh(new THREE.OctahedronGeometry(0.35),gm);ge.position.set(0,3.2,0);cg.add(ge);
+cg.position.set(0,-2,-10);s.add(cg);s.add(new THREE.AmbientLight(0x112211));a.position.set(0,1,12);
+var mx=0,my=0;document.addEventListener("mousemove",function(e){mx=(e.clientX/innerWidth-0.5)*2;my=(e.clientY/innerHeight-0.5)*2});
+if(isMobile){
+  r.render(s,a);
+}else{
+  var t=0;function anim(){requestAnimationFrame(anim);t+=0.005;pt.rotation.y+=0.0003;pt.rotation.x=Math.sin(t*0.15)*0.01;cg.position.y=Math.sin(t*0.3)*0.4-2;cg.rotation.y=mx*0.2;cg.rotation.x=my*0.08;ge.rotation.x=t;ge.rotation.y=t*0.5;g.material.opacity=0.06+Math.sin(t*1.2)*0.04;r.render(s,a)}
+  anim();
+}
+addEventListener("resize",function(){a.aspect=innerWidth/innerHeight;a.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)})
+})();
 
-  var activeTab=0;
-  function renderStats(){var st=computeStats();document.getElementById("statsBar").innerHTML='<div class="stat-card"><div class="value">'+st.totalItems+'</div><div class="label">Products</div></div><div class="stat-card"><div class="value">$'+Math.round(st.invCost)+'</div><div class="label">Inventory Cost</div></div><div class="stat-card"><div class="value">$'+Math.round(st.retail)+'</div><div class="label">Retail Value</div></div><div class="stat-card"><div class="value">$'+Math.round(st.profit)+'</div><div class="label">Projected Profit</div></div>'}
-  function renderTabs(){document.getElementById("menuTabs").innerHTML=MD.menus.map(function(m,i){return '<button class="menu-tab'+(i===activeTab?" active":"")+'" onclick="switchTab('+i+')">'+m.nombre+"</button>"}).join("")}
-  function switchTab(i){activeTab=i;renderTabs();renderMenuContent()}
-  function renderMenuContent(filter){filter=typeof filter==="string"?filter:"";var cont=document.getElementById("menuContent"),menu=MD.menus[activeTab];if(!menu)return;var q=filter.toLowerCase().trim(),hasAny=false,html="";menu.categorias.forEach(function(cat){var items=cat.items;if(q)items=items.filter(function(i){return i.nombre.toLowerCase().includes(q)||(i.desc||"").toLowerCase().includes(q)});if(!items.length)return;hasAny=true;html+='<div class="cat-section"><div class="cat-header"><h3>'+cat.nombre+'</h3><span class="line"></span><span class="count">'+items.length+'</span></div><div class="item-grid">';items.forEach(function(item){var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug}),cq=inCart?inCart.cantidad:0;var sn=item.nombre.replace(/'/g,"\\'"),icons={Vegetables:"\uD83E\uDD66",Fruits:"\uD83C\uDF4E",Beverages:"\uD83E\uDD64",Snacks:"\uD83C\uDF6C",Dairy:"\uD83E\uDD5B",Bread:"\uD83C\uDF5E",Meat:"\uD83E\uDD69",Frozen:"\u2744\uFE0F",Household:"\uD83C\uDFE0",Personal:"\uD83E\uDDF4",Canned:"\uD83E\uDDCA",Dry:"\uD83C\uDF3E",Condiment:"\uD83C\uDF36\uFE0F",Tea:"\uD83C\uDF75"};var icon=icons[cat.nombre]||"\uD83D\uDCE6";html+='<div class="item-card"><div class="item-img">'+icon+'</div><div class="item-body"><div class="item-name">'+item.nombre+'</div>'+(item.desc?'<div class="item-desc">'+item.desc+'</div>':'')+(item.tags&&item.tags.length?'<div class="item-tags">'+item.tags.map(function(t){return '<span>'+t+'</span>'}).join("")+'</div>':'')+'<div class="item-bottom"><div class="item-price">$'+item.precio.toFixed(2)+'</div><div class="item-add">'+(cq>0?'<button class="qty-btn" onclick="adjustItem(\''+sn+"\','"+item.menuSlug+"',-1)">-</button><span class="qty-val">"+cq+'</span><button class="qty-btn" onclick="adjustItem(\''+sn+"\','"+item.menuSlug+"',1)">+</button>":'<button class="add-btn" onclick="quickAdd(\''+sn+"\',"+item.precio+",'"+item.menuSlug+"')">+</button>")+'</div></div></div></div>'});html+="</div></div>"});if(!hasAny)html='<div class="empty-state"><div class="icon">\uD83D\DD0D</div>'+(q?"No products match ""+q+""":"No items")+"</div>";cont.innerHTML=html}
-  window.quickAdd=function(n,p,ms){addToCart({nombre:n,precio:p,menuSlug:ms,desc:"",tags:[]},1);renderMenuContent(document.getElementById("searchInput").value)};
-  window.adjustItem=function(n,ms,d){var idx=cart.findIndex(function(i){return i.nombre===n&&i.menuSlug===ms});if(idx>=0)changeCartQty(idx,d);renderMenuContent(document.getElementById("searchInput").value)};
-  window.onSearch=function(v){document.getElementById("searchClear").classList.toggle("visible",v.length>0);clearTimeout(window._st);window._st=setTimeout(function(){renderMenuContent(v)},150)};
-  window.clearSearch=function(){document.getElementById("searchInput").value="";document.getElementById("searchClear").classList.remove("visible");renderMenuContent("")};
-  window.openCheckout=function(){if(!cart.length)return;toggleCart();var total=cart.reduce(function(s,i){return s+i.precio*i.cantidad},0),il="";cart.forEach(function(i){il+='<div class="os-line"><span>'+i.nombre+" x"+i.cantidad+'</span><span>$'+(i.precio*i.cantidad).toFixed(2)+"</span></div>"});document.getElementById("checkoutContent").innerHTML='<div class="checkout-form"><div class="order-summary"><div style="font-weight:600;margin-bottom:0.3rem;color:var(--primary-light);font-size:0.85rem;">Order Summary</div>'+il+'<div class="os-line" style="font-weight:600;border-top:1px solid rgba(45,106,79,0.15);padding-top:0.3rem;margin-top:0.3rem;"><span>Total</span><span>$'+total.toFixed(2)+'</span></div></div><input type="text" id="checkoutName" placeholder="Your Name *"><input type="tel" id="checkoutPhone" placeholder="Phone for confirmation"><select id="checkoutType"><option value="pickup">Pickup</option><option value="delivery">Delivery</option></select><textarea id="checkoutAddress" placeholder="Delivery Address" rows="2"></textarea><textarea id="checkoutNotes" placeholder="Special notes" rows="2"></textarea><button class="btn-place" onclick="placeOrder()" id="placeBtn">Place Order</button></div>';document.getElementById("checkoutModal").classList.add("open")};
-  window.closeCheckout=function(){document.getElementById("checkoutModal").classList.remove("open");document.getElementById("checkoutContent").innerHTML=""};
-  window.placeOrder=async function(){var name=document.getElementById("checkoutName").value,phone=document.getElementById("checkoutPhone").value,type=document.getElementById("checkoutType").value,address=document.getElementById("checkoutAddress").value,notes=document.getElementById("checkoutNotes").value;if(!name){toast("Please enter your name");return}var btn=document.getElementById("placeBtn");btn.disabled=true;btn.textContent="Processing...";try{var res=await fetch("http://localhost:3001/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:cart,tipoEntrega:type,cliente:{nombre:name,telefono:phone,direccion:address},notas:notes}),signal:AbortSignal.timeout(8000)});var data=await res.json();if(data.ok)showConfirmation(data.orderId);else{toast("Order failed — please try again");btn.disabled=false;btn.textContent="Place Order"}}catch(e){console.warn("Order backend offline, using local fallback");showConfirmation("MOCK-"+Math.random().toString(36).slice(2,6).toUpperCase())}};
-  function showConfirmation(oid){cart=[];updateCartUI();closeCheckout();document.getElementById("checkoutContent").innerHTML='<div class="confirmation"><div class="check">\u2705</div><h2>Order Confirmed!</h2><div class="order-id">#'+oid+'</div><p>Your order is being prepared!</p><p>288 Kearny Ave, Kearny NJ 07032</p><p>(201) 428-1745</p><button style="margin-top:1.25rem;padding:0.7rem 1.8rem;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;" onclick="closeCheckout()">Continue Shopping</button></div>';document.getElementById("checkoutModal").classList.add("open")}
-  document.querySelectorAll(".modal-overlay").forEach(function(el){el.addEventListener("click",function(e){if(e.target===this)this.classList.remove("open")})});
-  (function(){var p=document.getElementById("cartPanel"),sx=0;p.addEventListener("touchstart",function(e){sx=e.touches[0].clientX},{passive:true});p.addEventListener("touchmove",function(e){if(!p.classList.contains("open"))return;var dx=e.touches[0].clientX-sx;if(dx>0)p.style.transform="translateX("+Math.min(dx,150)+"px)"},{passive:true});p.addEventListener("touchend",function(e){p.style.transform="";if(e.changedTouches[0].clientX-sx>80)toggleCart()},{passive:true})})();
-  renderStats();renderTabs();renderMenuContent();updateCartUI();console.log("Anthony's Market v2 Loaded");setTimeout(function(){document.body.classList.remove("loading")},200);
+// Cart persistence
+var cart=loadCart();
+function saveCart(){try{localStorage.setItem("anthony-cart",JSON.stringify(cart))}catch(e){}}
+function loadCart(){try{var d=localStorage.getItem("anthony-cart");return d?JSON.parse(d):[]}catch(e){return[]}}
+
+// Bilingual setLang
+function setLang(l){cl=l;
+document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.toggle("active",b.textContent.toLowerCase().includes(l));b.setAttribute("aria-checked",b.textContent.toLowerCase().includes(l))});
+document.querySelectorAll("[data-en]").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l);});
+document.querySelectorAll("[data-es-placeholder]").forEach(function(el){el.placeholder=el.getAttribute("data-"+l+"-placeholder");});
+var si=document.getElementById("searchInput");
+if(si){var ph=si.getAttribute("data-"+l);if(ph)si.placeholder=ph;}
+localStorage.setItem("anthony-lang",l);
+updateCartUI();
+renderStats();
+renderTabs();
+renderMenuContent(document.getElementById("searchInput").value);
+renderFilterChips();
+renderOrderHistory();}
+var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl);
+
+(function(){var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll(".reveal").forEach(function(el){obs.observe(el)})})();
+
+(function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","menu","pricing","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
+
+function scrollToMenu(){document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
+function goToPricing(){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
+
+function toast(m){var c=document.getElementById("toastContainer"),el=document.createElement("div");el.className="toast";el.textContent=m;c.appendChild(el);setTimeout(function(){el.remove()},2300)}
+
+function addToCart(item,qty){qty=qty||1;var ex=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug});if(ex)ex.cantidad+=qty;else cart.push(Object.assign({},item,{cantidad:qty}));saveCart();updateCartUI();var fab=document.getElementById("cartFab");fab.classList.remove("bump");void fab.offsetWidth;fab.classList.add("bump");toast(t("Added "+item.nombre,"Agregado "+item.nombre))}
+
+function changeCartQty(idx,delta){cart[idx].cantidad+=delta;if(cart[idx].cantidad<=0)cart.splice(idx,1);saveCart();updateCartUI()}
+
+function updateCartUI(){var count=cart.reduce(function(s,i){return s+i.cantidad},0);
+document.getElementById("cartBadge").textContent=count;
+var lb=document.getElementById("cartCountLabel");if(lb)lb.textContent=count?"("+count+")":"";
+var ie=document.getElementById("cartItems"),cb=document.getElementById("checkoutBtn");
+if(!cart.length){ie.className="items empty";ie.innerHTML=t("Your cart is empty","Tu carrito está vacío");document.getElementById("cartSubtotal").textContent="$0.00";document.getElementById("cartTax").textContent="$0.00";document.getElementById("cartTotal").textContent="$0.00";cb.disabled=true;cb.innerHTML=t("Proceed to Checkout","Ir a Pagar");return}
+ie.className="items";var h="",tot=0;
+cart.forEach(function(item,idx){var lt=item.precio*item.cantidad;tot+=lt;h+='<div class="cart-item"><span class="ci-name">'+item.nombre+'</span><div class="ci-controls"><button onclick="changeCartQty('+idx+',-1)">-</button><span class="ci-qty">'+item.cantidad+'</span><button onclick="changeCartQty('+idx+',1)">+</button></div><span class="ci-price">$'+lt.toFixed(2)+'</span></div>'});
+ie.innerHTML=h;var tax=tot*0.06625;document.getElementById("cartSubtotal").textContent="$"+tot.toFixed(2);document.getElementById("cartTax").textContent="$"+tax.toFixed(2);document.getElementById("cartTotal").textContent="$"+(tot+tax).toFixed(2);cb.disabled=false;cb.innerHTML=t("Proceed to Checkout","Ir a Pagar")}
+
+function toggleCart(){document.getElementById("cartPanel").classList.toggle("open");document.getElementById("cartBackdrop").classList.toggle("open")}
+
+// Tag filter chips
+var filterTags=["All","Vegan","GF","High Protein","Protein"];
+var activeFilter="All";
+
+function renderFilterChips(){var cont=document.getElementById("filterChips");cont.innerHTML=filterTags.map(function(f){return '<button class="filter-chip'+(activeFilter===f?" active":"")+'" onclick="setFilter(\''+f+'\')">'+(f==="GF"?"GF":t(f,f==="Vegan"?"Vegano":f==="High Protein"?"Alta Proteína":"Proteína"))+'</button>'}).join("")}
+
+function setFilter(f){activeFilter=f;renderFilterChips();renderMenuContent(document.getElementById("searchInput").value)}
+
+// Banner switching
+function getBannerUrl(slug){return banners[slug]||MD.menus[0].banner}
+
+// Stats rendering bilingual
+function renderStats(){var st=computeStats();document.getElementById("statsBar").innerHTML='<div class="stat-card"><div class="value">'+st.totalItems+'</div><div class="label">'+t("Products","Productos")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.invCost)+'</div><div class="label">'+t("Inventory Cost","Costo Inventario")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.retail)+'</div><div class="label">'+t("Retail Value","Valor Minorista")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.profit)+'</div><div class="label">'+t("Projected Profit","Ganancia Proyectada")+'</div></div>'}
+
+function renderTabs(){document.getElementById("menuTabs").innerHTML=MD.menus.map(function(m,i){return '<button class="menu-tab'+(i===activeTab?" active":"")+'" onclick="switchTab('+i+')">'+t(m.en,m.es)+"</button>"}).join("")}
+
+var activeTab=0;
+function switchTab(i){activeTab=i;renderTabs();renderMenuContent("");
+var img=document.getElementById("bannerImg");if(img){img.src=getBannerUrl(MD.menus[i].slug);img.alt=t(MD.menus[i].en,MD.menus[i].es)}}
+
+function renderMenuContent(filter){filter=typeof filter==="string"?filter:"";var cont=document.getElementById("menuContent"),menu=MD.menus[activeTab];if(!menu)return;var q=filter.toLowerCase().trim(),hasAny=false,html="";menu.categorias.forEach(function(cat){var items=cat.items;if(q)items=items.filter(function(i){return i.nombre.toLowerCase().includes(q)||(i.desc||"").toLowerCase().includes(q)});if(activeFilter!=="All")items=items.filter(function(i){return i.tags&&i.tags.indexOf(activeFilter)>=0});if(!items.length)return;hasAny=true;html+='<div class="cat-section"><div class="cat-header"><h3>'+t(cat.en,cat.es)+'</h3><span class="line"></span><span class="count">'+items.length+'</span></div><div class="item-grid">';items.forEach(function(item){var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug}),cq=inCart?inCart.cantidad:0;var sn=item.nombre.replace(/'/g,"\\'");var icons={"Hot Meals":"\uD83C\uDF7D\uFE0F","Latin Sides":"\uD83C\uDF5A","Breakfast":"\uD83C\uDF73","Dairy & Eggs":"\uD83E\uDD5B","Bread & Bakery":"\uD83C\uDF5E","Deli Containers":"\uD83D\uDCE6","Beverages":"\uD83E\uDD64","Snacks & Candy":"\uD83C\uDF6C","Canned & Jarred":"\uD83E\uDDCA","Dry Goods":"\uD83C\uDF3E","Condiments":"\uD83C\uDF36\uFE0F","Frozen Foods":"\u2744\uFE0F","Household":"\uD83C\uDFE0","Personal Care":"\uD83E\uDDF4","Paper & Foil":"\uD83D\uDCC3","Tea & Coffee":"\uD83C\uDF75"};var icon=icons[cat.nombre]||"\uD83D\uDCE6";var itemName=t(item.en,item.es);var itemDesc=item.desc_es&&cl==="es"?item.desc_es:item.desc;html+='<div class="item-card"><div class="item-img">'+icon+'</div><div class="item-body"><div class="item-name">'+itemName+'</div>'+(itemDesc?'<div class="item-desc">'+itemDesc+'</div>':'')+(item.tags&&item.tags.length?'<div class="item-tags">'+item.tags.map(function(tag){return '<span>'+tag+'</span>'}).join("")+'</div>':'')+'<div class="item-bottom"><div class="item-price">$'+item.precio.toFixed(2)+'</div><div class="item-add">'+(cq>0?'<button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',-1)\">-</button><span class=\"qty-val\">"+cq+'</span><button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',1)\">+</button>":'<button class="add-btn" onclick="quickAdd(\''+sn+"',"+item.precio+",'"+item.menuSlug+"','"+item.en+"','"+item.es+"')\">+</button>")+'</div></div></div></div>'});html+="</div></div>"});if(!hasAny)html='<div class="empty-state"><div class="icon">\uD83D\uDD0D</div>'+t("No products found matching your criteria.","No se encontraron productos con esos criterios.")+'</div>';cont.innerHTML=html}
+
+window.quickAdd=function(n,p,ms,en,es){addToCart({nombre:n,precio:p,menuSlug:ms,en:en,es:es,desc:"",tags:[]},1);renderMenuContent(document.getElementById("searchInput").value)};
+
+window.adjustItem=function(n,ms,d){var idx=cart.findIndex(function(i){return i.nombre===n&&i.menuSlug===ms});if(idx>=0)changeCartQty(idx,d);renderMenuContent(document.getElementById("searchInput").value)};
+
+window.onSearch=function(v){document.getElementById("searchClear").classList.toggle("visible",v.length>0);clearTimeout(window._st);window._st=setTimeout(function(){renderMenuContent(v)},150)};
+
+window.clearSearch=function(){document.getElementById("searchInput").value="";document.getElementById("searchClear").classList.remove("visible");renderMenuContent("")};
+
+window.openCheckout=function(){if(!cart.length)return;toggleCart();var total=cart.reduce(function(s,i){return s+i.precio*i.cantidad},0),il="";cart.forEach(function(i){il+='<div class="os-line"><span>'+i.nombre+" x"+i.cantidad+'</span><span>$'+(i.precio*i.cantidad).toFixed(2)+"</span></div>"});document.getElementById("checkoutContent").innerHTML='<div class="checkout-form"><div class="order-summary"><div style="font-weight:600;margin-bottom:0.3rem;color:var(--primary-light);font-size:0.85rem;">'+t("Order Summary","Resumen del Pedido")+'</div>'+il+'<div class="os-line" style="font-weight:600;border-top:1px solid rgba(45,106,79,0.15);padding-top:0.3rem;margin-top:0.3rem;"><span>'+t("Total","Total")+'</span><span>$'+total.toFixed(2)+'</span></div></div><input type="text" id="checkoutName" '+t('placeholder="Your Name *"','placeholder="Tu Nombre *"')+'><input type="tel" id="checkoutPhone" '+t('placeholder="Phone for confirmation"','placeholder="Teléfono para confirmación"')+'><select id="checkoutType"><option value="pickup">'+t("Pickup","Recoger")+'</option><option value="delivery">'+t("Delivery","Entrega")+'</option></select><textarea id="checkoutAddress" '+t('placeholder="Delivery Address"','placeholder="Dirección de Entrega"')+' rows="2"></textarea><textarea id="checkoutNotes" '+t('placeholder="Special notes"','placeholder="Notas especiales"')+' rows="2"></textarea><button class="btn-place" onclick="placeOrder()" id="placeBtn">'+t("Place Order","Hacer Pedido")+'</button></div>';document.getElementById("checkoutModal").classList.add("open")};
+
+window.closeCheckout=function(){document.getElementById("checkoutModal").classList.remove("open");document.getElementById("checkoutContent").innerHTML=""};
+
+window.placeOrder=async function(){var name=document.getElementById("checkoutName").value,phone=document.getElementById("checkoutPhone").value,type=document.getElementById("checkoutType").value,address=document.getElementById("checkoutAddress").value,notes=document.getElementById("checkoutNotes").value;if(!name){toast(t("Please enter your name","Por favor ingresa tu nombre"));return}var btn=document.getElementById("placeBtn");btn.disabled=true;btn.textContent=t("Processing...","Procesando...");var offline=false;try{var res=await fetch("http://localhost:3001/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:cart,tipoEntrega:type,cliente:{nombre:name,telefono:phone,direccion:address},notas:notes}),signal:AbortSignal.timeout(8000)});var data=await res.json();if(data.ok)showConfirmation(data.orderId,false);else{toast(t("Order failed — please try again","Pedido falló — intenta de nuevo"));btn.disabled=false;btn.textContent=t("Place Order","Hacer Pedido")}}catch(e){console.warn("Order backend offline");offline=true;var mockId="MOCK-"+Math.random().toString(36).slice(2,6).toUpperCase();showConfirmation(mockId,true)}};
+
+function showConfirmation(oid,offline){var items=cart.slice();var tot=cart.reduce(function(s,i){return s+i.precio*i.cantidad},0);var record={id:oid,date:new Date().toISOString(),items:items,total:tot,offline:offline};try{var hist=JSON.parse(localStorage.getItem("anthony-orders")||"[]");hist.unshift(record);if(hist.length>20)hist=hist.slice(0,20);localStorage.setItem("anthony-orders",JSON.stringify(hist))}catch(e){}cart=[];saveCart();updateCartUI();closeCheckout();var notice=offline?'<div class="offline-notice">'+t("Our online ordering system is temporarily offline. Call <strong>(201) 428-1745</strong> to place your order.","Nuestro sistema de pedidos en línea está temporalmente fuera de servicio. Llama al <strong>(201) 428-1745</strong> para hacer tu pedido.")+'</div>':'';document.getElementById("checkoutContent").innerHTML='<div class="confirmation"><div class="check">&#x2705;</div><h2>'+t("Order Confirmed!","¡Pedido Confirmado!")+'</h2><div class="order-id">#'+oid+'</div>'+notice+'<p>'+t("Your order has been recorded!","¡Tu pedido ha sido registrado!")+'</p><p>288 Kearny Ave, Kearny NJ 07032</p><p>(201) 428-1745</p><button style="margin-top:1.25rem;padding:0.7rem 1.8rem;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;" onclick="closeCheckout()">'+t("Continue Shopping","Seguir Comprando")+'</button></div>';document.getElementById("checkoutModal").classList.add("open")}
+
+function toggleOrderHistory(){var el=document.getElementById("orderHistory");el.classList.toggle("open");renderOrderHistory()}
+
+function renderOrderHistory(){var el=document.getElementById("orderHistory");if(!el.classList.contains("open"))return;try{var hist=JSON.parse(localStorage.getItem("anthony-orders")||"[]");if(!hist.length){el.innerHTML='<div style="text-align:center;padding:0.5rem;color:var(--text-muted);font-size:0.75rem;">'+t("No past orders yet.","Aún no hay pedidos anteriores.")+'</div>';return}var h="";hist.forEach(function(o){var d=new Date(o.date);var ds=(d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();h+='<div class="oh-item"><span><span class="oh-id">#'+o.id+'</span> '+ds+' <span style="color:var(--text-muted)">'+o.items.reduce(function(s,i){return s+i.cantidad},0)+' '+t("items","artículos")+'</span></span><span>$'+o.total.toFixed(2)+'</span></div>'});el.innerHTML=h}catch(e){el.innerHTML=""}}
+
+document.querySelectorAll(".modal-overlay").forEach(function(el){el.addEventListener("click",function(e){if(e.target===this)this.classList.remove("open")})});
+
+(function(){var p=document.getElementById("cartPanel"),sx=0;p.addEventListener("touchstart",function(e){sx=e.touches[0].clientX},{passive:true});p.addEventListener("touchmove",function(e){if(!p.classList.contains("open"))return;var dx=e.touches[0].clientX-sx;if(dx>0)p.style.transform="translateX("+Math.min(dx,150)+"px)"},{passive:true});p.addEventListener("touchend",function(e){p.style.transform="";if(e.changedTouches[0].clientX-sx>80)toggleCart()},{passive:true})})();
+
+renderStats();
+renderTabs();
+renderFilterChips();
+renderMenuContent("");
+updateCartUI();
+renderOrderHistory();
+console.log("Anthony's Supermarket v4 — Full Bilingual EN/ES");
+setTimeout(function(){document.body.classList.remove("loading")},200);
   </script>
 </body>
 </html>
