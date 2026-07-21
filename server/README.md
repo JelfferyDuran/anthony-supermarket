@@ -8,7 +8,7 @@ This small Express service receives website orders and sends kitchen notificatio
 - `KITCHEN_CHAT_ID`: the Telegram group or chat where kitchen orders should appear.
 - `ALLOWED_ORIGINS`: the deployed website origin.
 
-The public bot link is [@Anthonysuperkitchen_bot](https://t.me/Anthonysuperkitchen_bot).
+The public bot link is [@SuperAnthbot](https://t.me/SuperAnthbot).
 
 ## Run locally
 
