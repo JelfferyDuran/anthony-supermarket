@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: anthonys-order-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: KITCHEN_CHAT_ID
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://jelfferyduran.github.io
+      - key: TAX_RATE
+        value: "0"
