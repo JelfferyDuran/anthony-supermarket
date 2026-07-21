@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
 const KITCHEN_CHAT_ID = process.env.KITCHEN_CHAT_ID || '';
-const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/Anthonysuperkitchen_bot';
+const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/SuperAnthbot';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(origin => origin.trim()).filter(Boolean);
 const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
