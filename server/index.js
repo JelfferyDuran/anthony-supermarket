@@ -25,6 +25,9 @@ const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
 const KITCHEN_CHAT_ID = process.env.KITCHEN_CHAT_ID || '';
+const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/Anthonysuperkitchen_bot';
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(origin => origin.trim()).filter(Boolean);
+const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
@@ -82,7 +85,7 @@ flattenMenu();
 // ─── Express App ──────────────────────────────────────────────────────
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json());
 
 // Health check
@@ -91,6 +94,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // Get full menu
+app.get('/api/config', (req, res) => res.json({ restaurant: menuData?.nombre || "Anthony's Supermarket", phone: '(201) 428-1745', telegramBotUrl: TELEGRAM_BOT_URL }));
+
 app.get('/api/menu', (req, res) => res.json(menuData));
 
 // Get menu by slug
@@ -119,16 +124,32 @@ app.post('/api/orders', async (req, res) => {
   if (!items || !items.length) return res.status(400).json({ error: 'Cart is empty' });
   if (!cliente?.nombre) return res.status(400).json({ error: 'Customer name required' });
 
+  const normalizedItems = items.map(i => {
+    const catalogItem = flatItems.find(item => item.id === i.id || item.nombre === i.nombre || item.nombre === i.name);
+    if (!catalogItem) return null;
+    const cantidad = Math.max(1, Math.min(99, Number(i.cantidad || i.quantity || 1)));
+    return {
+      itemId: catalogItem.id,
+      nombre: catalogItem.nombre,
+      precio: Number(catalogItem.precio),
+      cantidad
+    };
+  });
+
+  if (normalizedItems.some(item => !item)) {
+    return res.status(400).json({ error: 'One or more items are no longer available' });
+  }
+
+  const subtotal = normalizedItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+
   const order = {
     id: uuidv4().slice(0, 8).toUpperCase(),
     restaurantSlug: menuData?.slug || 'anthonys',
-    items: items.map(i => ({
-      itemId: i.id,
-      nombre: i.nombre || i.name,
-      precio: i.precio || i.price,
-      cantidad: i.cantidad || 1
-    })),
-    total: items.reduce((s, i) => s + (i.precio || i.price || 0) * (i.cantidad || 1), 0),
+    items: normalizedItems,
+    subtotal,
+    tax,
+    total: subtotal + tax,
     moneda: 'USD',
     tipoEntrega: tipoEntrega || 'pickup',
     cliente: {
@@ -184,6 +205,8 @@ async function dispatchToN8n(order) {
     orderId: order.id,
     restaurantSlug: order.restaurantSlug,
     restaurantNombre: menuData?.nombre || "Anthony's Supermarket",
+    subtotal: order.subtotal,
+    tax: order.tax,
     total: order.total,
     moneda: order.moneda,
     tipoEntrega: order.tipoEntrega,
