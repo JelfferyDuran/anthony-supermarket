@@ -64,4 +64,4 @@ The public website is deployed on GitHub Pages. Deploy the order API separately 
 - `window.ANTHONY_API_URL` in the deployment configuration, or
 - the temporary `?api=https://your-order-api.example.com` URL parameter.
 
-Server setup and required secrets are documented in [server/README.md](./server/README.md). The Telegram bot is [@Anthonysuperkitchen_bot](https://t.me/Anthonysuperkitchen_bot). Never commit `TELEGRAM_TOKEN`.
+Server setup and required secrets are documented in [server/README.md](./server/README.md). The Telegram bot is [@SuperAnthbot](https://t.me/SuperAnthbot). Never commit `TELEGRAM_TOKEN`.
