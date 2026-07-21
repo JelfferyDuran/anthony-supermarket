@@ -7,9 +7,9 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: TELEGRAM_TOKEN
+      - key: 8490144078:AAEEdykMUncyuSgTb8aNM6Mxpsqi-YCuPgc
         sync: false
-      - key: KITCHEN_CHAT_ID
+      - key: 8544462547
         sync: false
       - key: ALLOWED_ORIGINS
         value: https://jelfferyduran.github.io
