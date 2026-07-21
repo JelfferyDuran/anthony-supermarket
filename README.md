@@ -51,3 +51,17 @@ Deploy: GitHub Actions -> GitHub Pages
 (201) 428-1745
 Mon-Sat 7AM-8PM | Sunday CLOSED
 Instagram: @anthony_supermarket
+
+
+## Simple production path
+
+The supported MVP order flow is:
+
+`catalog → cart → pickup/delivery request → Express API → Telegram kitchen notification`
+
+The public website is deployed on GitHub Pages. Deploy the order API separately using [render.yaml](./render.yaml), then set the website's API URL with either:
+
+- `window.ANTHONY_API_URL` in the deployment configuration, or
+- the temporary `?api=https://your-order-api.example.com` URL parameter.
+
+Server setup and required secrets are documented in [server/README.md](./server/README.md). The Telegram bot is [@Anthonysuperkitchen_bot](https://t.me/Anthonysuperkitchen_bot). Never commit `TELEGRAM_TOKEN`.
