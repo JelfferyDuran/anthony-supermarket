@@ -41,6 +41,7 @@ yarn-error.log*
 apps/delivery/
 apps/inventory/
 apps/menu/
+!apps/menu/scripts/anthonys-seed.json
 !apps/pricing-hub/
 !apps/command-center/
 

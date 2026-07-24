@@ -1,0 +1,245 @@
+{
+  "slug": "kitchen",
+  "nombre": "Anthony's SuperKitchen",
+  "menus": [
+    {
+      "slug": "kitchen",
+      "nombre": "🍳 Comida Caliente / Hot Food",
+      "subtitulo": "Sabor Dominicano Original — Kearny, NJ",
+      "categorias": [
+        {
+          "nombre": "Desayunos / Breakfast",
+          "items": [
+            { "nombre": "Mangu 3 Golpes", "precio": 9.95, "descripcion": "Mangu con Salami, Huevo y Queso Frito" },
+            { "nombre": "Yuca con Huevo Salami y Queso", "precio": 9.95, "descripcion": "Yuca hervida servida con huevo, salami y queso frito" },
+            { "nombre": "Guineitos con Huevo Salami y Queso Frito", "precio": 9.95, "descripcion": "Guineos verdes con huevo, salami y queso frito" }
+          ]
+        },
+        {
+          "nombre": "Sandwiches",
+          "items": [
+            { "nombre": "Cheesesteak", "precio": 8.95, "descripcion": "Classic cheesesteak sandwich — add fries +$1.95" },
+            { "nombre": "Jamon y Queso", "precio": 5.95, "descripcion": "Ham and cheese sandwich — add fries +$1.95" },
+            { "nombre": "Gourmet Turkey y Queso", "precio": 8.95, "descripcion": "Gourmet turkey and cheese — add fries +$1.95" },
+            { "nombre": "Hamburger", "precio": 5.95, "descripcion": "Classic hamburger — add fries +$1.95" },
+            { "nombre": "Cheeseburger", "precio": 6.95, "descripcion": "Cheeseburger with cheese — add fries +$1.95" },
+            { "nombre": "Chimi Res", "precio": 6.95, "descripcion": "Dominican-style beef chimichurri — add fries +$1.95" },
+            { "nombre": "Chimi Res con Queso Frito", "precio": 8.95, "descripcion": "Chimi with fried cheese — add fries +$1.95" },
+            { "nombre": "Club Sandwich con Papa", "precio": 10.95, "descripcion": "Club sandwich with fries" }
+          ]
+        },
+        {
+          "nombre": "Ensaladas / Salads",
+          "items": [
+            { "nombre": "Ensalada de Papa (PEQ)", "precio": 3.95, "descripcion": "Potato salad small" },
+            { "nombre": "Ensalada de Papa (MED)", "precio": 5.95, "descripcion": "Potato salad medium" },
+            { "nombre": "Ensalada de Codito Verde (PEQ)", "precio": 2.95, "descripcion": "Elbow macaroni salad small" },
+            { "nombre": "Ensalada de Codito Verde (MED)", "precio": 4.95, "descripcion": "Elbow macaroni salad medium" },
+            { "nombre": "Pollo a la Plancha (PEQ)", "precio": 4.95, "descripcion": "Grilled chicken salad small" },
+            { "nombre": "Pollo a la Plancha (MED)", "precio": 7.95, "descripcion": "Grilled chicken salad medium" },
+            { "nombre": "Pica Pollo con Tostones 3PC Mix (PEQ)", "precio": 5.95, "descripcion": "Fried chicken with tostones small — addl piece +$3" },
+            { "nombre": "Pica Pollo con Tostones 3PC Mix (MED)", "precio": 8.95, "descripcion": "Fried chicken with tostones medium — addl piece +$3" }
+          ]
+        },
+        {
+          "nombre": "Frituras / Fried Foods",
+          "items": [
+            { "nombre": "Carne Cerdo Salada con Tostones", "precio": 9.95, "descripcion": "Fried pork with tostones" },
+            { "nombre": "Salami y Queso Frito con Tostones", "precio": 9.95, "descripcion": "Fried salami and cheese with tostones" },
+            { "nombre": "Pechurina (4) con Tostones", "precio": 9.95, "descripcion": "4 fried chicken pieces with tostones" },
+            { "nombre": "Filete Pescado Frito con Tostones", "precio": 16.95, "descripcion": "Fried fish fillet with tostones" },
+            { "nombre": "Longaniza con Tostones", "precio": 9.95, "descripcion": "Dominican sausage with tostones" },
+            { "nombre": "Alitas Picante con Papas 6PC", "precio": 8.95, "descripcion": "6 spicy chicken wings with fries" }
+          ]
+        },
+        {
+          "nombre": "Student Specials — $6.95",
+          "items": [
+            { "nombre": "Tenders con Papas 2PC", "precio": 6.95, "descripcion": "2 chicken tenders with fries" },
+            { "nombre": "Cheeseburger con Papa", "precio": 6.95, "descripcion": "Cheeseburger with fries" },
+            { "nombre": "Salchicha con Papa", "precio": 6.95, "descripcion": "Sausage with fries" },
+            { "nombre": "Alitas con Papas 4PC", "precio": 6.95, "descripcion": "4 chicken wings with fries" },
+            { "nombre": "Arroz Habichuela y Carne", "precio": 6.95, "descripcion": "Rice, beans and meat" },
+            { "nombre": "Menu del Dia", "precio": 6.95, "descripcion": "Daily special — includes FREE soda or water" }
+          ]
+        },
+        {
+          "nombre": "Kids Menu — $5.95",
+          "items": [
+            { "nombre": "Chicken Tenders 2PC con Papa", "precio": 5.95, "descripcion": "2 chicken tenders with fries" },
+            { "nombre": "Salchicha con Papa", "precio": 5.95, "descripcion": "Sausage with fries" },
+            { "nombre": "Quesadilla con Papa", "precio": 5.95, "descripcion": "Quesadilla with fries" }
+          ]
+        },
+        {
+          "nombre": "Lunes Lunch Specials",
+          "items": [
+            { "nombre": "Res Guisada Lunes", "precio": 9.99, "descripcion": "Braised beef with rice and beans" },
+            { "nombre": "Pollo Guisado Lunes", "precio": 9.99, "descripcion": "Braised chicken with rice and beans" },
+            { "nombre": "Pollo Horno Lunes", "precio": 9.99, "descripcion": "Roasted chicken with rice and beans" },
+            { "nombre": "Pernil Lunes", "precio": 9.99, "descripcion": "Roasted pork with rice and beans" },
+            { "nombre": "Filete Pescado Lunes", "precio": 12.99, "descripcion": "Fish fillet with rice and beans" },
+            { "nombre": "Sancocho Lunes (PEQ)", "precio": 7.99, "descripcion": "Small Dominican stew" },
+            { "nombre": "Sancocho Lunes (GRND)", "precio": 11.99, "descripcion": "Large Dominican stew" }
+          ]
+        },
+        {
+          "nombre": "Martes Lunch Specials",
+          "items": [
+            { "nombre": "Spaghetti Martes", "precio": 8.99, "descripcion": "Spaghetti with rice and beans" },
+            { "nombre": "Chofan Martes", "precio": 9.99, "descripcion": "Dominican-style chow fun with rice and beans" },
+            { "nombre": "Cerdo Guisado Martes", "precio": 9.99, "descripcion": "Braised pork with rice and beans" },
+            { "nombre": "Pollo Horno Martes", "precio": 9.99, "descripcion": "Roasted chicken with rice and beans" },
+            { "nombre": "Chivo Guisado Martes", "precio": 11.99, "descripcion": "Braised goat with rice and beans" },
+            { "nombre": "Costilla Horno Martes", "precio": 11.99, "descripcion": "Roasted ribs with rice and beans" },
+            { "nombre": "Sopa Gallina Martes (PEQ)", "precio": 5.99, "descripcion": "Small hen soup" },
+            { "nombre": "Sopa Gallina Martes (GRND)", "precio": 9.99, "descripcion": "Large hen soup" }
+          ]
+        },
+        {
+          "nombre": "Miercoles Lunch Specials",
+          "items": [
+            { "nombre": "Bistec Guisado Miercoles", "precio": 9.99, "descripcion": "Braised steak with rice and beans" },
+            { "nombre": "Pollo Guisado Miercoles", "precio": 9.99, "descripcion": "Braised chicken with rice and beans" },
+            { "nombre": "Pernil Miercoles", "precio": 9.99, "descripcion": "Roasted pork with rice and beans" },
+            { "nombre": "Pollo Horno Miercoles", "precio": 9.99, "descripcion": "Roasted chicken with rice and beans" },
+            { "nombre": "Filete Tilapia Frita Miercoles", "precio": 12.99, "descripcion": "Fried tilapia fillet with rice and beans" },
+            { "nombre": "Sopa Pollo Miercoles (PEQ)", "precio": 5.99, "descripcion": "Small chicken soup" },
+            { "nombre": "Sopa Pollo Miercoles (GRND)", "precio": 9.99, "descripcion": "Large chicken soup" }
+          ]
+        },
+        {
+          "nombre": "Jueves Lunch Specials",
+          "items": [
+            { "nombre": "Spaghetti Jueves", "precio": 8.99, "descripcion": "Spaghetti with rice and beans" },
+            { "nombre": "Chofan Jueves", "precio": 9.99, "descripcion": "Dominican-style chow fun with rice and beans" },
+            { "nombre": "Puerco Guisado Jueves", "precio": 9.99, "descripcion": "Braised pork with rice and beans" },
+            { "nombre": "Pernil Jueves", "precio": 9.99, "descripcion": "Roasted pork with rice and beans" },
+            { "nombre": "Bacalao Jueves", "precio": 9.99, "descripcion": "Codfish with rice and beans" },
+            { "nombre": "Chivo Guisado Jueves", "precio": 9.99, "descripcion": "Braised goat with rice and beans" },
+            { "nombre": "Sancocho Jueves (PEQ)", "precio": 6.99, "descripcion": "Small Dominican stew" },
+            { "nombre": "Sancocho Jueves (GRND)", "precio": 11.99, "descripcion": "Large Dominican stew" }
+          ]
+        },
+        {
+          "nombre": "Viernes Lunch Specials",
+          "items": [
+            { "nombre": "Res Guisada Viernes", "precio": 9.99, "descripcion": "Braised beef with rice and beans" },
+            { "nombre": "Pollo Guisado Viernes", "precio": 9.99, "descripcion": "Braised chicken with rice and beans" },
+            { "nombre": "Pollo Horno Viernes", "precio": 9.99, "descripcion": "Roasted chicken with rice and beans" },
+            { "nombre": "Costilla Horno Viernes", "precio": 9.99, "descripcion": "Roasted ribs with rice and beans" },
+            { "nombre": "Rabo Encendido Viernes", "precio": 11.99, "descripcion": "Spicy oxtail stew with rice and beans" },
+            { "nombre": "Mondongo Viernes (PEQ)", "precio": 7.99, "descripcion": "Small tripe stew" },
+            { "nombre": "Mondongo Viernes (GRND)", "precio": 11.99, "descripcion": "Large tripe stew" }
+          ]
+        },
+        {
+          "nombre": "Sabado Lunch Specials",
+          "items": [
+            { "nombre": "Spaghetti Sabado", "precio": 8.99, "descripcion": "Spaghetti with rice and beans" },
+            { "nombre": "Chofan Sabado", "precio": 9.99, "descripcion": "Dominican-style chow fun with rice and beans" },
+            { "nombre": "Cerdo Guisado Sabado", "precio": 9.99, "descripcion": "Braised pork with rice and beans" },
+            { "nombre": "Pernil Sabado", "precio": 9.99, "descripcion": "Roasted pork with rice and beans" },
+            { "nombre": "Chivo Sabado", "precio": 9.99, "descripcion": "Goat with rice and beans" },
+            { "nombre": "Pescado Frito Sabado", "precio": 11.99, "descripcion": "Fried fish with rice and beans" },
+            { "nombre": "Sancocho Sabado", "precio": 12.99, "descripcion": "Dominican stew with rice and beans" }
+          ]
+        },
+        {
+          "nombre": "Pica Pollo",
+          "items": [
+            { "nombre": "Pica Pollo 3PC", "precio": 8.99, "descripcion": "3 pieces fried chicken" }
+          ]
+        },
+        {
+          "nombre": "Picalonga / Meat Combos",
+          "items": [
+            { "nombre": "Picalonga 2 Carnes", "precio": 12.95, "descripcion": "2 meats with tostones, batata, or fries" },
+            { "nombre": "Picalonga 3 Carnes", "precio": 16.95, "descripcion": "3 meats with tostones, batata, or fries" },
+            { "nombre": "Picalonga 4 Carnes", "precio": 24.95, "descripcion": "4 meats with tostones, batata, or fries" },
+            { "nombre": "Picalonga 6 Carnes", "precio": 39.95, "descripcion": "6 meats with tostones, batata, or fries" },
+            { "nombre": "Picalonga 8 Carnes", "precio": 59.95, "descripcion": "8 meats with tostones, batata, or fries" }
+          ]
+        },
+        {
+          "nombre": "Mofongos",
+          "items": [
+            { "nombre": "Mofongo Longaniza", "precio": 15.95, "descripcion": "Mofongo with Dominican sausage" },
+            { "nombre": "Mofongo Queso", "precio": 15.95, "descripcion": "Mofongo with cheese" },
+            { "nombre": "Mofongo Camarones", "precio": 18.95, "descripcion": "Mofongo with shrimp" },
+            { "nombre": "Mofongo Chicharron", "precio": 15.95, "descripcion": "Mofongo with pork crackling" }
+          ]
+        },
+        {
+          "nombre": "Side Orders",
+          "items": [
+            { "nombre": "Tostones (PEQ)", "precio": 3.95, "descripcion": "Small fried green plantains" },
+            { "nombre": "Tostones (MED)", "precio": 5.95, "descripcion": "Medium fried green plantains" },
+            { "nombre": "Maduros (PEQ)", "precio": 3.95, "descripcion": "Small sweet fried plantains" },
+            { "nombre": "Maduros (MED)", "precio": 6.95, "descripcion": "Medium sweet fried plantains" },
+            { "nombre": "Papas Fritas (PEQ)", "precio": 1.95, "descripcion": "Small french fries" },
+            { "nombre": "Papas Fritas (MED)", "precio": 2.95, "descripcion": "Medium french fries" },
+            { "nombre": "Arroz Blanco (PEQ)", "precio": 2.99, "descripcion": "Small white rice" },
+            { "nombre": "Arroz Blanco (MED)", "precio": 4.95, "descripcion": "Medium white rice" },
+            { "nombre": "Arroz Blanco (GRND)", "precio": 6.99, "descripcion": "Large white rice" },
+            { "nombre": "Habichuelas 8oz", "precio": 1.95, "descripcion": "Beans 8oz" },
+            { "nombre": "Habichuelas 16oz", "precio": 3.95, "descripcion": "Beans 16oz" },
+            { "nombre": "Habichuelas 32oz", "precio": 7.95, "descripcion": "Beans 32oz" },
+            { "nombre": "Empanada", "precio": 2.00, "descripcion": "Fried empanada" },
+            { "nombre": "Quipe", "precio": 2.50, "descripcion": "Fried kibbeh" },
+            { "nombre": "Bola de Yuca", "precio": 2.50, "descripcion": "Fried yuca ball" },
+            { "nombre": "Yaroa (MED)", "precio": 7.99, "descripcion": "Medium Dominican yaroa" },
+            { "nombre": "Yaroa (GRND)", "precio": 10.00, "descripcion": "Large Dominican yaroa" }
+          ]
+        },
+        {
+          "nombre": "Jugos Naturales",
+          "items": [
+            { "nombre": "Limonada 16oz", "precio": 3.95, "descripcion": "Fresh lemonade 16oz" },
+            { "nombre": "Limonada 20oz", "precio": 4.95, "descripcion": "Fresh lemonade 20oz" },
+            { "nombre": "Jugo de Pina 16oz", "precio": 3.95, "descripcion": "Fresh pineapple juice 16oz" },
+            { "nombre": "Jugo de Pina 20oz", "precio": 4.95, "descripcion": "Fresh pineapple juice 20oz" },
+            { "nombre": "Jugo de Chinola 16oz", "precio": 3.95, "descripcion": "Fresh passion fruit juice 16oz" },
+            { "nombre": "Jugo de Chinola 20oz", "precio": 4.95, "descripcion": "Fresh passion fruit juice 20oz" },
+            { "nombre": "Jugo de Tamarindo 16oz", "precio": 3.95, "descripcion": "Fresh tamarind juice 16oz" },
+            { "nombre": "Jugo de Tamarindo 20oz", "precio": 4.95, "descripcion": "Fresh tamarind juice 20oz" },
+            { "nombre": "Jugo de Naranja 16oz", "precio": 4.95, "descripcion": "Fresh orange juice 16oz" },
+            { "nombre": "Jugo de Naranja 20oz", "precio": 5.95, "descripcion": "Fresh orange juice 20oz" }
+          ]
+        },
+        {
+          "nombre": "Batidas / Smoothies",
+          "items": [
+            { "nombre": "Batida de Lechosa 16oz", "precio": 4.95, "descripcion": "Papaya smoothie 16oz" },
+            { "nombre": "Batida de Lechosa 20oz", "precio": 5.95, "descripcion": "Papaya smoothie 20oz" },
+            { "nombre": "Batida de Mamey 16oz", "precio": 4.95, "descripcion": "Mamey smoothie 16oz" },
+            { "nombre": "Batida de Mamey 20oz", "precio": 5.95, "descripcion": "Mamey smoothie 20oz" },
+            { "nombre": "Batida de Fresa 16oz", "precio": 4.95, "descripcion": "Strawberry smoothie 16oz" },
+            { "nombre": "Batida de Fresa 20oz", "precio": 5.95, "descripcion": "Strawberry smoothie 20oz" },
+            { "nombre": "Batida de Pina 16oz", "precio": 4.95, "descripcion": "Pineapple smoothie 16oz" },
+            { "nombre": "Batida de Pina 20oz", "precio": 5.95, "descripcion": "Pineapple smoothie 20oz" },
+            { "nombre": "Batida Mixed Berries 16oz", "precio": 4.95, "descripcion": "Mixed berries smoothie with evap milk 16oz" },
+            { "nombre": "Batida Mixed Berries 20oz", "precio": 5.95, "descripcion": "Mixed berries smoothie with evap milk 20oz" },
+            { "nombre": "Batida Verde 16oz", "precio": 5.95, "descripcion": "Green smoothie 16oz" },
+            { "nombre": "Batida Verde 20oz", "precio": 6.95, "descripcion": "Green smoothie 20oz" },
+            { "nombre": "Batida de Banana 16oz", "precio": 4.95, "descripcion": "Banana smoothie 16oz" },
+            { "nombre": "Batida de Banana 20oz", "precio": 5.95, "descripcion": "Banana smoothie 20oz" }
+          ]
+        },
+        {
+          "nombre": "Postres / Desserts",
+          "items": [
+            { "nombre": "Alfajores Peruano", "precio": 2.50, "descripcion": "Peruvian dulce de leche cookies" },
+            { "nombre": "Bizcocho Dominicano", "precio": 4.95, "descripcion": "Dominican cake" }
+          ]
+        },
+        {
+          "nombre": "Picadera / Party Platter",
+          "items": [
+            { "nombre": "Picadera", "precio": 59.99, "descripcion": "Party platter — 12 Bolitas de Yuca, 12 Quipes, 12 Empanaditas Queso, 12 Empanaditas Pollo, 12 Sandwichitos — order 1 week in advance" }
+          ]
+        }
+      ]
+    }
+  ]
+}

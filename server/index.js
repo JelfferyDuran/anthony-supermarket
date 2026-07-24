@@ -304,53 +304,43 @@ function startBot() {
     bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
       bot.sendMessage(chatId,
-        `🦁 *Welcome to Anthony's Supermarket!*\n\n` +
+        `🦁 *Welcome to Anthony's SuperKitchen!*\n\n` +
         `📍 288 Kearny Ave, Kearny NJ 07032\n` +
         `📞 (201) 428-1745\n\n` +
         `*Order from:*\n` +
-        `🍳 /hotfood — Hot Food Menu (Comida Caliente)\n` +
-        `🥩 /deli — Deli & Meats\n` +
-        `🛒 /grocery — Grocery & Pantry\n` +
-        `🔍 /search <item> — Search products\n` +
+        `🍳 /menu — Full Kitchen Menu\n` +
+        `🔍 /search <item> — Search items\n` +
         `🛍️ /cart — View your cart\n` +
         `✅ /checkout — Place your order\n\n` +
-        `🌐 Also order online: https://jelfferyduran.github.io/anthony-supermarket/`,
+        `🌐 Also order online: https://jelfferyduran.github.io/anthony-supermarket/\n` +
+        `🕐 Mon–Sat 7AM–8PM | Sun CLOSED`,
         { parse_mode: 'Markdown' }
       );
     });
 
-    // Menu handlers
-    const menuHandlers = {
-      hotfood: { slug: 'hot-food', name: '🍳 Hot Food Menu' },
-      deli: { slug: 'deli-meats', name: '🥩 Deli & Meats' },
-      grocery: { slug: 'grocery', name: '🛒 Grocery' }
-    };
+    // Menu handler — kitchen only
+    bot.onText(/\/menu/, (msg) => {
+      const menu = menuData?.menus.find(m => m.slug === 'kitchen');
+      if (!menu) return bot.sendMessage(msg.chat.id, 'Menu not found');
 
-    Object.entries(menuHandlers).forEach(([cmd, { slug, name }]) => {
-      bot.onText(new RegExp(`/${cmd}`), (msg) => {
-        const menu = menuData?.menus.find(m => m.slug === slug);
-        if (!menu) return bot.sendMessage(msg.chat.id, 'Menu not found');
+      let text = `*🍳 Anthony's SuperKitchen — Full Menu*\n${menu.subtitulo || ''}\n\n`;
+      const keyboard = [];
 
-        let text = `*${name}*\n${menu.subtitulo || ''}\n\n`;
-        const keyboard = [];
-
-        menu.categorias.forEach(cat => {
-          text += `*${cat.nombre}* — ${cat.items.length} items\n`;
-          cat.items.slice(0, 5).forEach(item => {
-            text += `  • ${item.nombre} — _$${item.precio.toFixed(2)}_\n`;
-          });
-          if (cat.items.length > 5) text += `  _+${cat.items.length - 5} more_\n`;
-          text += '\n';
-          // Add category button
-          keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:${slug}:${cat.nombre}` }]);
+      menu.categorias.forEach(cat => {
+        text += `*${cat.nombre}* — ${cat.items.length} items\n`;
+        cat.items.slice(0, 3).forEach(item => {
+          text += `  • ${item.nombre} — _$${item.precio.toFixed(2)}_\n`;
         });
+        if (cat.items.length > 3) text += `  _+${cat.items.length - 3} more_\n`;
+        text += '\n';
+        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:kitchen:${cat.nombre}` }]);
+      });
 
-        text += `\nTap a category to see all items, or use /add <item name> to order.`;
+      text += `\nTap a category or use /search <item> to find something.`;
 
-        bot.sendMessage(msg.chat.id, text, {
-          parse_mode: 'Markdown',
-          reply_markup: { inline_keyboard: keyboard }
-        });
+      bot.sendMessage(msg.chat.id, text, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: keyboard }
       });
     });
 
@@ -420,9 +410,7 @@ function startBot() {
       }
 
       if (data.startsWith('back:')) {
-        const slug = data.split(':')[1];
-        const cmd = Object.entries(menuHandlers).find(([, v]) => v.slug === slug)?.[0];
-        if (cmd) bot.emit('text', { chat: { id: chatId }, text: `/${cmd}` });
+        bot.emit('text', { chat: { id: chatId }, text: '/menu' });
       }
     });
 
@@ -449,7 +437,7 @@ function startBot() {
     bot.onText(/\/cart/, (msg) => {
       const userId = msg.from.id;
       const cart = userCarts[userId];
-      if (!cart || !cart.items.length) return bot.sendMessage(msg.chat.id, '🛍️ Your cart is empty. Browse /hotfood, /deli, or /grocery to add items.');
+      if (!cart || !cart.items.length) return bot.sendMessage(msg.chat.id, '🛍️ Your cart is empty. Browse /menu to add items.');
 
       let text = `🛍️ *Your Cart*\n\n`;
       chatId: msg.chat.id;
@@ -559,17 +547,30 @@ function startBot() {
     // Help
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(msg.chat.id,
-        `🦁 *Anthony's Super Bot Commands*\n\n` +
-        `/start — Welcome & menu\n` +
-        `/hotfood — Hot food menu\n` +
-        `/deli — Deli & meats\n` +
-        `/grocery — Grocery items\n` +
-        `/search <item> — Search products\n` +
+        `🦁 *Anthony's SuperKitchen Bot Commands*\n\n` +
+        `/start — Welcome\n` +
+        `/menu — Full kitchen menu\n` +
+        `/search <item> — Search items\n` +
         `/cart — View cart\n` +
         `/checkout — Place order\n` +
         `/clear — Clear cart\n` +
-        `/status — 🏪 Pending orders (kitchen only)\n` +
+        `/hours — Store hours & contact\n` +
         `/help — This message`,
+        { parse_mode: 'Markdown' }
+      );
+    });
+
+    // Hours / contact
+    bot.onText(/\/hours/, (msg) => {
+      bot.sendMessage(msg.chat.id,
+        `📍 *Anthony's SuperKitchen*\n` +
+        `288 Kearny Ave, Kearny NJ 07032\n\n` +
+        `📞 (201) 428-1745\n` +
+        `💬 WhatsApp: 732-925-5201\n\n` +
+        `🕐 *Hours:*\n` +
+        `Mon–Sat: 7:00 AM – 8:00 PM\n` +
+        `Sunday: CLOSED\n\n` +
+        `🌐 https://jelfferyduran.github.io/anthony-supermarket/`,
         { parse_mode: 'Markdown' }
       );
     });
