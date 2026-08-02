@@ -17,3 +17,18 @@ services:
         value: https://jelfferyduran.github.io
       - key: TAX_RATE
         value: "0"
+
+  - type: web
+    name: superkitchen-mini-app
+    runtime: node
+    rootDir: apps/superkitchen
+    buildCommand: npm ci && npm run build && cd server && npm ci
+    startCommand: node server/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: BOT_URL
+        value: https://t.me/SuperAnthbot
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false

@@ -13,6 +13,8 @@
     "dev:delivery": "cd apps/delivery && npm run dev",
     "dev:menu": "cd apps/menu && npm run dev",
     "dev:command-center": "cd apps/command-center && npm run dev",
+    "dev:superkitchen": "cd apps/superkitchen && npm run dev",
+    "server:superkitchen": "cd apps/superkitchen/server && npm start",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"

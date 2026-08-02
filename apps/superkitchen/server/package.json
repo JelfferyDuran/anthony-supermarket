@@ -1,0 +1,14 @@
+{
+  "name": "superkitchen-server",
+  "version": "1.0.0",
+  "description": "Backend for Anthony's Super Kitchen Telegram Mini App (orders + admin image gen)",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
