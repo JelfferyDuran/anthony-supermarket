@@ -206,16 +206,16 @@ Deno.serve(async (req) => {
       return htmlResponse(INDEX_HTML);
     }
 
-    if (req.method === "POST" && path === "/orders") {
+    if (req.method === "POST" && (path === "/orders" || path === "/api/orders")) {
       return await handleCreateOrder(req);
     }
 
-    if (req.method === "GET" && path === "/orders") {
+    if (req.method === "GET" && (path === "/orders" || path === "/api/orders")) {
       return await handleListOrders();
     }
 
-    if (req.method === "GET" && path.startsWith("/orders/")) {
-      const id = path.split("/")[2];
+    if (req.method === "GET" && (path.startsWith("/orders/") || path.startsWith("/api/orders/"))) {
+      const id = path.split("/").pop();
       return await handleGetOrder(id);
     }
 

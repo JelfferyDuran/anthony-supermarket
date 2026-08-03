@@ -3,8 +3,8 @@ version: '3.8'
 services:
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: server/Dockerfile
     container_name: anthony-supermarket-server
     ports:
       - "3001:3001"
@@ -12,8 +12,8 @@ services:
       - server/.env
     environment:
       - NODE_ENV=production
-      - MINIAPP_API_URL=http://host.docker.internal:3002
-      - MINIAPP_URL=http://100.115.191.38:3002
+      - MINIAPP_API_URL=https://cbpdiiyzzmbavsymjysb.functions.supabase.co/superkitchen
+      - MINIAPP_URL=https://jelfferyduran.github.io/anthony-supermarket/apps/superkitchen/dist/
     volumes:
       - ./server/data:/app/data
     restart: unless-stopped
