@@ -16,6 +16,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 3002;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(s => s.trim()).filter(Boolean);
@@ -27,6 +28,22 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2';
 const BOT_URL = process.env.BOT_URL || 'https://t.me/SuperAnthbot';
 const DIST_DIR = path.join(__dirname, '..', 'dist');
+
+// Supabase (optional — falls back to local JSON file storage)
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+let supabase = null;
+if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+  try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Mini App Supabase connected');
+  } catch (e) {
+    console.error('⚠️ Mini App Supabase init failed:', e.message);
+    supabase = null;
+  }
+} else {
+  console.log('⚠️ Mini App Supabase not configured — using local file storage');
+}
 
 // ─── Data helpers ────────────────────────────────────────────────────
 
@@ -43,6 +60,10 @@ function loadMenu() {
 loadMenu();
 
 function loadOrders() {
+  if (supabase) {
+    // Note: async — callers below treat this as fire-and-forget fallback;
+    // primary reads go through Supabase via loadOrdersAsync where needed.
+  }
   try {
     if (!fs.existsSync(ORDERS_PATH)) return [];
     return JSON.parse(fs.readFileSync(ORDERS_PATH, 'utf8'));
@@ -52,10 +73,74 @@ function loadOrders() {
   }
 }
 
+async function loadOrdersAsync() {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.error('Supabase load orders failed:', e.message);
+    }
+  }
+  return loadOrders();
+}
+
 function saveOrders(orders) {
   const dir = path.dirname(ORDERS_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(ORDERS_PATH, JSON.stringify(orders, null, 2));
+}
+
+async function addOrder(order) {
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('orders').insert([{
+        id: order.id,
+        restaurant_slug: order.restaurantSlug,
+        items: order.items,
+        subtotal: order.subtotal,
+        tax: 0,
+        total: order.subtotal,
+        moneda: order.moneda,
+        tipo_entrega: order.tipoEntrega,
+        cliente: order.cliente,
+        notas: order.notas,
+        estado: order.estado,
+        created_at: order.createdAt,
+      }]);
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.error('Supabase add order failed:', e.message);
+      // fall through to local storage
+    }
+  }
+  const orders = loadOrders();
+  orders.push(order);
+  saveOrders(orders);
+  return true;
+}
+
+async function getOrderAsync(orderId) {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .maybeSingle();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data) return data;
+    } catch (e) {
+      console.error('Supabase get order failed:', e.message);
+    }
+  }
+  return loadOrders().find(o => o.id === orderId) || null;
 }
 
 function findProduct(productId) {
@@ -76,18 +161,19 @@ const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json({ limit: '256kb' }));
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
   res.json({
     status: 'ok',
     restaurant: menuData?.brand?.name,
     products: menuData?.products?.length || 0,
-    orders: loadOrders().length,
+    orders: (await loadOrdersAsync()).length,
+    supabase: !!supabase,
     openai: !!OPENAI_API_KEY,
   });
 });
 
 // Create order — validated against menu data, prices computed server-side
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   const { items, customer, tipoEntrega, notas } = req.body;
 
   if (!Array.isArray(items) || items.length === 0) {
@@ -146,7 +232,8 @@ app.post('/api/orders', (req, res) => {
   };
 
   const orders = loadOrders();
-  orders.push(order);
+  await addOrder(order);
+  orders.push(order); // keep local mirror in sync for admin list fallback
   saveOrders(orders);
 
   console.log(`🍗 Order #${order.id} — ${order.cliente.nombre} — $${order.subtotal.toFixed(2)}`);
@@ -154,15 +241,15 @@ app.post('/api/orders', (req, res) => {
 });
 
 // Get order by id (used by the bot for ?start=ORDER_<id>)
-app.get('/api/orders/:id', (req, res) => {
-  const order = loadOrders().find(o => o.id === req.params.id);
+app.get('/api/orders/:id', async (req, res) => {
+  const order = await getOrderAsync(req.params.id);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   res.json(order);
 });
 
 // List orders (admin)
-app.get('/api/orders', (req, res) => {
-  res.json(loadOrders().slice(-50).reverse());
+app.get('/api/orders', async (req, res) => {
+  res.json((await loadOrdersAsync()).slice(-50).reverse());
 });
 
 // Admin: generate product image (server-side OpenAI, never client-side)
