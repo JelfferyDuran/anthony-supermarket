@@ -12,7 +12,7 @@ services:
       - key: KITCHEN_CHAT_ID
         sync: false
       - key: TELEGRAM_BOT_URL
-        value: https://t.me/SuperAnthbot
+        value: https://t.me/Anthonysuperkitchen_bot
       - key: ALLOWED_ORIGINS
         value: https://jelfferyduran.github.io
       - key: TAX_RATE
@@ -27,7 +27,7 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: BOT_URL
-        value: https://t.me/SuperAnthbot
+        value: https://t.me/Anthonysuperkitchen_bot
       - key: OPENAI_API_KEY
         sync: false
       - key: ADMIN_TOKEN

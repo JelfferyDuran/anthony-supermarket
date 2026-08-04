@@ -26,8 +26,8 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
       });
       setOrderId(res.orderId);
       setState('done');
-      // Telegram deep link: https://t.me/SuperAnthbot?start=ORDER_<orderId>
-      const botUrl = menuData.brand.botUrl || 'https://t.me/SuperAnthbot';
+      // Telegram deep link: https://t.me/Anthonysuperkitchen_bot?start=ORDER_<orderId>
+      const botUrl = menuData.brand.botUrl || 'https://t.me/Anthonysuperkitchen_bot';
       const deepLink = `${botUrl}?start=ORDER_${res.orderId}`;
       // Open the bot (works inside Telegram webview too)
       window.open(deepLink, '_blank');

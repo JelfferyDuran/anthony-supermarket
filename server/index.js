@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
 const KITCHEN_CHAT_ID = process.env.KITCHEN_CHAT_ID || '';
-const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/SuperAnthbot';
+const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/Anthonysuperkitchen_bot';
 // Mini App order backend (apps/superkitchen/server) — used to resolve ORDER_<id> deep links
 const MINIAPP_API_URL = process.env.MINIAPP_API_URL || '';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(origin => origin.trim()).filter(Boolean);
@@ -402,7 +402,7 @@ function startBot() {
       const chatId = msg.chat.id;
       const payload = (match && match[1] ? match[1] : '').trim();
 
-      // Mini App handoff: https://t.me/SuperAnthbot?start=ORDER_<id>
+      // Mini App handoff: https://t.me/Anthonysuperkitchen_bot?start=ORDER_<id>
       if (/^ORDER_[A-Z0-9]+$/i.test(payload)) {
         const orderId = payload.split('_')[1];
         if (!MINIAPP_API_URL) {

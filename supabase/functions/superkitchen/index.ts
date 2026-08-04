@@ -16,7 +16,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 // RLS on `orders` allows public insert/select, so anon is sufficient.
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const BOT_URL = Deno.env.get("BOT_URL") || "https://t.me/SuperAnthbot";
+const BOT_URL = Deno.env.get("BOT_URL") || "https://t.me/Anthonysuperkitchen_bot";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

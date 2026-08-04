@@ -26,7 +26,7 @@ const IMAGE_DIR = process.env.IMAGE_DIR || path.join(__dirname, '..', 'public', 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''; // optional bearer for image-gen
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2';
-const BOT_URL = process.env.BOT_URL || 'https://t.me/SuperAnthbot';
+const BOT_URL = process.env.BOT_URL || 'https://t.me/Anthonysuperkitchen_bot';
 const DIST_DIR = path.join(__dirname, '..', 'dist');
 
 // Supabase (optional — falls back to local JSON file storage)
