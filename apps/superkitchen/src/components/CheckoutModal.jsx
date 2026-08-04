@@ -50,10 +50,19 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
         {state === 'done' ? (
           <>
             <h2>✅ Order Placed!</h2>
-            <p className="order-confirm">
-              Order <strong>#{orderId}</strong> — continue it in Telegram with the bot.
-            </p>
+            <div className="order-id-box">
+              <div className="order-id-label">YOUR ORDER #</div>
+              <div className="order-id-value">{orderId}</div>
+              {tipoEntrega === 'delivery' ? (
+                <p className="order-pickup-note">🚚 Delivery — we'll text you when it's on the way.</p>
+              ) : (
+                <p className="order-pickup-note">📦 Pickup at 288 Kearny Ave, Kearny NJ — we'll have it ready for you!</p>
+              )}
+            </div>
             <pre className="order-summary">{buildSummary()}</pre>
+            <p className="order-confirm">
+              Tap <strong>Continue in Telegram</strong> to confirm with the bot, or just come by!
+            </p>
             <div className="modal-footer">
               <button className="btn btn-primary btn-lg" onClick={onPlaced}>Done</button>
             </div>
