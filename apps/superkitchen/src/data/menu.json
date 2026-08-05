@@ -8,18 +8,55 @@
   },
   "currency": "USD",
   "meats": [
-    { "id": "chicken", "name": "Chicken", "priceDelta": 0 },
-    { "id": "beef", "name": "Beef", "priceDelta": 0 },
-    { "id": "pork", "name": "Pork", "priceDelta": 0 },
-    { "id": "shrimp", "name": "Shrimp", "priceDelta": 2.00, "premium": true },
-    { "id": "mixed", "name": "Mixed Meat", "priceDelta": 2.00, "premium": true }
+    {
+      "id": "chicken",
+      "name": "Chicken",
+      "priceDelta": 0
+    },
+    {
+      "id": "beef",
+      "name": "Beef",
+      "priceDelta": 0
+    },
+    {
+      "id": "pork",
+      "name": "Pork",
+      "priceDelta": 0
+    },
+    {
+      "id": "shrimp",
+      "name": "Shrimp",
+      "priceDelta": 2.0,
+      "premium": true
+    },
+    {
+      "id": "mixed",
+      "name": "Mixed Meat",
+      "priceDelta": 2.0,
+      "premium": true
+    }
   ],
   "sides": [
-    { "id": "tostones", "name": "Tostones" },
-    { "id": "papas", "name": "Papas" },
-    { "id": "yuca", "name": "Yuca" },
-    { "id": "batata-fritas", "name": "Batata Fritas" },
-    { "id": "arroz-habichuela", "name": "Arroz con Habichuela" }
+    {
+      "id": "tostones",
+      "name": "Tostones"
+    },
+    {
+      "id": "papas",
+      "name": "Papas"
+    },
+    {
+      "id": "yuca",
+      "name": "Yuca"
+    },
+    {
+      "id": "batata-fritas",
+      "name": "Batata Fritas"
+    },
+    {
+      "id": "arroz-habichuela",
+      "name": "Arroz con Habichuela"
+    }
   ],
   "products": [
     {
@@ -32,7 +69,8 @@
       "imagePrompt": "A high quality appetizing Dominican yaroa in a takeout container with melted cheese, seasoned meat, fries, pink sauce, realistic restaurant food photography.",
       "allowMeatChoice": true,
       "allowSideChoice": false,
-      "available": true
+      "available": true,
+      "imageUrl": "products/yaroa.jpg"
     },
     {
       "id": "yaroa-large",
@@ -44,7 +82,8 @@
       "imagePrompt": "A large Dominican yaroa loaded with fries, cheese, seasoned meat, ketchup mayo sauce, in a black takeout tray, realistic commercial food photography.",
       "allowMeatChoice": true,
       "allowSideChoice": false,
-      "available": true
+      "available": true,
+      "imageUrl": "products/yaroa.jpg"
     },
     {
       "id": "chimi-dominicano",
@@ -56,7 +95,8 @@
       "imagePrompt": "Dominican chimi burger with cabbage, tomato, grilled meat, ketchup mayo sauce, toasted bread, served hot in a casual supermarket kitchen style, realistic food photo.",
       "allowMeatChoice": true,
       "allowSideChoice": true,
-      "available": true
+      "available": true,
+      "imageUrl": "products/chimi.jpg"
     },
     {
       "id": "mofongo",
@@ -68,7 +108,8 @@
       "imagePrompt": "Dominican mofongo in a round foil bowl with garlic mashed plantain, fresh salad, and choice of meat around it, realistic high quality food photography.",
       "allowMeatChoice": true,
       "allowSideChoice": false,
-      "available": true
+      "available": true,
+      "imageUrl": "products/mofongo.jpg"
     },
     {
       "id": "pica-pollo-tenders",
@@ -80,7 +121,8 @@
       "imagePrompt": "Crispy Dominican fried chicken tenders with fries and pink sauce in a white takeout container, realistic restaurant food photography.",
       "allowMeatChoice": false,
       "allowSideChoice": true,
-      "available": true
+      "available": true,
+      "imageUrl": "products/tenders.jpg"
     }
   ]
 }
