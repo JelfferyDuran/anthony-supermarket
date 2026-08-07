@@ -254,6 +254,7 @@ export default function StaffApp() {
                 <span>{order.tipo_entrega === 'delivery' ? '🚚 Delivery' : '📦 Pickup'}</span>
                 <span>{customer.nombre || 'Customer'}</span>
                 {customer.telefono ? <a href={`tel:${customer.telefono}`}>{customer.telefono}</a> : null}
+                {order.tipo_entrega === 'delivery' && customer.direccion ? <span>📍 {customer.direccion}</span> : null}
               </div>
 
               <ul className="staff-items">
