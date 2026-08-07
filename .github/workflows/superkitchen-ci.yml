@@ -1,0 +1,68 @@
+name: Super Kitchen CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/superkitchen/**'
+      - 'supabase/functions/superkitchen/**'
+      - 'supabase/migrations/**'
+      - '.github/workflows/superkitchen-ci.yml'
+  push:
+    branches:
+      - main
+      - phase1-foundation-security
+    paths:
+      - 'apps/superkitchen/**'
+      - 'supabase/functions/superkitchen/**'
+      - 'supabase/migrations/**'
+      - '.github/workflows/superkitchen-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/superkitchen
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/superkitchen/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Production build
+        run: npm run build
+
+  security-source-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail on obvious committed secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nE '(TELEGRAM_TOKEN|SUPABASE_SERVICE_ROLE_KEY|OPENAI_API_KEY)=[^[:space:]]+' -- ':!*.example' ':!*.md'; then
+            echo 'Potential secret value committed. Move it to deployment secrets.'
+            exit 1
+          fi
+
+      - name: Ensure client never references service-role key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n 'SUPABASE_SERVICE_ROLE_KEY' -- apps/superkitchen/src; then
+            echo 'Service-role credentials must never appear in browser code.'
+            exit 1
+          fi
