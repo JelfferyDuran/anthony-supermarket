@@ -2,31 +2,48 @@ const SUPABASE_URL = 'https://cbpdiiyzzmbavsymjysb.supabase.co';
 // Supabase publishable keys are intentionally safe for browser clients.
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RsaXnitzsl5NLMGLrWsfeA_JCJId6lk';
 const API_BASE = import.meta.env.VITE_API_URL || `${SUPABASE_URL}/functions/v1/superkitchen`;
-const STORAGE_KEY = 'anthony_superkitchen_staff_session_v1';
+const STORAGE_KEY = 'anthony_superkitchen_staff_session_v2';
+const LEGACY_STORAGE_KEY = 'anthony_superkitchen_staff_session_v1';
+const MAX_SESSION_SECONDS = 12 * 60 * 60;
 
-function normalizeSession(data) {
+function normalizeSession(data, previous = null) {
   if (!data?.access_token) return null;
+  const now = Math.floor(Date.now() / 1000);
   return {
     access_token: data.access_token,
-    refresh_token: data.refresh_token || '',
-    expires_at: data.expires_at || Math.floor(Date.now() / 1000) + Number(data.expires_in || 3600),
-    user: data.user || null,
+    refresh_token: data.refresh_token || previous?.refresh_token || '',
+    expires_at: data.expires_at || now + Number(data.expires_in || 3600),
+    started_at: previous?.started_at || now,
+    user: data.user || previous?.user || null,
   };
 }
 
+function clearStoredSession() {
+  sessionStorage.removeItem(STORAGE_KEY);
+  // Remove the former persistent browser copy during the Phase 1 migration.
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
+}
+
 function saveSession(session) {
-  if (!session) {
-    localStorage.removeItem(STORAGE_KEY);
-    return;
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  clearStoredSession();
+  if (session) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
 export function readStoredSession() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    // Never restore the old localStorage token. Shared kitchen devices should not
+    // retain refresh credentials after the browser session closes.
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const session = raw ? JSON.parse(raw) : null;
+    const now = Math.floor(Date.now() / 1000);
+    if (session?.started_at && now - Number(session.started_at) > MAX_SESSION_SECONDS) {
+      clearStoredSession();
+      return null;
+    }
+    return session;
   } catch {
+    clearStoredSession();
     return null;
   }
 }
@@ -55,27 +72,22 @@ export async function signIn(email, password) {
   return session;
 }
 
-export async function signUp(email, password) {
-  const data = await authRequest('/signup', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  const session = normalizeSession(data);
-  if (session) saveSession(session);
-  return { session, user: data.user || null };
-}
-
 export async function refreshSession(force = false) {
   const current = readStoredSession();
   if (!current?.refresh_token) return current;
+
   const now = Math.floor(Date.now() / 1000);
+  if (!current.started_at || now - Number(current.started_at) > MAX_SESSION_SECONDS) {
+    clearStoredSession();
+    throw new Error('Staff session expired. Please sign in again.');
+  }
   if (!force && Number(current.expires_at || 0) > now + 90) return current;
 
   const data = await authRequest('/token?grant_type=refresh_token', {
     method: 'POST',
     body: JSON.stringify({ refresh_token: current.refresh_token }),
   });
-  const session = normalizeSession(data);
+  const session = normalizeSession(data, current);
   saveSession(session);
   return session;
 }
@@ -93,7 +105,7 @@ export async function signOut() {
   } catch {
     // Local logout must still succeed if the remote session is already gone.
   } finally {
-    saveSession(null);
+    clearStoredSession();
   }
 }
 
