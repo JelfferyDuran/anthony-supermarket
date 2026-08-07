@@ -1,8 +1,12 @@
-// API helper — talks to the Super Kitchen backend (order creation + admin image gen).
+// API helper — talks to the Super Kitchen backend.
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export async function createOrder({ items, customer, tipoEntrega, notas }) {
+  // Raw Telegram initData is safe to transmit to our backend, but must never be
+  // trusted in the browser. The Edge Function validates it before using identity.
+  const telegramInitData = window.Telegram?.WebApp?.initData || '';
+
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -18,6 +22,7 @@ export async function createOrder({ items, customer, tipoEntrega, notas }) {
       customer,
       tipoEntrega,
       notas,
+      telegramInitData,
     }),
   });
   if (!res.ok) {
