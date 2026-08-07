@@ -7,7 +7,6 @@ import {
   sessionRole,
   signIn,
   signOut,
-  signUp,
   updateOrderStatus,
 } from './staffAuth.js';
 import './staff.css';
@@ -44,7 +43,6 @@ export default function StaffApp() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [mode, setMode] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -116,19 +114,8 @@ export default function StaffApp() {
     setError('');
     setMessage('');
     try {
-      if (mode === 'signup') {
-        const result = await signUp(email.trim(), password);
-        if (result.session) {
-          setSession(result.session);
-          setMessage('Account created. A manager still needs to approve your staff role.');
-        } else {
-          setMessage('Account created. Check your email if confirmation is required, then sign in.');
-          setMode('signin');
-        }
-      } else {
-        const result = await signIn(email.trim(), password);
-        setSession(result);
-      }
+      const result = await signIn(email.trim(), password);
+      setSession(result);
       setPassword('');
     } catch (e) {
       setError(e.message || 'Authentication failed.');
@@ -143,7 +130,9 @@ export default function StaffApp() {
     try {
       const fresh = await refreshSession(true);
       setSession(fresh);
-      setMessage(isStaffRole(sessionRole(fresh)) ? 'Staff access confirmed.' : 'Your account is active, but staff access is still awaiting approval.');
+      setMessage(isStaffRole(sessionRole(fresh))
+        ? 'Staff access confirmed.'
+        : 'This account has not been provisioned with a staff role.');
     } catch (e) {
       setError(e.message || 'Could not refresh access.');
     } finally {
@@ -181,19 +170,19 @@ export default function StaffApp() {
         <section className="staff-auth-card">
           <div className="staff-brand-mark">AK</div>
           <h1>Anthony's Kitchen Staff</h1>
-          <p className="staff-muted">Protected kitchen access. Accounts receive no staff privileges until approved.</p>
+          <p className="staff-muted">
+            Protected staff access. Accounts are provisioned by management and cannot self-register here.
+          </p>
           <form onSubmit={handleAuth} className="staff-auth-form">
             <label>Email</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required />
             <label>Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={8} required />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" minLength={8} required />
             {error && <p className="staff-error">{error}</p>}
             {message && <p className="staff-message">{message}</p>}
-            <button className="staff-primary" disabled={submitting}>{submitting ? 'Working…' : mode === 'signup' ? 'Create staff account' : 'Sign in'}</button>
+            <button className="staff-primary" disabled={submitting}>{submitting ? 'Signing in…' : 'Sign in'}</button>
           </form>
-          <button className="staff-link" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}>
-            {mode === 'signin' ? 'Need an account? Request access' : 'Already have an account? Sign in'}
-          </button>
+          <p className="staff-muted">Need access? Ask a manager to provision your staff account and role.</p>
           <a className="staff-link" href="./">← Customer menu</a>
         </section>
       </main>
@@ -205,8 +194,10 @@ export default function StaffApp() {
       <main className="staff-shell auth-shell">
         <section className="staff-auth-card">
           <div className="staff-brand-mark">AK</div>
-          <h1>Access pending</h1>
-          <p className="staff-muted">Your login is valid, but this account has not been assigned a kitchen, manager, or admin role.</p>
+          <h1>Access not provisioned</h1>
+          <p className="staff-muted">
+            The login is valid, but this account does not have a kitchen, manager, or admin role. Roles can only be assigned server-side.
+          </p>
           {message && <p className="staff-message">{message}</p>}
           {error && <p className="staff-error">{error}</p>}
           <button className="staff-primary" onClick={handleRefreshAccess} disabled={submitting}>{submitting ? 'Checking…' : 'Refresh access'}</button>
