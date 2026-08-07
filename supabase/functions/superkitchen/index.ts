@@ -4,6 +4,8 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const BOT_URL = Deno.env.get("BOT_URL") || "https://t.me/Anthonysuperkitchen_bot";
+// Server-only secret. Never expose this value to the Mini App/browser.
+const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -79,6 +81,91 @@ function newOrderId() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
+const textEncoder = new TextEncoder();
+
+async function hmacSha256(key: string | Uint8Array, data: string) {
+  const rawKey = typeof key === "string" ? textEncoder.encode(key) : key;
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    rawKey,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  return new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, textEncoder.encode(data)));
+}
+
+function bytesToHex(bytes: Uint8Array) {
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function timingSafeHexEqual(expected: string, received: string) {
+  if (expected.length !== received.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i += 1) {
+    diff |= expected.charCodeAt(i) ^ received.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+type TelegramIdentity = {
+  verified: boolean;
+  invalid?: boolean;
+  reason?: string;
+  userId?: number;
+  authDate?: number;
+};
+
+async function verifyTelegramInitData(rawValue: unknown): Promise<TelegramIdentity> {
+  const raw = typeof rawValue === "string" ? rawValue : "";
+  if (!raw) return { verified: false, reason: "absent" };
+  if (raw.length > 8192) return { verified: false, invalid: true, reason: "too_large" };
+
+  // Until the rotated token is installed as a server-side secret, ordering still
+  // works anonymously. Crucially, no Telegram identity is trusted or persisted.
+  if (!TELEGRAM_BOT_TOKEN) return { verified: false, reason: "not_configured" };
+
+  const params = new URLSearchParams(raw);
+  const receivedHash = (params.get("hash") || "").toLowerCase();
+  const authDate = Number(params.get("auth_date"));
+  if (!/^[a-f0-9]{64}$/.test(receivedHash) || !Number.isSafeInteger(authDate) || authDate <= 0) {
+    return { verified: false, invalid: true, reason: "malformed" };
+  }
+
+  params.delete("hash");
+  const dataCheckString = Array.from(params.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("\n");
+
+  // Telegram Mini App validation: HMAC(bot token, key="WebAppData") creates
+  // the secret key, then HMAC(data-check-string, secret key) must match hash.
+  const secretKey = await hmacSha256("WebAppData", TELEGRAM_BOT_TOKEN);
+  const expectedHash = bytesToHex(await hmacSha256(secretKey, dataCheckString));
+  if (!timingSafeHexEqual(expectedHash, receivedHash)) {
+    return { verified: false, invalid: true, reason: "signature" };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const ageSeconds = now - authDate;
+  if (ageSeconds < -60 || ageSeconds > 900) {
+    return { verified: false, invalid: true, reason: "stale" };
+  }
+
+  let user: any = null;
+  try {
+    user = JSON.parse(params.get("user") || "null");
+  } catch {
+    return { verified: false, invalid: true, reason: "bad_user" };
+  }
+  const userId = Number(user?.id);
+  if (!Number.isSafeInteger(userId) || userId <= 0) {
+    return { verified: false, invalid: true, reason: "missing_user" };
+  }
+
+  return { verified: true, userId, authDate };
+}
+
 const fallbackBuckets = new Map<string, { count: number; reset: number }>();
 function fallbackRateLimited(key: string) {
   const now = Date.now();
@@ -92,7 +179,7 @@ function fallbackRateLimited(key: string) {
 }
 
 async function sha256Hex(value: string) {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  const digest = await crypto.subtle.digest("SHA-256", textEncoder.encode(value));
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
@@ -129,8 +216,13 @@ async function handleCreateOrder(req: Request) {
   let body: any;
   try { body = await req.json(); } catch { return json(req, { error: "Invalid JSON" }, 400); }
 
-  const { items, customer, tipoEntrega, notas } = body || {};
+  const { items, customer, tipoEntrega, notas, telegramInitData } = body || {};
   if (!Array.isArray(items) || items.length === 0 || items.length > 30) return json(req, { error: "Invalid cart" }, 400);
+
+  const telegramIdentity = await verifyTelegramInitData(telegramInitData);
+  if (telegramIdentity.invalid) {
+    return json(req, { error: "Invalid or expired Telegram session" }, 401);
+  }
 
   const nombre = String(customer?.nombre || "").trim();
   const telefono = String(customer?.telefono || "").trim();
@@ -184,6 +276,10 @@ async function handleCreateOrder(req: Request) {
     cliente: { nombre, telefono },
     notas: safeNotas,
     estado: "recibido",
+    telegram_user_id: telegramIdentity.verified ? telegramIdentity.userId : null,
+    telegram_auth_date: telegramIdentity.verified && telegramIdentity.authDate
+      ? new Date(telegramIdentity.authDate * 1000).toISOString()
+      : null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -194,7 +290,13 @@ async function handleCreateOrder(req: Request) {
     return json(req, { error: "Failed to save order" }, 500);
   }
 
-  return json(req, { ok: true, orderId: order.id, total: order.total, botUrl: BOT_URL }, 201);
+  return json(req, {
+    ok: true,
+    orderId: order.id,
+    total: order.total,
+    botUrl: BOT_URL,
+    telegramVerified: telegramIdentity.verified,
+  }, 201);
 }
 
 async function handleGetOrder(req: Request, id: string) {
@@ -207,7 +309,7 @@ async function handleGetOrder(req: Request, id: string) {
   }
 
   // Compatibility receipt for Telegram deep links created after hardening.
-  // Only long random IDs qualify, and no customer PII or notes are returned.
+  // Only long random IDs qualify, and no customer PII, Telegram identity, or notes are returned.
   if (!/^[A-F0-9]{16}$/i.test(id)) return json(req, { error: "Unauthorized" }, 401);
   const { data, error } = await admin
     .from("orders")
