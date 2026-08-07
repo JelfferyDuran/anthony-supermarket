@@ -48,7 +48,7 @@ function corsHeaders(req: Request) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://jelfferyduran.github.io",
     "Vary": "Origin",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Cache-Control": "no-store",
   };
@@ -79,17 +79,37 @@ function newOrderId() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
-const buckets = new Map<string, { count: number; reset: number }>();
-function rateLimited(req: Request) {
+const fallbackBuckets = new Map<string, { count: number; reset: number }>();
+function fallbackRateLimited(key: string) {
   const now = Date.now();
-  const key = (req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
-  const current = buckets.get(key);
+  const current = fallbackBuckets.get(key);
   if (!current || current.reset < now) {
-    buckets.set(key, { count: 1, reset: now + 60_000 });
+    fallbackBuckets.set(key, { count: 1, reset: now + 60_000 });
     return false;
   }
   current.count += 1;
   return current.count > 12;
+}
+
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function rateLimited(req: Request) {
+  const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  const ua = (req.headers.get("user-agent") || "unknown").slice(0, 160);
+  const keyHash = await sha256Hex(`${ip}|${ua}|superkitchen-order`);
+
+  const { data, error } = await admin.rpc("consume_order_rate_limit", {
+    p_key_hash: keyHash,
+    p_limit: 12,
+    p_window_seconds: 60,
+  });
+
+  if (!error && typeof data === "boolean") return !data;
+  console.error("durable rate limiter unavailable", error?.message || "unknown error");
+  return fallbackRateLimited(keyHash);
 }
 
 async function requireStaff(req: Request) {
@@ -102,7 +122,7 @@ async function requireStaff(req: Request) {
 }
 
 async function handleCreateOrder(req: Request) {
-  if (rateLimited(req)) return json(req, { error: "Too many requests. Please try again shortly." }, 429);
+  if (await rateLimited(req)) return json(req, { error: "Too many requests. Please try again shortly." }, 429);
   const len = Number(req.headers.get("content-length") || 0);
   if (len > 32768) return json(req, { error: "Request too large" }, 413);
 
@@ -178,9 +198,23 @@ async function handleCreateOrder(req: Request) {
 }
 
 async function handleGetOrder(req: Request, id: string) {
-  if (!(await requireStaff(req))) return json(req, { error: "Unauthorized" }, 401);
-  const { data, error } = await admin.from("orders").select("*").eq("id", id).maybeSingle();
-  if (error) return json(req, { error: "Failed to load order" }, 500);
+  const staff = await requireStaff(req);
+  if (staff) {
+    const { data, error } = await admin.from("orders").select("*").eq("id", id).maybeSingle();
+    if (error) return json(req, { error: "Failed to load order" }, 500);
+    if (!data) return json(req, { error: "Order not found" }, 404);
+    return json(req, data);
+  }
+
+  // Compatibility receipt for Telegram deep links created after hardening.
+  // Only long random IDs qualify, and no customer PII or notes are returned.
+  if (!/^[A-F0-9]{16}$/i.test(id)) return json(req, { error: "Unauthorized" }, 401);
+  const { data, error } = await admin
+    .from("orders")
+    .select("id,items,subtotal,total,moneda,tipo_entrega,estado,created_at,updated_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) return json(req, { error: "Failed to load receipt" }, 500);
   if (!data) return json(req, { error: "Order not found" }, 404);
   return json(req, data);
 }
@@ -192,6 +226,44 @@ async function handleListOrders(req: Request) {
   return json(req, data);
 }
 
+async function handleUpdateStatus(req: Request, id: string) {
+  const staff = await requireStaff(req);
+  if (!staff) return json(req, { error: "Unauthorized" }, 401);
+
+  let body: any;
+  try { body = await req.json(); } catch { return json(req, { error: "Invalid JSON" }, 400); }
+  const nextStatus = String(body?.status || "").trim();
+  if (!["preparando", "listo", "completado", "cancelado"].includes(nextStatus)) {
+    return json(req, { error: "Invalid status" }, 400);
+  }
+
+  const { data, error } = await admin.rpc("staff_update_order_status", {
+    p_order_id: id,
+    p_new_status: nextStatus,
+    p_actor_user_id: staff.user.id,
+    p_actor_role: staff.role,
+  });
+
+  if (error) {
+    console.error("status update rejected", error.message);
+    return json(req, { error: "Status change rejected" }, 409);
+  }
+  return json(req, data);
+}
+
+async function handleAudit(req: Request, id: string) {
+  const staff = await requireStaff(req);
+  if (!staff || !["manager", "admin"].includes(staff.role)) return json(req, { error: "Unauthorized" }, 401);
+
+  const { data, error } = await admin
+    .from("order_audit_log")
+    .select("id,order_id,from_status,to_status,actor_user_id,actor_role,source,detail,created_at")
+    .eq("order_id", id)
+    .order("created_at", { ascending: true });
+  if (error) return json(req, { error: "Failed to load audit log" }, 500);
+  return json(req, data);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(req) });
   const path = new URL(req.url).pathname.replace(/^\/[^/]+/, "") || "/";
@@ -200,9 +272,16 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && path === "/") return html(req, INDEX_HTML);
     if (req.method === "POST" && (path === "/orders" || path === "/api/orders")) return await handleCreateOrder(req);
     if (req.method === "GET" && (path === "/orders" || path === "/api/orders")) return await handleListOrders(req);
-    if (req.method === "GET" && (path.startsWith("/orders/") || path.startsWith("/api/orders/"))) {
-      return await handleGetOrder(req, path.split("/").pop() || "");
-    }
+
+    const auditMatch = path.match(/^\/(?:api\/)?orders\/([^/]+)\/audit$/);
+    if (req.method === "GET" && auditMatch) return await handleAudit(req, auditMatch[1]);
+
+    const statusMatch = path.match(/^\/(?:api\/)?orders\/([^/]+)\/status$/);
+    if (req.method === "PATCH" && statusMatch) return await handleUpdateStatus(req, statusMatch[1]);
+
+    const orderMatch = path.match(/^\/(?:api\/)?orders\/([^/]+)$/);
+    if (req.method === "GET" && orderMatch) return await handleGetOrder(req, orderMatch[1]);
+
     return json(req, { error: "Not found" }, 404);
   } catch (e) {
     console.error("superkitchen handler error", e);
