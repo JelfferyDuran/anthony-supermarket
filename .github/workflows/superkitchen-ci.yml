@@ -45,15 +45,21 @@ jobs:
       - run: npm run build --workspaces=false
 
   bot-v2-syntax:
-    if: ${{ hashFiles('server/superkitchen-bot-v2.js') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Parse secure bot v2
-        run: node --check server/superkitchen-bot-v2.js
+      - name: Parse secure bot v2 when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f server/superkitchen-bot-v2.js ]]; then
+            node --check server/superkitchen-bot-v2.js
+          else
+            echo 'Bot v2 is not on this branch yet; syntax check will activate when it is added.'
+          fi
 
   security-source-checks:
     runs-on: ubuntu-latest
