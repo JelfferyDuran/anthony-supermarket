@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/superkitchen/src/**'
       - 'apps/superkitchen/index.html'
+      - 'apps/superkitchen/dist/**'
       - 'apps/superkitchen/vercel.json'
       - 'apps/superkitchen/package.json'
       - 'apps/superkitchen/package-lock.json'
@@ -20,6 +21,7 @@ on:
     paths:
       - 'apps/superkitchen/src/**'
       - 'apps/superkitchen/index.html'
+      - 'apps/superkitchen/dist/**'
       - 'apps/superkitchen/vercel.json'
       - 'apps/superkitchen/package.json'
       - 'apps/superkitchen/package-lock.json'
@@ -56,6 +58,15 @@ jobs:
           fi
       - run: npm ci --workspaces=false
       - run: npm run build --workspaces=false
+      - name: Verify tracked Pages build matches source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A -f dist
+          if ! git diff --cached --exit-code -- dist; then
+            echo 'apps/superkitchen/dist is stale. Rebuild and commit the generated Pages artifact.'
+            exit 1
+          fi
 
   bot-v2-syntax:
     runs-on: ubuntu-latest
