@@ -2,9 +2,9 @@ services:
   - type: web
     name: anthonys-order-api
     runtime: node
-    rootDir: server
+    rootDir: server/bot-v2
     buildCommand: npm ci
-    startCommand: node superkitchen-bot-v2.js
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: TELEGRAM_TOKEN
