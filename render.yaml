@@ -4,19 +4,17 @@ services:
     runtime: node
     rootDir: server
     buildCommand: npm ci
-    startCommand: npm start
+    startCommand: node superkitchen-bot-v2.js
     healthCheckPath: /api/health
     envVars:
       - key: TELEGRAM_TOKEN
         sync: false
       - key: KITCHEN_CHAT_ID
         sync: false
-      - key: TELEGRAM_BOT_URL
-        value: https://t.me/Anthonysuperkitchen_bot
-      - key: ALLOWED_ORIGINS
-        value: https://jelfferyduran.github.io
-      - key: TAX_RATE
-        value: "0"
+      - key: MINIAPP_URL
+        value: https://jelfferyduran.github.io/anthony-supermarket/apps/superkitchen/dist/
+      - key: MINIAPP_API_URL
+        value: https://cbpdiiyzzmbavsymjysb.supabase.co/functions/v1/superkitchen
 
   - type: web
     name: superkitchen-mini-app
