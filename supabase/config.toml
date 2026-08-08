@@ -1,2 +1,5 @@
 [functions.superkitchen]
 verify_jwt = false
+
+[functions.superkitchen-ops]
+verify_jwt = true
