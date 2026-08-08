@@ -1,0 +1,123 @@
+.kds-review-count {
+  border: 1px solid #7c5a13;
+  background: #2a2009;
+  color: #fde68a;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.kds-review-summary {
+  max-width: 1800px;
+  margin: 12px auto 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #6b4e12;
+  background: #211a08;
+  border-radius: 13px;
+}
+
+.kds-review-summary > div {
+  display: grid;
+  gap: 3px;
+}
+
+.kds-review-summary strong {
+  color: #fde68a;
+  font-size: 13px;
+}
+
+.kds-review-summary span {
+  color: #b9ad8c;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.kds-review-summary button {
+  border: 1px solid #81651f;
+  background: #33270b;
+  color: #fff1b3;
+  border-radius: 9px;
+  min-height: 38px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kds-review-panel {
+  max-width: 1800px;
+  margin: 10px auto 0;
+  border: 1px solid #4e3c16;
+  background: #0f0d08;
+  border-radius: 15px;
+  padding: 14px;
+}
+
+.kds-review-panel > header h2 {
+  margin: 2px 0 3px;
+  font-size: 20px;
+}
+
+.kds-review-panel > header p {
+  margin: 0;
+  color: #aaa18a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.kds-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.review-order-card {
+  border-color: #66511b;
+}
+
+.review-order-card::before {
+  background: #eab308 !important;
+}
+
+.kds-review-flag {
+  margin: -2px 0 9px;
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: #302508;
+  color: #fde68a;
+  border: 1px solid #6b5317;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.kds-timer.stale {
+  color: #fde68a;
+}
+
+@media (max-width: 760px) {
+  .kds-review-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .kds-review-summary button {
+    width: 100%;
+  }
+
+  .kds-review-grid {
+    grid-template-columns: 1fr;
+  }
+}
