@@ -13,19 +13,21 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/superkitchen
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: apps/superkitchen/package-lock.json
-      - run: npm ci --workspaces=false
+      - name: Prepare isolated audit input
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/superkitchen-audit
+          cp apps/superkitchen/package.json apps/superkitchen/package-lock.json /tmp/superkitchen-audit/
       - name: Production dependency audit
+        working-directory: /tmp/superkitchen-audit
         run: npm audit --omit=dev --audit-level=moderate
       - name: Full dependency audit details
+        working-directory: /tmp/superkitchen-audit
         shell: bash
         run: npm audit --json || true
