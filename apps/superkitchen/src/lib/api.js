@@ -1,6 +1,8 @@
 // API helper — talks to the Super Kitchen backend (order creation + admin image gen).
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+// Keep static/GitHub Pages builds functional even when VITE_API_URL is not injected.
+// Deployment environments can still override this value explicitly.
+const API_BASE = import.meta.env.VITE_API_URL || 'https://cbpdiiyzzmbavsymjysb.functions.supabase.co/superkitchen';
 
 export async function createOrder({ items, customer, tipoEntrega, notas }) {
   const res = await fetch(`${API_BASE}/api/orders`, {
