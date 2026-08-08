@@ -66,7 +66,7 @@ If the customer Mini App fails after merge:
 - revert the PR merge or restore the previous known-good Pages build.
 
 If the new Edge Function fails:
-- redeploy the previously verified hardened v24 source.
+- redeploy the previously verified hardened v25 source.
 - do not restore the historical Telegram token.
 
 If bot v2 fails:
