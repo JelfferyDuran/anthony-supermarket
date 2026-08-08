@@ -6,7 +6,8 @@ This repository is the canonical shared context for AI agents working on Anthony
 1. `docs/agent-context/CURRENT_STATE.md`
 2. `docs/agent-context/OPERATING_RULES.md`
 3. `docs/agent-context/HANDOFF_PROTOCOL.md`
-4. Relevant code, migrations, issues, and PRs for the task.
+4. If operating from Hermes/VPS automation: `docs/agent-context/HERMES_ACCESS.md`
+5. Relevant code, migrations, issues, and PRs for the task.
 
 Do not rely on cached local memory when repository state disagrees with it. Pull/rebase first and treat the repository plus live infrastructure checks as source of truth.
 
@@ -15,7 +16,8 @@ Build fast where mistakes are reversible. Build deliberately where consequences 
 
 ## Authority boundaries
 - Never commit secrets, tokens, passwords, service-role keys, customer PII, or private credentials.
-- Never expose Supabase service-role credentials to browser code or Telegram clients.
+- Never expose Supabase service-role credentials to browser code, Telegram clients, or general-purpose VPS agents.
+- Never give a machine identity more privilege than its task requires.
 - Do not bypass authentication, RLS, audit logging, server-authoritative pricing, or state-machine validation.
 - Use branches and pull requests for meaningful code changes.
 - Production deployments, destructive database changes, secret rotation, role escalation, and irreversible actions require an explicit validated deployment path and rollback plan.
