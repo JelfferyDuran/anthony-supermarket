@@ -64,6 +64,38 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  stage-pages-dist:
+    needs: frontend-build
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'phase1-cutover-v2'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Reset tracked Pages build directory
+        run: |
+          rm -rf apps/superkitchen/dist
+          mkdir -p apps/superkitchen/dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: superkitchen-dist
+          path: apps/superkitchen/dist
+      - name: Commit reviewed build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -f apps/superkitchen/dist
+          if git diff --cached --quiet; then
+            echo 'Tracked Pages build is already current.'
+            exit 0
+          fi
+          git commit -m 'build(superkitchen): refresh Pages dist [skip ci]'
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+
   bot-v2-syntax:
     runs-on: ubuntu-latest
     steps:
