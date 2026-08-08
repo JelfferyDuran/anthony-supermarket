@@ -13,6 +13,7 @@ on:
       - 'supabase/migrations/**'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
+      - 'render.yaml'
       - '.github/workflows/superkitchen-ci.yml'
   push:
     branches: [main]
@@ -27,6 +28,7 @@ on:
       - 'supabase/migrations/**'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
+      - 'render.yaml'
       - '.github/workflows/superkitchen-ci.yml'
 
 permissions:
