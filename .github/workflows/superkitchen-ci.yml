@@ -104,7 +104,7 @@ jobs:
       - name: Parse Hermes observer client
         run: node --check scripts/hermes-ops-check.mjs
       - name: Type-check observer Edge Function
-        run: deno check supabase/functions/superkitchen-ops/index.ts
+        run: deno check --config supabase/functions/superkitchen-ops/deno.json supabase/functions/superkitchen-ops/index.ts
       - name: Require JWT verification for observer function
         shell: python
         run: |
