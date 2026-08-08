@@ -1,0 +1,30 @@
+name: Super Kitchen Server Dependency Audit
+
+on:
+  pull_request:
+    paths:
+      - 'server/package.json'
+      - 'server/package-lock.json'
+      - '.github/workflows/superkitchen-server-audit-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare isolated server audit input
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/superkitchen-server-audit
+          cp server/package.json server/package-lock.json /tmp/superkitchen-server-audit/
+      - name: Production dependency audit
+        working-directory: /tmp/superkitchen-server-audit
+        shell: bash
+        run: npm audit --omit=dev --json || true
