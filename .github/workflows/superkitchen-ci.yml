@@ -11,7 +11,10 @@ on:
       - 'apps/superkitchen/package-lock.json'
       - 'apps/superkitchen/vite.config.*'
       - 'supabase/functions/superkitchen/**'
+      - 'supabase/functions/superkitchen-ops/**'
       - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - 'scripts/hermes-ops-check.mjs'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
       - 'render.yaml'
@@ -27,7 +30,10 @@ on:
       - 'apps/superkitchen/package-lock.json'
       - 'apps/superkitchen/vite.config.*'
       - 'supabase/functions/superkitchen/**'
+      - 'supabase/functions/superkitchen-ops/**'
       - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - 'scripts/hermes-ops-check.mjs'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
       - 'render.yaml'
@@ -83,6 +89,51 @@ jobs:
             node --check server/superkitchen-bot-v2.js
           else
             echo 'Bot v2 is not on this branch yet; syntax check will activate when it is added.'
+          fi
+
+  ops-observer-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Parse Hermes observer client
+        run: node --check scripts/hermes-ops-check.mjs
+      - name: Type-check observer Edge Function
+        run: deno check supabase/functions/superkitchen-ops/index.ts
+      - name: Require JWT verification for observer function
+        shell: python
+        run: |
+          import pathlib, tomllib
+          config = tomllib.loads(pathlib.Path('supabase/config.toml').read_text())
+          assert config['functions']['superkitchen-ops']['verify_jwt'] is True, 'superkitchen-ops must keep verify_jwt=true'
+      - name: Keep observer response free of customer PII fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE '\b(cliente|telefono|direccion|notas|telegram_user_id|telegram_auth_date)\b' supabase/functions/superkitchen-ops/index.ts; then
+            echo 'Observer function must not query or expose customer PII or Telegram identity fields.'
+            exit 1
+          fi
+      - name: Keep observer API read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE '\.(insert|update|delete|upsert)\s*\(' supabase/functions/superkitchen-ops/index.ts; then
+            echo 'Observer function must remain read-only.'
+            exit 1
+          fi
+      - name: Keep service-role credentials out of Hermes client
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -n 'SUPABASE_SERVICE_ROLE_KEY' scripts/hermes-ops-check.mjs; then
+            echo 'Hermes observer client must never use the Supabase service-role key.'
+            exit 1
           fi
 
   security-source-checks:
