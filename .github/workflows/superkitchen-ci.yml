@@ -12,6 +12,7 @@ on:
       - 'apps/superkitchen/vite.config.*'
       - 'supabase/functions/superkitchen/**'
       - 'supabase/migrations/**'
+      - 'server/bot-v2/**'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
       - 'render.yaml'
@@ -28,6 +29,7 @@ on:
       - 'apps/superkitchen/vite.config.*'
       - 'supabase/functions/superkitchen/**'
       - 'supabase/migrations/**'
+      - 'server/bot-v2/**'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
       - 'render.yaml'
@@ -68,21 +70,42 @@ jobs:
             exit 1
           fi
 
-  bot-v2-syntax:
+  bot-v2-runtime:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Parse secure bot v2 when present
+      - name: Install, audit, parse, and smoke-test isolated bot v2
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -f server/superkitchen-bot-v2.js ]]; then
+          if [[ -f server/bot-v2/package-lock.json ]]; then
+            cd server/bot-v2
+            npm ci
+            npm audit --omit=dev --audit-level=moderate
+            node --check index.js
+            PORT=31999 TELEGRAM_TOKEN= node index.js >/tmp/superkitchen-bot-v2.log 2>&1 &
+            pid=$!
+            trap 'kill "$pid" 2>/dev/null || true' EXIT
+            ok=0
+            for _ in {1..20}; do
+              if curl --fail --silent http://127.0.0.1:31999/api/health | grep -q '"botEnabled":false'; then
+                ok=1
+                break
+              fi
+              sleep 0.25
+            done
+            if [[ "$ok" -ne 1 ]]; then
+              cat /tmp/superkitchen-bot-v2.log
+              echo 'Bot v2 health smoke test failed.'
+              exit 1
+            fi
+          elif [[ -f server/superkitchen-bot-v2.js ]]; then
             node --check server/superkitchen-bot-v2.js
           else
-            echo 'Bot v2 is not on this branch yet; syntax check will activate when it is added.'
+            echo 'Bot v2 is not on this branch yet; runtime guard will activate when it is added.'
           fi
 
   security-source-checks:
