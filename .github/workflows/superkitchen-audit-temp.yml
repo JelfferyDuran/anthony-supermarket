@@ -1,0 +1,31 @@
+name: Super Kitchen Dependency Audit
+
+on:
+  pull_request:
+    paths:
+      - 'apps/superkitchen/package.json'
+      - 'apps/superkitchen/package-lock.json'
+      - '.github/workflows/superkitchen-audit-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/superkitchen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/superkitchen/package-lock.json
+      - run: npm ci --workspaces=false
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Full dependency audit details
+        shell: bash
+        run: npm audit --json || true
