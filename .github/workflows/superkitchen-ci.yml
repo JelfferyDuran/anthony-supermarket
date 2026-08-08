@@ -56,6 +56,13 @@ jobs:
           fi
       - run: npm ci --workspaces=false
       - run: npm run build --workspaces=false
+      - name: Package built Mini App for preview inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: superkitchen-dist
+          path: apps/superkitchen/dist
+          if-no-files-found: error
+          retention-days: 1
 
   bot-v2-syntax:
     runs-on: ubuntu-latest
