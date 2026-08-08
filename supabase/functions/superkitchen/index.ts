@@ -226,11 +226,15 @@ async function handleCreateOrder(req: Request) {
   const tg = await verifyTelegramInitData(telegramInitData);
   if (tg.invalid) return json(req, { error: "Invalid or expired Telegram session" }, 401);
 
+  const delivery = tipoEntrega === "delivery";
   const nombre = String(customer?.nombre || "").trim();
   const telefono = String(customer?.telefono || "").trim();
+  const direccion = String(customer?.direccion || "").trim();
   const safeNotas = String(notas || "").trim();
   if (!nombre || nombre.length > 80) return json(req, { error: "Invalid customer name" }, 400);
   if (telefono.length > 32) return json(req, { error: "Invalid phone number" }, 400);
+  if (delivery && !telefono) return json(req, { error: "Phone number required for delivery" }, 400);
+  if (delivery && (!direccion || direccion.length > 220)) return json(req, { error: "Valid delivery address required" }, 400);
   if (safeNotas.length > 500) return json(req, { error: "Notes are too long" }, 400);
 
   const normalized: any[] = [];
@@ -273,8 +277,8 @@ async function handleCreateOrder(req: Request) {
     tax: 0,
     total: subtotal,
     moneda: "USD",
-    tipo_entrega: tipoEntrega === "delivery" ? "delivery" : "pickup",
-    cliente: { nombre, telefono },
+    tipo_entrega: delivery ? "delivery" : "pickup",
+    cliente: delivery ? { nombre, telefono, direccion } : { nombre, telefono },
     notas: safeNotas,
     estado: "recibido",
     telegram_user_id: tg.verified ? tg.userId : null,

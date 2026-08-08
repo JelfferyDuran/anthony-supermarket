@@ -1,0 +1,14 @@
+{
+  "name": "anthonys-superkitchen-bot-v2",
+  "version": "1.0.0",
+  "description": "Anthony's Super Kitchen Telegram bot v2 — native Node 22 runtime",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js"
+  }
+}
