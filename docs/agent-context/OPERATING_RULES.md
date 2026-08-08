@@ -35,15 +35,28 @@ Preferred hierarchy for automation:
 3. Narrow server/API identity for runtime operations.
 4. Broad service-role/account-wide keys only when no narrower mechanism exists, with explicit owner approval and rotation plan.
 
-A general-purpose VPS agent should NOT receive the Supabase service-role key merely to deploy code. Prefer GitHub Actions or Supabase CLI/management credentials with the narrowest practical scope.
+A general-purpose VPS agent should NOT receive the Supabase service-role key merely to deploy or monitor code. Prefer GitHub Actions plus a dedicated read-only application identity for operational visibility.
 
 Telegram bot tokens belong only in server-side secret stores. A bot token is not a frontend environment variable.
+
+## Machine observer boundary
+The dedicated `agent_observer` role is read-only and intended for Hermes/VPS operational monitoring.
+
+It may receive non-PII operational summaries through `superkitchen-ops` only. It must not receive:
+- customer names, phones, addresses, notes, or Telegram identities
+- staff passwords or human admin credentials
+- Supabase service-role credentials
+- direct database write access
+- order/menu/staff mutation endpoints
+
+`superkitchen-ops` must keep `verify_jwt=true`, remain GET-only, and remain free of database mutation methods. CI enforces these invariants.
 
 ## Super Kitchen authorization
 - Customer: public menu/order creation through controlled Edge endpoint.
 - Kitchen: view operational orders and perform allowed kitchen transitions.
 - Manager: operational management functions.
 - Admin: privileged application management.
+- Agent observer: read-only non-PII operational health/summary only.
 - Browser role display is not a security boundary; backend verification is authoritative.
 
 ## Order integrity
