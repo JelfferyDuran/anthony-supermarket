@@ -83,6 +83,14 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 - GitHub Pages/tracked `dist/` has permanent source↔build consistency checks.
 - Do not point production to feature branches during testing.
 
+## Public website (root `index.html`)
+- Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
+- Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe), Visit Us (location/hours/call + embedded Google Map).
+- Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data — no hardcoded deal prices.
+- Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
+- Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
+- 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).
+
 ## Phase 2 roadmap
 - #17: Merchant Operations Platform epic
 - #18: Kitchen Dashboard MVP
