@@ -16,7 +16,6 @@ This file is operational context, not a secret store. Verify live state before c
 - UI polish branch: `phase1-ui-polish`
 - Kitchen Dashboard branch: `phase2-kitchen-dashboard`
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
-- Hermes observer branch: `agent-observer-access-v1`
 
 ## Kitchen Dashboard status
 Phase 2A currently provides:
@@ -46,13 +45,14 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 - Delivery validation/address handling is part of the staged cutover contract; coordinate frontend/backend deployment together.
 
 ## Hermes / machine observer
-- Dedicated read-only Edge Function `superkitchen-ops` version 1 is deployed and ACTIVE.
+- Dedicated read-only Edge Function `superkitchen-ops` version 2 is deployed and ACTIVE.
 - Supabase reports `verify_jwt=true` for `superkitchen-ops`.
 - Observer roles accepted by the function: `agent_observer`, `manager`, `admin`.
 - The endpoint is GET-only and returns non-PII operational summaries: order counts, status counts, last-24h gross sales excluding cancelled orders, delivery-type counts, audit-transition counts, recent order references/timestamps, and freshness/age indicators.
 - It does not return customer names, phones, addresses, notes, or Telegram identities.
-- A dedicated Hermes Auth user with `app_metadata.role=agent_observer` still needs to be created before Hermes can authenticate to this endpoint.
+- Dedicated Hermes Auth user `kingdom-hermes@agentmail.to` is confirmed and has protected `app_metadata.role=agent_observer`.
 - Hermes must not receive the Supabase service-role key for this workflow.
+- Hermes still needs its observer email/password plus the project publishable key configured only in its protected VPS environment before the authenticated smoke test can run.
 - VPS smoke-check client: `scripts/hermes-ops-check.mjs`.
 - Setup/security contract: `docs/agent-context/HERMES_ACCESS.md`.
 
