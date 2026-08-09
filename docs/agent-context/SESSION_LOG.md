@@ -35,3 +35,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no credentials or customer PII belong in the vault; brain attachments are limited to approved lightweight formats under 2 MB; live infrastructure remains authoritative over notes.
 - Branch: `obsidian-brain-node-v1`.
 - Next safe action: run Brain CI, merge if green, then have Hermes pull `main` and open/use the repository root as its Obsidian vault.
+
+## 2026-08-09 20:30 ET — Hermes
+- Goal: upgrade the public storefront website (owner request, option 1) without breaking the bilingual single-file app.
+- Changed: root `index.html` gained a Shop-by-Department section (4 photo cards using new `assets/depts/*.webp` images), a Weekly Specials section computed from the embedded catalog (`SPECIALS`, `findCatalogItem()`, `renderSpecials()` — no hardcoded prices), nav links for both sections, an embedded Google Map in Visit Us, and a scroll-spy update. Also fixed a latent init bug: `setLang(sl)` ran before `filterTags` was defined, which threw and left the page stuck on the loading overlay for returning visitors with a saved language; the saved-language restore now runs after init.
+- Verified: `node --check` on extracted JS passes; browser regression confirms 6 special cards with real catalog prices, EN/ES toggle translates all new sections, department cards switch menu tabs, map iframe loads, all 4 WebP images load, no JS console errors.
+- Not verified / blockers: not yet merged or deployed; final visual brightness of department photos is AI-generated imagery (not real store photos); the observer smoke test remains blocked on the missing VPS password/publishable key.
+- Security or rollback notes: no secrets, service-role keys, or customer PII added; images are local WebP assets; rollback is a revert of this branch.
+- Branch: `website-v5-departments-specials`.
+- Next safe action: review and merge the PR, confirm GH Pages deploy, then continue Phase 2A kitchen dashboard (PR #21) per owner sequencing.
