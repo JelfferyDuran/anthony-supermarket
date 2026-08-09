@@ -14,8 +14,15 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 ## 2026-08-08 15:21 ET — ChatGPT
 - Goal: give Hermes useful operational visibility without handing the VPS a Supabase service-role key or production mutation authority.
 - Changed: created `superkitchen-ops` as a separate GET-only Edge Function, added `agent_observer` authorization, added `scripts/hermes-ops-check.mjs`, documented `HERMES_ACCESS.md`, and added permanent CI guards for JWT verification, PII exclusion, read-only behavior, and service-role exclusion from the Hermes client.
-- Verified: Supabase deployed `superkitchen-ops` version 1 as ACTIVE with `verify_jwt=true`; deployment compilation succeeded. Live `superkitchen` was reported as version 27 during the same infrastructure check.
-- Not verified / blockers: a dedicated Hermes Supabase Auth user has not yet been created, so an authorized end-to-end observer request is still pending. This execution environment could not make the external HTTP smoke request because outbound DNS was unavailable; do not claim that network test passed.
+- Verified: Supabase deployed `superkitchen-ops`; later validation aligned the live function to version 2 ACTIVE with `verify_jwt=true`; CI #88 passed the observer Deno type-check and security invariants. Live `superkitchen` was reported as version 27 during the same infrastructure work.
 - Security or rollback notes: customer/order function was not modified; no database schema was changed; observer endpoint contains no mutation routes and no customer PII fields. Rollback is isolated to disabling/removing `superkitchen-ops`.
-- Branch: `agent-observer-access-v1`.
-- Next safe action: create a dedicated Supabase Auth user for Hermes, assign protected `app_metadata.role=agent_observer`, configure only that account plus the publishable key on the VPS, run `node scripts/hermes-ops-check.mjs`, then merge this branch if CI is green.
+- PR/issue: observer PR #23 merged into `main`; onboarding checklist #24 tracks runtime activation.
+- Next safe action: provision the dedicated Hermes observer identity and run the authenticated VPS smoke test.
+
+## 2026-08-08 22:02 ET — ChatGPT
+- Goal: activate the dedicated Hermes observer identity without broadening its authority.
+- Changed: no schema or application code changes. Updated only protected Auth app metadata for the dedicated machine account.
+- Verified: `kingdom-hermes@agentmail.to` exists in Supabase Auth, is email-confirmed, and now has `app_metadata.role=agent_observer`.
+- Not verified / blocker: Hermes has not yet demonstrated an authenticated request from the VPS because its password and publishable key still need to be configured in `/opt/data/anthony-ops.env` and `scripts/hermes-ops-check.mjs` still needs to be run there.
+- Security notes: no password, publishable key, service-role key, or customer PII was written to GitHub. Hermes remains GET-only through `superkitchen-ops`; do not grant `SUPABASE_SERVICE_ROLE_KEY`.
+- Next safe action: configure the observer email/password and publishable key directly on the Hermes VPS, run the smoke test, then record only the non-secret pass/fail result.
