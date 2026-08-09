@@ -25,6 +25,9 @@ out/
 *.swo
 *~
 
+# Obsidian local state
+.obsidian/
+
 # OS
 .DS_Store
 Thumbs.db

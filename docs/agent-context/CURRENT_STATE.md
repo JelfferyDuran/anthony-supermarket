@@ -1,21 +1,34 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 This file is operational context, not a secret store. Verify live state before consequential actions.
 
 ## Repository
 - Canonical repo: `JelfferyDuran/anthony-supermarket`
 - Default branch: `main`
+- Repository root is also the shared Obsidian vault.
+- Human/agent working brain: `brain/`
 - Customer/KDS code: `apps/superkitchen`
 - Supabase code/migrations: `supabase/`
 - Isolated Telegram bot v2 runtime: `server/bot-v2/`
+
+## Shared Obsidian brain
+- Obsidian should open the repository root directly; no second writable mirror is required.
+- Home/navigation note: `brain/00 - Anthony HQ.md`.
+- Working folders: `brain/Inbox/`, `brain/Decisions/`, `brain/Sessions/`, `brain/Attachments/`.
+- `docs/agent-context/` remains the canonical operational-state and cross-agent handoff layer.
+- GitHub provides version history, backup, PR review, collaboration, and rollback for the brain.
+- Local `.obsidian/` state is ignored and must not be committed.
+- Shared Brain CI enforces allowed lightweight file types, 2 MB maximum brain-file size, no tracked `.obsidian/` state, canonical entry points, and obvious-secret scanning.
+- Live infrastructure remains authoritative for runtime state when notes and deployed systems disagree.
 
 ## Current Super Kitchen workstreams
 - Secure Phase 1 cutover branch: `phase1-cutover-v3`
 - UI polish branch: `phase1-ui-polish`
 - Kitchen Dashboard branch: `phase2-kitchen-dashboard`
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
+- Obsidian brain node branch: `obsidian-brain-node-v1`
 
 ## Kitchen Dashboard status
 Phase 2A currently provides:
@@ -85,4 +98,4 @@ Recommended sequence:
 6. Add payment/delivery/POS/inventory integrations only after the order lifecycle is stable.
 
 ## Data caution
-At the time this file was created, production contained older unresolved orders from earlier testing/usage. Do not bulk-complete or delete them automatically. Review explicitly and preserve audit history.
+Production contains older unresolved orders from earlier testing/usage. Do not bulk-complete or delete them automatically. Review explicitly and preserve audit history.
