@@ -26,3 +26,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified / blocker: Hermes has not yet demonstrated an authenticated request from the VPS because its password and publishable key still need to be configured in `/opt/data/anthony-ops.env` and `scripts/hermes-ops-check.mjs` still needs to be run there.
 - Security notes: no password, publishable key, service-role key, or customer PII was written to GitHub. Hermes remains GET-only through `superkitchen-ops`; do not grant `SUPABASE_SERVICE_ROLE_KEY`.
 - Next safe action: configure the observer email/password and publishable key directly on the Hermes VPS, run the smoke test, then record only the non-secret pass/fail result.
+
+## 2026-08-09 00:07 ET — ChatGPT
+- Goal: add Obsidian as the shared human/agent brain and lightweight backup workflow without creating duplicate writable knowledge stores.
+- Changed: made the repository root the intended Obsidian vault, added `brain/00 - Anthony HQ.md`, Inbox/Decisions/Sessions/Attachments workspaces, updated `AGENTS.md` and the handoff protocol, ignored local `.obsidian/` state, and added Shared Brain CI guards for file types, size, obvious secrets, and canonical entry points.
+- Verified: implementation is isolated to repository knowledge/workflow files; no runtime application, database, pricing, auth, or customer-order behavior was changed.
+- Not verified / blocker: Obsidian itself has not yet been opened against the repo on the Hermes VPS/desktop; local UI/plugin state remains intentionally outside Git.
+- Security or rollback notes: no credentials or customer PII belong in the vault; brain attachments are limited to approved lightweight formats under 2 MB; live infrastructure remains authoritative over notes.
+- Branch: `obsidian-brain-node-v1`.
+- Next safe action: run Brain CI, merge if green, then have Hermes pull `main` and open/use the repository root as its Obsidian vault.
