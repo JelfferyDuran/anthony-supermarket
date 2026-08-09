@@ -1,0 +1,82 @@
+name: Shared Brain CI
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'brain/**'
+      - 'docs/agent-context/**'
+      - '.gitignore'
+      - '.github/workflows/brain-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'AGENTS.md'
+      - 'brain/**'
+      - 'docs/agent-context/**'
+      - '.gitignore'
+      - '.github/workflows/brain-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  brain-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Keep Obsidian local state untracked
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files '.obsidian/**' | grep -q .; then
+            echo '.obsidian local state must not be committed.'
+            exit 1
+          fi
+
+      - name: Validate brain file types and size
+        shell: python
+        run: |
+          from pathlib import Path
+
+          allowed = {'.md', '.txt', '.json', '.yaml', '.yml', '.csv', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.pdf'}
+          max_bytes = 2 * 1024 * 1024
+          root = Path('brain')
+          problems = []
+
+          for path in root.rglob('*'):
+              if not path.is_file():
+                  continue
+              if path.suffix.lower() not in allowed:
+                  problems.append(f'unsupported type: {path}')
+              if path.stat().st_size > max_bytes:
+                  problems.append(f'file exceeds 2 MB: {path}')
+
+          if problems:
+              raise SystemExit('\n'.join(problems))
+
+      - name: Scan shared brain for obvious secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nEI '(service[_-]?role|api[_-]?key|telegram[_-]?token|password|secret)[[:space:]]*[:=][[:space:]]*[^<{$[:space:]][^[:space:]]{7,}' -- AGENTS.md brain docs/agent-context; then
+            echo 'Potential secret value detected in shared brain. Store secrets only in approved secret stores.'
+            exit 1
+          fi
+
+      - name: Require canonical brain entry points
+        shell: python
+        run: |
+          from pathlib import Path
+          required = [
+              Path('AGENTS.md'),
+              Path('brain/00 - Anthony HQ.md'),
+              Path('docs/agent-context/CURRENT_STATE.md'),
+              Path('docs/agent-context/OPERATING_RULES.md'),
+              Path('docs/agent-context/HANDOFF_PROTOCOL.md'),
+              Path('docs/agent-context/SESSION_LOG.md'),
+          ]
+          missing = [str(p) for p in required if not p.exists()]
+          if missing:
+              raise SystemExit('Missing required brain files: ' + ', '.join(missing))
