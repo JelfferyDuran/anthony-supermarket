@@ -54,3 +54,7 @@ docs/pricing/*.csv
 
 # Runtime data
 server/data/
+
+# NRS pipeline
+nrs/.env
+nrs/inbox/*.csv
