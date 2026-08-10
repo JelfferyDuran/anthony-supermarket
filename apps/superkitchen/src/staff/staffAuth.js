@@ -128,7 +128,7 @@ export function isStaffRole(role) {
   return ['kitchen', 'manager', 'admin'].includes(role);
 }
 
-async function staffFetch(path, options = {}) {
+export async function staffFetch(path, options = {}) {
   const session = await refreshSession(false);
   if (!session?.access_token) throw new Error('Staff sign-in required');
   const res = await fetch(`${API_BASE}${path}`, {
@@ -146,6 +146,29 @@ async function staffFetch(path, options = {}) {
     throw error;
   }
   return body;
+}
+
+export function isManagerRole(role) {
+  return ['manager', 'admin'].includes(role);
+}
+
+export async function getAdminOverview() {
+  return staffFetch('/api/admin/overview');
+}
+
+export async function getAdminInsights(days = 7) {
+  return staffFetch(`/api/admin/insights?days=${encodeURIComponent(days)}`);
+}
+
+export async function getAdminAudit() {
+  return staffFetch('/api/admin/audit');
+}
+
+export async function previewPricingReport(payload) {
+  return staffFetch('/api/admin/pricing/preview', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function listOrders() {

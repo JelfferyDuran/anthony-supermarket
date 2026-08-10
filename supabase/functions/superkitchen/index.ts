@@ -1,4 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { buildPricingPreview, InvoicePricingError } from "../_shared/invoicePricing.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -200,6 +201,11 @@ async function requireStaff(req: Request) {
   return ["kitchen", "manager", "admin"].includes(role) ? { user: data.user, role } : null;
 }
 
+async function requireManager(req: Request) {
+  const staff = await requireStaff(req);
+  return staff && ["manager", "admin"].includes(staff.role) ? staff : null;
+}
+
 async function parseLimitedJson(req: Request) {
   const raw = await req.text();
   if (encoder.encode(raw).byteLength > 32768) throw new Error("REQUEST_TOO_LARGE");
@@ -367,6 +373,147 @@ async function handleAudit(req: Request, id: string) {
   return json(req, data);
 }
 
+function startOfStoreDayIso() {
+  const now = new Date();
+  const storeClock = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const offsetNow = now.getTime() - storeClock.getTime();
+  storeClock.setHours(0, 0, 0, 0);
+  return new Date(storeClock.getTime() + offsetNow).toISOString();
+}
+
+async function handleAdminOverview(req: Request) {
+  if (!(await requireManager(req))) return json(req, { error: "Unauthorized" }, 401);
+  const start = startOfStoreDayIso();
+  const { data, error } = await admin
+    .from("orders")
+    .select("id,total,estado,created_at,updated_at")
+    .gte("created_at", start)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) return json(req, { error: "Failed to load overview" }, 500);
+
+  const orders = data || [];
+  const includedOrders = orders.filter((order) => order.estado !== "cancelado");
+  const completed = includedOrders.filter((order) => order.estado === "completado");
+  const orderValueToday = includedOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const prepSamples = completed
+    .map((order) => (new Date(order.updated_at).getTime() - new Date(order.created_at).getTime()) / 60000)
+    .filter((minutes) => Number.isFinite(minutes) && minutes >= 0 && minutes <= 24 * 60);
+
+  return json(req, {
+    ordersToday: orders.length,
+    orderValueToday: Math.round(orderValueToday * 100) / 100,
+    averageOrder: includedOrders.length ? Math.round((orderValueToday / includedOrders.length) * 100) / 100 : 0,
+    activeOrders: orders.filter((order) => ["recibido", "preparando", "listo"].includes(order.estado)).length,
+    averagePrepMinutes: prepSamples.length ? Math.round(prepSamples.reduce((sum, value) => sum + value, 0) / prepSamples.length) : 0,
+    generatedAt: new Date().toISOString(),
+  });
+}
+
+async function handleAdminAudit(req: Request) {
+  if (!(await requireManager(req))) return json(req, { error: "Unauthorized" }, 401);
+  const { data, error } = await admin
+    .from("order_audit_log")
+    .select("id,order_id,from_status,to_status,actor_role,source,created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) return json(req, { error: "Failed to load audit log" }, 500);
+  return json(req, data || []);
+}
+
+async function handlePricingPreview(req: Request) {
+  if (!(await requireManager(req))) return json(req, { error: "Unauthorized" }, 401);
+  let body: any;
+  try {
+    body = await parseLimitedJson(req);
+  } catch (e) {
+    return json(req, { error: (e as Error).message === "REQUEST_TOO_LARGE" ? "Pricing report is too large" : "Invalid JSON" }, 400);
+  }
+  try {
+    return json(req, { ...buildPricingPreview(body), generatedAt: new Date().toISOString() });
+  } catch (error) {
+    if (error instanceof InvoicePricingError) return json(req, { error: error.message }, 400);
+    throw error;
+  }
+}
+
+function trafficDevice(userAgent: string) {
+  if (/tablet|ipad/i.test(userAgent)) return "tablet";
+  if (/mobile|iphone|android/i.test(userAgent)) return "mobile";
+  return "desktop";
+}
+
+async function trafficRateLimited(req: Request) {
+  const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  const ua = (req.headers.get("user-agent") || "unknown").slice(0, 160);
+  const keyHash = await sha256Hex(`${ip}|${ua}|superkitchen-traffic`);
+  const { data, error } = await admin.rpc("consume_order_rate_limit", {
+    p_key_hash: keyHash,
+    p_limit: 60,
+    p_window_seconds: 60,
+  });
+  if (!error && typeof data === "boolean") return !data;
+  return fallbackRateLimited(keyHash);
+}
+
+async function handleTrafficEvent(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  if (!ALLOWED_ORIGINS.has(origin)) return json(req, { error: "Origin not allowed" }, 403);
+  if (await trafficRateLimited(req)) return json(req, { error: "Too many requests" }, 429);
+  let body: any;
+  try { body = await parseLimitedJson(req); } catch { return json(req, { error: "Invalid JSON" }, 400); }
+  const path = String(body?.path || "/").split(/[?#]/)[0].slice(0, 160);
+  const source = String(body?.source || "direct").toLowerCase().replace(/[^a-z0-9.-]/g, "").slice(0, 100) || "direct";
+  const language = String(body?.language || "unknown").toLowerCase().match(/^[a-z]{2}$/)?.[0] || "unknown";
+  if (!path.startsWith("/") || path.includes("..")) return json(req, { error: "Invalid path" }, 400);
+  const { error } = await admin.from("site_traffic_events").insert({
+    path,
+    source,
+    device: trafficDevice(req.headers.get("user-agent") || ""),
+    language,
+  });
+  if (error) {
+    console.error("traffic insert failed", error.message);
+    return json(req, { error: "Traffic service unavailable" }, 503);
+  }
+  // Privacy retention: discard events older than 90 days. No customer/order data is touched.
+  await admin.from("site_traffic_events").delete().lt("occurred_at", new Date(Date.now() - 90 * 86400000).toISOString());
+  return json(req, { ok: true }, 202);
+}
+
+function countRows(rows: any[], key: string) {
+  const counts = new Map<string, number>();
+  rows.forEach((row) => counts.set(String(row[key] || "unknown"), (counts.get(String(row[key] || "unknown")) || 0) + 1));
+  return Array.from(counts, ([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 12);
+}
+
+async function handleAdminInsights(req: Request) {
+  if (!(await requireManager(req))) return json(req, { error: "Unauthorized" }, 401);
+  const requested = Number(new URL(req.url).searchParams.get("days") || 7);
+  const days = Number.isInteger(requested) ? Math.min(30, Math.max(1, requested)) : 7;
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const { data, error } = await admin
+    .from("site_traffic_events")
+    .select("path,source,device,language,occurred_at")
+    .gte("occurred_at", since)
+    .order("occurred_at", { ascending: false })
+    .limit(10000);
+  if (error) return json(req, { error: "Traffic insights are not deployed yet" }, 503);
+  const rows = data || [];
+  const storeHour = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", hourCycle: "h23" });
+  const hourRows = rows.map((row) => ({ hour: `${storeHour.format(new Date(row.occurred_at))}:00` }));
+  return json(req, {
+    days,
+    totalViews: rows.length,
+    topPages: countRows(rows, "path"),
+    sources: countRows(rows, "source"),
+    devices: countRows(rows, "device"),
+    languages: countRows(rows, "language"),
+    hourly: countRows(hourRows, "hour").sort((a, b) => a.label.localeCompare(b.label)),
+    generatedAt: new Date().toISOString(),
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(req) });
   const path = new URL(req.url).pathname.replace(/^\/[^/]+/, "") || "/";
@@ -375,6 +522,11 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && path === "/") return rootHtml(req);
     if (req.method === "POST" && (path === "/orders" || path === "/api/orders")) return await handleCreateOrder(req);
     if (req.method === "GET" && (path === "/orders" || path === "/api/orders")) return await handleListOrders(req);
+    if (req.method === "POST" && path === "/api/traffic") return await handleTrafficEvent(req);
+    if (req.method === "GET" && path === "/api/admin/overview") return await handleAdminOverview(req);
+    if (req.method === "GET" && path === "/api/admin/audit") return await handleAdminAudit(req);
+    if (req.method === "GET" && path === "/api/admin/insights") return await handleAdminInsights(req);
+    if (req.method === "POST" && path === "/api/admin/pricing/preview") return await handlePricingPreview(req);
 
     const audit = path.match(/^\/(?:api\/)?orders\/([^/]+)\/audit$/);
     if (req.method === "GET" && audit) return await handleAudit(req, audit[1]);
