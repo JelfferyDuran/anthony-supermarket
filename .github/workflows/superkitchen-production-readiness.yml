@@ -1,0 +1,35 @@
+name: Super Kitchen Production Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'apps/superkitchen/**'
+      - 'server/**'
+      - 'render.yaml'
+      - 'scripts/check-superkitchen-prod-readiness.mjs'
+      - '.github/workflows/superkitchen-production-readiness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/superkitchen/**'
+      - 'server/**'
+      - 'render.yaml'
+      - 'scripts/check-superkitchen-prod-readiness.mjs'
+      - '.github/workflows/superkitchen-production-readiness.yml'
+
+jobs:
+  superkitchen-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Production readiness guards
+        run: node scripts/check-superkitchen-prod-readiness.mjs
+      - name: Bot v2 syntax check
+        working-directory: server/bot-v2
+        run: npm ci && npm run check
+      - name: Mini App build
+        working-directory: apps/superkitchen
+        run: npm ci && npm run build
