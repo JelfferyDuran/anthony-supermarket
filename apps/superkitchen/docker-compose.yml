@@ -12,7 +12,7 @@ services:
       - ./server/.env
     environment:
       - NODE_ENV=production
-      - BOT_URL=https://t.me/SuperAnthbot
+      - BOT_URL=https://t.me/Anthonysuperkitchen_bot
     volumes:
       - ./server/data:/app/server/data
       - ./public/generated-images:/app/public/generated-images

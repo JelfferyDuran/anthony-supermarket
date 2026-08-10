@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
+const kitchenAide = require('./kitchen-aide');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -544,6 +545,11 @@ function startBot() {
       if (data.startsWith('back:')) {
         bot.emit('text', { chat: { id: chatId }, text: '/menu' });
       }
+
+      // Kitchen Aide: status buttons in the kitchen group's order threads
+      if (data.startsWith('kitchen:status:')) {
+        return kitchenAide.handleStatusCallback(query);
+      }
     });
 
     // Search
@@ -674,6 +680,19 @@ function startBot() {
       }
     });
 
+    // Kitchen Aide: customer DMs (relay to kitchen thread) + kitchen thread replies (relay to customer)
+    bot.on('message', async (msg) => {
+      // Kitchen group thread reply -> relay back to customer
+      if (msg.chat && String(msg.chat.id) === String(KITCHEN_CHAT_ID || '')) {
+        return kitchenAide.handleKitchenThreadReply(msg);
+      }
+      // Private chat (customer DM) -> relay into their latest order thread
+      if (msg.chat && msg.chat.type === 'private') {
+        return kitchenAide.handleCustomerDm(msg);
+      }
+      return undefined;
+    });
+
     // Help
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(msg.chat.id,
@@ -757,6 +776,9 @@ function startBot() {
   } catch (e) {
     console.error('❌ Bot failed to start:', e.message);
   }
+
+  // 🧑‍🍳 Kitchen Aide: order threads in the kitchen group
+  kitchenAide.startKitchenAide(bot, MINIAPP_API_URL, KITCHEN_CHAT_ID);
 }
 
 // ─── Start ────────────────────────────────────────────────────────────
