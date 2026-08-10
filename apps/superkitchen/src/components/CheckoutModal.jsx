@@ -23,23 +23,23 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
     setState('submitting');
     setErrorMsg('');
     try {
-      // Capture Telegram user id when the app runs inside the Telegram webview,
-      // so the bot can DM this customer about their order.
-      let telegramId = null;
+      // Capture Telegram session so the API can verify + get the user id,
+      // enabling the bot to DM this customer about their order.
+      let telegramInitData = '';
       try {
-        telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id ?? null;
-      } catch { /* not in Telegram — that's fine */ }
+        telegramInitData = window.Telegram?.WebApp?.initData || '';
+      } catch { /* not in Telegram — anonymous order, no DM relay */ }
 
       const res = await createOrder({
         items: cart.items,
         customer: {
           nombre: nombre.trim(),
           telefono: telefono.trim(),
-          telegramId,
         },
         tipoEntrega,
         direccion: tipoEntrega === 'delivery' ? direccion.trim() : '',
         notas: notas.trim(),
+        telegramInitData,
       });
       setOrderId(res.orderId);
       setState('done');
