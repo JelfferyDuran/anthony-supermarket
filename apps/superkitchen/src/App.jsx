@@ -24,6 +24,11 @@ export default function App() {
     return CATEGORY_ORDER.filter(c => byName[c]).map(c => ({ name: c, products: byName[c] }));
   }, []);
 
+  const goCart = () => {
+    setScreen('cart');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -36,7 +41,7 @@ export default function App() {
         </div>
         <button
           className="cart-badge"
-          onClick={() => setScreen('cart')}
+          onClick={goCart}
           disabled={cart.totals.count === 0}
         >
           🛍️ {cart.totals.count > 0 ? cart.totals.count : ''}
@@ -44,20 +49,45 @@ export default function App() {
       </header>
 
       {screen === 'menu' && (
-        <MenuScreen
-          categories={categories}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-          onCustomize={setCustomizing}
-        />
+        <div className="screen screen-menu">
+          <section className="hero-banner">
+            <div className="hero-text">
+              <span className="hero-kicker">🔥 HECHO FRESCO · DOMINICAN FAST FOOD</span>
+              <h2>Order ahead, skip the line.</h2>
+              <p>Pick up at <strong>288 Kearny Ave, Kearny NJ</strong> — or get it delivered.</p>
+            </div>
+            <div className="hero-badges">
+              <span className="hero-badge">🕐 7AM–8PM</span>
+              <span className="hero-badge">📞 (201) 428-1745</span>
+            </div>
+          </section>
+
+          <MenuScreen
+            categories={categories}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+            onCustomize={setCustomizing}
+          />
+        </div>
       )}
 
       {screen === 'cart' && (
-        <CartScreen
-          cart={cart}
-          onBack={() => setScreen('menu')}
-          onCheckout={() => setCheckoutOpen(true)}
-        />
+        <div className="screen screen-cart">
+          <CartScreen
+            cart={cart}
+            onBack={() => setScreen('menu')}
+            onCheckout={() => setCheckoutOpen(true)}
+          />
+        </div>
+      )}
+
+      {/* Sticky bottom cart bar (menu screen only, items exist) */}
+      {screen === 'menu' && cart.totals.count > 0 && (
+        <button className="sticky-cart" onClick={goCart}>
+          <span className="sticky-cart-icon">🛍️</span>
+          <span className="sticky-cart-label">View Cart · {cart.totals.count} {cart.totals.count === 1 ? 'item' : 'items'}</span>
+          <span className="sticky-cart-total">${cart.totals.total.toFixed(2)}</span>
+        </button>
       )}
 
       {customizing && (

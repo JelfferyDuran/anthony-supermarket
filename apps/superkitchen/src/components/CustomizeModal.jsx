@@ -90,8 +90,29 @@ export default function CustomizeModal({ product, menuData, cart, onClose }) {
 
         {error && <p className="error-text">{error}</p>}
 
-        <div className="modal-footer">
-          <div className="line-total">${lineTotal.toFixed(2)}</div>
+        <div className="modal-footer total-footer">
+          <div className="total-detail">
+            <div className="total-detail-line">
+              <span>{product.name}</span>
+              <span>${product.basePrice.toFixed(2)}</span>
+            </div>
+            {selectedMeat?.priceDelta > 0 && (
+              <div className="total-detail-line premium-line">
+                <span>Premium: {selectedMeat.name}</span>
+                <span>+${selectedMeat.priceDelta.toFixed(2)}</span>
+              </div>
+            )}
+            {qty > 1 && (
+              <div className="total-detail-line">
+                <span>Qty ×{qty}</span>
+                <span>${unitPrice.toFixed(2)} ea</span>
+              </div>
+            )}
+            <div className="total-detail-grand">
+              <span>Total</span>
+              <span className="line-total">${lineTotal.toFixed(2)}</span>
+            </div>
+          </div>
           <button className="btn btn-primary btn-lg" onClick={handleAdd}>
             Add to Cart
           </button>
