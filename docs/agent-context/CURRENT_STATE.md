@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 This file is operational context, not a secret store. Verify live state before consequential actions.
 
@@ -30,6 +30,15 @@ This file is operational context, not a secret store. Verify live state before c
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
 - Obsidian brain node branch: `obsidian-brain-node-v1`
 
+## 2026-08-10 production-readiness remediation draft
+- Branch `superkitchen-prod-readiness-audit-fixes` ports only the current-main safety fixes needed before production deployment.
+- Mini App `index.html` loads the Telegram Web App SDK so `window.Telegram.WebApp.initData` can be captured by `CheckoutModal` and verified by the Supabase `superkitchen` Edge Function.
+- Render `anthonys-order-api` is moved from legacy `server/` to isolated `server/bot-v2/`.
+- `server/bot-v2/` has no database credentials and no Telegram status-mutation callback path. It can send customer receipt links and exposes only a token-protected `/api/kitchen/notify` route for kitchen group alerts.
+- `KITCHEN_CHAT_ID` and `KITCHEN_NOTIFY_TOKEN` are server-side only. Do not expose them in Vite/frontend variables.
+- The Mini App static/admin server no longer creates, lists, looks up, or mutates orders directly; those routes return `410` and point callers to the protected Supabase Edge Function.
+- New CI guard `scripts/check-superkitchen-prod-readiness.mjs` blocks regressions for missing Telegram SDK, legacy Render root, direct Mini App order table access, public order lists, unaudited status updates, and Telegram callback mutation handling.
+- Not deployed or merged yet. Do not deploy/merge until CI passes and one controlled Telegram Mini App order proves `telegramVerified=true` plus audited KDS transitions through `staff_update_order_status`.
 ## Kitchen Dashboard status
 Phase 2A currently provides:
 - authenticated staff entry via `?staff=1`

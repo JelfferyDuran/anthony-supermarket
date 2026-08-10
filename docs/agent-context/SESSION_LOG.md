@@ -44,3 +44,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets, service-role keys, or customer PII added; images are local WebP assets; rollback is a revert of this branch.
 - Branch: `website-v5-departments-specials`.
 - Next safe action: review and merge the PR, confirm GH Pages deploy, then continue Phase 2A kitchen dashboard (PR #21) per owner sequencing.
+
+## 2026-08-10 18:45 ET - Codex
+- Goal: prepare a production-readiness remediation branch for Super Kitchen without deploying or changing production data.
+- Changed: added Telegram Web App SDK loading to the Mini App shell, added isolated `server/bot-v2/` runtime, moved Render `anthonys-order-api` to bot-v2, added token-protected notification-only `/api/kitchen/notify`, retired Mini App server order routes with `410`, and added Super Kitchen production-readiness CI guards.
+- Verified: local static guards pass; bot-v2 syntax check passes. No production deployment was performed.
+- Not verified / blockers: CI has not completed yet; no controlled Telegram Mini App E2E order has been run; `telegramVerified=true` and audited KDS transitions still require live proof before merge/deploy.
+- Security or rollback notes: no secrets or PII committed; `KITCHEN_CHAT_ID` and `KITCHEN_NOTIFY_TOKEN` remain server-side only; bot-v2 has no direct database writes or Telegram status mutation route.
+- PR/issue/commit: draft PR pending from `superkitchen-prod-readiness-audit-fixes`.
+- Next safe action: wait for CI, then run one controlled Telegram order and verify `telegramVerified=true` plus staff audit entries before any production merge/deploy.
