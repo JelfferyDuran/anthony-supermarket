@@ -85,11 +85,17 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 
 ## Public website (root `index.html`)
 - Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
-- Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe), Visit Us (location/hours/call + embedded Google Map).
-- Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data — no hardcoded deal prices.
+- Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Featured This Week, Menu (embedded catalog), Visit Us (location/hours/call + embedded Google Map).
+- The internal Pricing Hub iframe, public navigation link, and hero link were removed; wholesale costs and markup tools no longer appear on the customer storefront.
+- The public summary strip contains customer-safe facts only (product count, departments, bilingual service, and days open); inventory cost, retail-value, and profit projections are manager-only.
+- Featured items are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so approved prices stay in sync with the menu data — no hardcoded deal prices and no unsupported discount claim.
 - Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
+- Department cards support mouse, touch, Enter, and Space with visible keyboard focus.
+- Store name/logo lockups, address, phone, UPCs, and official brand tokens remain invariant. Generic product names use the catalog's curated EN/ES fields, so Spanish mode stays complete without machine-translating brands.
+- A privacy-minimized traffic signal is staged for the protected manager Insights API. It sends path, referrer domain, coarse device class, and the storefront language selected by the customer; it contains no customer/order PII and respects both Do Not Track and Global Privacy Control. The endpoint/schema must deploy before events are accepted.
 - Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
 - 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).
+- 2026-08-09: separated the public storefront from internal pricing, made brand/product identity translation-safe, renamed non-discounted specials to Featured This Week, added department keyboard activation, and staged the traffic signal behind its protected API rollout.
 
 ## Phase 2 roadmap
 - #17: Merchant Operations Platform epic

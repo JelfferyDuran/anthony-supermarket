@@ -44,3 +44,21 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets, service-role keys, or customer PII added; images are local WebP assets; rollback is a revert of this branch.
 - Branch: `website-v5-departments-specials`.
 - Next safe action: review and merge the PR, confirm GH Pages deploy, then continue Phase 2A kitchen dashboard (PR #21) per owner sequencing.
+
+## 2026-08-09 18:35 ET — Codex
+- Goal: make the storefront a clean customer surface while moving Pricing Hub concepts into the authenticated admin roadmap and adding brand-safe bilingual behavior plus traffic readiness.
+- Changed: removed public Pricing Hub navigation/hero/iframe exposure; renamed non-discounted Weekly Specials to Featured This Week; protected store/product brand data from translation; added Enter/Space activation and focus treatment to department cards; staged a privacy-minimized traffic signal; added permanent Storefront CI guards.
+- Verified: all inline storefront JavaScript parses; the storefront guard confirms no public internal-tool link/iframe, brand translation exclusion, keyboard activation, traffic route presence, and removal of the inaccurate live-Pricing-Hub copy; `git diff --check` passes.
+- Not verified / blockers: branch is not pushed/deployed; full visual browser review awaits a preview URL; traffic events will return unavailable until the Phase 2B schema/function deployment is approved.
+- Security or rollback notes: no invoice scans, wholesale costs, customer PII, credentials, or production data changed; the traffic signal respects Do Not Track and sends no name/phone/address/order data.
+- PR/issue/commit: branch `agent/website-v6-brand-safe-insights`; PR pending.
+- Next safe action: push and open a ready-for-review storefront PR to `main`, verify CI/preview, then merge and confirm GitHub Pages.
+
+## 2026-08-09 19:38 ET — Codex
+- Goal: finish the owner-approved storefront integrity pass before publication.
+- Changed: restored curated Spanish names for generic products while preserving brand tokens; propagated selected-language names through specials, cart, and checkout; made traffic honor Global Privacy Control and report the chosen storefront language; removed public inventory-cost, retail-value, and projected-profit metrics and their misleading client calculation.
+- Verified: all inline JavaScript parses; Storefront CI-equivalent guard passes; local HTTP smoke returns the v6 application; internal Pricing Hub links/iframe, wholesale accounting copy/calculation, generic-name translation freeze, and inaccurate Pricing Hub claims are absent; DNT/GPC, keyboard activation, and selected-language traffic guards are present; obvious-secret scan and `git diff --check` pass.
+- Not verified / blockers: local Chromium download was blocked, so final responsive/console visual QA must use the GitHub/Vercel preview. The traffic endpoint remains rollout-dependent and will safely fail closed until the protected Phase 2B backend is deployed.
+- Security or rollback notes: invoice scans, wholesale costs, credentials, and customer PII remain excluded; this is an isolated storefront commit and can be reverted independently.
+- PR/issue/commit: branch `agent/website-v6-brand-safe-insights`; PR pending.
+- Next safe action: commit/push, open the storefront PR to `main`, inspect CI and preview, then merge only after the preview is clean.
