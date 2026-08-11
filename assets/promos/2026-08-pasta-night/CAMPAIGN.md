@@ -33,6 +33,30 @@ flyer, website specials).
 | 🥈 Pantry staples | Hunt's Diced/Whole, Victoria paste, Goya sauce/salsa/paste | Sunday sauce builders |
 | 🥉 Quick-win | Maruchan Instant Lunch, Cup Noodles | "$2 lunch" traffic driver |
 | 🔗 Cross-sell | Galo Lasanha sheets, pesto, Prego Alfredo, Solias crackers | Second-night meals |
+| 💎 Premium line | Rummo (see §3a) | Imported quality story |
+
+## 3a. Rummo — the Premium Feature (product shots in `products/`)
+
+Full range confirmed on shelf (all 1lb/454g unless noted, bronze-cut, "Lenta
+Lavorazione" slow method):
+
+| Shape | Code | Notes |
+|---|---|---|
+| Penne Rigate | Nº 66 | core seller, sauce-absorbing badge |
+| Mezzi Rigatoni | Nº 51 | chunky shape, Sunday gravy pair |
+| Rigatoni | Nº 51 | seen next to farfalle |
+| Squared Spaghetti | Nº 221 | unique square cut — great Reel subject |
+| Farfalle | Nº 85 | family/visual shape |
+| Egg Nest Fettuccine | Nº 94 | 250g, free-range Italian eggs, **price tag $2.79 spotted** |
+| Egg Nest Pappardelle | Nº 101 | 250g, eggs, "COOKS IN 5 MIN" |
+| Lasagne | Nº 83 | oven-ready OR classic, NON-GMO verified |
+
+Value tier below Rummo: Star, Organic Elbows, Mantoya, Molitalia (PASTA CORTA) —
+keeps an entry price point while Rummo carries the premium margin.
+
+**Story angle:** "From Benevento since 1846 — imported quality at a Kearny price."
+Egg-nest pastas (free-range Italian eggs) + lasagne are the margin leaders; the
+egg fettuccine at $2.79 is the anchor price for the premium shelf.
 
 ## 4. Sales Mechanics (price hooks — fill `[PRICE]` later)
 
@@ -128,3 +152,4 @@ Countdown to last deal day · Location tag (store) · Link sticker → website s
 | `aisle-pasta-sauces.webp` | Web version (site, faster load) |
 | `CAMPAIGN.md` | This brief |
 | `flyer.html` | Printable flyer template (EN/ES, price placeholders) |
+| `products/` (7 JPG + 7 WebP) | Rummo range product shots for IG carousels/reels |
