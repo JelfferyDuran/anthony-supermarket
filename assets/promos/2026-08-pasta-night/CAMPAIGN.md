@@ -60,8 +60,9 @@ egg fettuccine at $2.79 is the anchor price for the premium shelf.
 
 ## 4. Sales Mechanics (price hooks — fill `[PRICE]` later)
 
-1. ✅ **CONFIRMED — RUMMO 2 for $3.99, mix & match all shapes, WHILE SUPPLIES LAST.**
-   Math: $2.00/bag vs. $2.79 shelf tag = **~28% off**. This is the campaign anchor —
+1. ✅ **CONFIRMED — RUMMO 2 for $4, mix & match all shapes, WHILE SUPPLIES LAST**
+   (No end date — sell-through is the goal; urgency = FOMO, see §4a).
+   Math: $2.00/bag vs. $2.79 shelf tag = **~28% off**. Campaign anchor —
    hero of flyer, IG, shelf talkers. Verify per-bag cost still clears the
    cost × 1.70 rule; if a shape's cost is too high, sub it out of the deal.
 2. **Kit deal (other brands)** — pasta + sauce + canned tomatoes flat price:
@@ -69,15 +70,29 @@ egg fettuccine at $2.79 is the anchor price for the premium shelf.
 3. **BOGO sauce / 2nd jar 50%** — with pasta purchase: still `[PRICE]`/`[DEAL]` pending.
 4. **Sunday Sauce special** — Hunt's diced + Victoria paste + Goya sauce bundle:
    `[PRICE]` pending.
-5. **Meal-plan tie-in** — next to PLAN #1–4 signs: *"Plan #2 → add Rummo 2-for-$3.99"*.
+5. **Meal-plan tie-in** — next to PLAN #1–4 signs: *"Plan #2 → add Rummo 2-for-$4"*.
+   Deli counter upsells when customers pick up meal-plan meat.
    Deli counter upsells when customers pick up meal-plan meat.
 6. **Lunch lane** — Maruchan/Cup Noodles endcap or register basket: 2 for `[PRICE]`.
 7. **Premium story** — Rummo "since 1846, imported quality at a Kearny price" signs.
-8. **Pricing Hub / website** — mirror 2-for-$3.99 on the site's Weekly Specials so
+8. **Pricing Hub / website** — mirror 2-for-$4 on the site's Weekly Specials so
    IG post and store match (one source of truth).
 
 > 💡 **Rule of thumb (repo pricing rule):** retail = cost × 1.70. Bundle prices must
 > still clear that margin unless Noel overrides for a loss-leader item.
+
+## 4a. FOMO Strategy (no end date — by design)
+
+The sale runs **until stock runs out**. That's a feature, not a bug: scarcity is
+the engine. Execution rules:
+- **Never print a date.** Every sign/card says "WHILE SUPPLIES LAST" — that's the deadline.
+- **Stock signal:** when ~25–30% of Rummo stock remains, brother posts the
+  FOMO closer card (05) — "When it's gone, it's gone."
+- **Stories:** countdown sticker without a date; shelf-restock BTS video;
+  "last few bags" shots when the shelf thins out.
+- **Registers:** cashiers say "grab 2 before they're gone" — free FOMO at checkout.
+- If it sells through fast: reorder + relaunch as "back by popular demand" — the
+  cycle feeds itself.
 
 ## 5. What to PRINT (in-store)
 
@@ -114,7 +129,7 @@ egg fettuccine at $2.79 is the anchor price for the premium shelf.
 
 ### Caption template (bilingual, day-1 example)
 
-> 🍝 **RUMMO 2 FOR $3.99 — mix & match ANY shape!** 🇺🇸🇪🇸
+> 🍝 **RUMMO 2 FOR $4 — mix & match ANY shape!** 🇺🇸🇪🇸
 > Penne Rigate · Rigatoni · Squared Spaghetti · Farfalle · Egg Fettuccine ·
 > Pappardelle · Lasagne. Imported since 1846, at a Kearny price — while supplies last.
 > Grab 2, save ~28%, dinner's solved. Pair with Ragu, Prego, Hunt's, Goya, Victoria.
@@ -140,7 +155,7 @@ Countdown to last deal day · Location tag (store) · Link sticker → website s
 
 ## 8. FILL-IN LATER (from Noel)
 
-- [x] ✅ Rummo deal: **2 for $3.99 mix & match, while supplies last**
+- [x] ✅ Rummo deal: **2 for $4 mix & match, while supplies last (no end date)**
 - [ ] Kit bundle price (other brands) `[PRICE]`
 - [ ] Sauce deal: BOGO or 50%-off choice
 - [ ] Sunday sauce bundle price
@@ -155,5 +170,14 @@ Countdown to last deal day · Location tag (store) · Link sticker → website s
 | `aisle-pasta-sauces.jpg` | Master photo (print, IG feed) |
 | `aisle-pasta-sauces.webp` | Web version (site, faster load) |
 | `CAMPAIGN.md` | This brief |
-| `flyer.html` | Printable flyer template (EN/ES, price placeholders) |
+| `flyer.html` + `flyer.pdf` | Print flyer template + print-ready PDF (EN/ES) |
 | `products/` (7 JPG + 7 WebP) | Rummo range product shots for IG carousels/reels |
+| `IG-PACK/` | **Send-ready for brother** (posts on @anthony_supermarket): 6 designed cards (1080×1350), README-CAPTIONS.txt with 6 posts EN/ES + story ideas |
+| `make_ig_cards.py` | Card generator (edit + rerun to refresh cards) |
+
+## 10. IG Handoff (who posts)
+
+**Brother runs @anthony_supermarket.** Noel forwards the `IG-PACK/` zip; brother
+posts the cards + captions verbatim or edited. No direct IG API access from
+Hermes — the pack is the delivery mechanism. Get his WhatsApp/Telegram contact
+into the repo if useful for future campaigns.
