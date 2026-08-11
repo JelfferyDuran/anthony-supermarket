@@ -60,19 +60,21 @@ egg fettuccine at $2.79 is the anchor price for the premium shelf.
 
 ## 4. Sales Mechanics (price hooks — fill `[PRICE]` later)
 
-1. **Kit deal** — the engine: Pasta + Sauce + Can of Tomatoes = `[PRICE]` flat
-   (vs. `[PRICE]` separately). "Arma tu kit" sign + shelf talker.
-2. **BOGO sauce** — buy any pasta box, 2nd jar of sauce 50% off (or BOGO on Goya
-   sauce). Pick ONE to keep the register math simple.
-3. **Sunday Sauce special** — Hunt's diced + Victoria paste + Goya sauce bundle for
-   the classic NY/NJ Sunday gravy at `[PRICE]`.
-4. **Meal-plan tie-in** — next to PLAN #1–4 signs: *"Plan #2 → add Pasta Night kit
-   for `[PRICE]`."* Deli counter can upsell when customers pick up meal-plan meat.
-5. **Lunch lane** — Maruchan/Cup Noodles endcap or register basket: 2 for `[PRICE]`.
-6. **Premium story** — Rummo IGP: "imported quality, local price" sign. Margin
-   friendly; makes the aisle feel upscale while the deals feel local.
-7. **Pricing Hub / website** — mirror the same specials on the site's Weekly
-   Specials section so the IG post and the store match (one source of truth).
+1. ✅ **CONFIRMED — RUMMO 2 for $3.99, mix & match all shapes, WHILE SUPPLIES LAST.**
+   Math: $2.00/bag vs. $2.79 shelf tag = **~28% off**. This is the campaign anchor —
+   hero of flyer, IG, shelf talkers. Verify per-bag cost still clears the
+   cost × 1.70 rule; if a shape's cost is too high, sub it out of the deal.
+2. **Kit deal (other brands)** — pasta + sauce + canned tomatoes flat price:
+   still `[PRICE]` pending. "Ask at the register" callout carries it meanwhile.
+3. **BOGO sauce / 2nd jar 50%** — with pasta purchase: still `[PRICE]`/`[DEAL]` pending.
+4. **Sunday Sauce special** — Hunt's diced + Victoria paste + Goya sauce bundle:
+   `[PRICE]` pending.
+5. **Meal-plan tie-in** — next to PLAN #1–4 signs: *"Plan #2 → add Rummo 2-for-$3.99"*.
+   Deli counter upsells when customers pick up meal-plan meat.
+6. **Lunch lane** — Maruchan/Cup Noodles endcap or register basket: 2 for `[PRICE]`.
+7. **Premium story** — Rummo "since 1846, imported quality at a Kearny price" signs.
+8. **Pricing Hub / website** — mirror 2-for-$3.99 on the site's Weekly Specials so
+   IG post and store match (one source of truth).
 
 > 💡 **Rule of thumb (repo pricing rule):** retail = cost × 1.70. Bundle prices must
 > still clear that margin unless Noel overrides for a loss-leader item.
@@ -112,12 +114,13 @@ egg fettuccine at $2.79 is the anchor price for the premium shelf.
 
 ### Caption template (bilingual, day-1 example)
 
-> 🍝 **PASTA NIGHT is here — Arma tu kit!** 🇺🇸🇪🇸
-> Grab any pasta + sauce + canned tomatoes and build your kit at a bundle price.
-> One aisle. One night. Dinner solved. — from Barilla to Rummo, Ragu to Goya.
+> 🍝 **RUMMO 2 FOR $3.99 — mix & match ANY shape!** 🇺🇸🇪🇸
+> Penne Rigate · Rigatoni · Squared Spaghetti · Farfalle · Egg Fettuccine ·
+> Pappardelle · Lasagne. Imported since 1846, at a Kearny price — while supplies last.
+> Grab 2, save ~28%, dinner's solved. Pair with Ragu, Prego, Hunt's, Goya, Victoria.
 >
 > 📍 288 Kearny Ave, Kearny NJ
-> #AnthonySupermarket #KearnyNJ #PastaNight #NocheDePasta #SundaySauce
+> #AnthonySupermarket #KearnyNJ #PastaNight #NocheDePasta #Rummo #SundaySauce
 > #HudsonCounty #JerseyEats #SmallBusiness #GroceryDeals #Barilla #GoyaFoods
 
 ### Hashtag set
@@ -137,10 +140,11 @@ Countdown to last deal day · Location tag (store) · Link sticker → website s
 
 ## 8. FILL-IN LATER (from Noel)
 
-- [ ] Sale dates (start/end)
-- [ ] Kit price `[PRICE]`, BOGO or 50%-off choice
+- [x] ✅ Rummo deal: **2 for $3.99 mix & match, while supplies last**
+- [ ] Kit bundle price (other brands) `[PRICE]`
+- [ ] Sauce deal: BOGO or 50%-off choice
 - [ ] Sunday sauce bundle price
-- [ ] 2-for lunch price
+- [ ] 2-for lunch price (Maruchan/Cup Noodles)
 - [ ] Which recipes go on cards
 - [ ] IG posting approval + who runs stories
 

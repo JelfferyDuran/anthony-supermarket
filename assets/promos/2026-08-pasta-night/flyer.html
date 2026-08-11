@@ -9,7 +9,7 @@
     --green:#1e5631; --green2:#2e7d46; --cream:#fdf6e3; --red:#c0392b; --gold:#d4a017; --ink:#1c1c1c;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#888;display:flex;flex-direction:column;gap:0;align-items:center;}
+  body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#888;display:flex;flex-direction:column;align-items:center;}
   .page{
     width:215.9mm;min-height:279.4mm;background:var(--cream);color:var(--ink);
     padding:12mm 14mm;margin:6mm auto;position:relative;overflow:hidden;display:flex;flex-direction:column;
@@ -22,22 +22,28 @@
   h1{font-size:34pt;line-height:1.02;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin:2mm 0 1mm;}
   h1 span{color:var(--green);}
   .sub{font-size:13pt;font-weight:600;color:var(--ink);margin-bottom:5mm;}
-  .heroimg{width:100%;height:62mm;object-fit:cover;border-radius:3mm;margin-bottom:5mm;border:2px solid var(--green);}
-  .dealgrid{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-bottom:5mm;}
-  .deal{background:#fff;border:2px solid var(--green);border-radius:3mm;padding:4mm;text-align:center;}
-  .deal .big{font-size:24pt;font-weight:800;color:var(--red);}
-  .deal .lbl{font-size:11pt;font-weight:700;}
-  .deal .note{font-size:8.5pt;color:#555;margin-top:1mm;}
-  .deal.hot{background:var(--green);color:#fff;border-color:var(--gold);}
-  .deal.hot .big{color:var(--gold);}
-  .deal.hot .note{color:#dcefe2;}
+  .heroimg{width:100%;height:58mm;object-fit:cover;border-radius:3mm;margin-bottom:5mm;border:2px solid var(--green);}
+  .herobanner{
+    background:var(--green);color:#fff;border-radius:3mm;padding:6mm 5mm;text-align:center;
+    border:3px solid var(--gold);margin-bottom:4mm;
+  }
+  .herobanner .brandline{font-size:15pt;font-weight:800;letter-spacing:3px;color:var(--gold);}
+  .herobanner .deal{font-size:40pt;font-weight:900;line-height:1.05;color:#fff;margin:1mm 0;}
+  .herobanner .deal span{color:var(--gold);}
+  .herobanner .mix{font-size:13pt;font-weight:700;margin-bottom:1mm;}
+  .herobanner .shapes{font-size:9.5pt;color:#dcefe2;line-height:1.4;}
+  .savings{display:flex;justify-content:center;gap:4mm;margin-top:2mm;}
+  .savings .chip{background:var(--gold);color:var(--ink);font-weight:800;font-size:10.5pt;border-radius:2mm;padding:1.5mm 3mm;}
+  .savings .chip.red{background:var(--red);color:#fff;}
+  .partner{background:#fff;border:2px solid var(--green);border-radius:3mm;padding:3.5mm 4mm;margin-bottom:5mm;font-size:10.5pt;text-align:center;}
+  .partner b{color:var(--red);}
   .row{display:flex;gap:4mm;margin-bottom:5mm;}
   .recipe{flex:1;background:#fff;border:2px dashed var(--gold);border-radius:3mm;padding:4mm;font-size:9.5pt;}
   .recipe h3{color:var(--red);font-size:12pt;margin-bottom:1.5mm;}
   .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;border-top:3px solid var(--green);padding-top:3mm;}
   .foot .qrcode{width:18mm;height:18mm;background:#eee;border:1px solid #999;display:flex;align-items:center;justify-content:center;font-size:6pt;color:#666;text-align:center;}
-  .foot .tag{font-size:9pt;color:#444;}
-  .price-slot{background:#ffe9a8;border-bottom:2px dotted var(--red);padding:0 2mm;font-weight:800;}
+  .foot .tag{font-size:9.5pt;color:#444;}
+  .foot .tag b{color:var(--red);}
   @media print{
     body{background:#fff;}
     .page{margin:0;box-shadow:none;page-break-after:always;}
@@ -55,48 +61,40 @@
   </div>
 
   <h1>🍝 Pasta Night</h1>
-  <div class="sub">One aisle. One night. Dinner solved. — Build your kit &amp; save.</div>
+  <div class="sub">One aisle. One night. Dinner solved. — 🇺🇸🇪🇸</div>
 
   <img class="heroimg" src="aisle-pasta-sauces.jpg" alt="Pasta aisle at Anthony's Supermarket">
 
-  <div class="dealgrid">
-    <div class="deal hot">
-      <div class="lbl">🥇 BUILD YOUR KIT</div>
-      <div class="big"><span class="price-slot">$[KIT PRICE]</span></div>
-      <div class="note">Any pasta + any sauce + canned tomatoes<br>(Barilla · Rummo · Ragu · Prego · Goya)</div>
+  <div class="herobanner">
+    <div class="brandline">RUMMO · MAESTRI PASTAI DAL 1846</div>
+    <div class="deal">ANY 2 FOR <span>$3.99</span></div>
+    <div class="mix">MIX &amp; MATCH ALL SHAPES</div>
+    <div class="shapes">Penne Rigate · Rigatoni · Squared Spaghetti · Farfalle<br>Egg Fettuccine · Egg Pappardelle · Lasagne</div>
+    <div class="savings">
+      <div class="chip">SAVE ~28% vs $2.79 each</div>
+      <div class="chip red">WHILE SUPPLIES LAST</div>
     </div>
-    <div class="deal">
-      <div class="lbl">🍅 SUNDAY SAUCE BUNDLE</div>
-      <div class="big"><span class="price-slot">$[PRICE]</span></div>
-      <div class="note">Hunt's diced + Victoria paste + Goya sauce — the real gravy kit</div>
-    </div>
-    <div class="deal">
-      <div class="lbl">🥈 BOGO / 50% OFF SAUCE</div>
-      <div class="big"><span class="price-slot">[DEAL]</span></div>
-      <div class="note">With any pasta box purchase</div>
-    </div>
-    <div class="deal">
-      <div class="lbl">🥉 2-MINUTE LUNCH</div>
-      <div class="big"><span class="price-slot">2 FOR $[PRICE]</span></div>
-      <div class="note">Maruchan Instant Lunch · Cup Noodles</div>
-    </div>
+  </div>
+
+  <div class="partner">
+    🍅 <b>Pair it:</b> Ragu · Prego · Hunt's · Goya · Victoria — ask at the register about Pasta Night kits &amp; sauce deals
   </div>
 
   <div class="row">
     <div class="recipe">
       <h3>⚡ 15-Minute Spaghetti &amp; Meat Sauce</h3>
       <b>PLAN #2 pair:</b> 1 lb ground beef → brown, add 1 jar Prego/Ragu,
-      simmer, toss with Barilla spaghetti. Serves 4. <i>Add Goya adobo to taste.</i>
+      simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. <i>Add Goya adobo to taste.</i>
     </div>
     <div class="recipe">
       <h3>👵 Sunday Gravy (the Kearny way)</h3>
       <b>PLAN #3 pair:</b> Pork chops browned in olive oil; add Hunt's diced +
-      Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Penne.
+      Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51.
     </div>
   </div>
 
   <div class="foot">
-    <div class="tag">📅 <b>Sale ends: <span class="price-slot">[DATE]</span></b><br>📍 288 Kearny Ave, Kearny NJ · While supplies last</div>
+    <div class="tag">📍 288 Kearny Ave, Kearny NJ · <b>Sale runs while supplies last</b><br>Family owned &amp; operated · @anthony_supermarket</div>
     <div class="qrcode">QR →<br>weekly<br>specials</div>
   </div>
 </div>
@@ -109,48 +107,40 @@
   </div>
 
   <h1>🍝 Noche de <span>Pasta</span></h1>
-  <div class="sub">Un pasillo. Una noche. Cena resuelta. — Arma tu kit y ahorra.</div>
+  <div class="sub">Un pasillo. Una noche. Cena resuelta. — 🇺🇸🇪🇸</div>
 
   <img class="heroimg" src="aisle-pasta-sauces.jpg" alt="Pasillo de pasta en Anthony's Supermarket">
 
-  <div class="dealgrid">
-    <div class="deal hot">
-      <div class="lbl">🥇 ARMA TU KIT</div>
-      <div class="big"><span class="price-slot">$[PRECIO]</span></div>
-      <div class="note">Cualquier pasta + salsa + tomates en lata<br>(Barilla · Rummo · Ragu · Prego · Goya)</div>
+  <div class="herobanner">
+    <div class="brandline">RUMMO · MAESTRI PASTAI DAL 1846</div>
+    <div class="deal">2 POR <span>$3.99</span></div>
+    <div class="mix">MEZCLA Y COMBINA TODAS LAS FORMAS</div>
+    <div class="shapes">Penne Rigate · Rigatoni · Espagueti Cuadrado · Farfalle<br>Fettuccine de Huevo · Pappardelle de Huevo · Lasagna</div>
+    <div class="savings">
+      <div class="chip">AHORRA ~28% vs $2.79 c/u</div>
+      <div class="chip red">HASTA AGOTAR EXISTENCIAS</div>
     </div>
-    <div class="deal">
-      <div class="lbl">🍅 PAQUETE SALSA DOMINICAL</div>
-      <div class="big"><span class="price-slot">$[PRECIO]</span></div>
-      <div class="note">Hunt's en cubitos + pasta de tomate Victoria + salsa Goya</div>
-    </div>
-    <div class="deal">
-      <div class="lbl">🥈 2ª SALSA AL 50%</div>
-      <div class="big"><span class="price-slot">[OFERTA]</span></div>
-      <div class="note">Al comprar cualquier caja de pasta</div>
-    </div>
-    <div class="deal">
-      <div class="lbl">🥉 ALMUERZO EN 2 MIN</div>
-      <div class="big"><span class="price-slot">2 POR $[PRECIO]</span></div>
-      <div class="note">Maruchan Instant Lunch · Cup Noodles</div>
-    </div>
+  </div>
+
+  <div class="partner">
+    🍅 <b>Acompaña:</b> Ragu · Prego · Hunt's · Goya · Victoria — pregunta en caja por los kits de Noche de Pasta y ofertas de salsa
   </div>
 
   <div class="row">
     <div class="recipe">
       <h3>⚡ Espaguetis con salsa de carne en 15 min</h3>
       <b>Con PLAN #2:</b> 1 lb carne molida → dora, agrega 1 frasco de Prego/Ragu,
-      hierve y mezcla con espaguetis Barilla. Rinde 4 porciones.
+      hierve y mezcla con Rummo Espagueti Cuadrado Nº 221. Rinde 4 porciones.
     </div>
     <div class="recipe">
       <h3>👵 Salsa dominical (estilo Kearny)</h3>
       <b>Con PLAN #3:</b> Dorar chuletas de cerdo en aceite de oliva; agregar
-      Hunt's + pasta Victoria + salsa Goya; cocinar 45 min. Servir con Rummo Penne.
+      Hunt's + pasta Victoria + salsa Goya; cocinar 45 min. Servir con Rummo Mezzi Rigatoni Nº 51.
     </div>
   </div>
 
   <div class="foot">
-    <div class="tag">📅 <b>La oferta termina: <span class="price-slot">[FECHA]</span></b><br>📍 288 Kearny Ave, Kearny NJ · Hasta agotar existencias</div>
+    <div class="tag">📍 288 Kearny Ave, Kearny NJ · <b>La oferta dura hasta agotar existencias</b><br>Negocio familiar · @anthony_supermarket</div>
     <div class="qrcode">QR →<br>especiales<br>de la semana</div>
   </div>
 </div>
