@@ -1,4 +1,4 @@
-# Current State — Anthony's Supermarket
+# Current State â€” Anthony's Supermarket
 
 Last updated: 2026-08-12
 
@@ -80,16 +80,15 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 ## Frontend/deployment
 - Vercel project has been created for Super Kitchen and production from `main` has been observed working.
 - Preview deployments are used for feature branches before production.
-- GitHub Pages/tracked `dist/` has permanent source↔build consistency checks.
+- GitHub Pages/tracked `dist/` has permanent sourceâ†”build consistency checks.
 - Do not point production to feature branches during testing.
 
 ## Public website (root `index.html`)
 - Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
 - Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe), Visit Us (location/hours/call + embedded Google Map).
-- Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data — no hardcoded deal prices.
-- 2026-08-12: standalone bilingual sales page `sales.html` (Pasta Night / Rummo 2-for-$4) is LIVE on Pages — hero deal box, FOMO banner, Three.js interactive showcase of 7 Rummo shapes, pair-it chips, recipes, poster display. v2 upgrade spec in `docs/agent-context/SALES_PAGE_V2_UPGRADE.md` (mobile-first rebuild, replace Three.js with DOM-based carousel, JSON-driven config; tracked in issue #31).
+- Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data â€” no hardcoded deal prices.
 - Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
-- Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
+- Local images: `assets/depts/*.webp` (AI-generated, WebP ~130â€“215KB each, lazy-loaded).
 - 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).
 
 ## Phase 2 roadmap
@@ -109,11 +108,10 @@ Recommended sequence:
 ## Data caution
 Production contains older unresolved orders from earlier testing/usage. Do not bulk-complete or delete them automatically. Review explicitly and preserve audit history.
 
-
 ## Invoice pricing foundation
 - Feature branch `feature/invoice-pricing-pipeline` defines the server-managed invoice, vendor-product mapping, product price, immutable price history, and label-batch data model.
 - Staff invoice intake and price approval belong in this private repository; `anthony-superapp` is the Enatega-derived customer/delivery client and may consume only approved catalog data.
-- Default retail calculation remains base unit cost × 1.70 with final currency rounding. OCR output, fuzzy matches, missing UPCs, ambiguous packs, and unreconciled invoices must remain in review.
-- The migration is prepared but not applied to production. The authenticated upload/extraction/review API and Pricing Hub UI remain to be built.
-
-- Pricing Hub now has a browser-safe interactive demo: local PDF/image selection, two-line sample extraction, editable invoice facts, per-unit and `× 1.70` retail calculations, review blocking, reconciliation, and approved-only price-gun CSV export. It intentionally performs no OCR or database writes yet.
+- Default retail calculation remains base unit cost Ã— 1.70 with final currency rounding. OCR output, fuzzy matches, missing UPCs, ambiguous packs, and unreconciled invoices must remain in review.
+- The migration is prepared but not applied to production. Pricing Hub now connects to a shared Node pricing engine: it checks API capability, accepts manager tokens, posts PDF/image uploads to the extraction route, exposes explicit OCR-configuration errors, and keeps a clearly labeled safe sample for local demonstrations.
+- The same engine powers authenticated `/api/pricing/calculate` requests and allowlisted Telegram `/price` and `/caseprice` commands, preventing formula drift between the UI and Hermes. These paths calculate only; they do not approve or write prices.
+- Real OCR remains configuration-blocked until a protected `PRICING_OCR_WEBHOOK_URL` is supplied. Private storage and the approval transaction still need implementation.
