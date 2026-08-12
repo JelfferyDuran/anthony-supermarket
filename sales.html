@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This Week's Sale — Anthony's Supermarket | Ofertas de la Semana</title>
+<meta name="description" content="RUMMO pasta 2 for $4 — mix & match all shapes, while supplies last. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --primary:#2D6A4F; --primary-light:#40916C; --accent:#E07A2F; --gold:#D4A017;
+    --bg:#0F0F14; --card:#1A1A24; --card-border:#2A2A34; --text:#F0F0F0; --text-dim:#8888A0;
+    --red:#C0392B; --cream:#FDF6E3; --radius:12px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.7rem 5%;background:rgba(15,15,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--card-border);}
+  .brand{font-weight:800;color:var(--primary-light);letter-spacing:.5px;font-size:1rem;}
+  .brand small{display:block;font-size:.62rem;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;}
+  .top-right{display:flex;align-items:center;gap:.6rem;}
+  .lang-btn{background:var(--card);color:var(--text);border:1px solid var(--card-border);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;}
+  .lang-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .hero{position:relative;text-align:center;padding:3rem 5% 2.5rem;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(45,106,79,.35),transparent 60%);pointer-events:none;}
+  .hero h1{font-size:clamp(2rem,6vw,3.6rem);font-weight:900;letter-spacing:.5px;text-transform:uppercase;}
+  .hero h1 .r{color:var(--red);} .hero h1 .g{color:var(--primary-light);}
+  .hero .sub{color:var(--text-dim);margin-top:.5rem;font-size:clamp(.9rem,2vw,1.05rem);}
+  .deal-hero{display:inline-flex;align-items:center;gap:1.2rem;margin-top:1.4rem;background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:1rem 1.6rem;flex-wrap:wrap;justify-content:center;}
+  .deal-hero .price{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;color:var(--gold);}
+  .deal-hero .price span{font-size:.5em;color:var(--text);}
+  .deal-hero .meta{text-align:left;font-size:.8rem;color:var(--text-dim);line-height:1.4;}
+  .deal-hero .meta b{color:var(--text);}
+  .chip{display:inline-block;background:var(--red);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:.3rem .8rem;}
+  .chip.gold{background:var(--gold);color:#1c1c1c;}
+  .chip.green{background:var(--primary);}
+  .poster-row{display:flex;gap:1.5rem;justify-content:center;align-items:flex-start;margin-top:2rem;flex-wrap:wrap;}
+  .poster-img{width:min(340px,90vw);border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  .poster-caption{font-size:.72rem;color:var(--text-dim);text-align:center;margin-top:.5rem;}
+  .section{padding:2.8rem 5%;max-width:1200px;margin:0 auto;}
+  .section-title{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-bottom:.4rem;}
+  .section-title span{color:var(--accent);}
+  .section-sub{text-align:center;color:var(--text-dim);font-size:.9rem;max-width:640px;margin:0 auto 1.6rem;}
+  #sales3d-wrap{position:relative;border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;background:var(--card);}
+  #sales3d-wrap[hidden]{display:none;}
+  #sales3d{display:block;width:100%;height:480px;touch-action:none;}
+  #s3d-hint{position:absolute;top:.6rem;left:50%;transform:translateX(-50%);font-size:.66rem;color:var(--text-dim);letter-spacing:.07em;text-transform:uppercase;pointer-events:none;background:rgba(15,15,20,.55);padding:.28rem .8rem;border-radius:999px;white-space:nowrap;}
+  #s3d-info{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1.1rem;padding:.9rem 1.25rem;border-top:1px solid var(--card-border);min-height:64px;}
+  #s3d-info .si-tag{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);}
+  #s3d-info .si-name{font-weight:700;}
+  #s3d-info .si-price{font-weight:900;font-size:1.25rem;color:var(--gold);margin-left:auto;}
+  #s3d-info .si-desc{font-size:.8rem;color:var(--text-dim);flex-basis:100%;}
+  #s3d-info .si-cta{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;}
+  #s3d-info .si-cta:hover{background:var(--primary-light);}
+  .fomo{background:linear-gradient(90deg,var(--red),#a02a1d);color:#fff;text-align:center;padding:.9rem 5%;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.75rem,2vw,.95rem);}
+  .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:1.5rem;}
+  .how-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.2rem;text-align:center;}
+  .how-card .n{font-size:1.6rem;font-weight:900;color:var(--accent);}
+  .how-card h4{font-size:.95rem;margin:.4rem 0 .3rem;}
+  .how-card p{font-size:.8rem;color:var(--text-dim);}
+  .chips-row{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:1.2rem;}
+  .pchip{background:var(--card);border:1px solid var(--card-border);border-radius:999px;padding:.45rem 1.1rem;font-size:.85rem;font-weight:700;color:var(--text);}
+  .pchip .tag{color:var(--accent);font-size:.65rem;display:block;text-transform:uppercase;letter-spacing:.08em;}
+  .recipes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin-top:1.5rem;}
+  .recipe{background:var(--card);border:1px dashed var(--gold);border-radius:var(--radius);padding:1.2rem;}
+  .recipe h4{color:var(--accent);font-size:1rem;margin-bottom:.5rem;}
+  .recipe p{font-size:.85rem;color:var(--text-dim);}
+  .recipe b{color:var(--text);}
+  .footer{margin-top:2rem;border-top:1px solid var(--card-border);padding:2rem 5%;text-align:center;color:var(--text-dim);font-size:.85rem;background:var(--card);}
+  .footer .fbrand{font-weight:800;color:var(--primary-light);font-size:1.1rem;letter-spacing:.5px;}
+  .footer a{color:var(--primary-light);text-decoration:none;}
+  .footer .frow{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+  @media (max-width:768px){ #sales3d{height:340px;} .deal-hero{gap:.8rem;padding:.9rem 1.1rem;} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">ANTHONY'S <small data-en="Supermarket · Kearny NJ" data-es="Supermercado · Kearny NJ">Supermarket · Kearny NJ</small></div>
+  <div class="top-right">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+  </div>
+</header>
+
+<div class="hero">
+  <h1 data-en="<span class='r'>PASTA</span> <span class='g'>NIGHT</span>" data-es="<span class='r'>NOCHE</span> <span class='g'>DE PASTA</span>"><span class="r">PASTA</span> <span class="g">NIGHT</span></h1>
+  <p class="sub" data-en="One aisle. One night. Dinner solved. — RUMMO imported since 1846." data-es="Un pasillo. Una noche. Cena resuelta. — RUMMO importada desde 1846.">One aisle. One night. Dinner solved. — RUMMO imported since 1846.</p>
+  <div class="deal-hero">
+    <div class="price" data-en="ANY 2 FOR $4" data-es="CUALQUIER 2 POR $4">ANY 2 FOR <span>$4</span></div>
+    <div class="meta">
+      <b data-en="Mix &amp; match all 7 shapes" data-es="Mezcla y combina las 7 formas">Mix &amp; match all 7 shapes</b><br>
+      <span data-en="Save ~28% vs $2.79 each" data-es="Ahorra ~28% vs $2.79 c/u">Save ~28% vs $2.79 each</span>
+    </div>
+    <span class="chip" data-en="While supplies last" data-es="Hasta agotar existencias">While supplies last</span>
+  </div>
+</div>
+
+<div class="fomo" data-en="🚨 WHEN IT'S GONE, IT'S GONE — NO DATE, NO RESTOCK GUARANTEE" data-es="🚨 CUANDO SE ACABA, SE ACABA — SIN FECHA, SIN GARANTÍA DE REPOSICIÓN">🚨 WHEN IT'S GONE, IT'S GONE — NO DATE, NO RESTOCK GUARANTEE</div>
+
+<section class="section">
+  <h2 class="section-title" data-en="The <span>Sale</span>" data-es="La <span>Oferta</span>">The <span>Sale</span></h2>
+  <p class="section-sub" data-en="Spin the rack. Tap a shape. Every single one is 2 for $4." data-es="Gira el estante. Toca una forma. Cada una está 2 por $4.">Spin the rack. Tap a shape. Every single one is 2 for $4.</p>
+  <div id="sales3d-wrap" hidden>
+    <canvas id="sales3d" aria-label="Rummo pasta 3D showcase"></canvas>
+    <div id="s3d-hint">Drag to spin · Tap a product</div>
+    <div id="s3d-info">
+      <span class="si-tag" id="siTag"></span>
+      <span class="si-name" id="siName"></span>
+      <span class="si-price" id="siPrice"></span>
+      <a class="si-cta" id="siCta" href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="📍 Get Directions" data-es="📍 Cómo Llegar">📍 Get Directions</a>
+      <span class="si-desc" id="siDesc"></span>
+    </div>
+  </div>
+  <div class="how">
+    <div class="how-card"><div class="n">1</div><h4 data-en="Pick any 2 shapes" data-es="Elige 2 formas">Pick any 2 shapes</h4><p data-en="Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne." data-es="Penne, rigatoni, spaghetti, farfalle, pasta de huevo, lasagna.">Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne.</p></div>
+    <div class="how-card"><div class="n">$4</div><h4 data-en="Pay $4 total" data-es="Paga $4 en total">Pay $4 total</h4><p data-en="That's $2 a bag — about 28% off the shelf price." data-es="Son $2 por bolsa — ~28% menos que el precio regular.">That's $2 a bag — about 28% off the shelf price.</p></div>
+    <div class="how-card"><div class="n">🍝</div><h4 data-en="Dinner solved" data-es="Cena resuelta">Dinner solved</h4><p data-en="Bronze-cut, slow-made, sauce-absorbing. Since 1846." data-es="Corte de bronce, hechas lentamente. Desde 1846.">Bronze-cut, slow-made, sauce-absorbing. Since 1846.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title" data-en="Pair <span>It</span>" data-es="Acompáñala <span>Con</span>">Pair <span>It</span></h2>
+  <p class="section-sub" data-en="Everything you need for pasta night, one aisle away." data-es="Todo lo que necesitas para la noche de pasta, a un pasillo.">Everything you need for pasta night, one aisle away.</p>
+  <div class="chips-row">
+    <div class="pchip"><span class="tag">Sauce</span>Ragu · Prego</div>
+    <div class="pchip"><span class="tag">Tomatoes</span>Hunt's · Goya</div>
+    <div class="pchip"><span class="tag">Paste</span>Victoria</div>
+    <div class="pchip"><span class="tag">Salsa</span>Goya Salsa de Tomate</div>
+    <div class="pchip"><span class="tag">Quick</span>Maruchan · Cup Noodles</div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title" data-en="Tonight's <span>Ideas</span>" data-es="Ideas Para <span>Hoy</span>">Tonight's <span>Ideas</span></h2>
+  <div class="recipes">
+    <div class="recipe">
+      <h4 data-en="⚡ 15-Minute Spaghetti &amp; Meat Sauce" data-es="⚡ Espaguetis con salsa de carne en 15 min">⚡ 15-Minute Spaghetti &amp; Meat Sauce</h4>
+      <p data-en="<b>Pair with PLAN #2:</b> Brown 1 lb ground beef, add a jar of Prego or Ragu, simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. Add Goya adobo to taste." data-es="<b>Con PLAN #2:</b> Dora 1 lb de carne molida, agrega un frasco de Prego o Ragu, hierve y mezcla con Rummo Espagueti Cuadrado Nº 221. Rinde 4 porciones. Agrega adobo Goya al gusto."><b>Pair with PLAN #2:</b> Brown 1 lb ground beef, add a jar of Prego or Ragu, simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. Add Goya adobo to taste.</p>
+    </div>
+    <div class="recipe">
+      <h4 data-en="👵 Sunday Gravy, the Kearny Way" data-es="👵 Salsa dominical, estilo Kearny">👵 Sunday Gravy, the Kearny Way</h4>
+      <p data-en="<b>Pair with PLAN #3:</b> Brown pork chops in olive oil; add Hunt's diced + Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51." data-es="<b>Con PLAN #3:</b> Dora chuletas de cerdo en aceite de oliva; agrega Hunt's en cubitos + pasta Victoria + salsa Goya; cocina 45 min. Sirve con Rummo Mezzi Rigatoni Nº 51."><b>Pair with PLAN #3:</b> Brown pork chops in olive oil; add Hunt's diced + Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51.</p>
+    </div>
+    <div class="recipe">
+      <h4 data-en="🥚 3-Minute Egg Fettuccine" data-es="🥚 Fettuccine de huevo en 3 min">🥚 3-Minute Egg Fettuccine</h4>
+      <p data-en="<b>Fast night:</b> Rummo Egg Nest Fettuccine Nº 94 cooks in 3 minutes. Free-range Italian eggs, butter, parmesan. Done." data-es="<b>Noche rápida:</b> El Fettuccine de Huevo Rummo Nº 94 se cocina en 3 minutos. Huevos italianos de gallinas libres, mantequilla, parmesano. Listo."><b>Fast night:</b> Rummo Egg Nest Fettuccine Nº 94 cooks in 3 minutes. Free-range Italian eggs, butter, parmesan. Done.</p>
+    </div>
+  </div>
+</section>
+
+<div class="poster-row">
+  <div>
+    <img class="poster-img" id="posterImg" src="assets/promos/2026-08-pasta-night/poster-en-allshapes.png" alt="Rummo 2 for $4 poster">
+    <div class="poster-caption" data-en="Print this — EN / ES posters in the promo folder" data-es="Imprime esto — pósters EN / ES en la carpeta de promos">Print this — EN / ES posters in the promo folder</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="fbrand">ANTHONY'S SUPERMARKET</div>
+  <div class="frow">
+    <span data-en="288 Kearny Ave, Kearny NJ 07032" data-es="288 Kearny Ave, Kearny NJ 07032">288 Kearny Ave, Kearny NJ 07032</span>
+    <span data-en="Mon–Sat 7AM–8PM · Sun CLOSED" data-es="Lun–Sáb 7AM–8PM · Dom CERRADO">Mon–Sat 7AM–8PM · Sun CLOSED</span>
+    <a href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="📌 Directions" data-es="📌 Cómo llegar">📌 Directions</a>
+    <a href="https://instagram.com/anthony_supermarket" target="_blank" rel="noopener">📷 @anthony_supermarket</a>
+  </div>
+  <div class="frow" style="margin-top:.4rem;">
+    <span class="chip" data-en="While supplies last" data-es="Hasta agotar existencias">While supplies last</span>
+  </div>
+</footer>
+
+<script>
+// ===== Bilingual helpers =====
+var cl="en";
+function t(en,es){return cl==="es"?es:en}
+function setLang(l){
+  cl=l;
+  document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.toggle("active",b.textContent.toLowerCase().indexOf(l)>=0)});
+  document.querySelectorAll("[data-en]").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l);});
+  try{localStorage.setItem("anthony-lang",l)}catch(e){}
+  try{document.dispatchEvent(new CustomEvent("langchange"))}catch(e){}
+  var pi=document.getElementById("posterImg");
+  if(pi)pi.src=cl==="es"?"assets/promos/2026-08-pasta-night/poster-es-chatgpt.jpg":"assets/promos/2026-08-pasta-night/poster-en-allshapes.png";
+}
+try{var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl)}catch(e){}
+
+// ===== Pasta lineup (facts from packaging — no invented prices) =====
+var PASTAS=[
+ {code:"Nº 66",en:"Penne Rigate",es:"Penne Rigate",w:"1 lb / 454g",
+  fe:"Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",
+  fs:"Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."},
+ {code:"Nº 51",en:"Mezzi Rigatoni",es:"Mezzi Rigatoni",w:"1 lb / 454g",
+  fe:"Chunky tubes built for Sunday gravy — the Kearny classic.",
+  fs:"Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."},
+ {code:"Nº 221",en:"Squared Spaghetti",es:"Espagueti Cuadrado",w:"1 lb / 454g",
+  fe:"A unique square cut that holds sauce on every side. Conversation starter.",
+  fs:"Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."},
+ {code:"Nº 85",en:"Farfalle",es:"Farfalle",w:"1 lb / 454g",
+  fe:"Bow ties the whole family loves — great cold in salads too.",
+  fs:"Moños que toda la familia ama — también geniales fríos en ensaladas."},
+ {code:"Nº 94",en:"Egg Fettuccine",es:"Fettuccine de Huevo",w:"8.82 oz / 250g",
+  fe:"Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",
+  fs:"Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."},
+ {code:"Nº 101",en:"Egg Pappardelle",es:"Pappardelle de Huevo",w:"8.82 oz / 250g",
+  fe:"Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",
+  fs:"Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."},
+ {code:"Nº 83",en:"Lasagne",es:"Lasagna",w:"1 lb / 454g",
+  fe:"Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",
+  fs:"Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."}
+];
+
+// ===== 3D showcase (WebGL with graceful fallback) =====
+(function(){
+  var wrap=document.getElementById("sales3d-wrap"),cv=document.getElementById("sales3d");
+  if(!wrap||!cv||typeof THREE==="undefined")return;
+  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});}catch(e){return;}
+  wrap.hidden=false;
+  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,1,0.1,100);
+  camera.position.set(0,1.4,9.6);camera.lookAt(0,0.5,0);
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  var carousel=new THREE.Group();scene.add(carousel);
+  function roundRect(x,a,b,c,d,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+c,b,a+c,b+d,r);x.arcTo(a+c,b+d,a,b+d,r);x.arcTo(a,b+d,a,b,r);x.arcTo(a,b,a+c,b,r);x.closePath();}
+  function wrapText(ctx,text,maxW,maxLine){var words=text.split(" "),lines=[],cur="";words.forEach(function(wd){var test=cur?cur+" "+wd:wd;if(ctx.measureText(test).width>maxW&&cur){lines.push(cur);cur=wd}else cur=test});if(cur)lines.push(cur);if(lines.length>maxLine){lines=lines.slice(0,maxLine);lines[maxLine-1]+="..."}return lines;}
+  function cardTexture(p){
+    var w=512,h=768,c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");
+    x.fillStyle="#1A1A24";roundRect(x,8,8,w-16,h-16,26);x.fill();
+    x.strokeStyle="#2D6A4F";x.lineWidth=6;roundRect(x,8,8,w-16,h-16,26);x.stroke();
+    x.fillStyle="#D4A017";roundRect(x,8,8,w-16,10,6);x.fill();
+    x.fillStyle="#D4A017";x.font="700 42px Arial, sans-serif";x.textAlign="center";x.textBaseline="alphabetic";
+    x.fillText("RUMMO · "+p.code,w/2,118);
+    x.fillStyle="#F0F0F0";x.font="700 58px Arial, sans-serif";x.textBaseline="top";
+    var lines=wrapText(x,cl==="es"?p.es:p.en,w-110,2),ly=225;
+    lines.forEach(function(l){x.fillText(l,w/2,ly);ly+=70});
+    x.fillStyle="#D4A017";x.font="900 74px Arial, sans-serif";x.textBaseline="alphabetic";x.textAlign="center";
+    x.fillText(cl==="es"?"2 POR $4":"2 FOR $4",w/2,560);
+    x.fillStyle="#8888A0";x.font="700 30px Arial, sans-serif";
+    x.fillText(p.w,w/2,620);
+    x.fillStyle="#1E5631";roundRect(x,8,h-72,w-16,64,26);x.fill();
+    x.fillStyle="#E07A2F";x.font="700 30px Arial, sans-serif";x.textBaseline="middle";
+    x.fillText(cl==="es"?"HASTA AGOTAR EXISTENCIAS":"WHILE SUPPLIES LAST",w/2,h-40);
+    var tx=new THREE.CanvasTexture(c);try{tx.encoding=THREE.sRGBEncoding}catch(e){}
+    return tx;
+  }
+  var cards=[],R=4.5;
+  PASTAS.forEach(function(p,i){
+    var g=new THREE.Group();
+    var glow=new THREE.Mesh(new THREE.PlaneGeometry(2.95,4.2),new THREE.MeshBasicMaterial({color:0xE07A2F,transparent:true,opacity:0}));
+    glow.position.z=-0.03;g.add(glow);
+    var m=new THREE.Mesh(new THREE.PlaneGeometry(2.55,3.83),new THREE.MeshBasicMaterial({map:cardTexture(p)}));
+    g.add(m);
+    cards.push({g:g,m:m,glow:glow,p:p});carousel.add(g);
+  });
+  function layout(){var n=cards.length;cards.forEach(function(c,i){var th=n>1?(-1.15+i*(2.3/(n-1))):0;c.g.position.set(Math.sin(th)*R,0.4+(i%2)*0.18,-Math.cos(th)*R+R*0.25)})}
+  layout();
+  var ring=new THREE.Mesh(new THREE.RingGeometry(2.7,3.4,48),new THREE.MeshBasicMaterial({color:0x1E5631,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=-1.45;scene.add(ring);
+  var gold=new THREE.Mesh(new THREE.TorusGeometry(3.15,0.035,8,64),new THREE.MeshBasicMaterial({color:0xD4A017,transparent:true,opacity:0.5}));
+  gold.rotation.x=-Math.PI/2;gold.position.y=-1.44;scene.add(gold);
+  var pc=60,pos=new Float32Array(pc*3);
+  for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*10;pos[i*3+1]=Math.random()*3.4-1;pos[i*3+2]=(Math.random()-0.5)*6-1}
+  var pgeo=new THREE.BufferGeometry();pgeo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  var pts=new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x2D6A4F,size:0.07,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending}));
+  scene.add(pts);
+  function resize(){var w=wrap.clientWidth||600,h=wrap.clientHeight||480;if(w<10)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  resize();
+  var raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),hover=-1,selected=-1,dragging=false,lastX=0;
+  function pick(e){var r=cv.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-(((e.clientY-r.top)/r.height)*2-1);raycaster.setFromCamera(mouse,camera);var hits=raycaster.intersectObjects(cards.map(function(c){return c.m}),false);return hits.length?hits[0].object.userData.idx:-1}
+  function paintGlow(){cards.forEach(function(c,i){c.glow.material.opacity=(i===hover?0.4:0)+(i===selected?0.25:0);c.g.scale.set(i===hover?1.07:1,i===hover?1.07:1,1)})}
+  cv.addEventListener("pointermove",function(e){
+    if(dragging){carousel.rotation.y+=(e.clientX-lastX)*0.008;lastX=e.clientX;return}
+    var h=pick(e);if(h!==hover){hover=h;paintGlow();cv.style.cursor=hover>=0?"pointer":"grab"}
+  });
+  cv.addEventListener("pointerdown",function(e){dragging=true;lastX=e.clientX;cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)});
+  cv.addEventListener("pointerup",function(e){if(!dragging)return;dragging=false;var h=pick(e);if(h>=0)select(h)});
+  cv.addEventListener("pointercancel",function(){dragging=false});
+  cv.style.cursor="grab";
+  var siTag=document.getElementById("siTag"),siName=document.getElementById("siName"),siDesc=document.getElementById("siDesc"),siPrice=document.getElementById("siPrice");
+  function select(i){
+    selected=i;hover=-1;paintGlow();
+    var p=PASTAS[i];
+    siTag.textContent="RUMMO "+p.code+" · "+p.w;
+    siName.textContent=cl==="es"?p.es:p.en;
+    siDesc.textContent=cl==="es"?p.fs:p.fe;
+    siPrice.textContent=cl==="es"?"2 POR $4":"2 FOR $4";
+  }
+  var hint=document.getElementById("s3d-hint");
+  function setHint(){hint.textContent=cl==="es"?"Arrastra o desliza para girar · Toca una forma":"Drag to spin · Tap a shape"}
+  setHint();
+  document.addEventListener("langchange",function(){
+    cards.forEach(function(c){c.m.material.map=cardTexture(c.p);c.m.material.needsUpdate=true});
+    if(selected>=0)select(selected);setHint();
+  });
+  var t0=Date.now();
+  function anim(){
+    requestAnimationFrame(anim);
+    var t=(Date.now()-t0)/1000;
+    if(!reduced&&!dragging)carousel.rotation.y+=0.0035;
+    if(!reduced)cards.forEach(function(c,i){c.g.position.y=0.4+(i%2)*0.18+Math.sin(t*1.4+i*1.7)*0.09});
+    pts.rotation.y+=0.0006;gold.rotation.z+=0.002;
+    cards.forEach(function(c){c.m.lookAt(camera.position);c.glow.lookAt(camera.position)});
+    renderer.render(scene,camera);
+  }
+  anim();
+  addEventListener("resize",resize);
+  if(PASTAS.length)select(0);
+})();
+</script>
+</body>
+</html>
