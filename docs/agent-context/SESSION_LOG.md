@@ -73,3 +73,13 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: pricing tables are RLS-enabled and grant no direct anon/authenticated access; invoice images must remain private; OCR cannot auto-approve prices. Roll back by reverting this feature branch and closing draft PR #4; no production database or deployment changed.
 - PR/issue/commit: `anthony-supermarket` draft PR #32; `anthony-superapp` draft PR #4.
 - Next safe action: review the migration, implement authenticated manager/admin upload-review-approve endpoints, then replace mobile credentials/assets surface by surface and run full builds.
+
+
+## 2026-08-12 00:45 ET — Codex
+- Goal: make the invoice workflow visible as a safe demo and establish a permanent GitHub registry for agent-created skills.
+- Changed: replaced the placeholder Pricing Hub with an interactive invoice-review demo; added the `anthony-invoice-pricing` skill registry and standing registration rule to `AGENTS.md`.
+- Verified: headless Chromium loaded the page, rendered two extracted lines, preserved one approved/one review-blocked state, downloaded `price-gun-T-100.csv`, and reported no console errors. Screenshot captured in the Codex task outputs.
+- Not verified / blockers: demo extraction is fixture-based; real PDF/image OCR, private storage, authenticated approval, and production database writes remain unconnected.
+- Security or rollback notes: the demo does not upload files or write a database. Revert the Pricing Hub file and registry commit to roll back.
+- PR/issue/commit: draft PR #32.
+- Next safe action: connect private object upload and server-side OCR behind manager/admin authentication, preserving the current review gates.
