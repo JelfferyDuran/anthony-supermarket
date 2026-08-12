@@ -115,3 +115,10 @@ TIPS FOR THE BROTHER
 - Pin Post 1 for the whole sale.
 - Reply to every comment with "2 for $4 while supplies last!" (replies boost reach).
 - Reel option: use 01-hero-any2for4.jpg + zoom/pan as a 5-sec Reel with trending audio.
+
+----------------------------------------
+POSTERS (print quality, vertical)
+- 01-poster-ES.jpg  (ChatGPT original — ES)
+- 02-poster-EN.jpg  (AI match — EN)
+Use these for storefront window + print.
+----------------------------------------
