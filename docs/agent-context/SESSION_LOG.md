@@ -46,3 +46,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Next safe action: review and merge the PR, confirm GH Pages deploy, then continue Phase 2A kitchen dashboard (PR #21) per owner sequencing.
 
 - 2026-08-10: Added NRS POS daily sales intelligence pipeline (`nrs/`). Analyzer (nrs-analyze.py) reads NRS portal CSV exports from nrs/inbox/, computes daily KPIs + leak flags (voids/refunds/no-sales/discounts/cashier stats/trend anomalies), appends to nrs/data/daily_history.json, writes briefing to nrs/reports/. Daily Hermes cron "Anthony's NRS Daily Sales Report" (07:30 ET) attempts browser fetch of mystore.nrsplus.com CSV Download report, falls back to manual inbox drop. Creds go in nrs/.env (NRS_USER/NRS_PASS, gitignored).
+
+## 2026-08-12 00:40 ET — Hermes
+- Goal: deliver a "fully developed sales page" for the Pasta Night campaign (owner request).
+- Changed: new standalone `sales.html` (repo root, committed on `promo-2026-08-pasta-night` since it depends on the campaign poster assets in `assets/promos/2026-08-pasta-night/`). Full bilingual (EN/ES) single-page sales experience: sticky brand bar + lang toggle, PASTA NIGHT hero with ANY 2 FOR $4 deal box + ~28% save chip, red FOMO banner (no dates), interactive Three.js 3D showcase of all 7 Rummo shapes (drag/tap spin, hover glow, click-to-select info panel with packaging facts, "2 FOR $4" price, Get Directions CTA), 3-step how-it-works, pair-it chips (Ragu/Prego/Hunt's/Victoria/Goya), 3 recipe cards, EN/ES poster display that swaps per language, store footer. Prices are NOT invented: only the confirmed 2-for-$4 deal and packaging facts.
+- Verified: `node --check` passes; browser regression — 3D wrap unhidden (WebGL OK), auto-select Penne Rigate panel, ES toggle switches hero/hint/price/desc/poster image, EN restore works, ZERO console errors, no rendering glitches.
+- Not verified: not yet merged/deployed (no PR capability with embedded PAT — owner merges; Pages auto-deploys; page will be live at /sales.html after promo branch merge).
+- Security/rollback: no secrets/PII; no iframes (map is a link — avoids load hangs); rollback = revert branch.
+- Branch: `promo-2026-08-pasta-night` (contains sales.html + poster assets).
+- Next safe action: owner reviews/merges promo branch; optionally wire a nav link to sales.html from index.html on the site branch after merge.
