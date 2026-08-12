@@ -1,283 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pricing Hub — Anthony's Supermarket</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Invoice Pricing Hub â€” Anthony's Shop & Save</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    :root {
-      --primary: #4CAF50;
-      --primary-dark: #388E3C;
-      --secondary: #FF9800;
-      --dark: #1a1a1a;
-      --light: #f5f5f5;
-    }
-    
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: var(--dark);
-      min-height: 100vh;
-      padding: 2rem;
-    }
-    
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    
-    .logo {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-    
-    h1 {
-      font-size: 2.5rem;
-      color: var(--primary-dark);
-      margin-bottom: 0.5rem;
-    }
-    
-    .subtitle {
-      color: #666;
-      font-size: 1.125rem;
-    }
-    
-    .pricing-table {
-      background: white;
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-      overflow-x: auto;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    th {
-      background: var(--primary);
-      color: white;
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-    }
-    
-    td {
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-    }
-    
-    tr:hover {
-      background: #f9f9f9;
-    }
-    
-    .price {
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
-    
-    .cost {
-      color: #999;
-    }
-    
-    .margin {
-      background: rgba(76, 175, 80, 0.1);
-      color: var(--primary-dark);
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-    
-    .vendor-badge {
-      background: var(--secondary);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
-    
-    .stat-label {
-      color: #666;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    
-    .btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-    
-    .actions {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
+    :root{--green:#166534;--lime:#84cc16;--ink:#17201b;--muted:#65706a;--cream:#f5f3e9;--card:#fff;--line:#dce3dc;--amber:#b45309;--red:#b91c1c}
+    *{box-sizing:border-box}body{margin:0;font:15px/1.45 Inter,Segoe UI,system-ui,sans-serif;background:var(--cream);color:var(--ink)}
+    button,input{font:inherit}.shell{max-width:1480px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}
+    .brand{display:flex;gap:14px;align-items:center}.mark{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:var(--green);color:#fff;font-size:26px;font-weight:900}.brand h1{font-size:24px;margin:0}.brand p{margin:2px 0 0;color:var(--muted)}
+    .demo{padding:7px 11px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:12px}.grid{display:grid;grid-template-columns:360px 1fr;gap:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px #17331f0d}.pad{padding:20px}
+    h2{font-size:17px;margin:0 0 14px}.drop{display:block;border:2px dashed #9fb2a3;border-radius:15px;padding:27px 18px;text-align:center;background:#f9fbf8;cursor:pointer}.drop strong{display:block;font-size:16px}.drop small{color:var(--muted)}
+    input[type=file]{display:none}.field{margin-top:14px}.field label{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.field input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:white}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--green);color:#fff}.secondary{background:#e9efe9;color:var(--green)}.wide{width:100%;margin-top:14px}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .steps{margin:18px 0 0;padding:0;list-style:none}.steps li{display:flex;gap:10px;align-items:center;padding:9px 0;color:var(--muted)}.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e6ebe6;font-size:12px;font-weight:900}.done .dot{background:var(--green);color:white}.done{color:var(--ink)!important}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.stat{padding:15px;border:1px solid var(--line);border-radius:14px;background:#fbfcfa}.stat b{font-size:22px;display:block}.stat span{font-size:12px;color:var(--muted)}
+    .bar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.bar .actions{display:flex;gap:8px;flex-wrap:wrap}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:1040px}th{background:#eef3ee;color:#425148;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px}td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:middle}td input{width:100%;min-width:75px;padding:7px;border:1px solid transparent;border-radius:7px;background:transparent}td input:hover,td input:focus{border-color:#a8b7aa;background:#fff;outline:0}.money{font-weight:800}.retail{color:var(--green);font-size:17px}.pill{display:inline-block;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:900}.approved{background:#dcfce7;color:#166534}.review{background:#fef3c7;color:#92400e}.rejected{background:#fee2e2;color:#991b1b}.select{border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff}
+    .notice{margin-top:14px;border-left:4px solid var(--amber);background:#fffbeb;padding:11px 13px;border-radius:8px;color:#7c4b08}.reconcile{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.rec{padding:12px;border-radius:12px;background:#f7f9f6}.rec span{display:block;color:var(--muted);font-size:11px}.ok{color:var(--green)!important}.bad{color:var(--red)!important}@media(max-width:950px){.grid{grid-template-columns:1fr}.stats,.reconcile{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start}.shell{padding:14px}}
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="logo">💰</div>
-      <h1>Pricing Hub</h1>
-      <p class="subtitle">Anthony's Supermarket — Wholesale Cost & Retail Price Tracker</p>
-    </header>
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">93</div>
-        <div class="stat-label">Products Tracked</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">$4,511</div>
-        <div class="stat-label">Total Inventory Cost</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">$8,364</div>
-        <div class="stat-label">Projected Revenue (65% markup)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">$3,852</div>
-        <div class="stat-label">Projected Profit</div>
-      </div>
-    </div>
-    
-    <div class="actions">
-      <button class="btn" onclick="alert('Upload invoice feature coming soon!')">📤 Upload Invoice</button>
-      <button class="btn" onclick="alert('Export feature coming soon!')">📊 Export CSV</button>
-      <button class="btn" style="background: var(--secondary);">➕ Add Item</button>
-    </div>
-    
-    <div class="pricing-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Vendor</th>
-            <th>Cost/Unit</th>
-            <th>Retail Price</th>
-            <th>Margin</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Whole Milk (1 gallon)</td>
-            <td><span class="vendor-badge">Super Trading</span></td>
-            <td class="cost">$2.49</td>
-            <td class="price">$4.11</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>White Bread (20oz)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$1.20</td>
-            <td class="price">$1.98</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Eggs (Large, 18ct)</td>
-            <td><span class="vendor-badge">Super Trading</span></td>
-            <td class="cost">$3.50</td>
-            <td class="price">$5.78</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Chicken Breast (per lb)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$2.99</td>
-            <td class="price">$4.93</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Ground Beef 80/20 (per lb)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$4.50</td>
-            <td class="price">$7.43</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Orange Juice (52oz)</td>
-            <td><span class="vendor-badge">Super Trading</span></td>
-            <td class="cost">$3.20</td>
-            <td class="price">$5.28</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Cheddar Cheese (16oz)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$4.80</td>
-            <td class="price">$7.92</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Tomatoes (per lb)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$1.50</td>
-            <td class="price">$2.48</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Bananas (per lb)</td>
-            <td><span class="vendor-badge">Family Food</span></td>
-            <td class="cost">$0.60</td>
-            <td class="price">$0.99</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-          <tr>
-            <td>Paper Towels (6-pack)</td>
-            <td><span class="vendor-badge">Super Trading</span></td>
-            <td class="cost">$5.50</td>
-            <td class="price">$9.08</td>
-            <td><span class="margin">65%</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<main class="shell">
+  <header class="top"><div class="brand"><div class="mark">A</div><div><h1>Invoice Pricing Hub</h1><p>Anthony's Shop & Save Â· manager review workspace</p></div></div><span class="demo">SAFE DEMO Â· NO DATABASE WRITES</span></header>
+  <div class="grid">
+    <aside class="card pad">
+      <h2>1. Add vendor invoice</h2>
+      <label class="drop" for="invoiceFile"><strong>Drop PDF or invoice photo</strong><small id="fileName">PDF, JPG, PNG Â· remains local in this demo</small></label>
+      <input id="invoiceFile" type="file" accept="application/pdf,image/*">
+      <div class="field"><label for="vendor">Vendor</label><input id="vendor" value="Test Vendor"></div>
+      <div class="field"><label for="invoiceNo">Invoice number</label><input id="invoiceNo" value="T-100"></div>
+      <div class="field"><label for="subtotal">Invoice subtotal</label><input id="subtotal" type="number" step="0.01" value="58.00"></div>
+      <button class="btn primary wide" id="extractBtn">Run demo extraction</button>
+      <ol class="steps"><li class="done"><span class="dot">1</span>Upload invoice</li><li id="step2"><span class="dot">2</span>Extract line items</li><li id="step3"><span class="dot">3</span>Review product matches</li><li id="step4"><span class="dot">4</span>Approve and export labels</li></ol>
+      <div class="notice">OCR never changes a live price automatically. Missing UPCs, unclear packs, or low confidence stay blocked for review.</div>
+    </aside>
+    <section class="card pad">
+      <div class="stats"><div class="stat"><b id="lineCount">0</b><span>Invoice lines</span></div><div class="stat"><b id="approvedCount">0</b><span>Approved labels</span></div><div class="stat"><b id="reviewCount">0</b><span>Need review</span></div><div class="stat"><b>Ã— 1.70</b><span>Retail multiplier</span></div></div>
+      <div class="bar"><div><h2>2. Review calculated prices</h2><span style="color:var(--muted)">Edit invoice facts, then approve only confirmed products.</span></div><div class="actions"><button class="btn secondary" id="addBtn">+ Add line</button><button class="btn primary" id="exportBtn" disabled>Export price-gun CSV</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Status</th><th>Product / UPC</th><th>Cases</th><th>Units/case</th><th>Line total</th><th>Cost/unit</th><th>Final retail</th><th>OCR</th></tr></thead><tbody id="rows"><tr><td colspan="8" style="text-align:center;padding:55px;color:var(--muted)">Upload an invoice or run the demo extraction to begin.</td></tr></tbody></table></div>
+      <div class="reconcile"><div class="rec"><span>Invoice subtotal</span><b id="recSubtotal">$0.00</b></div><div class="rec"><span>Extracted line sum</span><b id="recLines">$0.00</b></div><div class="rec"><span>Variance</span><b id="variance">$0.00</b></div><div class="rec"><span>Ready to finalize</span><b id="ready">No</b></div></div>
+    </section>
   </div>
+</main>
+<script>
+const demo=[
+ {status:'approved',name:'Cafe Bustelo',upc:'0074471000500',cases:2,units:12,total:48,confidence:.99},
+ {status:'needs_review',name:'Unreadable item',upc:'',cases:1,units:0,total:10,confidence:.62}
+];
+let items=[];const $=id=>document.getElementById(id);const money=n=>'$'+(Number(n)||0).toFixed(2);const retail=x=>Math.round((x*1.70+Number.EPSILON)*100)/100;
+function calculate(item){const divisor=Number(item.cases)*Number(item.units);item.cost=divisor>0?Number(item.total)/divisor:0;item.price=retail(item.cost);if(!item.upc||divisor<=0||Number(item.confidence)<.9)item.status='needs_review'}
+function render(){items.forEach(calculate);$('rows').innerHTML=items.length?items.map((x,i)=>`<tr>
+ <td><select class="select" data-i="${i}" data-k="status"><option value="needs_review" ${x.status==='needs_review'?'selected':''}>Needs review</option><option value="approved" ${x.status==='approved'?'selected':''} ${(!x.upc||!x.units)?'disabled':''}>Approved</option><option value="rejected" ${x.status==='rejected'?'selected':''}>Rejected</option></select><br><span class="pill ${x.status==='approved'?'approved':x.status==='rejected'?'rejected':'review'}">${x.status.replace('_',' ')}</span></td>
+ <td><input data-i="${i}" data-k="name" value="${esc(x.name)}" aria-label="Product name"><input data-i="${i}" data-k="upc" value="${esc(x.upc)}" placeholder="UPC required" aria-label="UPC"></td>
+ <td><input type="number" min="0" step="1" data-i="${i}" data-k="cases" value="${x.cases}"></td><td><input type="number" min="0" step="1" data-i="${i}" data-k="units" value="${x.units}"></td><td><input type="number" min="0" step=".01" data-i="${i}" data-k="total" value="${x.total}"></td>
+ <td class="money">${money(x.cost)}</td><td class="money retail">${money(x.price)}</td><td>${Math.round(x.confidence*100)}%</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:55px">No lines</td></tr>';
+ document.querySelectorAll('[data-i]').forEach(el=>el.onchange=e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;items[i][k]=['cases','units','total'].includes(k)?Number(e.target.value):e.target.value;render()});
+ const approved=items.filter(x=>x.status==='approved'),review=items.filter(x=>x.status==='needs_review');$('lineCount').textContent=items.length;$('approvedCount').textContent=approved.length;$('reviewCount').textContent=review.length;$('exportBtn').disabled=!approved.length;
+ const subtotal=Number($('subtotal').value),sum=items.reduce((a,x)=>a+Number(x.total||0),0),variance=Math.round((subtotal-sum)*100)/100;$('recSubtotal').textContent=money(subtotal);$('recLines').textContent=money(sum);$('variance').textContent=money(variance);$('variance').className=Math.abs(variance)<=.01?'ok':'bad';const ready=items.length>0&&!review.length&&Math.abs(variance)<=.01;$('ready').textContent=ready?'Yes':'No';$('ready').className=ready?'ok':'bad';$('step3').className=items.length?'done':'';$('step4').className=approved.length?'done':'';
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('invoiceFile').onchange=e=>{$('fileName').textContent=e.target.files[0]?.name||'PDF, JPG, PNG'};
+$('extractBtn').onclick=()=>{items=structuredClone(demo);$('step2').className='done';render()};
+$('addBtn').onclick=()=>{items.push({status:'needs_review',name:'',upc:'',cases:1,units:0,total:0,confidence:1});render()};
+$('subtotal').oninput=render;
+$('exportBtn').onclick=()=>{const rows=[['item_name','upc','price','department'],...items.filter(x=>x.status==='approved').map(x=>[x.name,x.upc,x.price.toFixed(2),''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`price-gun-${$('invoiceNo').value||'invoice'}.csv`;a.click();URL.revokeObjectURL(a.href)};
+</script>
 </body>
 </html>
+
