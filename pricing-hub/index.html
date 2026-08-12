@@ -9,7 +9,7 @@
     *{box-sizing:border-box}body{margin:0;font:15px/1.45 Inter,Segoe UI,system-ui,sans-serif;background:var(--cream);color:var(--ink)}
     button,input{font:inherit}.shell{max-width:1480px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}
     .brand{display:flex;gap:14px;align-items:center}.mark{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:var(--green);color:#fff;font-size:26px;font-weight:900}.brand h1{font-size:24px;margin:0}.brand p{margin:2px 0 0;color:var(--muted)}
-    .demo{padding:7px 11px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:12px}.grid{display:grid;grid-template-columns:360px 1fr;gap:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px #17331f0d}.pad{padding:20px}
+    .demo{padding:7px 11px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:12px}.demo.online{background:#dcfce7;color:#166534}.demo.offline{background:#fee2e2;color:#991b1b}.grid{display:grid;grid-template-columns:360px 1fr;gap:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px #17331f0d}.pad{padding:20px}
     h2{font-size:17px;margin:0 0 14px}.drop{display:block;border:2px dashed #9fb2a3;border-radius:15px;padding:27px 18px;text-align:center;background:#f9fbf8;cursor:pointer}.drop strong{display:block;font-size:16px}.drop small{color:var(--muted)}
     input[type=file]{display:none}.field{margin-top:14px}.field label{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.field input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:white}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--green);color:#fff}.secondary{background:#e9efe9;color:var(--green)}.wide{width:100%;margin-top:14px}.btn:disabled{opacity:.45;cursor:not-allowed}
     .steps{margin:18px 0 0;padding:0;list-style:none}.steps li{display:flex;gap:10px;align-items:center;padding:9px 0;color:var(--muted)}.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e6ebe6;font-size:12px;font-weight:900}.done .dot{background:var(--green);color:white}.done{color:var(--ink)!important}
@@ -20,16 +20,20 @@
 </head>
 <body>
 <main class="shell">
-  <header class="top"><div class="brand"><div class="mark">A</div><div><h1>Invoice Pricing Hub</h1><p>Anthony's Shop & Save Â· manager review workspace</p></div></div><span class="demo">SAFE DEMO Â· NO DATABASE WRITES</span></header>
+  <header class="top"><div class="brand"><div class="mark">A</div><div><h1>Invoice Pricing Hub</h1><p>Anthony's Shop & Save Â· manager review workspace</p></div></div><span class="demo" id="apiStatus">CHECKING PRICING APIâ€¦</span></header>
   <div class="grid">
     <aside class="card pad">
       <h2>1. Add vendor invoice</h2>
       <label class="drop" for="invoiceFile"><strong>Drop PDF or invoice photo</strong><small id="fileName">PDF, JPG, PNG Â· remains local in this demo</small></label>
       <input id="invoiceFile" type="file" accept="application/pdf,image/*">
+      <div class="field"><label for="apiBase">Pricing API</label><input id="apiBase" value="http://127.0.0.1:3001" autocomplete="url"></div>
+      <div class="field"><label for="managerToken">Manager token</label><input id="managerToken" type="password" placeholder="Required outside local demo" autocomplete="off"></div>
       <div class="field"><label for="vendor">Vendor</label><input id="vendor" value="Test Vendor"></div>
       <div class="field"><label for="invoiceNo">Invoice number</label><input id="invoiceNo" value="T-100"></div>
       <div class="field"><label for="subtotal">Invoice subtotal</label><input id="subtotal" type="number" step="0.01" value="58.00"></div>
-      <button class="btn primary wide" id="extractBtn">Run demo extraction</button>
+      <button class="btn primary wide" id="extractBtn">Extract selected invoice</button>
+      <button class="btn secondary wide" id="sampleBtn">Use safe sample instead</button>
+      <p id="message" role="status" aria-live="polite" style="color:var(--muted);min-height:22px;margin:10px 0 0"></p>
       <ol class="steps"><li class="done"><span class="dot">1</span>Upload invoice</li><li id="step2"><span class="dot">2</span>Extract line items</li><li id="step3"><span class="dot">3</span>Review product matches</li><li id="step4"><span class="dot">4</span>Approve and export labels</li></ol>
       <div class="notice">OCR never changes a live price automatically. Missing UPCs, unclear packs, or low confidence stay blocked for review.</div>
     </aside>
@@ -47,6 +51,8 @@ const demo=[
  {status:'needs_review',name:'Unreadable item',upc:'',cases:1,units:0,total:10,confidence:.62}
 ];
 let items=[];const $=id=>document.getElementById(id);const money=n=>'$'+(Number(n)||0).toFixed(2);const retail=x=>Math.round((x*1.70+Number.EPSILON)*100)/100;
+const apiUrl=path=>$('apiBase').value.replace(/\/$/,'')+path;
+function setMessage(text,error=false){$('message').textContent=text;$('message').style.color=error?'var(--red)':'var(--muted)'}
 function calculate(item){const divisor=Number(item.cases)*Number(item.units);item.cost=divisor>0?Number(item.total)/divisor:0;item.price=retail(item.cost);if(!item.upc||divisor<=0||Number(item.confidence)<.9)item.status='needs_review'}
 function render(){items.forEach(calculate);$('rows').innerHTML=items.length?items.map((x,i)=>`<tr>
  <td><select class="select" data-i="${i}" data-k="status"><option value="needs_review" ${x.status==='needs_review'?'selected':''}>Needs review</option><option value="approved" ${x.status==='approved'?'selected':''} ${(!x.upc||!x.units)?'disabled':''}>Approved</option><option value="rejected" ${x.status==='rejected'?'selected':''}>Rejected</option></select><br><span class="pill ${x.status==='approved'?'approved':x.status==='rejected'?'rejected':'review'}">${x.status.replace('_',' ')}</span></td>
@@ -59,11 +65,15 @@ function render(){items.forEach(calculate);$('rows').innerHTML=items.length?item
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 $('invoiceFile').onchange=e=>{$('fileName').textContent=e.target.files[0]?.name||'PDF, JPG, PNG'};
-$('extractBtn').onclick=()=>{items=structuredClone(demo);$('step2').className='done';render()};
+$('apiBase').value=localStorage.getItem('anthonyPricingApi')||$('apiBase').value;
+$('apiBase').onchange=()=>{localStorage.setItem('anthonyPricingApi',$('apiBase').value);checkApi()};
+async function checkApi(){try{const r=await fetch(apiUrl('/api/pricing/config'));if(!r.ok)throw new Error();const c=await r.json();$('apiStatus').textContent=c.ocrConfigured?'PRICING API + OCR READY':c.localDemo?'LOCAL API Â· OCR NOT CONFIGURED':'PRICING API Â· OCR NOT CONFIGURED';$('apiStatus').className='demo '+(c.ocrConfigured?'online':'')}catch{$('apiStatus').textContent='PRICING API OFFLINE';$('apiStatus').className='demo offline'}}
+$('extractBtn').onclick=async()=>{const file=$('invoiceFile').files[0];if(!file)return setMessage('Choose a PDF or invoice photo first.',true);const button=$('extractBtn');button.disabled=true;button.textContent='Extractingâ€¦';setMessage('Sending invoice securely to the configured OCR serviceâ€¦');try{const form=new FormData();form.append('invoice',file);form.append('vendor_name',$('vendor').value);form.append('invoice_number',$('invoiceNo').value);const token=$('managerToken').value;const r=await fetch(apiUrl('/api/pricing/invoices/extract'),{method:'POST',headers:token?{Authorization:'Bearer '+token}:{},body:form});const data=await r.json();if(!r.ok)throw new Error(data.error+(data.code==='OCR_NOT_CONFIGURED'?' â€” configure PRICING_OCR_WEBHOOK_URL on the server.':''));items=data.items.map(x=>({status:x.status,name:x.description,upc:x.upc,cases:x.case_quantity,units:x.units_per_case,total:x.line_total,confidence:x.ocr_confidence}));$('subtotal').value=data.reconciliation.invoice_subtotal;$('step2').className='done';render();setMessage(`Extracted ${items.length} line item(s). Review all yellow rows.`)}catch(e){setMessage(e.message,true)}finally{button.disabled=false;button.textContent='Extract selected invoice'}};
+$('sampleBtn').onclick=()=>{items=structuredClone(demo);$('step2').className='done';render();setMessage('Safe sample loaded. No file was uploaded.')};
 $('addBtn').onclick=()=>{items.push({status:'needs_review',name:'',upc:'',cases:1,units:0,total:0,confidence:1});render()};
 $('subtotal').oninput=render;
 $('exportBtn').onclick=()=>{const rows=[['item_name','upc','price','department'],...items.filter(x=>x.status==='approved').map(x=>[x.name,x.upc,x.price.toFixed(2),''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`price-gun-${$('invoiceNo').value||'invoice'}.csv`;a.click();URL.revokeObjectURL(a.href)};
+checkApi();
 </script>
 </body>
 </html>
-
