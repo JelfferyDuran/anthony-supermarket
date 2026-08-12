@@ -39,7 +39,7 @@ After materially changing architecture, deployment state, security posture, acti
 3. Add/update a linked note in `brain/Decisions/` or `brain/Sessions/` when the reasoning/history is useful to humans or future agents.
 
 ## Custom skill registry
-- `anthony-invoice-pricing` â€” converts vendor invoice PDFs/photos into reviewed unit costs, `cost Ã— 1.70` retail prices, database imports, and approved price-gun label CSVs. Canonical source: `C:/Users/Jayto/.codex/skills/anthony-invoice-pricing/SKILL.md`; workflow contract: `docs/INVOICE_PRICING_PIPELINE.md`.
+- `anthony-invoice-pricing` â€” converts vendor invoice PDFs/photos into reviewed unit costs, `cost Ã— 1.70` retail prices, database imports, approved price-gun label CSVs, and shared Hermes/Telegram calculations. Canonical source: `C:/Users/Jayto/.codex/skills/anthony-invoice-pricing/SKILL.md`; workflow contract: `docs/INVOICE_PRICING_PIPELINE.md`; validated 2026-08-12 with engine tests and local API smoke checks.
 - Whenever an agent creates or materially changes a custom Anthony/KFS skill, update this registry and the master `kfs-infra/AGENTS.md` registry in the same workstream. Record the skill name, purpose, canonical location, repository dependencies, validation status, and date. Never put credentials or invoice/customer data in a skill or registry entry.
 
 ## Project priorities
@@ -52,4 +52,3 @@ After materially changing architecture, deployment state, security posture, acti
 
 ## Business pricing rule
 Unless the owner explicitly overrides it for a task: Retail Price = Base Cost Ã— 1.70. For multi-packs, calculate cost per unit and retail per unit. If pack size, cost, item identity, or invoice math is ambiguous, stop and ask rather than guess.
-
