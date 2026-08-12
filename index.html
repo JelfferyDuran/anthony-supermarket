@@ -273,6 +273,19 @@
     .special-card .sp-price { font-weight:700; font-size:1.1rem; color:var(--primary-light); }
     .special-card .sp-btn { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:0.45rem 1rem; font-size:0.8rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background .2s ease; }
     .special-card .sp-btn:hover { background:var(--primary-light); }
+    /* === v6 upgrade: 3D specials showcase === */
+    #specials3d-wrap { position:relative; max-width:1100px; margin:1.5rem auto 0; border:1px solid var(--card-border); border-radius:var(--radius); overflow:hidden; background:var(--card); }
+    #specials3d-wrap[hidden] { display:none; }
+    #specials3d { display:block; width:100%; height:440px; touch-action:none; }
+    #sp3d-hint { position:absolute; top:0.6rem; left:50%; transform:translateX(-50%); font-size:0.68rem; color:var(--text-dim); letter-spacing:0.07em; text-transform:uppercase; pointer-events:none; background:rgba(15,15,20,.55); padding:0.28rem 0.8rem; border-radius:999px; white-space:nowrap; }
+    #sp3d-info { display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem 1.1rem; padding:0.9rem 1.25rem; border-top:1px solid var(--card-border); min-height:62px; }
+    #sp3d-info .si-tag { font-size:0.66rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent); }
+    #sp3d-info .si-name { font-weight:700; color:var(--text); }
+    #sp3d-info .si-price { font-weight:800; font-size:1.2rem; color:var(--primary-light); margin-left:auto; }
+    #sp3d-info .si-btn { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:0.5rem 1.2rem; font-size:0.85rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background .2s ease; }
+    #sp3d-info .si-btn:hover { background:var(--primary-light); }
+    #sp3d-info .si-desc { font-size:0.8rem; color:var(--text-dim); flex-basis:100%; }
+    @media (max-width:768px) { #specials3d { height:320px; } #sp3d-hint { font-size:0.6rem; } }
     .store-map { border:1px solid var(--card-border); border-radius:var(--radius); width:100%; max-width:800px; height:300px; margin:1.5rem auto 0; display:block; background:var(--card); }
     @media (max-width:768px) { .dept-grid,.specials-grid { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); } }
   </style>
@@ -385,6 +398,17 @@
       <h2 class="section-title" data-en="Weekly Specials" data-es="Ofertas de la Semana">Weekly <span>Specials</span></h2>
       <p class="section-sub" data-en="Hand-picked deals from our kitchen and aisles. Prices from the live Pricing Hub." data-es="Ofertas seleccionadas de nuestra cocina y pasillos. Precios del Pricing Hub en vivo.">Hand-picked deals from our kitchen and aisles. Prices from the live Pricing Hub.</p>
       <div class="specials-grid" id="specialsGrid"></div>
+      <div id="specials3d-wrap" hidden>
+        <canvas id="specials3d" aria-label="3D weekly specials"></canvas>
+        <div id="sp3d-hint">Drag to spin · Tap a product</div>
+        <div id="sp3d-info">
+          <span class="si-tag" id="siTag"></span>
+          <span class="si-name" id="siName"></span>
+          <span class="si-price" id="siPrice"></span>
+          <button class="si-btn" id="siAdd">Add to Cart</button>
+          <span class="si-desc" id="siDesc"></span>
+        </div>
+      </div>
     </section>
 
     <section class="overlay" id="menu" aria-label="Menu">
@@ -650,6 +674,7 @@ renderTabs();
 renderMenuContent(document.getElementById("searchInput").value);
 renderFilterChips();
 if(typeof renderSpecials==="function")renderSpecials();
+try{document.dispatchEvent(new CustomEvent("langchange"))}catch(e){}
 renderOrderHistory();}
 
 (function(){var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll(".reveal").forEach(function(el){obs.observe(el)})})();
@@ -665,6 +690,108 @@ function goToDept(slug){var idx=-1;MD.menus.forEach(function(m,i){if(m.slug===sl
 // v5: weekly specials — prices computed from the embedded catalog (no fake data)
 var SPECIALS=[{tag:"Hot Food",slug:"hot-food",name:"Whole Roasted Chicken"},{tag:"Hot Food",slug:"hot-food",name:"Pernil (per lb)"},{tag:"Hot Food",slug:"hot-food",name:"Ground Beef 80/20 (per lb)"},{tag:"Latin Sides",slug:"hot-food",name:"Plantains (per lb)"},{tag:"Deli & Meats",slug:"deli-meats",name:"Pan de Yuca"},{tag:"Deli & Meats",slug:"deli-meats",name:"Cheese Tequeño"}];
 function findCatalogItem(slug,name){var found=null;MD.menus.forEach(function(m){if(m.slug!==slug)return;m.categorias.forEach(function(c){c.items.forEach(function(i){if(i.nombre===name)found=i})})});return found}
+
+// v6: 3D specials showcase — catalog-driven, bilingual, WebGL with grid fallback
+(function(){
+  var wrap=document.getElementById("specials3d-wrap"),cv=document.getElementById("specials3d");
+  if(!wrap||!cv||typeof THREE==="undefined")return;
+  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var items=[];
+  (SPECIALS||[]).forEach(function(s){var it=findCatalogItem(s.slug,s.name);if(it)items.push({s:s,it:it})});
+  if(!items.length)return;
+  var renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});}catch(e){return;}
+  wrap.hidden=false;
+  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,1,0.1,100);
+  camera.position.set(0,1.4,9.6);camera.lookAt(0,0.5,0);
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  var carousel=new THREE.Group();scene.add(carousel);
+  function roundRect(x,a,b,c,d,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+c,b,a+c,b+d,r);x.arcTo(a+c,b+d,a,b+d,r);x.arcTo(a,b+d,a,b,r);x.arcTo(a,b,a+c,b,r);x.closePath();}
+  function wrapText(ctx,text,maxW,maxLine){var words=text.split(" "),lines=[],cur="";words.forEach(function(wd){var test=cur?cur+" "+wd:wd;if(ctx.measureText(test).width>maxW&&cur){lines.push(cur);cur=wd}else cur=test});if(cur)lines.push(cur);if(lines.length>maxLine){lines=lines.slice(0,maxLine);lines[maxLine-1]+="..."}return lines;}
+  function tagText(s){return cl==="es"?(s.tag==="Hot Food"?"Comida Caliente":s.tag==="Deli & Meats"?"Delicatessen y Carnes":s.tag):s.tag;}
+  function cardTexture(s,it){
+    var w=512,h=768,c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");
+    x.fillStyle="#1A1A24";roundRect(x,8,8,w-16,h-16,26);x.fill();
+    x.strokeStyle="#2D6A4F";x.lineWidth=6;roundRect(x,8,8,w-16,h-16,26);x.stroke();
+    x.fillStyle="#E07A2F";roundRect(x,8,8,w-16,10,6);x.fill();
+    x.fillStyle="#E07A2F";x.font="700 40px Arial, sans-serif";x.textAlign="center";x.textBaseline="alphabetic";
+    x.fillText(tagText(s).toUpperCase(),w/2,118);
+    x.fillStyle="#F0F0F0";x.font="700 56px Arial, sans-serif";x.textBaseline="top";
+    var lines=wrapText(x,cl==="es"?it.es:it.en,w-110,3),ly=225;
+    lines.forEach(function(l){x.fillText(l,w/2,ly);ly+=68});
+    x.fillStyle="#40916C";x.font="800 92px Arial, sans-serif";x.textBaseline="alphabetic";x.textAlign="center";
+    x.fillText("$"+it.precio.toFixed(2),w/2,600);
+    x.fillStyle="#1E5631";roundRect(x,8,h-72,w-16,64,26);x.fill();
+    x.fillStyle="#D4A017";x.font="700 32px Arial, sans-serif";x.textBaseline="middle";
+    x.fillText(cl==="es"?"ESPECIAL DE LA SEMANA":"WEEKLY SPECIAL",w/2,h-40);
+    var tx=new THREE.CanvasTexture(c);try{tx.encoding=THREE.sRGBEncoding}catch(e){}
+    return tx;
+  }
+  var cards=[],R=4.3;
+  items.forEach(function(o,i){
+    var g=new THREE.Group();
+    var glow=new THREE.Mesh(new THREE.PlaneGeometry(2.95,4.2),new THREE.MeshBasicMaterial({color:0xE07A2F,transparent:true,opacity:0}));
+    glow.position.z=-0.03;g.add(glow);
+    var m=new THREE.Mesh(new THREE.PlaneGeometry(2.55,3.83),new THREE.MeshBasicMaterial({map:cardTexture(o.s,o.it)}));
+    g.add(m);
+    cards.push({g:g,m:m,glow:glow,o:o});carousel.add(g);
+  });
+  function layout(){var n=cards.length;cards.forEach(function(c,i){var th=n>1?(-1.05+i*(2.1/(n-1))):0;c.g.position.set(Math.sin(th)*R,0.4+(i%2)*0.18,-Math.cos(th)*R+R*0.25)})}
+  layout();
+  var ring=new THREE.Mesh(new THREE.RingGeometry(2.6,3.3,48),new THREE.MeshBasicMaterial({color:0x1E5631,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=-1.45;scene.add(ring);
+  var gold=new THREE.Mesh(new THREE.TorusGeometry(3.05,0.035,8,64),new THREE.MeshBasicMaterial({color:0xD4A017,transparent:true,opacity:0.5}));
+  gold.rotation.x=-Math.PI/2;gold.position.y=-1.44;scene.add(gold);
+  var pc=50,pos=new Float32Array(pc*3);
+  for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*9;pos[i*3+1]=Math.random()*3-1;pos[i*3+2]=(Math.random()-0.5)*6-1}
+  var pgeo=new THREE.BufferGeometry();pgeo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  var pts=new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x2D6A4F,size:0.07,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending}));
+  scene.add(pts);
+  function resize(){var w=wrap.clientWidth||600,h=wrap.clientHeight||440;if(w<10)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  resize();
+  var raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),hover=-1,selected=-1,dragging=false,lastX=0;
+  function pick(e){var r=cv.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-(((e.clientY-r.top)/r.height)*2-1);raycaster.setFromCamera(mouse,camera);var hits=raycaster.intersectObjects(cards.map(function(c){return c.m}),false);return hits.length?hits[0].object.userData.idx:-1}
+  function paintGlow(){cards.forEach(function(c,i){c.glow.material.opacity=(i===hover?0.4:0)+(i===selected?0.25:0);c.g.scale.set(i===hover?1.07:1,i===hover?1.07:1,1)})}
+  cv.addEventListener("pointermove",function(e){
+    if(dragging){carousel.rotation.y+=(e.clientX-lastX)*0.008;lastX=e.clientX;return}
+    var h=pick(e);if(h!==hover){hover=h;paintGlow();cv.style.cursor=hover>=0?"pointer":"grab"}
+  });
+  cv.addEventListener("pointerdown",function(e){dragging=true;lastX=e.clientX;cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)});
+  cv.addEventListener("pointerup",function(e){if(!dragging)return;dragging=false;var h=pick(e);if(h>=0)select(h)});
+  cv.addEventListener("pointercancel",function(){dragging=false});
+  cv.style.cursor="grab";
+  var siTag=document.getElementById("siTag"),siName=document.getElementById("siName"),siDesc=document.getElementById("siDesc"),siPrice=document.getElementById("siPrice"),siAdd=document.getElementById("siAdd");
+  function select(i){
+    selected=i;hover=-1;paintGlow();
+    var o=items[i],s=o.s,it=o.it;
+    siTag.textContent=tagText(s);siName.textContent=cl==="es"?it.es:it.en;
+    siDesc.textContent=cl==="es"?(it.desc_es||""):(it.desc||"");
+    siPrice.textContent="$"+it.precio.toFixed(2);
+    siAdd.textContent=cl==="es"?"Agregar al Carrito":"Add to Cart";
+  }
+  siAdd.onclick=function(){if(selected>=0){var o=items[selected];quickAdd(o.it.nombre,o.it.precio,o.s.slug,o.it.en,o.it.es)}};
+  var hint=document.getElementById("sp3d-hint");
+  function setHint(){hint.textContent=cl==="es"?"Arrastra o desliza para girar · Toca un producto":"Drag to spin · Tap a product"}
+  setHint();
+  document.addEventListener("langchange",function(){
+    cards.forEach(function(c){c.m.material.map=cardTexture(c.o.s,c.o.it);c.m.material.needsUpdate=true});
+    if(selected>=0)select(selected);setHint();
+  });
+  var t0=Date.now();
+  function anim(){
+    requestAnimationFrame(anim);
+    var t=(Date.now()-t0)/1000;
+    if(!reduced&&!dragging)carousel.rotation.y+=0.0035;
+    if(!reduced)cards.forEach(function(c,i){c.g.position.y=0.4+(i%2)*0.18+Math.sin(t*1.4+i*1.7)*0.09});
+    pts.rotation.y+=0.0006;gold.rotation.z+=0.002;
+    cards.forEach(function(c){c.m.lookAt(camera.position);c.glow.lookAt(camera.position)});
+    renderer.render(scene,camera);
+  }
+  anim();
+  addEventListener("resize",resize);
+  window.__specials3d={select:select};
+  if(items.length)select(0);
+})();
 function renderSpecials(){var cont=document.getElementById("specialsGrid");if(!cont||typeof SPECIALS==="undefined"||!SPECIALS.length)return;var html="";SPECIALS.forEach(function(s){var item=findCatalogItem(s.slug,s.name);if(!item)return;var tagEs=s.tag==="Hot Food"?"Comida Caliente":s.tag==="Deli & Meats"?"Delicatessen y Carnes":s.tag;var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===s.slug}),cq=inCart?inCart.cantidad:0;var nm=item.nombre.replace(/'/g,"\\'");html+='<div class="special-card"><div class="sp-tag">'+t(s.tag,tagEs)+'</div><div class="sp-name">'+t(item.en,item.es)+'</div><div class="sp-desc">'+t(item.desc||"",item.desc_es||"")+'</div><div class="sp-bottom"><div class="sp-price">$'+item.precio.toFixed(2)+'</div><button class="sp-btn" onclick="quickAdd(\''+nm+'\','+item.precio+',\''+s.slug+'\',\''+item.en.replace(/'/g,"\\'")+'\',\''+item.es.replace(/'/g,"\\'")+'\')">'+(cq>0?t("In Cart","En Carrito"):t("Add","Agregar"))+'</button></div></div>'});cont.innerHTML=html}
 
 function toast(m){var c=document.getElementById("toastContainer"),el=document.createElement("div");el.className="toast";el.textContent=m;c.appendChild(el);setTimeout(function(){el.remove()},2300)}
