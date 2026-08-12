@@ -87,6 +87,7 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 - Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
 - Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe), Visit Us (location/hours/call + embedded Google Map).
 - Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data — no hardcoded deal prices.
+- 2026-08-12: standalone bilingual sales page `sales.html` (Pasta Night / Rummo 2-for-$4) is LIVE on Pages — hero deal box, FOMO banner, Three.js interactive showcase of 7 Rummo shapes, pair-it chips, recipes, poster display. v2 upgrade spec in `docs/agent-context/SALES_PAGE_V2_UPGRADE.md` (mobile-first rebuild, replace Three.js with DOM-based carousel, JSON-driven config; tracked in issue #31).
 - Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
 - Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
 - 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).

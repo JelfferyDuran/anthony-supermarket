@@ -55,3 +55,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security/rollback: no secrets/PII; no iframes (map is a link — avoids load hangs); rollback = revert branch.
 - Branch: `promo-2026-08-pasta-night` (contains sales.html + poster assets).
 - Next safe action: owner reviews/merges promo branch; optionally wire a nav link to sales.html from index.html on the site branch after merge.
+
+## 2026-08-12 01:50 ET — Hermes
+- Goal: create a v2 upgrade spec for the sales page so Claude Code/Codex can enhance it with full capabilities (owner request), including replacing Three.js for better mobile/multi-screen UI.
+- Changed: new `docs/agent-context/SALES_PAGE_V2_UPGRADE.md` — full handoff spec: repo rules, v1 inventory, v2 mission, feature checklist (mobile-first composition, bottom-sheet info panel, DOM-text cards, real product photos, JSON-driven weekly config, share buttons, accessibility, performance gates), rendering-tech decision matrix (recommends Swiper/CSS-3D DOM carousel over Three.js r128; keeps Three.js only as optional lazy-loaded ambient), quality gates (node --check, 4 viewport widths, Lighthouse ≥85, WebGL fallback), acceptance criteria, reference material. GitHub issue #31 created to track it. CURRENT_STATE.md updated.
+- Verified: spec written + linked; issue #31 created (https://github.com/JelfferyDuran/anthony-supermarket/issues/31).
+- Not verified: no code changed on the live page (v1 stays live until v2 PR merges).
+- Branch: committed directly to main (docs-only change, owner approved direct pushes this session).
+- Next safe action: hand the spec to Claude Code/Codex (it has owner-authorized repo access) or implement v2 on a `sales-v2-upgrade` branch; also consider merging `site-3d-specials` into main (owner pending decision).
