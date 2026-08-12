@@ -115,3 +115,5 @@ Production contains older unresolved orders from earlier testing/usage. Do not b
 - Staff invoice intake and price approval belong in this private repository; `anthony-superapp` is the Enatega-derived customer/delivery client and may consume only approved catalog data.
 - Default retail calculation remains base unit cost × 1.70 with final currency rounding. OCR output, fuzzy matches, missing UPCs, ambiguous packs, and unreconciled invoices must remain in review.
 - The migration is prepared but not applied to production. The authenticated upload/extraction/review API and Pricing Hub UI remain to be built.
+
+- Pricing Hub now has a browser-safe interactive demo: local PDF/image selection, two-line sample extraction, editable invoice facts, per-unit and `× 1.70` retail calculations, review blocking, reconciliation, and approved-only price-gun CSV export. It intentionally performs no OCR or database writes yet.
