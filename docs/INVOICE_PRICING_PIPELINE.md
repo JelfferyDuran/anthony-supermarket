@@ -36,6 +36,20 @@
 5. Connect only the approved read-only catalog endpoint first. Keep pricing approval and invoice uploads in the private staff system.
 6. Rebrand and test each surface separately: customer web/mobile, store dashboard, rider app, admin dashboard, then API notifications.
 
+## Connected API and Hermes/Telegram entry points
+
+The Node server now owns one shared pricing engine and exposes:
+
+- `GET /api/pricing/config` for UI capability/status checks.
+- `POST /api/pricing/calculate` for unit-cost or case-cost calculations.
+- `POST /api/pricing/invoices/extract` for manager-authorized PDF/image intake through a configured OCR webhook.
+
+Production callers must use either `Authorization: Bearer <PRICING_MANAGER_TOKEN>` or the server-to-server `x-pricing-agent-key` header. The latter is for Hermes only and must remain in its protected environment. Local demo access is allowed only outside production when neither token is configured.
+
+The Telegram bot supports allowlisted `/price <unit-cost>` and `/caseprice <line-total> <cases> <units-per-case>` commands. Allowed chats come from `HERMES_CHAT_ID` or `PRICING_TELEGRAM_CHAT_IDS`; other chats receive no pricing response. These commands calculate only and never approve or write product prices.
+
+Real invoice extraction requires `PRICING_OCR_WEBHOOK_URL` and, when applicable, `PRICING_OCR_WEBHOOK_TOKEN`. Without them the API returns `OCR_NOT_CONFIGURED`; the UI may use the clearly labeled safe sample but must not represent it as OCR.
+
 ## Next implementation slice
 
-Build an authenticated Pricing Hub API for upload, extraction status, review, approval, history, and label export. The migration intentionally grants table access only to `service_role`; application access must go through authenticated server endpoints with manager/admin authorization and audit logging.
+Connect private invoice storage and an authenticated approval transaction for reviewed lines, price history, and label batches. Then configure the OCR webhook and protected Telegram/Hermes secrets in staging and perform an end-to-end test with a non-sensitive sample invoice. Browser and Telegram clients must never receive the Supabase service-role key.
