@@ -1,4 +1,4 @@
-// 🦁 Anthony's Supermarket — Order API + Telegram Bot Server
+// ðŸ¦ Anthony's Supermarket â€” Order API + Telegram Bot Server
 // With Supabase integration for persistent storage
 
 const express = require('express');
@@ -8,19 +8,26 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
 const kitchenAide = require('./kitchen-aide');
+const { createPricingRouter } = require('./pricing-router');
+const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
 const KITCHEN_CHAT_ID = process.env.KITCHEN_CHAT_ID || '';
 const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL || 'https://t.me/Anthonysuperkitchen_bot';
-// Mini App order backend (apps/superkitchen/server) — used to resolve ORDER_<id> deep links
+// Mini App order backend (apps/superkitchen/server) â€” used to resolve ORDER_<id> deep links
 const MINIAPP_API_URL = process.env.MINIAPP_API_URL || '';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(origin => origin.trim()).filter(Boolean);
 const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
+const PRICING_TELEGRAM_CHAT_IDS = new Set(
+  [process.env.HERMES_CHAT_ID, ...(process.env.PRICING_TELEGRAM_CHAT_IDS || '').split(',')]
+    .map(value => String(value || '').trim())
+    .filter(Boolean)
+);
 
 // Supabase client
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -29,12 +36,12 @@ let supabase = null;
 
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('✅ Supabase connected');
+  console.log('âœ… Supabase connected');
 } else {
-  console.log('⚠️ Supabase not configured — using local file storage');
+  console.log('âš ï¸ Supabase not configured â€” using local file storage');
 }
 
-// ─── Data Functions (Supabase + Fallback) ─────────────────────────────
+// â”€â”€â”€ Data Functions (Supabase + Fallback) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function loadOrders() {
   if (supabase) {
@@ -145,20 +152,20 @@ async function updateOrderStatus(orderId, estado) {
   return true;
 }
 
-// ─── Data Store ───────────────────────────────────────────────────────
+// â”€â”€â”€ Data Store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let menuData = null;
 function loadMenu() {
   try {
     menuData = JSON.parse(fs.readFileSync(MENU_DATA_PATH, 'utf8'));
-    console.log(`✅ Menu loaded: ${menuData.nombre}`);
+    console.log(`âœ… Menu loaded: ${menuData.nombre}`);
   } catch (e) {
-    console.error('❌ Failed to load menu:', e.message);
+    console.error('âŒ Failed to load menu:', e.message);
     menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
   }
 }
 
-// ─── Flatten menu items for easy lookup ──────────────────────────────
+// â”€â”€â”€ Flatten menu items for easy lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let flatItems = [];
 function flattenMenu() {
@@ -182,11 +189,12 @@ function flattenMenu() {
 loadMenu();
 flattenMenu();
 
-// ─── Express App ──────────────────────────────────────────────────────
+// â”€â”€â”€ Express App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json());
+app.use('/api/pricing', createPricingRouter());
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -280,7 +288,7 @@ app.post('/api/orders', async (req, res) => {
     notifyWhatsApp(order).catch(e => console.error('WhatsApp notification failed:', e.message));
   }
 
-  console.log(`📦 Order #${order.id} — ${cliente.nombre} — $${order.total.toFixed(2)}`);
+  console.log(`ðŸ“¦ Order #${order.id} â€” ${cliente.nombre} â€” $${order.total.toFixed(2)}`);
   res.json({ ok: true, orderId: order.id, total: order.total });
 });
 
@@ -320,31 +328,31 @@ async function dispatchToN8n(order) {
   return res.ok;
 }
 
-// ─── Kitchen Notifications ──────────────────────────────────────────
+// â”€â”€â”€ Kitchen Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function notifyKitchen(order) {
   if (!bot || !KITCHEN_CHAT_ID) return;
 
   const itemsList = order.items.map(i =>
-    `• ${i.nombre} x${i.cantidad} — _$${(i.precio * i.cantidad).toFixed(2)}_`
+    `â€¢ ${i.nombre} x${i.cantidad} â€” _$${(i.precio * i.cantidad).toFixed(2)}_`
   ).join('\n');
 
   const message =
-    `👨‍🍳 *NEW ORDER #${order.id}* 🦁\n\n` +
+    `ðŸ‘¨â€ðŸ³ *NEW ORDER #${order.id}* ðŸ¦\n\n` +
     `${itemsList}\n\n` +
     `*Total:* $${order.total.toFixed(2)}\n` +
-    `*${order.tipoEntrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}*\n\n` +
+    `*${order.tipoEntrega === 'pickup' ? 'ðŸ“¦ Pickup' : 'ðŸšš Delivery'}*\n\n` +
     `*Customer:* ${order.cliente.nome}\n` +
     (order.cliente.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
     (order.cliente.direccion ? `*Address:* ${order.cliente.direccion}\n` : '') +
     (order.notas ? `*Notes:* ${order.notas}\n` : '') +
-    `\n🕐 ${new Date(order.createdAt).toLocaleTimeString()}`;
+    `\nðŸ• ${new Date(order.createdAt).toLocaleTimeString()}`;
 
   try {
     await bot.sendMessage(KITCHEN_CHAT_ID, message, { parse_mode: 'Markdown' });
-    console.log(`👨‍🍳 Kitchen notified for order #${order.id}`);
+    console.log(`ðŸ‘¨â€ðŸ³ Kitchen notified for order #${order.id}`);
   } catch (e) {
-    console.error(`❌ Kitchen notification failed: ${e.message}`);
+    console.error(`âŒ Kitchen notification failed: ${e.message}`);
   }
 }
 
@@ -352,17 +360,17 @@ async function notifyWhatsApp(order) {
   if (!WHATSAPP_WEBHOOK) return;
 
   const itemsList = order.items.map(i =>
-    `• ${i.nombre} x${i.cantidad}`
+    `â€¢ ${i.nombre} x${i.cantidad}`
   ).join('\n');
 
   const message =
-    `🦁 *Order Confirmed!*\n\n` +
+    `ðŸ¦ *Order Confirmed!*\n\n` +
     `Order #${order.id}\n` +
     `Total: $${order.total.toFixed(2)}\n` +
-    `${order.tipoEntrega === 'pickup' ? '📦 Pickup at store' : '🚚 Delivery to your address'}\n\n` +
+    `${order.tipoEntrega === 'pickup' ? 'ðŸ“¦ Pickup at store' : 'ðŸšš Delivery to your address'}\n\n` +
     `${itemsList}\n\n` +
-    `📍 288 Kearny Ave, Kearny NJ 07032\n` +
-    `📞 (201) 428-1745\n\n` +
+    `ðŸ“ 288 Kearny Ave, Kearny NJ 07032\n` +
+    `ðŸ“ž (201) 428-1745\n\n` +
     `We'll notify you when ready!`;
 
   try {
@@ -376,29 +384,29 @@ async function notifyWhatsApp(order) {
       }),
       signal: AbortSignal.timeout(8000)
     });
-    if (res.ok) console.log(`📱 WhatsApp notified for order #${order.id}`);
+    if (res.ok) console.log(`ðŸ“± WhatsApp notified for order #${order.id}`);
   } catch (e) {
-    console.error(`❌ WhatsApp notification failed: ${e.message}`);
+    console.error(`âŒ WhatsApp notification failed: ${e.message}`);
   }
 }
 
-// ─── Telegram Bot ─────────────────────────────────────────────────────
+// â”€â”€â”€ Telegram Bot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let bot = null;
 const userCarts = {};
 
 function startBot() {
   if (!TELEGRAM_TOKEN) {
-    console.log('⚡ No TELEGRAM_TOKEN set — bot disabled. Set env var to enable.');
+    console.log('âš¡ No TELEGRAM_TOKEN set â€” bot disabled. Set env var to enable.');
     return;
   }
 
   try {
     const TelegramBot = require('node-telegram-bot-api');
     bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
-    console.log('🤖 Telegram bot started');
+    console.log('ðŸ¤– Telegram bot started');
 
-    // Welcome /start — also handles Mini App deep links: /start ORDER_<id>
+    // Welcome /start â€” also handles Mini App deep links: /start ORDER_<id>
     bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
       const chatId = msg.chat.id;
       const payload = (match && match[1] ? match[1] : '').trim();
@@ -408,46 +416,46 @@ function startBot() {
         const orderId = payload.split('_')[1];
         if (!MINIAPP_API_URL) {
           return bot.sendMessage(chatId,
-            `⚠️ Mini App order lookup is not configured yet.\n\nOrder #${orderId} was received — we'll confirm shortly.`);
+            `âš ï¸ Mini App order lookup is not configured yet.\n\nOrder #${orderId} was received â€” we'll confirm shortly.`);
         }
         try {
           const res = await fetch(`${MINIAPP_API_URL}/api/orders/${orderId}`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const order = await res.json();
           const itemsList = order.items.map(i =>
-            `• ${i.name} x${i.qty} — _$${(i.unitPrice * i.qty).toFixed(2)}_` +
+            `â€¢ ${i.name} x${i.qty} â€” _$${(i.unitPrice * i.qty).toFixed(2)}_` +
             (i.meat ? `\n   Meat: ${i.meat.name}${i.meat.priceDelta > 0 ? ` (+$${i.meat.priceDelta.toFixed(2)})` : ''}` : '') +
             (i.side ? `\n   Side: ${i.side.name}` : '')
           ).join('\n');
           return bot.sendMessage(chatId,
-            `🦁 *Order #${order.id} — Received!* ✅\n\n` +
+            `ðŸ¦ *Order #${order.id} â€” Received!* âœ…\n\n` +
             `${itemsList}\n\n` +
             `*Total:* $${order.subtotal.toFixed(2)}\n` +
-            `*${order.tipoEntrega === 'delivery' ? '🚚 Delivery' : '📦 Pickup'}*\n` +
+            `*${order.tipoEntrega === 'delivery' ? 'ðŸšš Delivery' : 'ðŸ“¦ Pickup'}*\n` +
             (order.cliente?.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
             (order.notas ? `*Notes:* ${order.notas}\n` : '') +
-            `\nWe'll message you here when it's ready! 🍽️`,
+            `\nWe'll message you here when it's ready! ðŸ½ï¸`,
             { parse_mode: 'Markdown' }
           );
         } catch (e) {
           console.error(`Mini App order lookup failed for ${orderId}:`, e.message);
           return bot.sendMessage(chatId,
-            `⚠️ Couldn't load order #${orderId} right now. Hang tight — we have it and will confirm shortly.`);
+            `âš ï¸ Couldn't load order #${orderId} right now. Hang tight â€” we have it and will confirm shortly.`);
         }
       }
 
       bot.sendMessage(chatId,
-        `🦁 *Welcome to Anthony's SuperKitchen!*\n\n` +
-        `📍 288 Kearny Ave, Kearny NJ 07032\n` +
-        `📞 (201) 428-1745\n\n` +
+        `ðŸ¦ *Welcome to Anthony's SuperKitchen!*\n\n` +
+        `ðŸ“ 288 Kearny Ave, Kearny NJ 07032\n` +
+        `ðŸ“ž (201) 428-1745\n\n` +
         `*Order from:*\n` +
-        `🍳 /menu — Full Kitchen Menu\n` +
-        `🔍 /search <item> — Search items\n` +
-        `🛍️ /cart — View your cart\n` +
-        `✅ /checkout — Place your order\n\n` +
-        `🌐 Also order online: https://jelfferyduran.github.io/anthony-supermarket/\n` +
-        `🍗 Or try the Mini App: ${process.env.MINIAPP_URL || 'http://localhost:3002'}\n` +
-        `🕐 Mon–Sat 7AM–8PM | Sun CLOSED`,
+        `ðŸ³ /menu â€” Full Kitchen Menu\n` +
+        `ðŸ” /search <item> â€” Search items\n` +
+        `ðŸ›ï¸ /cart â€” View your cart\n` +
+        `âœ… /checkout â€” Place your order\n\n` +
+        `ðŸŒ Also order online: https://jelfferyduran.github.io/anthony-supermarket/\n` +
+        `ðŸ— Or try the Mini App: ${process.env.MINIAPP_URL || 'http://localhost:3002'}\n` +
+        `ðŸ• Monâ€“Sat 7AMâ€“8PM | Sun CLOSED`,
         { parse_mode: 'Markdown' }
       );
     });
@@ -457,17 +465,17 @@ function startBot() {
       const menu = menuData?.menus.find(m => m.slug === 'kitchen');
       if (!menu) return bot.sendMessage(msg.chat.id, 'Menu not found');
 
-      let text = `*🍳 Anthony's SuperKitchen — Full Menu*\n${menu.subtitulo || ''}\n\n`;
+      let text = `*ðŸ³ Anthony's SuperKitchen â€” Full Menu*\n${menu.subtitulo || ''}\n\n`;
       const keyboard = [];
 
       menu.categorias.forEach(cat => {
-        text += `*${cat.nombre}* — ${cat.items.length} items\n`;
+        text += `*${cat.nombre}* â€” ${cat.items.length} items\n`;
         cat.items.slice(0, 3).forEach(item => {
-          text += `  • ${item.nombre} — _$${item.precio.toFixed(2)}_\n`;
+          text += `  â€¢ ${item.nombre} â€” _$${item.precio.toFixed(2)}_\n`;
         });
         if (cat.items.length > 3) text += `  _+${cat.items.length - 3} more_\n`;
         text += '\n';
-        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:kitchen:${cat.nombre}` }]);
+        keyboard.push([{ text: `ðŸ“‹ ${cat.nombre}`, callback_data: `cat:kitchen:${cat.nombre}` }]);
       });
 
       text += `\nTap a category or use /search <item> to find something.`;
@@ -489,18 +497,18 @@ function startBot() {
         const cat = menu?.categorias.find(c => c.nombre === catName);
         if (!cat) return bot.answerCallbackQuery(query.id, { text: 'Category not found' });
 
-        let text = `*${cat.nombre}* — ${cat.items.length} items\n\n`;
+        let text = `*${cat.nombre}* â€” ${cat.items.length} items\n\n`;
         const keyboard = [];
 
         cat.items.forEach(item => {
           text += `*${item.nombre}*\n`;
-          text += `  💰 $${item.precio.toFixed(2)}\n`;
-          if (item.descripcion) text += `  📝 ${item.descripcion}\n`;
+          text += `  ðŸ’° $${item.precio.toFixed(2)}\n`;
+          if (item.descripcion) text += `  ðŸ“ ${item.descripcion}\n`;
           text += '\n';
-          keyboard.push([{ text: `➕ ${item.nombre} — $${item.precio.toFixed(2)}`, callback_data: `add:${slug}:${cat.nombre}:${item.nombre}` }]);
+          keyboard.push([{ text: `âž• ${item.nombre} â€” $${item.precio.toFixed(2)}`, callback_data: `add:${slug}:${cat.nombre}:${item.nombre}` }]);
         });
 
-        keyboard.push([{ text: '🔙 Back', callback_data: `back:${slug}` }]);
+        keyboard.push([{ text: 'ðŸ”™ Back', callback_data: `back:${slug}` }]);
 
         await bot.answerCallbackQuery(query.id);
         await bot.sendMessage(chatId, text, {
@@ -535,9 +543,9 @@ function startBot() {
           });
         }
 
-        await bot.answerCallbackQuery(query.id, { text: `✅ Added ${item.nombre}` });
+        await bot.answerCallbackQuery(query.id, { text: `âœ… Added ${item.nombre}` });
         await bot.sendMessage(chatId,
-          `✅ *${item.nombre}* added to cart! ($${item.precio.toFixed(2)})`,
+          `âœ… *${item.nombre}* added to cart! ($${item.precio.toFixed(2)})`,
           { parse_mode: 'Markdown' }
         );
       }
@@ -563,10 +571,10 @@ function startBot() {
 
       if (!results.length) return bot.sendMessage(msg.chat.id, `No items found for "${match[1]}"`);
 
-      let text = `🔍 *Results for "${match[1]}"*\n\n`;
+      let text = `ðŸ” *Results for "${match[1]}"*\n\n`;
       results.forEach(item => {
-        text += `• *${item.nombre}* — _$${item.precio.toFixed(2)}_\n`;
-        text += `  ${item.menuName} › ${item.categoria}\n\n`;
+        text += `â€¢ *${item.nombre}* â€” _$${item.precio.toFixed(2)}_\n`;
+        text += `  ${item.menuName} â€º ${item.categoria}\n\n`;
       });
       bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
     });
@@ -575,15 +583,15 @@ function startBot() {
     bot.onText(/\/cart/, (msg) => {
       const userId = msg.from.id;
       const cart = userCarts[userId];
-      if (!cart || !cart.items.length) return bot.sendMessage(msg.chat.id, '🛍️ Your cart is empty. Browse /menu to add items.');
+      if (!cart || !cart.items.length) return bot.sendMessage(msg.chat.id, 'ðŸ›ï¸ Your cart is empty. Browse /menu to add items.');
 
-      let text = `🛍️ *Your Cart*\n\n`;
+      let text = `ðŸ›ï¸ *Your Cart*\n\n`;
       cart.items.forEach((item, i) => {
         text += `${i + 1}. ${item.nombre} x${item.cantidad} = _$${(item.precio * item.cantidad).toFixed(2)}_\n`;
       });
       const total = cart.items.reduce((s, i) => s + i.precio * i.cantidad, 0);
       text += `\n*Total: $${total.toFixed(2)}*`;
-      text += `\n\n✅ /checkout — Place order\n🗑️ /clear — Clear cart`;
+      text += `\n\nâœ… /checkout â€” Place order\nðŸ—‘ï¸ /clear â€” Clear cart`;
 
       bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
     });
@@ -595,7 +603,7 @@ function startBot() {
         userCarts[userId].items = [];
         userCarts[userId].slug = '';
       }
-      bot.sendMessage(msg.chat.id, '🗑️ Cart cleared!');
+      bot.sendMessage(msg.chat.id, 'ðŸ—‘ï¸ Cart cleared!');
     });
 
     // Checkout
@@ -607,13 +615,13 @@ function startBot() {
       const total = cart.items.reduce((s, i) => s + i.precio * i.cantidad, 0);
 
       const keyboard = [
-        [{ text: '📦 Pickup', callback_data: 'checkout:pickup' }],
-        [{ text: '🚚 Delivery', callback_data: 'checkout:delivery' }],
-        [{ text: '❌ Cancel', callback_data: 'checkout:cancel' }]
+        [{ text: 'ðŸ“¦ Pickup', callback_data: 'checkout:pickup' }],
+        [{ text: 'ðŸšš Delivery', callback_data: 'checkout:delivery' }],
+        [{ text: 'âŒ Cancel', callback_data: 'checkout:cancel' }]
       ];
 
-      let text = `✅ *Ready to Checkout*\n\n`;
-      cart.items.forEach(i => { text += `• ${i.nombre} x${i.cantidad} — $${(i.precio * i.cantidad).toFixed(2)}\n`; });
+      let text = `âœ… *Ready to Checkout*\n\n`;
+      cart.items.forEach(i => { text += `â€¢ ${i.nombre} x${i.cantidad} â€” $${(i.precio * i.cantidad).toFixed(2)}\n`; });
       text += `\n*Total: $${total.toFixed(2)}*`;
       text += `\n\nChoose pickup or delivery:`;
 
@@ -660,20 +668,20 @@ function startBot() {
             userCarts[userId] = { items: [], slug: '' };
 
             await bot.sendMessage(chatId,
-              `🎉 *Order Confirmed!*\n\n` +
+              `ðŸŽ‰ *Order Confirmed!*\n\n` +
               `Order #${order.orderId}\n` +
               `Total: *$${order.total.toFixed(2)}*\n` +
-              `Type: ${method === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}\n\n` +
-              `📍 288 Kearny Ave, Kearny NJ 07032\n` +
-              `📞 (201) 428-1745\n\n` +
-              `We'll notify you when your order is ready! 🦁`,
+              `Type: ${method === 'pickup' ? 'ðŸ“¦ Pickup' : 'ðŸšš Delivery'}\n\n` +
+              `ðŸ“ 288 Kearny Ave, Kearny NJ 07032\n` +
+              `ðŸ“ž (201) 428-1745\n\n` +
+              `We'll notify you when your order is ready! ðŸ¦`,
               { parse_mode: 'Markdown' }
             );
           } else {
-            await bot.sendMessage(chatId, `❌ Order failed: ${order.error}`);
+            await bot.sendMessage(chatId, `âŒ Order failed: ${order.error}`);
           }
         } catch (e) {
-          await bot.sendMessage(chatId, `❌ Server error: ${e.message}`);
+          await bot.sendMessage(chatId, `âŒ Server error: ${e.message}`);
         }
 
         await bot.answerCallbackQuery(query.id);
@@ -696,30 +704,63 @@ function startBot() {
     // Help
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(msg.chat.id,
-        `🦁 *Anthony's SuperKitchen Bot Commands*\n\n` +
-        `/start — Welcome\n` +
-        `/menu — Full kitchen menu\n` +
-        `/search <item> — Search items\n` +
-        `/cart — View cart\n` +
-        `/checkout — Place order\n` +
-        `/clear — Clear cart\n` +
-        `/hours — Store hours & contact\n` +
-        `/help — This message`,
+        `ðŸ¦ *Anthony's SuperKitchen Bot Commands*\n\n` +
+        `/start â€” Welcome\n` +
+        `/menu â€” Full kitchen menu\n` +
+        `/search <item> â€” Search items\n` +
+        `/cart â€” View cart\n` +
+        `/checkout â€” Place order\n` +
+        `/clear â€” Clear cart\n` +
+        `/hours â€” Store hours & contact\n` +
+        `/help â€” This message` +
+        (PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))
+          ? `\n\n*Authorized pricing:*\n/price <unit-cost>\n/caseprice <line-total> <cases> <units-per-case>`
+          : ''),
         { parse_mode: 'Markdown' }
       );
+    });
+
+    // Restricted Hermes/manager calculator. These commands never change a database price.
+    bot.onText(/\/price(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const unitCost = Number(match[1]);
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Pricing*\nUnit cost: $${unitCost.toFixed(2)}\nFormula: $${unitCost.toFixed(2)} Ã— 1.70\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
+    });
+
+    bot.onText(/\/caseprice(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const lineTotal = Number(match[1]);
+        const caseQuantity = Number(match[2]);
+        const unitsPerCase = Number(match[3]);
+        const unitCost = unitCostFromCase({ lineTotal, caseQuantity, unitsPerCase });
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Case Pricing*\nLine total: $${lineTotal.toFixed(2)}\nPack: ${caseQuantity} case(s) Ã— ${unitsPerCase} units\nUnit cost: $${unitCost.toFixed(2)}\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
     });
 
     // Hours / contact
     bot.onText(/\/hours/, (msg) => {
       bot.sendMessage(msg.chat.id,
-        `📍 *Anthony's SuperKitchen*\n` +
+        `ðŸ“ *Anthony's SuperKitchen*\n` +
         `288 Kearny Ave, Kearny NJ 07032\n\n` +
-        `📞 (201) 428-1745\n` +
-        `💬 WhatsApp: 732-925-5201\n\n` +
-        `🕐 *Hours:*\n` +
-        `Mon–Sat: 7:00 AM – 8:00 PM\n` +
+        `ðŸ“ž (201) 428-1745\n` +
+        `ðŸ’¬ WhatsApp: 732-925-5201\n\n` +
+        `ðŸ• *Hours:*\n` +
+        `Monâ€“Sat: 7:00 AM â€“ 8:00 PM\n` +
         `Sunday: CLOSED\n\n` +
-        `🌐 https://jelfferyduran.github.io/anthony-supermarket/`,
+        `ðŸŒ https://jelfferyduran.github.io/anthony-supermarket/`,
         { parse_mode: 'Markdown' }
       );
     });
@@ -731,22 +772,22 @@ function startBot() {
       const pending = orders.filter(o => o.estado === 'recibido' || o.estado === 'preparando');
 
       if (!pending.length) {
-        return bot.sendMessage(chatId, '✅ No pending orders. All clear! 🦁');
+        return bot.sendMessage(chatId, 'âœ… No pending orders. All clear! ðŸ¦');
       }
 
-      let text = `👨‍🍳 *Kitchen — Order Board*\n\n`;
+      let text = `ðŸ‘¨â€ðŸ³ *Kitchen â€” Order Board*\n\n`;
       pending.forEach((o, i) => {
-        text += `*${i + 1}. #${o.id}* — ${o.estado === 'recibido' ? '🆕 New' : '👨‍🍳 Prep'}\n`;
-        text += `   ${o.cliente.nombre} — ${o.tipo_entrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}\n`;
+        text += `*${i + 1}. #${o.id}* â€” ${o.estado === 'recibido' ? 'ðŸ†• New' : 'ðŸ‘¨â€ðŸ³ Prep'}\n`;
+        text += `   ${o.cliente.nombre} â€” ${o.tipo_entrega === 'pickup' ? 'ðŸ“¦ Pickup' : 'ðŸšš Delivery'}\n`;
         text += `   Total: $${o.total.toFixed(2)}\n`;
         o.items.forEach(item => {
-          text += `   • ${item.nombre} x${item.cantidad}\n`;
+          text += `   â€¢ ${item.nombre} x${item.cantidad}\n`;
         });
-        text += `   🕐 ${new Date(o.created_at).toLocaleString()}\n\n`;
+        text += `   ðŸ• ${new Date(o.created_at).toLocaleString()}\n\n`;
       });
 
       const keyboard = pending.map(o => [
-        { text: `✅ Mark #${o.id} Ready`, callback_data: `ready:${o.id}` }
+        { text: `âœ… Mark #${o.id} Ready`, callback_data: `ready:${o.id}` }
       ]);
 
       await bot.sendMessage(chatId, text, {
@@ -764,9 +805,9 @@ function startBot() {
         const orderId = data.split(':')[1];
         await updateOrderStatus(orderId, 'listo');
 
-        await bot.answerCallbackQuery(query.id, { text: `✅ Order #${orderId} marked ready!` });
+        await bot.answerCallbackQuery(query.id, { text: `âœ… Order #${orderId} marked ready!` });
         await bot.sendMessage(chatId,
-          `✅ *Order #${orderId} is READY!* 🎉\n\n` +
+          `âœ… *Order #${orderId} is READY!* ðŸŽ‰\n\n` +
           `Ready for pickup or delivery.`,
           { parse_mode: 'Markdown' }
         );
@@ -774,20 +815,20 @@ function startBot() {
     });
 
   } catch (e) {
-    console.error('❌ Bot failed to start:', e.message);
+    console.error('âŒ Bot failed to start:', e.message);
   }
 
-  // 🧑‍🍳 Kitchen Aide: order threads in the kitchen group
+  // ðŸ§‘â€ðŸ³ Kitchen Aide: order threads in the kitchen group
   kitchenAide.startKitchenAide(bot, MINIAPP_API_URL, KITCHEN_CHAT_ID);
 }
 
-// ─── Start ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 app.listen(PORT, () => {
-  console.log(`🦁 Anthony's Server running on http://localhost:${PORT}`);
-  console.log(`📊 Menu: ${flatItems.length} items across ${menuData?.menus?.length || 0} menus`);
-  if (KITCHEN_CHAT_ID) console.log(`👨‍🍳 Kitchen notifications enabled (chat: ${KITCHEN_CHAT_ID})`);
-  if (WHATSAPP_WEBHOOK) console.log(`📱 WhatsApp notifications enabled`);
-  if (N8N_WEBHOOK_URL) console.log(`🔗 n8n webhook enabled`);
+  console.log(`ðŸ¦ Anthony's Server running on http://localhost:${PORT}`);
+  console.log(`ðŸ“Š Menu: ${flatItems.length} items across ${menuData?.menus?.length || 0} menus`);
+  if (KITCHEN_CHAT_ID) console.log(`ðŸ‘¨â€ðŸ³ Kitchen notifications enabled (chat: ${KITCHEN_CHAT_ID})`);
+  if (WHATSAPP_WEBHOOK) console.log(`ðŸ“± WhatsApp notifications enabled`);
+  if (N8N_WEBHOOK_URL) console.log(`ðŸ”— n8n webhook enabled`);
   startBot();
 });
