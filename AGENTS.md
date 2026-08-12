@@ -1,4 +1,4 @@
-# Anthony's Supermarket — Agent Entry Point
+# Anthony's Supermarket â€” Agent Entry Point
 
 This repository is the canonical shared context for AI agents working on Anthony's Supermarket systems and is designed to be opened directly as the Anthony's Obsidian vault.
 
@@ -38,6 +38,10 @@ After materially changing architecture, deployment state, security posture, acti
 2. Append a short entry to `docs/agent-context/SESSION_LOG.md`.
 3. Add/update a linked note in `brain/Decisions/` or `brain/Sessions/` when the reasoning/history is useful to humans or future agents.
 
+## Custom skill registry
+- `anthony-invoice-pricing` â€” converts vendor invoice PDFs/photos into reviewed unit costs, `cost Ã— 1.70` retail prices, database imports, and approved price-gun label CSVs. Canonical source: `C:/Users/Jayto/.codex/skills/anthony-invoice-pricing/SKILL.md`; workflow contract: `docs/INVOICE_PRICING_PIPELINE.md`.
+- Whenever an agent creates or materially changes a custom Anthony/KFS skill, update this registry and the master `kfs-infra/AGENTS.md` registry in the same workstream. Record the skill name, purpose, canonical location, repository dependencies, validation status, and date. Never put credentials or invoice/customer data in a skill or registry entry.
+
 ## Project priorities
 1. Secure and reliable customer ordering.
 2. Kitchen operations dashboard.
@@ -47,4 +51,5 @@ After materially changing architecture, deployment state, security posture, acti
 6. Later integration into the wider Anthony's SuperApp/inventory/POS ecosystem.
 
 ## Business pricing rule
-Unless the owner explicitly overrides it for a task: Retail Price = Base Cost × 1.70. For multi-packs, calculate cost per unit and retail per unit. If pack size, cost, item identity, or invoice math is ambiguous, stop and ask rather than guess.
+Unless the owner explicitly overrides it for a task: Retail Price = Base Cost Ã— 1.70. For multi-packs, calculate cost per unit and retail per unit. If pack size, cost, item identity, or invoice math is ambiguous, stop and ask rather than guess.
+
