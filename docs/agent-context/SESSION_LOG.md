@@ -63,3 +63,23 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified: no code changed on the live page (v1 stays live until v2 PR merges).
 - Branch: committed directly to main (docs-only change, owner approved direct pushes this session).
 - Next safe action: hand the spec to Claude Code/Codex (it has owner-authorized repo access) or implement v2 on a `sales-v2-upgrade` branch; also consider merging `site-3d-specials` into main (owner pending decision).
+
+## 2026-08-13 — Claude Code (sales page v2 implementation)
+- Goal: implement `docs/agent-context/SALES_PAGE_V2_UPGRADE.md` (issue #31) — mobile-first rebuild of `sales.html`, replace Three.js, make the sale weekly-swappable from one config.
+- Changed:
+  - `data/sale.json` (NEW) — the entire campaign as one editable file: campaign titles, deal + FOMO copy, 7 products (image/code/name/weight/facts), how-it-works, pair-it, recipes, posters, share templates, store info, UI strings. Every text field is `{ en, es }`.
+  - `sales.html` — rebuilt as a config-driven page. **Three.js r128 removed entirely** (spec §4). The rack is CSS 3D (`perspective` + `preserve-3d`) driven by ~11KB of inline JS: pointer drag with axis detection, fling projection + snap-to-nearest, ease-out cubic animation, arrow/Home/End/Enter keys, horizontal wheel, dots. No external libraries, no CDN.
+  - Card faces are real DOM text (`<h3>` name, gold price pill, weight, badge) over the real product photo — replaces v1's `CanvasTexture` text.
+  - Detail view: docked side panel ≥861px; drag-to-dismiss bottom sheet below that (backdrop, Escape, focus restore, safe-area inset).
+  - WhatsApp share per product + share-the-sale + copy-link (with clipboard fallback and a toast).
+  - `assets/promos/2026-08-pasta-night/products/cards/*` (NEW, 14 files) — 640×640 webp+jpg card derivatives. Originals kept in `products/`.
+- Verified (all re-run after the final edit):
+  - `node --check` clean on the extracted inline JS; `data/sale.json` parses.
+  - Lighthouse mobile: performance **99**, accessibility **100**, best-practices **100**, SEO **100**; FCP 0.8s, LCP 1.7s, TBT 90ms, CLS 0; 254KB / 5 requests.
+  - 100/100 automated Chromium checks: widths 360/768/1280/1920, phone landscape 844×390, 320×568, Pixel 5 touch (fling carries >1 card, snaps to exact position, tap opens the sheet, Escape closes), reduced-motion, EN/ES flips card price + badge + hero + detail facts, zero console errors everywhere, no horizontal overflow, no dates, card fits the stage at every size.
+  - Degradation: config 404 → graceful store-info message with the app hidden and no thrown error; JS off → `<noscript>` with address/hours/directions; no CSS 3D → static product grid via `@supports`.
+- Fixed along the way: a real perf bug (all 7 full-size 1920×2560 photos loaded up front because the stacked cards all count as "in viewport", defeating native lazy-loading) — LCP 4.6s → 1.7s; and a `/favicon.ico` 404 on every visit.
+- Not done / deliberately out of scope: spec §3.3 bullet 3 (making `index.html`'s Weekly Specials read the same JSON). `index.html`'s `SPECIALS` is a different data domain — hot-food/deli items priced from the embedded catalog via `findCatalogItem()` — and the referenced `site-3d-specials` branch is still unmerged. Wiring them together would mean inventing a mapping between catalog items and campaign products, so it is left for an owner decision.
+- Security/rollback: no secrets, tokens, or PII; no invented prices or dates; rollback = revert the branch. v1 stays live on `main` until this merges.
+- Branch: `claude/sales-v2-upgrade-spec-1tsrkx` (PR opened as draft).
+- Next safe action: owner reviews the PR on a real phone (fling + bottom sheet + EN/ES), then merge; Pages redeploys `/sales.html` automatically. To swap next week's sale, edit `data/sale.json` only.

@@ -1,0 +1,265 @@
+{
+  "_readme": "THIS FILE IS THE WHOLE SALE. Edit it to swap the weekly campaign — sales.html reads it and rebuilds itself. Rules: never write a date (use 'while supplies last'), never invent a price. Every text field takes { en, es } and both are required. A product 'image' is a path WITHOUT the file extension — ship a ~640x640 .webp AND a .jpg at that path (full-resolution originals live one folder up, in products/).",
+  "version": 1,
+
+  "campaign": {
+    "id": "2026-08-pasta-night",
+    "titleA": { "en": "PASTA", "es": "NOCHE" },
+    "titleB": { "en": "NIGHT", "es": "DE PASTA" },
+    "tagline": {
+      "en": "One aisle. One night. Dinner solved. — RUMMO imported since 1846.",
+      "es": "Un pasillo. Una noche. Cena resuelta. — RUMMO importada desde 1846."
+    },
+    "documentTitle": {
+      "en": "This Week's Sale — Anthony's Supermarket",
+      "es": "Ofertas de la Semana — Anthony's Supermarket"
+    },
+    "metaDescription": {
+      "en": "RUMMO pasta 2 for $4 — mix & match all shapes, while supplies last. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.",
+      "es": "Pasta RUMMO 2 por $4 — mezcla y combina todas las formas, hasta agotar existencias. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ."
+    }
+  },
+
+  "deal": {
+    "headline": { "en": "ANY 2 FOR", "es": "CUALQUIER 2 POR" },
+    "price": "$4",
+    "detail": { "en": "Mix & match all 7 shapes", "es": "Mezcla y combina las 7 formas" },
+    "save": { "en": "Save ~28% vs $2.79 each", "es": "Ahorra ~28% vs $2.79 c/u" },
+    "badge": { "en": "While supplies last", "es": "Hasta agotar existencias" },
+    "cardPrice": { "en": "2 FOR $4", "es": "2 POR $4" },
+    "fomo": {
+      "en": "WHEN IT'S GONE, IT'S GONE — NO DATE, NO RESTOCK GUARANTEE",
+      "es": "CUANDO SE ACABA, SE ACABA — SIN FECHA, SIN GARANTÍA DE REPOSICIÓN"
+    }
+  },
+
+  "showcase": {
+    "title": { "en": "The <span>Sale</span>", "es": "La <span>Oferta</span>" },
+    "sub": {
+      "en": "Swipe the rack. Tap a shape. Every single one is 2 for $4.",
+      "es": "Desliza el estante. Toca una forma. Cada una está 2 por $4."
+    },
+    "hint": {
+      "en": "Swipe or use ← → · Tap a shape for details",
+      "es": "Desliza o usa ← → · Toca una forma para ver detalles"
+    }
+  },
+
+  "products": [
+    {
+      "id": "penne-rigate-66",
+      "brand": "RUMMO",
+      "code": "Nº 66",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-penne-rigate-66",
+      "name": { "en": "Penne Rigate", "es": "Penne Rigate" },
+      "weight": "1 lb / 454g",
+      "facts": {
+        "en": "Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",
+        "es": "Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."
+      }
+    },
+    {
+      "id": "mezzi-rigatoni-51",
+      "brand": "RUMMO",
+      "code": "Nº 51",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-mezzi-rigatoni-51",
+      "name": { "en": "Mezzi Rigatoni", "es": "Mezzi Rigatoni" },
+      "weight": "1 lb / 454g",
+      "facts": {
+        "en": "Chunky tubes built for Sunday gravy — the Kearny classic.",
+        "es": "Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."
+      }
+    },
+    {
+      "id": "squared-spaghetti-221",
+      "brand": "RUMMO",
+      "code": "Nº 221",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-squared-spaghetti-221",
+      "name": { "en": "Squared Spaghetti", "es": "Espagueti Cuadrado" },
+      "weight": "1 lb / 454g",
+      "facts": {
+        "en": "A unique square cut that holds sauce on every side. Conversation starter.",
+        "es": "Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."
+      }
+    },
+    {
+      "id": "farfalle-85",
+      "brand": "RUMMO",
+      "code": "Nº 85",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-farfalle-85-rigatoni-51",
+      "name": { "en": "Farfalle", "es": "Farfalle" },
+      "weight": "1 lb / 454g",
+      "facts": {
+        "en": "Bow ties the whole family loves — great cold in salads too.",
+        "es": "Moños que toda la familia ama — también geniales fríos en ensaladas."
+      }
+    },
+    {
+      "id": "egg-fettuccine-94",
+      "brand": "RUMMO",
+      "code": "Nº 94",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-egg-fettuccine-94",
+      "name": { "en": "Egg Fettuccine", "es": "Fettuccine de Huevo" },
+      "weight": "8.82 oz / 250g",
+      "facts": {
+        "en": "Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",
+        "es": "Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."
+      }
+    },
+    {
+      "id": "egg-pappardelle-101",
+      "brand": "RUMMO",
+      "code": "Nº 101",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-egg-pappardelle-101",
+      "name": { "en": "Egg Pappardelle", "es": "Pappardelle de Huevo" },
+      "weight": "8.82 oz / 250g",
+      "facts": {
+        "en": "Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",
+        "es": "Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."
+      }
+    },
+    {
+      "id": "lasagne-83",
+      "brand": "RUMMO",
+      "code": "Nº 83",
+      "image": "assets/promos/2026-08-pasta-night/products/cards/rummo-lasagne-83",
+      "name": { "en": "Lasagne", "es": "Lasagna" },
+      "weight": "1 lb / 454g",
+      "facts": {
+        "en": "Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",
+        "es": "Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."
+      }
+    }
+  ],
+
+  "how": {
+    "title": { "en": "How It <span>Works</span>", "es": "Cómo <span>Funciona</span>" },
+    "steps": [
+      {
+        "n": "1",
+        "title": { "en": "Pick any 2 shapes", "es": "Elige 2 formas" },
+        "body": {
+          "en": "Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne.",
+          "es": "Penne, rigatoni, spaghetti, farfalle, pasta de huevo, lasagna."
+        }
+      },
+      {
+        "n": "$4",
+        "title": { "en": "Pay $4 total", "es": "Paga $4 en total" },
+        "body": {
+          "en": "That's $2 a bag — about 28% off the shelf price.",
+          "es": "Son $2 por bolsa — ~28% menos que el precio regular."
+        }
+      },
+      {
+        "n": "🍝",
+        "title": { "en": "Dinner solved", "es": "Cena resuelta" },
+        "body": {
+          "en": "Bronze-cut, slow-made, sauce-absorbing. Since 1846.",
+          "es": "Corte de bronce, hechas lentamente. Desde 1846."
+        }
+      }
+    ]
+  },
+
+  "pairings": {
+    "title": { "en": "Pair <span>It</span>", "es": "Acompáñala <span>Con</span>" },
+    "sub": {
+      "en": "Everything you need for pasta night, one aisle away.",
+      "es": "Todo lo que necesitas para la noche de pasta, a un pasillo."
+    },
+    "items": [
+      { "tag": { "en": "Sauce", "es": "Salsa" }, "items": "Ragu · Prego" },
+      { "tag": { "en": "Tomatoes", "es": "Tomates" }, "items": "Hunt's · Goya" },
+      { "tag": { "en": "Paste", "es": "Pasta de tomate" }, "items": "Victoria" },
+      { "tag": { "en": "Salsa", "es": "Salsa" }, "items": "Goya Salsa de Tomate" },
+      { "tag": { "en": "Quick", "es": "Rápido" }, "items": "Maruchan · Cup Noodles" }
+    ]
+  },
+
+  "recipes": {
+    "title": { "en": "Tonight's <span>Ideas</span>", "es": "Ideas Para <span>Hoy</span>" },
+    "items": [
+      {
+        "title": {
+          "en": "⚡ 15-Minute Spaghetti & Meat Sauce",
+          "es": "⚡ Espaguetis con salsa de carne en 15 min"
+        },
+        "body": {
+          "en": "<b>Pair with PLAN #2:</b> Brown 1 lb ground beef, add a jar of Prego or Ragu, simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. Add Goya adobo to taste.",
+          "es": "<b>Con PLAN #2:</b> Dora 1 lb de carne molida, agrega un frasco de Prego o Ragu, hierve y mezcla con Rummo Espagueti Cuadrado Nº 221. Rinde 4 porciones. Agrega adobo Goya al gusto."
+        }
+      },
+      {
+        "title": {
+          "en": "👵 Sunday Gravy, the Kearny Way",
+          "es": "👵 Salsa dominical, estilo Kearny"
+        },
+        "body": {
+          "en": "<b>Pair with PLAN #3:</b> Brown pork chops in olive oil; add Hunt's diced + Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51.",
+          "es": "<b>Con PLAN #3:</b> Dora chuletas de cerdo en aceite de oliva; agrega Hunt's en cubitos + pasta Victoria + salsa Goya; cocina 45 min. Sirve con Rummo Mezzi Rigatoni Nº 51."
+        }
+      },
+      {
+        "title": {
+          "en": "🥚 3-Minute Egg Fettuccine",
+          "es": "🥚 Fettuccine de huevo en 3 min"
+        },
+        "body": {
+          "en": "<b>Fast night:</b> Rummo Egg Nest Fettuccine Nº 94 cooks in 3 minutes. Free-range Italian eggs, butter, parmesan. Done.",
+          "es": "<b>Noche rápida:</b> El Fettuccine de Huevo Rummo Nº 94 se cocina en 3 minutos. Huevos italianos de gallinas libres, mantequilla, parmesano. Listo."
+        }
+      }
+    ]
+  },
+
+  "poster": {
+    "en": "assets/promos/2026-08-pasta-night/poster-en-allshapes",
+    "enExt": "png",
+    "es": "assets/promos/2026-08-pasta-night/poster-es-chatgpt",
+    "esExt": "jpg",
+    "alt": { "en": "Rummo 2 for $4 poster", "es": "Póster Rummo 2 por $4" },
+    "caption": {
+      "en": "Print this — EN / ES posters in the promo folder",
+      "es": "Imprime esto — pósters EN / ES en la carpeta de promos"
+    }
+  },
+
+  "share": {
+    "buttonSale": { "en": "Share this sale", "es": "Compartir la oferta" },
+    "buttonProduct": { "en": "Share", "es": "Compartir" },
+    "buttonCopy": { "en": "Copy link", "es": "Copiar enlace" },
+    "copied": { "en": "Link copied!", "es": "¡Enlace copiado!" },
+    "saleText": {
+      "en": "🍝 Pasta Night at Anthony's Supermarket — RUMMO any 2 for $4, mix & match. While supplies last. 288 Kearny Ave, Kearny NJ.",
+      "es": "🍝 Noche de Pasta en Anthony's Supermarket — RUMMO cualquier 2 por $4, mezcla y combina. Hasta agotar existencias. 288 Kearny Ave, Kearny NJ."
+    },
+    "productText": {
+      "en": "🍝 {name} ({code}) — {price} at Anthony's Supermarket, 288 Kearny Ave, Kearny NJ. While supplies last!",
+      "es": "🍝 {name} ({code}) — {price} en Anthony's Supermarket, 288 Kearny Ave, Kearny NJ. ¡Hasta agotar existencias!"
+    }
+  },
+
+  "store": {
+    "name": "ANTHONY'S SUPERMARKET",
+    "tagline": { "en": "Supermarket · Kearny NJ", "es": "Supermercado · Kearny NJ" },
+    "address": "288 Kearny Ave, Kearny NJ 07032",
+    "hours": { "en": "Mon–Sat 7AM–8PM · Sun CLOSED", "es": "Lun–Sáb 7AM–8PM · Dom CERRADO" },
+    "mapsUrl": "https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032",
+    "directions": { "en": "📍 Get Directions", "es": "📍 Cómo Llegar" },
+    "instagram": "@anthony_supermarket",
+    "instagramUrl": "https://instagram.com/anthony_supermarket"
+  },
+
+  "ui": {
+    "loading": { "en": "Loading this week's sale…", "es": "Cargando la oferta de la semana…" },
+    "error": {
+      "en": "We couldn't load this week's sale. Come see us at 288 Kearny Ave, Kearny NJ — Mon–Sat 7AM–8PM.",
+      "es": "No pudimos cargar la oferta de esta semana. Visítanos en 288 Kearny Ave, Kearny NJ — Lun–Sáb 7AM–8PM."
+    },
+    "prev": { "en": "Previous shape", "es": "Forma anterior" },
+    "next": { "en": "Next shape", "es": "Forma siguiente" },
+    "close": { "en": "Close", "es": "Cerrar" },
+    "rackLabel": { "en": "Pasta shapes on sale", "es": "Formas de pasta en oferta" }
+  }
+}
