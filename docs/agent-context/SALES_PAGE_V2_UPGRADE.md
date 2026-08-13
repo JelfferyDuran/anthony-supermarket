@@ -5,7 +5,13 @@
 **Repo:** `https://github.com/JelfferyDuran/anthony-supermarket` (pull/push access for owner-approved agents)
 **Live page:** `https://jelfferyduran.github.io/anthony-supermarket/sales.html`
 **Date:** 2026-08-12
-**Status:** 🟡 OPEN — spec approved by owner, not yet implemented
+**Status:** ✅ IMPLEMENTED 2026-08-13 on branch `claude/sales-v2-upgrade-spec-1tsrkx` — see `SESSION_LOG.md` and `brain/Decisions/2026-08-13-sales-v2-drop-threejs.md`.
+
+> **Implementation notes (what differs from this spec, and why):**
+> - **§4 option A was taken, not B.** The rack is pure CSS 3D + ~11KB of inline JS rather than Swiper. Both were starred here; A won because it adds **0KB** and no CDN dependency (the page is a single self-contained file on GitHub Pages), while still delivering the momentum/snap/keyboard behaviour B would have provided. Three.js is removed outright — not kept as an ambient accent.
+> - **§3.3 bullet 3 (`index.html` reads the same JSON) was NOT done.** `SPECIALS` there is a different data domain (hot-food/deli priced from the embedded catalog via `findCatalogItem()`), and `site-3d-specials` is still unmerged. Unifying them would require inventing a catalog↔campaign mapping. Left for an owner decision.
+> - **Added beyond the spec:** 640×640 card-image derivatives under `products/cards/`. Shipping the 1920×2560 originals into a ~280px card was the single biggest cost to the §3.5 Lighthouse gate (LCP 4.6s → 1.7s once fixed).
+> - **Gate results:** Lighthouse mobile perf **99** (gate ≥85), LCP **1.7s** (gate ≤2.5s), a11y 100, best-practices 100, SEO 100. 100/100 automated browser checks.
 
 ---
 

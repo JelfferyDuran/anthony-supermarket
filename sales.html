@@ -2,309 +2,815 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>This Week's Sale — Anthony's Supermarket | Ofertas de la Semana</title>
-<meta name="description" content="RUMMO pasta 2 for $4 — mix & match all shapes, while supplies last. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<meta name="description" id="metaDesc" content="RUMMO pasta 2 for $4 — mix &amp; match all shapes, while supplies last. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.">
+<meta name="theme-color" content="#12120F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232D6A4F'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='700' fill='%23D4A017' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="data/sale.json" as="fetch" crossorigin="anonymous">
 <style>
   :root{
-    --primary:#2D6A4F; --primary-light:#40916C; --accent:#E07A2F; --gold:#D4A017;
-    --bg:#0F0F14; --card:#1A1A24; --card-border:#2A2A34; --text:#F0F0F0; --text-dim:#8888A0;
-    --red:#C0392B; --cream:#FDF6E3; --radius:12px;
+    --bg:#12120F; --bg-2:#1A1A15; --line:#2E2C24;
+    --paper:#FDF6E3; --paper-2:#F1E6C8; --ink:#22201A; --ink-dim:#6B6455;
+    --green:#2D6A4F; --green-l:#40916C; --gold:#D4A017; --red:#C0392B; --accent:#E07A2F;
+    --text:#F2EEE3; --text-dim:#9A9484;
+    --radius:14px;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,'Times New Roman',serif;
+    --sans:'Segoe UI',system-ui,-apple-system,Roboto,Arial,Helvetica,sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    /* card width is bounded by viewport HEIGHT too, so the rack never outgrows the stage
+       (matters in phone landscape, where width is plentiful and height is not) */
+    --cw:clamp(180px,min(56vw,42vh),280px);
   }
+  @supports (height:100svh){ :root{ --cw:clamp(180px,min(56vw,42svh),280px); } }
   *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;}
-  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.7rem 5%;background:rgba(15,15,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--card-border);}
-  .brand{font-weight:800;color:var(--primary-light);letter-spacing:.5px;font-size:1rem;}
-  .brand small{display:block;font-size:.62rem;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;}
-  .top-right{display:flex;align-items:center;gap:.6rem;}
-  .lang-btn{background:var(--card);color:var(--text);border:1px solid var(--card-border);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;}
-  .lang-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
-  .hero{position:relative;text-align:center;padding:3rem 5% 2.5rem;overflow:hidden;}
-  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(45,106,79,.35),transparent 60%);pointer-events:none;}
-  .hero h1{font-size:clamp(2rem,6vw,3.6rem);font-weight:900;letter-spacing:.5px;text-transform:uppercase;}
-  .hero h1 .r{color:var(--red);} .hero h1 .g{color:var(--primary-light);}
-  .hero .sub{color:var(--text-dim);margin-top:.5rem;font-size:clamp(.9rem,2vw,1.05rem);}
-  .deal-hero{display:inline-flex;align-items:center;gap:1.2rem;margin-top:1.4rem;background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:1rem 1.6rem;flex-wrap:wrap;justify-content:center;}
-  .deal-hero .price{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;color:var(--gold);}
-  .deal-hero .price span{font-size:.5em;color:var(--text);}
-  .deal-hero .meta{text-align:left;font-size:.8rem;color:var(--text-dim);line-height:1.4;}
-  .deal-hero .meta b{color:var(--text);}
-  .chip{display:inline-block;background:var(--red);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:.3rem .8rem;}
-  .chip.gold{background:var(--gold);color:#1c1c1c;}
-  .chip.green{background:var(--primary);}
-  .poster-row{display:flex;gap:1.5rem;justify-content:center;align-items:flex-start;margin-top:2rem;flex-wrap:wrap;}
-  .poster-img{width:min(340px,90vw);border-radius:var(--radius);border:1px solid var(--card-border);box-shadow:0 20px 60px rgba(0,0,0,.5);}
-  .poster-caption{font-size:.72rem;color:var(--text-dim);text-align:center;margin-top:.5rem;}
-  .section{padding:2.8rem 5%;max-width:1200px;margin:0 auto;}
-  .section-title{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-bottom:.4rem;}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.55;overflow-x:hidden;}
+  img{max-width:100%;display:block;}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:6px;}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    padding:.65rem clamp(.9rem,5vw,3rem);background:rgba(18,18,15,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .brand{font-family:var(--serif);font-weight:700;color:var(--green-l);letter-spacing:.4px;font-size:1rem;line-height:1.15;}
+  .brand small{display:block;font-family:var(--sans);font-size:.6rem;color:var(--text-dim);letter-spacing:1.4px;text-transform:uppercase;}
+  .top-right{display:flex;align-items:center;gap:.4rem;}
+  .lang-btn{background:var(--bg-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:.4rem .75rem;
+    font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:38px;min-width:44px;}
+  .lang-btn.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;text-align:center;padding:clamp(1.8rem,6vw,3.4rem) clamp(.9rem,5vw,3rem) clamp(1.4rem,4vw,2.4rem);overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -25%,rgba(45,106,79,.4),transparent 62%);pointer-events:none;}
+  .hero h1{position:relative;font-family:var(--serif);font-size:clamp(2.1rem,10vw,4.2rem);font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;line-height:1.02;}
+  .hero h1 .r{color:var(--red);} .hero h1 .g{color:var(--green-l);}
+  .hero .sub{position:relative;color:var(--text-dim);margin-top:.6rem;font-size:clamp(.86rem,2.4vw,1.05rem);max-width:44ch;margin-inline:auto;}
+  .deal-hero{position:relative;display:inline-flex;align-items:center;gap:clamp(.7rem,3vw,1.4rem);margin-top:1.4rem;
+    background:var(--paper);color:var(--ink);border:2px solid var(--gold);border-radius:16px;padding:clamp(.8rem,3vw,1.1rem) clamp(1rem,4vw,1.7rem);
+    flex-wrap:wrap;justify-content:center;box-shadow:0 18px 44px rgba(0,0,0,.45);}
+  .deal-hero .price{font-family:var(--serif);font-size:clamp(1.5rem,7vw,2.7rem);font-weight:700;color:#8a1c12;line-height:1;white-space:nowrap;}
+  .deal-hero .price b{color:var(--red);}
+  .deal-hero .meta{text-align:left;font-size:clamp(.74rem,2vw,.82rem);color:var(--ink-dim);line-height:1.45;}
+  .deal-hero .meta b{color:var(--ink);display:block;}
+  .chip{display:inline-block;background:var(--red);color:#fff;font-size:.66rem;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;border-radius:999px;padding:.35rem .85rem;}
+  .fomo{background:repeating-linear-gradient(135deg,var(--red),var(--red) 18px,#a82a1d 18px,#a82a1d 36px);color:#fff;text-align:center;
+    padding:.85rem clamp(.9rem,5vw,3rem);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.7rem,2.4vw,.92rem);}
+
+  /* ---------- sections ---------- */
+  .section{padding:clamp(2rem,6vw,3.2rem) clamp(.9rem,5vw,3rem);max-width:1280px;margin:0 auto;}
+  .section-title{font-family:var(--serif);font-size:clamp(1.4rem,5vw,2.2rem);font-weight:700;text-transform:uppercase;
+    letter-spacing:.5px;text-align:center;margin-bottom:.35rem;}
   .section-title span{color:var(--accent);}
-  .section-sub{text-align:center;color:var(--text-dim);font-size:.9rem;max-width:640px;margin:0 auto 1.6rem;}
-  #sales3d-wrap{position:relative;border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;background:var(--card);}
-  #sales3d-wrap[hidden]{display:none;}
-  #sales3d{display:block;width:100%;height:480px;touch-action:none;}
-  #s3d-hint{position:absolute;top:.6rem;left:50%;transform:translateX(-50%);font-size:.66rem;color:var(--text-dim);letter-spacing:.07em;text-transform:uppercase;pointer-events:none;background:rgba(15,15,20,.55);padding:.28rem .8rem;border-radius:999px;white-space:nowrap;}
-  #s3d-info{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1.1rem;padding:.9rem 1.25rem;border-top:1px solid var(--card-border);min-height:64px;}
-  #s3d-info .si-tag{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);}
-  #s3d-info .si-name{font-weight:700;}
-  #s3d-info .si-price{font-weight:900;font-size:1.25rem;color:var(--gold);margin-left:auto;}
-  #s3d-info .si-desc{font-size:.8rem;color:var(--text-dim);flex-basis:100%;}
-  #s3d-info .si-cta{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;}
-  #s3d-info .si-cta:hover{background:var(--primary-light);}
-  .fomo{background:linear-gradient(90deg,var(--red),#a02a1d);color:#fff;text-align:center;padding:.9rem 5%;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.75rem,2vw,.95rem);}
-  .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:1.5rem;}
-  .how-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.2rem;text-align:center;}
-  .how-card .n{font-size:1.6rem;font-weight:900;color:var(--accent);}
-  .how-card h4{font-size:.95rem;margin:.4rem 0 .3rem;}
-  .how-card p{font-size:.8rem;color:var(--text-dim);}
-  .chips-row{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:1.2rem;}
-  .pchip{background:var(--card);border:1px solid var(--card-border);border-radius:999px;padding:.45rem 1.1rem;font-size:.85rem;font-weight:700;color:var(--text);}
-  .pchip .tag{color:var(--accent);font-size:.65rem;display:block;text-transform:uppercase;letter-spacing:.08em;}
-  .recipes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin-top:1.5rem;}
-  .recipe{background:var(--card);border:1px dashed var(--gold);border-radius:var(--radius);padding:1.2rem;}
-  .recipe h4{color:var(--accent);font-size:1rem;margin-bottom:.5rem;}
-  .recipe p{font-size:.85rem;color:var(--text-dim);}
-  .recipe b{color:var(--text);}
-  .footer{margin-top:2rem;border-top:1px solid var(--card-border);padding:2rem 5%;text-align:center;color:var(--text-dim);font-size:.85rem;background:var(--card);}
-  .footer .fbrand{font-weight:800;color:var(--primary-light);font-size:1.1rem;letter-spacing:.5px;}
-  .footer a{color:var(--primary-light);text-decoration:none;}
-  .footer .frow{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
-  @media (max-width:768px){ #sales3d{height:340px;} .deal-hero{gap:.8rem;padding:.9rem 1.1rem;} }
+  .section-sub{text-align:center;color:var(--text-dim);font-size:clamp(.82rem,2.2vw,.94rem);max-width:56ch;margin:0 auto 1.5rem;}
+
+  /* ---------- showcase / rack ---------- */
+  .showcase{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:
+    radial-gradient(ellipse at 50% 120%,rgba(45,106,79,.28),transparent 60%),var(--bg-2);overflow:hidden;}
+  .stage{position:relative;height:clamp(360px,60vh,500px);perspective:1200px;perspective-origin:50% 45%;
+    touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;}
+  @supports (height:100svh){ .stage{height:clamp(360px,60svh,500px);} }
+  .stage.dragging{cursor:grabbing;}
+  .stage::after{content:'';position:absolute;left:50%;bottom:8%;transform:translateX(-50%);width:min(76%,520px);height:26px;
+    background:radial-gradient(ellipse,rgba(0,0,0,.55),transparent 70%);pointer-events:none;}
+  .rack{position:absolute;inset:0;transform-style:preserve-3d;}
+  .pcard{position:absolute;left:50%;top:50%;width:var(--cw);transform-style:preserve-3d;
+    will-change:transform,opacity;transform:translate(-50%,-50%);}
+  .pcard-in{position:relative;background:var(--paper);color:var(--ink);border-radius:12px;overflow:hidden;
+    border:2px solid var(--green);box-shadow:0 20px 46px rgba(0,0,0,.55);}
+  .pcard-in::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:var(--gold);z-index:2;}
+  .pcard .ph{position:relative;aspect-ratio:1/1;background:var(--paper-2);overflow:hidden;}
+  .pcard .ph img{width:100%;height:100%;object-fit:cover;}
+  .pcard .bd{padding:.7rem .8rem .85rem;text-align:center;}
+  .pcard .code{font-size:.62rem;font-weight:800;letter-spacing:.12em;color:#8a6a08;text-transform:uppercase;}
+  .pcard .nm{font-family:var(--serif);font-size:clamp(.98rem,3.4vw,1.2rem);font-weight:700;line-height:1.18;margin:.2rem 0 .3rem;}
+  .pcard .pr{display:inline-block;background:var(--gold);color:#211c05;font-weight:900;font-size:clamp(.86rem,3vw,1rem);
+    letter-spacing:.03em;border-radius:999px;padding:.22rem .8rem;}
+  .pcard .wt{font-size:.68rem;color:var(--ink-dim);margin-top:.32rem;}
+  .pcard .wsl{margin-top:.5rem;background:var(--green);color:#fff;font-size:.56rem;font-weight:800;letter-spacing:.1em;
+    text-transform:uppercase;padding:.34rem .4rem;border-radius:6px;}
+  .pcard.is-center .pcard-in{border-color:var(--gold);box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 3px rgba(212,160,23,.32);}
+  .pcard.pulse .pcard-in{animation:pulse .5s ease;}
+  @keyframes pulse{0%{box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 3px rgba(212,160,23,.32);}
+    50%{box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 0 12px rgba(212,160,23,.05);}
+    100%{box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 3px rgba(212,160,23,.32);}}
+
+  .hint{font-size:.63rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;text-align:center;
+    padding:.7rem .8rem .1rem;pointer-events:none;}
+  .navbtn{position:absolute;top:50%;transform:translateY(-50%);z-index:25;width:44px;height:44px;border-radius:50%;
+    background:rgba(18,18,15,.72);border:1px solid var(--line);color:var(--text);font-size:1.2rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-family:inherit;}
+  .navbtn:hover{background:var(--green);border-color:var(--green);}
+  .navbtn[disabled]{opacity:.28;cursor:default;}
+  .navbtn.prev{left:.5rem;} .navbtn.next{right:.5rem;}
+  .dots{display:flex;gap:.4rem;justify-content:center;padding:.7rem;flex-wrap:wrap;border-top:1px solid var(--line);}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);border:none;padding:0;cursor:pointer;}
+  .dot.on{background:var(--gold);transform:scale(1.25);}
+  .dot-hit{background:none;border:none;padding:9px;min-width:27px;min-height:27px;cursor:pointer;line-height:0;display:block;}
+
+  /* ---------- detail: desktop panel / mobile sheet ---------- */
+  .sheet-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;opacity:0;transition:opacity .22s ease;}
+  .sheet-bd.on{display:block;opacity:1;}
+  .detail{background:var(--bg-2);border-top:1px solid var(--line);padding:1rem clamp(1rem,4vw,1.5rem);}
+  .detail .d-head{display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;}
+  .detail .d-tag{font-size:.63rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);flex-basis:100%;}
+  .detail .d-name{font-family:var(--serif);font-size:clamp(1.15rem,4vw,1.5rem);font-weight:700;}
+  .detail .d-price{margin-left:auto;font-weight:900;font-size:clamp(1.1rem,4vw,1.4rem);color:var(--gold);white-space:nowrap;}
+  .detail .d-desc{font-size:.88rem;color:var(--text-dim);margin-top:.5rem;}
+  .detail .d-actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;background:var(--green);color:#fff;border:none;
+    border-radius:9px;padding:.62rem 1.05rem;font-size:.83rem;font-weight:700;cursor:pointer;font-family:inherit;
+    text-decoration:none;min-height:44px;}
+  .btn:hover{background:var(--green-l);}
+  .btn.wa{background:#25D366;color:#08341a;}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+  .btn.gold{background:var(--gold);color:#211c05;}
+  .grab{display:none;}
+  .d-close{display:none;}
+
+  @media (max-width:860px){
+    .detail{position:fixed;left:0;right:0;bottom:0;z-index:80;border-radius:18px 18px 0 0;border:1px solid var(--line);
+      padding-bottom:calc(1rem + var(--safe-b));transform:translateY(102%);transition:transform .28s cubic-bezier(.22,1,.36,1);
+      max-height:82svh;overflow-y:auto;box-shadow:0 -18px 50px rgba(0,0,0,.6);}
+    .detail.open{transform:translateY(0);}
+    .grab{display:block;width:44px;height:5px;border-radius:99px;background:var(--line);margin:-.25rem auto .6rem;}
+    .d-close{display:inline-flex;}
+    .grab-zone{padding:.5rem 0 .1rem;margin:-.5rem 0 0;touch-action:none;cursor:grab;}
+  }
+  @media (min-width:861px){
+    .detail{display:block !important;transform:none !important;}
+    .showcase.wide{display:grid;grid-template-columns:1fr minmax(280px,340px);}
+    .showcase.wide .detail{border-top:none;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;}
+    .showcase.wide .dots{grid-column:1;}
+  }
+
+  /* ---------- static grid fallback (browsers without CSS 3D) ---------- */
+  @supports not (transform-style:preserve-3d){
+    .stage{height:auto;perspective:none;}
+    .rack{position:static;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;padding:1rem;}
+    .pcard{position:static;width:auto;transform:none !important;opacity:1 !important;}
+    .navbtn,.hint{display:none;}
+  }
+
+  /* ---------- other sections ---------- */
+  .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-top:1.4rem;}
+  .how-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem;text-align:center;}
+  .how-card .n{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--accent);}
+  .how-card h3{font-size:.98rem;margin:.35rem 0 .3rem;}
+  .how-card p{font-size:.82rem;color:var(--text-dim);}
+  .chips-row{display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;margin-top:1.1rem;}
+  .pchip{background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:.5rem 1.1rem;font-size:.85rem;font-weight:700;}
+  .pchip .tag{color:var(--accent);font-size:.62rem;display:block;text-transform:uppercase;letter-spacing:.08em;}
+  .recipes{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem;margin-top:1.4rem;}
+  .recipe{background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:var(--radius);padding:1.15rem;}
+  .recipe h3{font-family:var(--serif);color:#8a1c12;font-size:1.02rem;margin-bottom:.45rem;}
+  .recipe p{font-size:.86rem;color:#4a463c;}
+  .recipe b{color:var(--ink);}
+  .poster-row{display:flex;gap:1.5rem;justify-content:center;align-items:flex-start;padding:0 clamp(.9rem,5vw,3rem) 1rem;flex-wrap:wrap;}
+  .poster-img{width:min(340px,88vw);border-radius:var(--radius);border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  .poster-caption{font-size:.72rem;color:var(--text-dim);text-align:center;margin-top:.5rem;}
+  .share-bar{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;padding:1.4rem clamp(.9rem,5vw,3rem);}
+  .toast{position:fixed;left:50%;bottom:calc(1.2rem + var(--safe-b));transform:translateX(-50%) translateY(140%);
+    background:var(--gold);color:#211c05;font-weight:800;font-size:.82rem;padding:.6rem 1.1rem;border-radius:999px;z-index:200;
+    transition:transform .26s cubic-bezier(.22,1,.36,1);pointer-events:none;}
+  .toast.on{transform:translateX(-50%) translateY(0);}
+  .footer{margin-top:1rem;border-top:1px solid var(--line);padding:2rem clamp(.9rem,5vw,3rem) calc(2rem + var(--safe-b));
+    text-align:center;color:var(--text-dim);font-size:.85rem;background:var(--bg-2);}
+  .footer .fbrand{font-family:var(--serif);font-weight:700;color:var(--green-l);font-size:1.15rem;letter-spacing:.5px;}
+  .footer a{color:var(--green-l);text-decoration:none;}
+  .footer .frow{display:flex;gap:1.1rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+  .state{text-align:center;padding:2.5rem 1rem;color:var(--text-dim);font-size:.9rem;}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <div class="brand">ANTHONY'S <small data-en="Supermarket · Kearny NJ" data-es="Supermercado · Kearny NJ">Supermarket · Kearny NJ</small></div>
+  <div class="brand">ANTHONY'S <small id="brandTag">Supermarket · Kearny NJ</small></div>
   <div class="top-right">
-    <button class="lang-btn active" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" onclick="setLang('es')">ES</button>
+    <button class="lang-btn active" type="button" onclick="setLang('en')" lang="en">EN</button>
+    <button class="lang-btn" type="button" onclick="setLang('es')" lang="es">ES</button>
   </div>
 </header>
 
-<div class="hero">
-  <h1 data-en="<span class='r'>PASTA</span> <span class='g'>NIGHT</span>" data-es="<span class='r'>NOCHE</span> <span class='g'>DE PASTA</span>"><span class="r">PASTA</span> <span class="g">NIGHT</span></h1>
-  <p class="sub" data-en="One aisle. One night. Dinner solved. — RUMMO imported since 1846." data-es="Un pasillo. Una noche. Cena resuelta. — RUMMO importada desde 1846.">One aisle. One night. Dinner solved. — RUMMO imported since 1846.</p>
-  <div class="deal-hero">
-    <div class="price" data-en="ANY 2 FOR $4" data-es="CUALQUIER 2 POR $4">ANY 2 FOR <span>$4</span></div>
-    <div class="meta">
-      <b data-en="Mix &amp; match all 7 shapes" data-es="Mezcla y combina las 7 formas">Mix &amp; match all 7 shapes</b><br>
-      <span data-en="Save ~28% vs $2.79 each" data-es="Ahorra ~28% vs $2.79 c/u">Save ~28% vs $2.79 each</span>
-    </div>
-    <span class="chip" data-en="While supplies last" data-es="Hasta agotar existencias">While supplies last</span>
+<noscript>
+  <div class="fomo">Please enable JavaScript to see this week's sale · Active JavaScript para ver la oferta de la semana</div>
+  <div class="state">
+    Anthony's Supermarket — 288 Kearny Ave, Kearny NJ 07032 · Mon–Sat 7AM–8PM · Sun CLOSED<br>
+    <a href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" style="color:#40916C">Get directions / Cómo llegar</a>
   </div>
-</div>
+</noscript>
 
-<div class="fomo" data-en="🚨 WHEN IT'S GONE, IT'S GONE — NO DATE, NO RESTOCK GUARANTEE" data-es="🚨 CUANDO SE ACABA, SE ACABA — SIN FECHA, SIN GARANTÍA DE REPOSICIÓN">🚨 WHEN IT'S GONE, IT'S GONE — NO DATE, NO RESTOCK GUARANTEE</div>
-
-<section class="section">
-  <h2 class="section-title" data-en="The <span>Sale</span>" data-es="La <span>Oferta</span>">The <span>Sale</span></h2>
-  <p class="section-sub" data-en="Spin the rack. Tap a shape. Every single one is 2 for $4." data-es="Gira el estante. Toca una forma. Cada una está 2 por $4.">Spin the rack. Tap a shape. Every single one is 2 for $4.</p>
-  <div id="sales3d-wrap" hidden>
-    <canvas id="sales3d" aria-label="Rummo pasta 3D showcase"></canvas>
-    <div id="s3d-hint">Drag to spin · Tap a product</div>
-    <div id="s3d-info">
-      <span class="si-tag" id="siTag"></span>
-      <span class="si-name" id="siName"></span>
-      <span class="si-price" id="siPrice"></span>
-      <a class="si-cta" id="siCta" href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="📍 Get Directions" data-es="📍 Cómo Llegar">📍 Get Directions</a>
-      <span class="si-desc" id="siDesc"></span>
+<main id="app" hidden>
+  <div class="hero">
+    <h1 id="heroTitle"></h1>
+    <p class="sub" id="heroSub"></p>
+    <div class="deal-hero">
+      <div class="price" id="dealPrice"></div>
+      <div class="meta"><b id="dealDetail"></b><span id="dealSave"></span></div>
+      <span class="chip" id="dealBadge"></span>
     </div>
   </div>
-  <div class="how">
-    <div class="how-card"><div class="n">1</div><h4 data-en="Pick any 2 shapes" data-es="Elige 2 formas">Pick any 2 shapes</h4><p data-en="Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne." data-es="Penne, rigatoni, spaghetti, farfalle, pasta de huevo, lasagna.">Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne.</p></div>
-    <div class="how-card"><div class="n">$4</div><h4 data-en="Pay $4 total" data-es="Paga $4 en total">Pay $4 total</h4><p data-en="That's $2 a bag — about 28% off the shelf price." data-es="Son $2 por bolsa — ~28% menos que el precio regular.">That's $2 a bag — about 28% off the shelf price.</p></div>
-    <div class="how-card"><div class="n">🍝</div><h4 data-en="Dinner solved" data-es="Cena resuelta">Dinner solved</h4><p data-en="Bronze-cut, slow-made, sauce-absorbing. Since 1846." data-es="Corte de bronce, hechas lentamente. Desde 1846.">Bronze-cut, slow-made, sauce-absorbing. Since 1846.</p></div>
-  </div>
-</section>
 
-<section class="section">
-  <h2 class="section-title" data-en="Pair <span>It</span>" data-es="Acompáñala <span>Con</span>">Pair <span>It</span></h2>
-  <p class="section-sub" data-en="Everything you need for pasta night, one aisle away." data-es="Todo lo que necesitas para la noche de pasta, a un pasillo.">Everything you need for pasta night, one aisle away.</p>
-  <div class="chips-row">
-    <div class="pchip"><span class="tag">Sauce</span>Ragu · Prego</div>
-    <div class="pchip"><span class="tag">Tomatoes</span>Hunt's · Goya</div>
-    <div class="pchip"><span class="tag">Paste</span>Victoria</div>
-    <div class="pchip"><span class="tag">Salsa</span>Goya Salsa de Tomate</div>
-    <div class="pchip"><span class="tag">Quick</span>Maruchan · Cup Noodles</div>
-  </div>
-</section>
+  <div class="fomo"><span aria-hidden="true">🚨</span> <span id="fomoText"></span></div>
 
-<section class="section">
-  <h2 class="section-title" data-en="Tonight's <span>Ideas</span>" data-es="Ideas Para <span>Hoy</span>">Tonight's <span>Ideas</span></h2>
-  <div class="recipes">
-    <div class="recipe">
-      <h4 data-en="⚡ 15-Minute Spaghetti &amp; Meat Sauce" data-es="⚡ Espaguetis con salsa de carne en 15 min">⚡ 15-Minute Spaghetti &amp; Meat Sauce</h4>
-      <p data-en="<b>Pair with PLAN #2:</b> Brown 1 lb ground beef, add a jar of Prego or Ragu, simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. Add Goya adobo to taste." data-es="<b>Con PLAN #2:</b> Dora 1 lb de carne molida, agrega un frasco de Prego o Ragu, hierve y mezcla con Rummo Espagueti Cuadrado Nº 221. Rinde 4 porciones. Agrega adobo Goya al gusto."><b>Pair with PLAN #2:</b> Brown 1 lb ground beef, add a jar of Prego or Ragu, simmer, toss with Rummo Squared Spaghetti Nº 221. Serves 4. Add Goya adobo to taste.</p>
+  <section class="section">
+    <h2 class="section-title" id="showTitle"></h2>
+    <p class="section-sub" id="showSub"></p>
+
+    <div class="showcase" id="showcase">
+      <div>
+        <div class="hint" id="hint"></div>
+        <div class="stage" id="stage">
+          <div class="rack" id="rack" role="listbox" tabindex="0" aria-label="Pasta shapes on sale"></div>
+          <button class="navbtn prev" type="button" id="btnPrev" aria-label="Previous">‹</button>
+          <button class="navbtn next" type="button" id="btnNext" aria-label="Next">›</button>
+        </div>
+        <div class="dots" id="dots"></div>
+      </div>
+
+      <aside class="detail" id="detail" role="dialog" aria-modal="false" aria-labelledby="dName" tabindex="-1">
+        <div class="grab-zone" id="grabZone"><div class="grab"></div></div>
+        <div class="d-head">
+          <span class="d-tag" id="dTag"></span>
+          <span class="d-name" id="dName"></span>
+          <span class="d-price" id="dPrice"></span>
+        </div>
+        <p class="d-desc" id="dDesc"></p>
+        <div class="d-actions">
+          <a class="btn" id="dMaps" href="#" target="_blank" rel="noopener"></a>
+          <a class="btn wa" id="dShare" href="#" target="_blank" rel="noopener"></a>
+          <button class="btn ghost d-close" type="button" id="dClose"></button>
+        </div>
+      </aside>
     </div>
-    <div class="recipe">
-      <h4 data-en="👵 Sunday Gravy, the Kearny Way" data-es="👵 Salsa dominical, estilo Kearny">👵 Sunday Gravy, the Kearny Way</h4>
-      <p data-en="<b>Pair with PLAN #3:</b> Brown pork chops in olive oil; add Hunt's diced + Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51." data-es="<b>Con PLAN #3:</b> Dora chuletas de cerdo en aceite de oliva; agrega Hunt's en cubitos + pasta Victoria + salsa Goya; cocina 45 min. Sirve con Rummo Mezzi Rigatoni Nº 51."><b>Pair with PLAN #3:</b> Brown pork chops in olive oil; add Hunt's diced + Victoria paste + Goya sauce; simmer 45 min. Serve over Rummo Mezzi Rigatoni Nº 51.</p>
-    </div>
-    <div class="recipe">
-      <h4 data-en="🥚 3-Minute Egg Fettuccine" data-es="🥚 Fettuccine de huevo en 3 min">🥚 3-Minute Egg Fettuccine</h4>
-      <p data-en="<b>Fast night:</b> Rummo Egg Nest Fettuccine Nº 94 cooks in 3 minutes. Free-range Italian eggs, butter, parmesan. Done." data-es="<b>Noche rápida:</b> El Fettuccine de Huevo Rummo Nº 94 se cocina en 3 minutos. Huevos italianos de gallinas libres, mantequilla, parmesano. Listo."><b>Fast night:</b> Rummo Egg Nest Fettuccine Nº 94 cooks in 3 minutes. Free-range Italian eggs, butter, parmesan. Done.</p>
-    </div>
-  </div>
-</section>
+  </section>
 
-<div class="poster-row">
-  <div>
-    <img class="poster-img" id="posterImg" src="assets/promos/2026-08-pasta-night/poster-en-allshapes.png" alt="Rummo 2 for $4 poster">
-    <div class="poster-caption" data-en="Print this — EN / ES posters in the promo folder" data-es="Imprime esto — pósters EN / ES en la carpeta de promos">Print this — EN / ES posters in the promo folder</div>
-  </div>
-</div>
+  <section class="section">
+    <h2 class="section-title" id="howTitle"></h2>
+    <div class="how" id="howGrid"></div>
+  </section>
 
-<footer class="footer">
-  <div class="fbrand">ANTHONY'S SUPERMARKET</div>
-  <div class="frow">
-    <span data-en="288 Kearny Ave, Kearny NJ 07032" data-es="288 Kearny Ave, Kearny NJ 07032">288 Kearny Ave, Kearny NJ 07032</span>
-    <span data-en="Mon–Sat 7AM–8PM · Sun CLOSED" data-es="Lun–Sáb 7AM–8PM · Dom CERRADO">Mon–Sat 7AM–8PM · Sun CLOSED</span>
-    <a href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="📌 Directions" data-es="📌 Cómo llegar">📌 Directions</a>
-    <a href="https://instagram.com/anthony_supermarket" target="_blank" rel="noopener">📷 @anthony_supermarket</a>
+  <section class="section">
+    <h2 class="section-title" id="pairTitle"></h2>
+    <p class="section-sub" id="pairSub"></p>
+    <div class="chips-row" id="pairRow"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title" id="recTitle"></h2>
+    <div class="recipes" id="recGrid"></div>
+  </section>
+
+  <div class="poster-row">
+    <div>
+      <picture id="posterPic"><img class="poster-img" id="posterImg" src="" alt="" loading="lazy" decoding="async"></picture>
+      <div class="poster-caption" id="posterCap"></div>
+    </div>
   </div>
-  <div class="frow" style="margin-top:.4rem;">
-    <span class="chip" data-en="While supplies last" data-es="Hasta agotar existencias">While supplies last</span>
+
+  <div class="share-bar">
+    <a class="btn wa" id="shareSale" href="#" target="_blank" rel="noopener"></a>
+    <button class="btn ghost" type="button" id="copyLink"></button>
   </div>
-</footer>
+
+  <footer class="footer">
+    <div class="fbrand" id="fBrand"></div>
+    <div class="frow">
+      <span id="fAddr"></span>
+      <span id="fHours"></span>
+      <a id="fMaps" href="#" target="_blank" rel="noopener"></a>
+      <a id="fIg" href="#" target="_blank" rel="noopener"></a>
+    </div>
+    <div class="frow" style="margin-top:.4rem;"><span class="chip" id="fBadge"></span></div>
+  </footer>
+</main>
+
+<div class="state" id="loading">Loading this week's sale…</div>
+<div class="sheet-bd" id="sheetBd"></div>
+<div class="toast" id="toast"></div>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
 
 <script>
-// ===== Bilingual helpers =====
-var cl="en";
-function t(en,es){return cl==="es"?es:en}
-function setLang(l){
-  cl=l;
-  document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.toggle("active",b.textContent.toLowerCase().indexOf(l)>=0)});
-  document.querySelectorAll("[data-en]").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l);});
-  try{localStorage.setItem("anthony-lang",l)}catch(e){}
-  try{document.dispatchEvent(new CustomEvent("langchange"))}catch(e){}
-  var pi=document.getElementById("posterImg");
-  if(pi)pi.src=cl==="es"?"assets/promos/2026-08-pasta-night/poster-es-chatgpt.jpg":"assets/promos/2026-08-pasta-night/poster-en-allshapes.png";
-}
-try{var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl)}catch(e){}
-
-// ===== Pasta lineup (facts from packaging — no invented prices) =====
-var PASTAS=[
- {code:"Nº 66",en:"Penne Rigate",es:"Penne Rigate",w:"1 lb / 454g",
-  fe:"Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",
-  fs:"Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."},
- {code:"Nº 51",en:"Mezzi Rigatoni",es:"Mezzi Rigatoni",w:"1 lb / 454g",
-  fe:"Chunky tubes built for Sunday gravy — the Kearny classic.",
-  fs:"Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."},
- {code:"Nº 221",en:"Squared Spaghetti",es:"Espagueti Cuadrado",w:"1 lb / 454g",
-  fe:"A unique square cut that holds sauce on every side. Conversation starter.",
-  fs:"Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."},
- {code:"Nº 85",en:"Farfalle",es:"Farfalle",w:"1 lb / 454g",
-  fe:"Bow ties the whole family loves — great cold in salads too.",
-  fs:"Moños que toda la familia ama — también geniales fríos en ensaladas."},
- {code:"Nº 94",en:"Egg Fettuccine",es:"Fettuccine de Huevo",w:"8.82 oz / 250g",
-  fe:"Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",
-  fs:"Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."},
- {code:"Nº 101",en:"Egg Pappardelle",es:"Pappardelle de Huevo",w:"8.82 oz / 250g",
-  fe:"Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",
-  fs:"Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."},
- {code:"Nº 83",en:"Lasagne",es:"Lasagna",w:"1 lb / 454g",
-  fe:"Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",
-  fs:"Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."}
-];
-
-// ===== 3D showcase (WebGL with graceful fallback) =====
+/* ============================================================
+   Anthony's Supermarket — Sales page v2
+   Data-driven (data/sale.json), no WebGL, no external libraries.
+   Card rack = CSS 3D transforms + pointer inertia + snap.
+   ============================================================ */
 (function(){
-  var wrap=document.getElementById("sales3d-wrap"),cv=document.getElementById("sales3d");
-  if(!wrap||!cv||typeof THREE==="undefined")return;
-  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var renderer;
-  try{renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});}catch(e){return;}
-  wrap.hidden=false;
-  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,1,0.1,100);
-  camera.position.set(0,1.4,9.6);camera.lookAt(0,0.5,0);
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
-  var carousel=new THREE.Group();scene.add(carousel);
-  function roundRect(x,a,b,c,d,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+c,b,a+c,b+d,r);x.arcTo(a+c,b+d,a,b+d,r);x.arcTo(a,b+d,a,b,r);x.arcTo(a,b,a+c,b,r);x.closePath();}
-  function wrapText(ctx,text,maxW,maxLine){var words=text.split(" "),lines=[],cur="";words.forEach(function(wd){var test=cur?cur+" "+wd:wd;if(ctx.measureText(test).width>maxW&&cur){lines.push(cur);cur=wd}else cur=test});if(cur)lines.push(cur);if(lines.length>maxLine){lines=lines.slice(0,maxLine);lines[maxLine-1]+="..."}return lines;}
-  function cardTexture(p){
-    var w=512,h=768,c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");
-    x.fillStyle="#1A1A24";roundRect(x,8,8,w-16,h-16,26);x.fill();
-    x.strokeStyle="#2D6A4F";x.lineWidth=6;roundRect(x,8,8,w-16,h-16,26);x.stroke();
-    x.fillStyle="#D4A017";roundRect(x,8,8,w-16,10,6);x.fill();
-    x.fillStyle="#D4A017";x.font="700 42px Arial, sans-serif";x.textAlign="center";x.textBaseline="alphabetic";
-    x.fillText("RUMMO · "+p.code,w/2,118);
-    x.fillStyle="#F0F0F0";x.font="700 58px Arial, sans-serif";x.textBaseline="top";
-    var lines=wrapText(x,cl==="es"?p.es:p.en,w-110,2),ly=225;
-    lines.forEach(function(l){x.fillText(l,w/2,ly);ly+=70});
-    x.fillStyle="#D4A017";x.font="900 74px Arial, sans-serif";x.textBaseline="alphabetic";x.textAlign="center";
-    x.fillText(cl==="es"?"2 POR $4":"2 FOR $4",w/2,560);
-    x.fillStyle="#8888A0";x.font="700 30px Arial, sans-serif";
-    x.fillText(p.w,w/2,620);
-    x.fillStyle="#1E5631";roundRect(x,8,h-72,w-16,64,26);x.fill();
-    x.fillStyle="#E07A2F";x.font="700 30px Arial, sans-serif";x.textBaseline="middle";
-    x.fillText(cl==="es"?"HASTA AGOTAR EXISTENCIAS":"WHILE SUPPLIES LAST",w/2,h-40);
-    var tx=new THREE.CanvasTexture(c);try{tx.encoding=THREE.sRGBEncoding}catch(e){}
-    return tx;
+  "use strict";
+
+  var cl = "en";                       // current language
+  var CFG = null;                      // loaded config
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var mqSheet = window.matchMedia ? window.matchMedia("(max-width:860px)") : {matches:false};
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
-  var cards=[],R=4.5;
-  PASTAS.forEach(function(p,i){
-    var g=new THREE.Group();
-    var glow=new THREE.Mesh(new THREE.PlaneGeometry(2.95,4.2),new THREE.MeshBasicMaterial({color:0xE07A2F,transparent:true,opacity:0}));
-    glow.position.z=-0.03;g.add(glow);
-    var m=new THREE.Mesh(new THREE.PlaneGeometry(2.55,3.83),new THREE.MeshBasicMaterial({map:cardTexture(p)}));
-    g.add(m);
-    cards.push({g:g,m:m,glow:glow,p:p});carousel.add(g);
-  });
-  function layout(){var n=cards.length;cards.forEach(function(c,i){var th=n>1?(-1.15+i*(2.3/(n-1))):0;c.g.position.set(Math.sin(th)*R,0.4+(i%2)*0.18,-Math.cos(th)*R+R*0.25)})}
-  layout();
-  var ring=new THREE.Mesh(new THREE.RingGeometry(2.7,3.4,48),new THREE.MeshBasicMaterial({color:0x1E5631,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
-  ring.rotation.x=-Math.PI/2;ring.position.y=-1.45;scene.add(ring);
-  var gold=new THREE.Mesh(new THREE.TorusGeometry(3.15,0.035,8,64),new THREE.MeshBasicMaterial({color:0xD4A017,transparent:true,opacity:0.5}));
-  gold.rotation.x=-Math.PI/2;gold.position.y=-1.44;scene.add(gold);
-  var pc=60,pos=new Float32Array(pc*3);
-  for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*10;pos[i*3+1]=Math.random()*3.4-1;pos[i*3+2]=(Math.random()-0.5)*6-1}
-  var pgeo=new THREE.BufferGeometry();pgeo.setAttribute("position",new THREE.BufferAttribute(pos,3));
-  var pts=new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x2D6A4F,size:0.07,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending}));
-  scene.add(pts);
-  function resize(){var w=wrap.clientWidth||600,h=wrap.clientHeight||480;if(w<10)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
-  resize();
-  var raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),hover=-1,selected=-1,dragging=false,lastX=0;
-  function pick(e){var r=cv.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-(((e.clientY-r.top)/r.height)*2-1);raycaster.setFromCamera(mouse,camera);var hits=raycaster.intersectObjects(cards.map(function(c){return c.m}),false);return hits.length?hits[0].object.userData.idx:-1}
-  function paintGlow(){cards.forEach(function(c,i){c.glow.material.opacity=(i===hover?0.4:0)+(i===selected?0.25:0);c.g.scale.set(i===hover?1.07:1,i===hover?1.07:1,1)})}
-  cv.addEventListener("pointermove",function(e){
-    if(dragging){carousel.rotation.y+=(e.clientX-lastX)*0.008;lastX=e.clientX;return}
-    var h=pick(e);if(h!==hover){hover=h;paintGlow();cv.style.cursor=hover>=0?"pointer":"grab"}
-  });
-  cv.addEventListener("pointerdown",function(e){dragging=true;lastX=e.clientX;cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)});
-  cv.addEventListener("pointerup",function(e){if(!dragging)return;dragging=false;var h=pick(e);if(h>=0)select(h)});
-  cv.addEventListener("pointercancel",function(){dragging=false});
-  cv.style.cursor="grab";
-  var siTag=document.getElementById("siTag"),siName=document.getElementById("siName"),siDesc=document.getElementById("siDesc"),siPrice=document.getElementById("siPrice");
-  function select(i){
-    selected=i;hover=-1;paintGlow();
-    var p=PASTAS[i];
-    siTag.textContent="RUMMO "+p.code+" · "+p.w;
-    siName.textContent=cl==="es"?p.es:p.en;
-    siDesc.textContent=cl==="es"?p.fs:p.fe;
-    siPrice.textContent=cl==="es"?"2 POR $4":"2 FOR $4";
+  /* Pick the language variant of a { en, es } field. Plain strings pass through. */
+  function L(field){
+    if(field == null) return "";
+    if(typeof field === "string") return field;
+    return field[cl] != null ? field[cl] : (field.en != null ? field.en : "");
   }
-  var hint=document.getElementById("s3d-hint");
-  function setHint(){hint.textContent=cl==="es"?"Arrastra o desliza para girar · Toca una forma":"Drag to spin · Tap a shape"}
-  setHint();
-  document.addEventListener("langchange",function(){
-    cards.forEach(function(c){c.m.material.map=cardTexture(c.p);c.m.material.needsUpdate=true});
-    if(selected>=0)select(selected);setHint();
-  });
-  var t0=Date.now();
-  function anim(){
-    requestAnimationFrame(anim);
-    var t=(Date.now()-t0)/1000;
-    if(!reduced&&!dragging)carousel.rotation.y+=0.0035;
-    if(!reduced)cards.forEach(function(c,i){c.g.position.y=0.4+(i%2)*0.18+Math.sin(t*1.4+i*1.7)*0.09});
-    pts.rotation.y+=0.0006;gold.rotation.z+=0.002;
-    cards.forEach(function(c){c.m.lookAt(camera.position);c.glow.lookAt(camera.position)});
-    renderer.render(scene,camera);
+  function setText(id,v){ var el=$(id); if(el) el.textContent=v; }
+  function setHTML(id,v){ var el=$(id); if(el) el.innerHTML=v; }
+
+  /* ---------- language ---------- */
+  function setLang(l){
+    cl = (l === "es") ? "es" : "en";
+    document.documentElement.lang = cl;
+    var btns = document.querySelectorAll(".lang-btn");
+    for(var i=0;i<btns.length;i++){
+      btns[i].classList.toggle("active", btns[i].textContent.toLowerCase().indexOf(cl) >= 0);
+    }
+    try{ localStorage.setItem("anthony-lang", cl); }catch(e){}
+    if(CFG) render();
+    try{ document.dispatchEvent(new CustomEvent("langchange")); }catch(e){}
   }
-  anim();
-  addEventListener("resize",resize);
-  if(PASTAS.length)select(0);
+  window.setLang = setLang;                       // used by the inline onclick handlers
+
+  /* ---------- share helpers ---------- */
+  function pageUrl(){ return location.href.split("#")[0]; }
+  function waLink(text){ return "https://wa.me/?text=" + encodeURIComponent(text + " " + pageUrl()); }
+  function fillTokens(tpl,p){
+    return String(tpl)
+      .replace(/\{name\}/g, L(p.name))
+      .replace(/\{code\}/g, p.brand ? (p.brand + " " + p.code) : p.code)
+      .replace(/\{price\}/g, L(CFG.deal.cardPrice));
+  }
+  var toastTimer = null;
+  function toast(msg){
+    var el = $("toast"); if(!el) return;
+    el.textContent = msg; el.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("on"); }, 2200);
+  }
+  function copyText(txt){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){ toast(L(CFG.share.copied)); }, fallbackCopy);
+    } else { fallbackCopy(); }
+    function fallbackCopy(){
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta); toast(L(CFG.share.copied));
+      }catch(e){}
+    }
+  }
+
+  /* ============================================================
+     The rack: CSS 3D carousel with drag inertia + snap
+     ============================================================ */
+  var rackEl, stageEl, cardEls = [], pos = 0, target = 0, n = 0;
+  var spacingPx = 200, depth = 190, angle = 42, VISIBLE = 3.4;
+  var anim = null, live = true;
+
+  function measure(){
+    if(!cardEls.length) return;
+    var w = cardEls[0].offsetWidth || 220;
+    spacingPx = Math.max(120, w * 0.66);
+    depth = w * 0.85;
+    angle = window.innerWidth < 560 ? 36 : 44;
+  }
+
+  function place(){
+    var center = Math.round(pos);
+    hydrate(center);
+    for(var i=0;i<cardEls.length;i++){
+      var el = cardEls[i], d = i - pos, ad = Math.abs(d);
+      if(ad > VISIBLE){ el.style.visibility = "hidden"; continue; }
+      el.style.visibility = "visible";
+      var sc = Math.max(0.68, 1 - ad * 0.13);
+      var op = Math.max(0, 1 - ad * 0.3);
+      el.style.transform =
+        "translate(-50%,-50%) translateX(" + (d * spacingPx).toFixed(2) + "px)" +
+        " translateZ(" + (-ad * depth).toFixed(2) + "px)" +
+        " rotateY(" + (-d * angle).toFixed(2) + "deg)" +
+        " scale(" + sc.toFixed(3) + ")";
+      el.style.opacity = op.toFixed(3);
+      el.style.zIndex = String(1000 - Math.round(ad * 100));
+      var isC = (i === center);
+      el.classList.toggle("is-center", isC);
+      el.setAttribute("aria-selected", isC ? "true" : "false");
+      el.tabIndex = isC ? 0 : -1;
+    }
+    var dots = $("dots").children;
+    for(var k=0;k<dots.length;k++){
+      var dt = dots[k].firstChild;
+      if(dt) dt.classList.toggle("on", k === center);
+    }
+    $("btnPrev").disabled = (center <= 0);
+    $("btnNext").disabled = (center >= n - 1);
+  }
+
+  function clamp(v,a,b){ return v < a ? a : (v > b ? b : v); }
+
+  function animateTo(to, dur){
+    to = clamp(to, 0, n - 1);
+    target = to;
+    if(anim){ cancelAnimationFrame(anim); anim = null; }
+    if(reduced || !live){ pos = to; place(); showDetail(to, false); return; }
+    var from = pos, dist = Math.abs(to - from);
+    if(dist < 0.0005){ pos = to; place(); showDetail(to, false); return; }
+    var d = dur || clamp(260 + dist * 130, 260, 620);
+    var t0 = performance.now();
+    (function step(now){
+      var p = clamp((now - t0) / d, 0, 1);
+      var e = 1 - Math.pow(1 - p, 3);           // ease-out cubic
+      pos = from + (to - from) * e;
+      place();
+      if(p < 1){ anim = requestAnimationFrame(step); }
+      else { anim = null; pos = to; place(); showDetail(to, false); }
+    })(performance.now());
+  }
+
+  function go(i){ animateTo(clamp(i, 0, n - 1)); }
+
+  /* ---------- pointer drag with inertia ---------- */
+  function bindDrag(){
+    var down = false, axis = null, id = null;
+    var sx = 0, sy = 0, startPos = 0, lastX = 0, lastT = 0, vel = 0, moved = 0;
+
+    stageEl.addEventListener("pointerdown", function(e){
+      if(e.button != null && e.button !== 0) return;
+      down = true; axis = null; id = e.pointerId;
+      sx = lastX = e.clientX; sy = e.clientY; lastT = performance.now();
+      startPos = pos; vel = 0; moved = 0;
+      if(anim){ cancelAnimationFrame(anim); anim = null; }
+    });
+
+    stageEl.addEventListener("pointermove", function(e){
+      if(!down) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if(axis === null){
+        if(Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if(axis === "x"){
+          stageEl.classList.add("dragging");
+          if(stageEl.setPointerCapture){ try{ stageEl.setPointerCapture(id); }catch(err){} }
+        }
+      }
+      if(axis !== "x") return;
+      e.preventDefault();
+      moved = Math.abs(dx);
+      var raw = startPos - dx / spacingPx;
+      /* rubber-band past the ends */
+      if(raw < 0) raw = raw * 0.35;
+      else if(raw > n - 1) raw = (n - 1) + (raw - (n - 1)) * 0.35;
+      var now = performance.now(), dt = now - lastT;
+      if(dt > 0){
+        var inst = -((e.clientX - lastX) / spacingPx) / dt;   // index per ms
+        vel = vel * 0.7 + inst * 0.3;
+        lastX = e.clientX; lastT = now;
+      }
+      pos = raw; place();
+    });
+
+    function release(){
+      if(!down) return;
+      down = false;
+      stageEl.classList.remove("dragging");
+      if(axis !== "x"){ axis = null; return; }
+      axis = null;
+      /* project the fling, then snap to the nearest card */
+      var proj = clamp(vel * 190, -3, 3);
+      if(!isFinite(proj)) proj = 0;
+      animateTo(Math.round(clamp(pos + proj, 0, n - 1)));
+      vel = 0;
+    }
+    stageEl.addEventListener("pointerup", release);
+    stageEl.addEventListener("pointercancel", release);
+    stageEl.addEventListener("lostpointercapture", release);
+
+    /* tap = select (only when the pointer barely moved) */
+    stageEl.addEventListener("click", function(e){
+      var card = e.target.closest ? e.target.closest(".pcard") : null;
+      if(!card || moved > 8) return;
+      var i = parseInt(card.getAttribute("data-i"), 10);
+      if(isNaN(i)) return;
+      if(i === Math.round(pos)) openSheet(i); else go(i);
+    });
+
+    /* horizontal wheel / trackpad */
+    var wheelLock = false;
+    stageEl.addEventListener("wheel", function(e){
+      if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // let vertical scroll through
+      e.preventDefault();
+      if(wheelLock) return;
+      wheelLock = true;
+      setTimeout(function(){ wheelLock = false; }, 220);
+      go(Math.round(pos) + (e.deltaX > 0 ? 1 : -1));
+    }, {passive:false});
+  }
+
+  function bindKeys(){
+    rackEl.addEventListener("keydown", function(e){
+      var k = e.key;
+      if(k === "ArrowRight"){ e.preventDefault(); go(Math.round(pos) + 1); }
+      else if(k === "ArrowLeft"){ e.preventDefault(); go(Math.round(pos) - 1); }
+      else if(k === "Home"){ e.preventDefault(); go(0); }
+      else if(k === "End"){ e.preventDefault(); go(n - 1); }
+      else if(k === "Enter" || k === " " || k === "Spacebar"){ e.preventDefault(); openSheet(Math.round(pos)); }
+    });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && $("detail").classList.contains("open")) closeSheet();
+    });
+  }
+
+  /* ============================================================
+     Detail panel (desktop) / bottom sheet (mobile)
+     ============================================================ */
+  var lastFocus = null;
+
+  function showDetail(i, pulse){
+    var p = CFG.products[i]; if(!p) return;
+    setText("dTag", (p.brand ? p.brand + " " : "") + p.code + " · " + p.weight);
+    setText("dName", L(p.name));
+    setText("dPrice", L(CFG.deal.cardPrice));
+    setText("dDesc", L(p.facts));
+    $("dMaps").href = CFG.store.mapsUrl;
+    $("dMaps").textContent = L(CFG.store.directions);
+    $("dShare").href = waLink(fillTokens(L(CFG.share.productText), p));
+    $("dShare").textContent = "💬 " + L(CFG.share.buttonProduct);
+    setText("live", L(p.name) + " — " + L(CFG.deal.cardPrice));
+    if(pulse && cardEls[i] && !reduced){
+      cardEls[i].classList.remove("pulse");
+      void cardEls[i].offsetWidth;
+      cardEls[i].classList.add("pulse");
+    }
+  }
+  function openSheet(i){
+    showDetail(i, true);
+    if(!mqSheet.matches) return;                 // desktop: panel is always visible
+    lastFocus = document.activeElement;
+    $("detail").classList.add("open");
+    $("detail").setAttribute("aria-modal","true");
+    $("sheetBd").classList.add("on");
+    $("detail").focus();
+  }
+  function closeSheet(){
+    $("detail").classList.remove("open");
+    $("detail").setAttribute("aria-modal","false");
+    $("sheetBd").classList.remove("on");
+    if(lastFocus && lastFocus.focus){ lastFocus.focus(); lastFocus = null; }
+  }
+
+  function bindSheet(){
+    $("sheetBd").addEventListener("click", closeSheet);
+    $("dClose").addEventListener("click", closeSheet);
+    /* drag the sheet down to dismiss */
+    var gz = $("grabZone"), sy = 0, dragging = false;
+    gz.addEventListener("pointerdown", function(e){
+      if(!mqSheet.matches) return;
+      dragging = true; sy = e.clientY;
+      $("detail").style.transition = "none";
+      if(gz.setPointerCapture){ try{ gz.setPointerCapture(e.pointerId); }catch(err){} }
+    });
+    gz.addEventListener("pointermove", function(e){
+      if(!dragging) return;
+      var dy = Math.max(0, e.clientY - sy);
+      $("detail").style.transform = "translateY(" + dy + "px)";
+    });
+    function end(e){
+      if(!dragging) return;
+      dragging = false;
+      var dy = Math.max(0, (e.clientY || 0) - sy);
+      $("detail").style.transition = "";
+      $("detail").style.transform = "";
+      if(dy > 90) closeSheet();
+    }
+    gz.addEventListener("pointerup", end);
+    gz.addEventListener("pointercancel", end);
+  }
+
+  /* ============================================================
+     Rendering from config
+     ============================================================ */
+  /* mode: "eager" (LCP candidate) | "lazy" (native, in normal flow) |
+            "deferred" (held back until hydrate() decides the card is near the centre)
+
+     Cards are stacked at the same point in the stage, so every one of them counts as
+     "in the viewport" and native loading="lazy" would still fetch all seven up front.
+     Deferred cards therefore carry data-src and are promoted by hydrate(). */
+  function picture(base, ext, cls, alt, mode){
+    var deferred = (mode === "deferred");
+    var srcsetAttr = deferred ? "data-srcset" : "srcset";
+    var srcAttr    = deferred ? "data-src"    : "src";
+    var loadAttr   = (mode === "eager") ? ' fetchpriority="high" loading="eager"'
+                   : (mode === "lazy")  ? ' loading="lazy"' : '';
+    return '<picture>' +
+      '<source ' + srcsetAttr + '="' + esc(base) + '.webp" type="image/webp">' +
+      '<img class="' + cls + '" ' + srcAttr + '="' + esc(base) + '.' + esc(ext) + '"' +
+      ' alt="' + esc(alt) + '" decoding="async"' + loadAttr + '>' +
+      '</picture>';
+  }
+
+  /* Promote deferred images for every card within HYDRATE_WINDOW of the centre. */
+  var HYDRATE_WINDOW = 2;
+  function hydrate(center){
+    for(var i=0;i<cardEls.length;i++){
+      if(Math.abs(i - center) > HYDRATE_WINDOW) continue;
+      var pic = cardEls[i].querySelector("picture");
+      if(!pic || pic.getAttribute("data-hydrated")) continue;
+      /* the <source> must be set before the <img>, or the browser resolves to the jpg */
+      var s = pic.querySelector("source[data-srcset]");
+      if(s){ s.setAttribute("srcset", s.getAttribute("data-srcset")); s.removeAttribute("data-srcset"); }
+      var im = pic.querySelector("img[data-src]");
+      if(im){ im.setAttribute("src", im.getAttribute("data-src")); im.removeAttribute("data-src"); }
+      pic.setAttribute("data-hydrated","1");
+    }
+  }
+
+  function renderCards(){
+    var html = "", dots = "";
+    for(var i=0;i<CFG.products.length;i++){
+      var p = CFG.products[i];
+      html += '<article class="pcard" data-i="' + i + '" role="option" aria-selected="false" tabindex="-1">' +
+                '<div class="pcard-in">' +
+                  '<div class="ph">' + picture(p.image, "jpg", "", L(p.name) + " — " + p.brand + " " + p.code,
+                                               i === 0 ? "eager" : "deferred") + '</div>' +
+                  '<div class="bd">' +
+                    '<div class="code">' + esc((p.brand ? p.brand + " · " : "") + p.code) + '</div>' +
+                    '<h3 class="nm">' + esc(L(p.name)) + '</h3>' +
+                    '<div class="pr">' + esc(L(CFG.deal.cardPrice)) + '</div>' +
+                    '<div class="wt">' + esc(p.weight) + '</div>' +
+                    '<div class="wsl">' + esc(L(CFG.deal.badge)) + '</div>' +
+                  '</div>' +
+                '</div>' +
+              '</article>';
+      dots += '<button class="dot-hit" type="button" data-i="' + i + '" aria-label="' + esc(L(p.name)) + '"><span class="dot"></span></button>';
+    }
+    rackEl.innerHTML = html;
+    $("dots").innerHTML = dots;
+    cardEls = Array.prototype.slice.call(rackEl.querySelectorAll(".pcard"));
+    n = cardEls.length;
+    rackEl.setAttribute("aria-label", L(CFG.ui.rackLabel));
+
+    var dotBtns = $("dots").querySelectorAll(".dot-hit");
+    for(var d=0;d<dotBtns.length;d++){
+      dotBtns[d].addEventListener("click", function(){
+        go(parseInt(this.getAttribute("data-i"), 10));
+      });
+    }
+    measure();
+    place();
+  }
+
+  function render(){
+    var c = CFG;
+    document.title = L(c.campaign.documentTitle) + " | Anthony's Supermarket";
+    var md = $("metaDesc"); if(md) md.setAttribute("content", L(c.campaign.metaDescription));
+
+    setText("brandTag", L(c.store.tagline));
+    setHTML("heroTitle", '<span class="r">' + esc(L(c.campaign.titleA)) + '</span> <span class="g">' + esc(L(c.campaign.titleB)) + '</span>');
+    setText("heroSub", L(c.campaign.tagline));
+    setHTML("dealPrice", esc(L(c.deal.headline)) + ' <b>' + esc(c.deal.price) + '</b>');
+    setText("dealDetail", L(c.deal.detail));
+    setText("dealSave", L(c.deal.save));
+    setText("dealBadge", L(c.deal.badge));
+    setText("fomoText", L(c.deal.fomo));
+
+    setHTML("showTitle", L(c.showcase.title));
+    setText("showSub", L(c.showcase.sub));
+    setText("hint", L(c.showcase.hint));
+    $("btnPrev").setAttribute("aria-label", L(c.ui.prev));
+    $("btnNext").setAttribute("aria-label", L(c.ui.next));
+    setText("dClose", L(c.ui.close));
+
+    setHTML("howTitle", L(c.how.title));
+    var hh = "";
+    for(var i=0;i<c.how.steps.length;i++){
+      var s = c.how.steps[i];
+      hh += '<div class="how-card"><div class="n">' + esc(s.n) + '</div><h3>' + esc(L(s.title)) + '</h3><p>' + esc(L(s.body)) + '</p></div>';
+    }
+    setHTML("howGrid", hh);
+
+    setHTML("pairTitle", L(c.pairings.title));
+    setText("pairSub", L(c.pairings.sub));
+    var ph = "";
+    for(var j=0;j<c.pairings.items.length;j++){
+      var it = c.pairings.items[j];
+      ph += '<div class="pchip"><span class="tag">' + esc(L(it.tag)) + '</span>' + esc(it.items) + '</div>';
+    }
+    setHTML("pairRow", ph);
+
+    setHTML("recTitle", L(c.recipes.title));
+    var rh = "";
+    for(var k=0;k<c.recipes.items.length;k++){
+      var r = c.recipes.items[k];
+      rh += '<div class="recipe"><h3>' + esc(L(r.title)) + '</h3><p>' + L(r.body) + '</p></div>';
+    }
+    setHTML("recGrid", rh);
+
+    var pBase = cl === "es" ? c.poster.es : c.poster.en;
+    var pExt  = cl === "es" ? c.poster.esExt : c.poster.enExt;
+    setHTML("posterPic", picture(pBase, pExt, "poster-img", L(c.poster.alt), "lazy"));
+    setText("posterCap", L(c.poster.caption));
+
+    $("shareSale").href = waLink(L(c.share.saleText));
+    $("shareSale").textContent = "💬 " + L(c.share.buttonSale);
+    setText("copyLink", "🔗 " + L(c.share.buttonCopy));
+
+    setText("fBrand", c.store.name);
+    setText("fAddr", c.store.address);
+    setText("fHours", L(c.store.hours));
+    $("fMaps").href = c.store.mapsUrl;
+    $("fMaps").textContent = L(c.store.directions);
+    $("fIg").href = c.store.instagramUrl;
+    $("fIg").textContent = "📷 " + c.store.instagram;
+    setText("fBadge", L(c.deal.badge));
+
+    renderCards();
+    showDetail(clamp(Math.round(pos), 0, n - 1), false);
+  }
+
+  /* ============================================================
+     Boot
+     ============================================================ */
+  function fail(msg){
+    $("loading").textContent = msg;
+    $("loading").hidden = false;
+  }
+
+  function valid(c){
+    return c && c.campaign && c.deal && c.products && c.products.length &&
+           c.store && c.ui && c.share && c.showcase && c.how && c.pairings && c.recipes && c.poster;
+  }
+
+  function boot(){
+    rackEl = $("rack"); stageEl = $("stage");
+
+    fetch("data/sale.json", {cache:"no-cache"})
+      .then(function(r){
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(cfg){
+        if(!valid(cfg)) throw new Error("incomplete config");
+        CFG = cfg;
+        try{ var sl = localStorage.getItem("anthony-lang"); if(sl === "es" || sl === "en") cl = sl; }catch(e){}
+        document.documentElement.lang = cl;
+        var btns = document.querySelectorAll(".lang-btn");
+        for(var i=0;i<btns.length;i++){
+          btns[i].classList.toggle("active", btns[i].textContent.toLowerCase().indexOf(cl) >= 0);
+        }
+
+        $("loading").hidden = true;
+        $("app").hidden = false;
+        render();
+
+        bindDrag();
+        bindKeys();
+        bindSheet();
+        $("btnPrev").addEventListener("click", function(){ go(Math.round(pos) - 1); });
+        $("btnNext").addEventListener("click", function(){ go(Math.round(pos) + 1); });
+        $("copyLink").addEventListener("click", function(){ copyText(L(CFG.share.saleText) + " " + pageUrl()); });
+
+        /* wide layout only when there is room for a docked panel */
+        function layoutMode(){
+          $("showcase").classList.toggle("wide", window.innerWidth >= 861);
+          if(!mqSheet.matches) closeSheetSilently();
+          measure(); place();
+        }
+        function closeSheetSilently(){
+          $("detail").classList.remove("open");
+          $("detail").setAttribute("aria-modal","false");
+          $("sheetBd").classList.remove("on");
+        }
+        layoutMode();
+        window.addEventListener("resize", layoutMode);
+        window.addEventListener("orientationchange", function(){ setTimeout(layoutMode, 120); });
+
+        /* pause work while the rack is off-screen */
+        if("IntersectionObserver" in window){
+          new IntersectionObserver(function(entries){
+            live = entries[0].isIntersecting;
+            if(!live && anim){ cancelAnimationFrame(anim); anim = null; pos = target; place(); }
+          }, {threshold:0.05}).observe(stageEl);
+        }
+      })
+      .catch(function(err){
+        var msg = "We couldn't load this week's sale. Come see us at 288 Kearny Ave, Kearny NJ — Mon–Sat 7AM–8PM.";
+        try{ if(CFG && CFG.ui) msg = L(CFG.ui.error); }catch(e){}
+        fail(msg);
+        if(window.console && console.warn) console.warn("[sales] config load failed:", err && err.message);
+      });
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
 </script>
 </body>
