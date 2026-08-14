@@ -315,6 +315,8 @@ const VENDORS = {
     "65990":{label:"#65990 — 6/20/26"}, "65991":{label:"#65991 — 6/22/26"}, "65992":{label:"#65992 — 6/22/26"} }},
   "Family Food": { label:"Family Food Distributors", invoices:{
     "90747231":{label:"#90747231 — 6/24/26 (Parada 23)"}, "90747476":{label:"#90747476 — 6/24/26 (Parada 22)"} }},
+  "Hershey's Ice Cream": { label:"Hershey's Ice Cream", invoices:{
+    "INVE0023460478":{label:"#INVE0023460478 — 8/13/26"} }},
 };
 
 const ALL_ITEMS = [
@@ -417,6 +419,22 @@ const ALL_ITEMS = [
   {id:155,itemNo:"1119",name:'Florida Tuna in Water 48/5oz',                cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:93.55,  units:48, costPerUnit:1.949,  retail:2.99,  internal:false},
   {id:156,itemNo:"1129",name:'Van Camps Yellowfin Tuna in Oil 24/4pk/3oz',  cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:139.95, units:24, costPerUnit:5.831,  retail:9.99,  internal:false},
   {id:157,itemNo:"1101",name:'Van Camps Yellowfin Tuna in Oil 48/5oz',      cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:5, boxPrice:113.55, units:48, costPerUnit:2.366,  retail:3.99,  internal:false},
+  // ── HERSHEY'S ICE CREAM #INVE0023460478 (8/13/26) ─────────────────────
+  // Grabbed by Hermes Invoice Grabber from scan of 08/13/2026 delivery invoice.
+  // Terms CASH OR CHECK · Route U3 · Total $234.42 (11 cases + $5 delivery fee).
+  // Retail values = 65% hub default. Verify shelf prices before tagging.
+  {id:158,itemNo:"2468200902",name:'Neapolitan 1.5QT Scround',            cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:159,itemNo:"2468200903",name:'Chocolate 1.5QT Scround',             cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:160,itemNo:"—",         name:'Strawberry 1.5QT Scround',            cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:161,itemNo:"—",         name:'Cookies N Cream 1.5QT Scround',       cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:162,itemNo:"—",         name:'Butter Pecan Pint',                   cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:163,itemNo:"—",         name:'Brownie Batter Pint',                 cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:164,itemNo:"—",         name:'Lil\' Blue Panda Pint',               cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:165,itemNo:"4767747420",name:'Twix Ice Cream Bar',                  cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:52.90,  units:24, costPerUnit:2.2042, retail:3.99,  internal:false},
+  {id:166,itemNo:"2468231261",name:'Vanilla 6oz Cup',                     cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:21.96,  units:12, costPerUnit:1.83,   retail:2.99,  internal:false},
+  {id:167,itemNo:"2468231334",name:'Straw Sundae 6oz Cup',                cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:21.96,  units:12, costPerUnit:1.83,   retail:2.99,  internal:false},
+  {id:168,itemNo:"2468231352",name:'NP Mini Sandwich',                    cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:22.08,  units:48, costPerUnit:0.46,   retail:0.99,  internal:false},
+  {id:169,itemNo:"—",         name:'Delivery Fee',                        cat:'Fees',          vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:5.00,   units:1,  costPerUnit:5.00,   retail:0,     internal:true},
 ];
 
 // ════════ STATE ════════

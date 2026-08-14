@@ -63,3 +63,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified: no code changed on the live page (v1 stays live until v2 PR merges).
 - Branch: committed directly to main (docs-only change, owner approved direct pushes this session).
 - Next safe action: hand the spec to Claude Code/Codex (it has owner-authorized repo access) or implement v2 on a `sales-v2-upgrade` branch; also consider merging `site-3d-specials` into main (owner pending decision).
+
+## 2026-08-13 — Hermes (Invoice Grabber)
+- Goal: grab Hershey's Ice Cream delivery invoice (scan sent via Telegram) into the Pricing Hub calculator.
+- Changed: `apps/pricing-hub/index.html` — added vendor "Hershey's Ice Cream" + invoice INVE0023460478 (8/13/26) to VENDORS; appended 12 items to ALL_ITEMS (11 sellable SKUs: 4 scrounds, 3 pints, Twix bar, 2 cups, NP mini sandwich; 1 internal "Delivery Fee" $5 so Total Paid = $234.42). costPerUnit from invoice pack math; retail = hub 65% default. Verified invoice math line-by-line (4×14.49 + 3×17.52 + 52.90 + 2×21.96 + 22.08 + 5.00 = 234.42 ✓). Handwritten note on invoice: 234.42 − 5.00 = 229.42 (delivery-fee deduction — owner to confirm policy).
+- Verified: new `scripts/verify-pricing-hub.js` harness loads the real script with DOM stubs — 29 checks PASS (vendor, invoice, 105 items total, unique ids, per-SKU cost/retail/units, calcRetail). Hub math @65%: revenue $400.74, profit $171.32, margin 42.8%, ROI 73%.
+- Not verified: shelf prices are 65%-default estimates — owner should confirm real shelf tags before POS. Raw scan archived in Obsidian vault 03_INVOICES (RAW/PROCESSED + audit) — NOT committed here (repo root deploys to Pages).
+- Branch: direct main push (invoice data entry, same cadence as prior invoice batches).
+- Next safe action: next invoice scan → same grab flow; optionally point site iframe at `apps/pricing-hub/` (root `pricing-hub/` is a stale demo with "coming soon" buttons).
