@@ -29,6 +29,7 @@ This file is operational context, not a secret store. Verify live state before c
 - Kitchen Dashboard branch: `phase2-kitchen-dashboard`
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
 - Obsidian brain node branch: `obsidian-brain-node-v1`
+- Bodeguetto Content Engine (NEW 2026-08-15): store-signal → content pipeline for @bodeguetto TikTok — see `brain/Projects/Bodeguetto Content Engine.md`. Local repo `/opt/data/projects/bodeguetto-content-engine`; remote pending owner creation (PRIVATE). Phase 1 (signals + capture missions) acceptance-tested. No publishing.
 
 ## Kitchen Dashboard status
 Phase 2A currently provides:

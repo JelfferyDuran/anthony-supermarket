@@ -71,3 +71,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified: shelf prices are 65%-default estimates — owner should confirm real shelf tags before POS. Raw scan archived in Obsidian vault 03_INVOICES (RAW/PROCESSED + audit) — NOT committed here (repo root deploys to Pages).
 - Branch: direct main push (invoice data entry, same cadence as prior invoice batches).
 - Next safe action: next invoice scan → same grab flow; optionally point site iframe at `apps/pricing-hub/` (root `pricing-hub/` is a stale demo with "coming soon" buttons).
+
+## 2026-08-15 — Hermes — Bodeguetto Content Engine: brain note + remote cleanup
+- Goal: link the Anthony's brain to the new Bodeguetto content pipeline; remove the embedded PAT from this repo's git remote.
+- Changed: new `brain/Projects/Bodeguetto Content Engine.md` (lightweight pointer — no code duplicated); CURRENT_STATE workstream bullet; git origin URL cleaned (gh credential helper now authenticates; verified `git ls-remote` OK).
+- Verified: content engine Phase 1 acceptance passed (signal "Se acabó la Malta hoy." → HYBRID job → capture mission → NEEDS_FOOTAGE, $0.00); smoke-test ALL PASSED (24 unit + Phase 0 + Phase 1 + MCP protocol).
+- Not verified / blockers: remote repo `JelfferyDuran/bodeguetto-content-engine` not yet created (PAT lacks repo-create, 403); no publishing performed.
+- Security or rollback notes: no secrets/PII added; old embedded PAT should be revoked/rotated by owner (was exposed in tool output); rollback = revert this branch.
+- PR/issue/commit: branch `feat/bodeguetto-brain-note`.
+- Next safe action: owner creates the repo (PRIVATE) → push content engine + PRs; Phase 2 (Postiz real publish) only after owner confirmation.
