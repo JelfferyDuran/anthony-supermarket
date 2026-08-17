@@ -5,10 +5,15 @@ import MenuScreen from './components/MenuScreen.jsx';
 import CustomizeModal from './components/CustomizeModal.jsx';
 import CartScreen from './components/CartScreen.jsx';
 import CheckoutModal from './components/CheckoutModal.jsx';
+import AdminApp from './components/AdminApp.jsx';
 
 const CATEGORY_ORDER = ['Yaroas', 'Chimis', 'Mofongos', 'Pica Pollo'];
 
+// Staff portal entry: https://<miniapp>/?staff=1
+const IS_STAFF = new URLSearchParams(window.location.search).get('staff') === '1';
+
 export default function App() {
+  if (IS_STAFF) return <AdminApp />;
   const cart = useCart();
   const [activeCategory, setActiveCategory] = useState(CATEGORY_ORDER[0]);
   const [screen, setScreen] = useState('menu'); // 'menu' | 'cart'

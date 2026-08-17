@@ -1,0 +1,85 @@
+{
+  "deal": "RUMMO 2-FOR-$4",
+  "dealEs": "RUMMO 2 POR $4",
+  "tagline": "Mix & match all 7 shapes — every bag $2.00.",
+  "taglineEs": "Mezcla y combina las 7 formas — cada bolsa $2.00.",
+  "products": [
+    {
+      "id": "penne-66",
+      "name": "Penne Rigate",
+      "nameEs": "Penne Rigate",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-penne-rigate-66.webp",
+      "price": "$2.00",
+      "code": "Nº 66",
+      "weight": "1 lb / 454g",
+      "desc": "Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",
+      "descEs": "Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."
+    },
+    {
+      "id": "rigatoni-51",
+      "name": "Mezzi Rigatoni",
+      "nameEs": "Mezzi Rigatoni",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-mezzi-rigatoni-51.webp",
+      "price": "$2.00",
+      "code": "Nº 51",
+      "weight": "1 lb / 454g",
+      "desc": "Chunky tubes built for Sunday gravy — the Kearny classic.",
+      "descEs": "Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."
+    },
+    {
+      "id": "spaghetti-221",
+      "name": "Squared Spaghetti",
+      "nameEs": "Espagueti Cuadrado",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-squared-spaghetti-221.webp",
+      "price": "$2.00",
+      "code": "Nº 221",
+      "weight": "1 lb / 454g",
+      "desc": "A unique square cut that holds sauce on every side. Conversation starter.",
+      "descEs": "Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."
+    },
+    {
+      "id": "farfalle-85",
+      "name": "Farfalle",
+      "nameEs": "Farfalle",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-farfalle-85-rigatoni-51.webp",
+      "price": "$2.00",
+      "code": "Nº 85",
+      "weight": "1 lb / 454g",
+      "desc": "Bow ties the whole family loves — great cold in salads too.",
+      "descEs": "Moños que toda la familia ama — también geniales fríos en ensaladas."
+    },
+    {
+      "id": "fettuccine-94",
+      "name": "Egg Fettuccine",
+      "nameEs": "Fettuccine de Huevo",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-egg-fettuccine-94.webp",
+      "price": "$2.00",
+      "code": "Nº 94",
+      "weight": "8.82 oz / 250g",
+      "desc": "Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",
+      "descEs": "Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."
+    },
+    {
+      "id": "pappardelle-101",
+      "name": "Egg Pappardelle",
+      "nameEs": "Pappardelle de Huevo",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-egg-pappardelle-101.webp",
+      "price": "$2.00",
+      "code": "Nº 101",
+      "weight": "8.82 oz / 250g",
+      "desc": "Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",
+      "descEs": "Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."
+    },
+    {
+      "id": "lasagne-83",
+      "name": "Lasagne",
+      "nameEs": "Lasagna",
+      "image": "assets/promos/2026-08-pasta-night/products/rummo-lasagne-83.webp",
+      "price": "$2.00",
+      "code": "Nº 83",
+      "weight": "1 lb / 454g",
+      "desc": "Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",
+      "descEs": "Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."
+    }
+  ]
+}
