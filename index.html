@@ -652,7 +652,7 @@ renderFilterChips();
 if(typeof renderSpecials==="function")renderSpecials();
 renderOrderHistory();}
 
-(function(){var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});document.querySelectorAll(".reveal").forEach(function(el){obs.observe(el)})})();
+(function(){var els=document.querySelectorAll(".reveal");function showAll(){els.forEach(function(el){el.classList.add("visible")})}if(!("IntersectionObserver" in window)||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){showAll();return}var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});els.forEach(function(el){obs.observe(el)});setTimeout(showAll,2500)})();
 
 (function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","pricing","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
 

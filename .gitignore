@@ -58,3 +58,4 @@ server/data/
 # NRS pipeline
 nrs/.env
 nrs/inbox/*.csv
+.vercel/
