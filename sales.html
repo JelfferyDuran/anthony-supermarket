@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>This Week's Sale — Anthony's Supermarket | Ofertas de la Semana</title>
 <meta name="description" content="RUMMO pasta 2 for $4 — mix & match all shapes, while supplies last. Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
   :root{
     --primary:#2D6A4F; --primary-light:#40916C; --accent:#E07A2F; --gold:#D4A017;
@@ -41,17 +40,23 @@
   .section-title{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-bottom:.4rem;}
   .section-title span{color:var(--accent);}
   .section-sub{text-align:center;color:var(--text-dim);font-size:.9rem;max-width:640px;margin:0 auto 1.6rem;}
-  #sales3d-wrap{position:relative;border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;background:var(--card);}
-  #sales3d-wrap[hidden]{display:none;}
-  #sales3d{display:block;width:100%;height:480px;touch-action:none;}
-  #s3d-hint{position:absolute;top:.6rem;left:50%;transform:translateX(-50%);font-size:.66rem;color:var(--text-dim);letter-spacing:.07em;text-transform:uppercase;pointer-events:none;background:rgba(15,15,20,.55);padding:.28rem .8rem;border-radius:999px;white-space:nowrap;}
-  #s3d-info{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1.1rem;padding:.9rem 1.25rem;border-top:1px solid var(--card-border);min-height:64px;}
-  #s3d-info .si-tag{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);}
-  #s3d-info .si-name{font-weight:700;}
-  #s3d-info .si-price{font-weight:900;font-size:1.25rem;color:var(--gold);margin-left:auto;}
-  #s3d-info .si-desc{font-size:.8rem;color:var(--text-dim);flex-basis:100%;}
-  #s3d-info .si-cta{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;}
-  #s3d-info .si-cta:hover{background:var(--primary-light);}
+  .rack-wrap{margin-top:1.6rem;}
+  .rack-deal{text-align:center;font-size:clamp(1.15rem,3.6vw,1.7rem);font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem;}
+  .rack-tag{text-align:center;color:var(--text-dim);font-size:.82rem;font-style:italic;margin-bottom:1rem;}
+  .rack{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:.35rem .35rem 1.1rem;scrollbar-width:thin;scrollbar-color:var(--primary) transparent;}
+  .rack::-webkit-scrollbar{height:6px;}
+  .rack::-webkit-scrollbar-thumb{background:var(--primary);border-radius:999px;}
+  .rack-card{position:relative;flex:0 0 62vw;max-width:62vw;scroll-snap-align:center;scroll-snap-stop:always;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .rack-badge{position:absolute;top:.7rem;left:.7rem;z-index:2;background:var(--gold);color:#1c1c1c;font-size:.66rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:.32rem .75rem;box-shadow:0 4px 12px rgba(0,0,0,.4);}
+  .rack-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;border-bottom:1px solid var(--card-border);background:var(--card);}
+  .rack-info{padding:1rem 1.1rem 1.15rem;display:flex;flex-direction:column;gap:.4rem;flex:1;}
+  .rack-name{font-size:clamp(1.05rem,3.6vw,1.25rem);font-weight:800;}
+  .rack-meta{font-size:.64rem;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-weight:700;}
+  .rack-desc{font-size:.8rem;color:var(--text-dim);line-height:1.45;}
+  .rack-price{display:flex;align-items:baseline;gap:.5rem;margin-top:auto;padding-top:.55rem;}
+  .rack-price b{font-size:clamp(1.2rem,4vw,1.5rem);font-weight:900;color:var(--gold);}
+  .rack-price .each{font-size:.72rem;color:var(--text-dim);}
+  .rack-hint{text-align:center;font-size:.66rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-top:.1rem;}
   .fomo{background:linear-gradient(90deg,var(--red),#a02a1d);color:#fff;text-align:center;padding:.9rem 5%;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.75rem,2vw,.95rem);}
   .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:1.5rem;}
   .how-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.2rem;text-align:center;}
@@ -70,7 +75,9 @@
   .footer .fbrand{font-weight:800;color:var(--primary-light);font-size:1.1rem;letter-spacing:.5px;}
   .footer a{color:var(--primary-light);text-decoration:none;}
   .footer .frow{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
-  @media (max-width:768px){ #sales3d{height:340px;} .deal-hero{gap:.8rem;padding:.9rem 1.1rem;} }
+  @media (min-width:769px){ .rack-card{flex-basis:260px;max-width:260px;} }
+  @media (max-width:768px){ .deal-hero{gap:.8rem;padding:.9rem 1.1rem;} .rack-card{flex-basis:62vw;max-width:62vw;} }
+  @media (max-width:480px){ .rack{gap:.7rem;} .rack-card{flex-basis:64vw;max-width:64vw;} .rack-info{padding:.85rem .9rem 1rem;} }
 </style>
 </head>
 <body>
@@ -100,17 +107,12 @@
 
 <section class="section">
   <h2 class="section-title" data-en="The <span>Sale</span>" data-es="La <span>Oferta</span>">The <span>Sale</span></h2>
-  <p class="section-sub" data-en="Spin the rack. Tap a shape. Every single one is 2 for $4." data-es="Gira el estante. Toca una forma. Cada una está 2 por $4.">Spin the rack. Tap a shape. Every single one is 2 for $4.</p>
-  <div id="sales3d-wrap" hidden>
-    <canvas id="sales3d" aria-label="Rummo pasta 3D showcase"></canvas>
-    <div id="s3d-hint">Drag to spin · Tap a product</div>
-    <div id="s3d-info">
-      <span class="si-tag" id="siTag"></span>
-      <span class="si-name" id="siName"></span>
-      <span class="si-price" id="siPrice"></span>
-      <a class="si-cta" id="siCta" href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="📍 Get Directions" data-es="📍 Cómo Llegar">📍 Get Directions</a>
-      <span class="si-desc" id="siDesc"></span>
-    </div>
+  <p class="section-sub" data-en="Swipe the rack. Tap a bag. Every single one is 2 for $4." data-es="Desliza el estante. Toca una bolsa. Cada una está 2 por $4.">Swipe the rack. Tap a bag. Every single one is 2 for $4.</p>
+  <div class="rack-wrap">
+    <div class="rack-deal" id="rackDeal" data-en="RUMMO 2-FOR-$4" data-es="RUMMO 2 POR $4">RUMMO 2-FOR-$4</div>
+    <div class="rack-tag" id="rackTag" data-en="Mix &amp; match all 7 shapes — every bag $2.00." data-es="Mezcla y combina las 7 formas — cada bolsa $2.00.">Mix &amp; match all 7 shapes — every bag $2.00.</div>
+    <div class="rack" id="productRack" role="region" aria-label="Rummo pasta — 2 for $4 rack"></div>
+    <div class="rack-hint" data-en="← Swipe / scroll →" data-es="← Desliza / desplázate →">← Swipe / scroll →</div>
   </div>
   <div class="how">
     <div class="how-card"><div class="n">1</div><h4 data-en="Pick any 2 shapes" data-es="Elige 2 formas">Pick any 2 shapes</h4><p data-en="Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne." data-es="Penne, rigatoni, spaghetti, farfalle, pasta de huevo, lasagna.">Penne, rigatoni, spaghetti, farfalle, egg pasta, lasagne.</p></div>
@@ -184,128 +186,51 @@ function setLang(l){
 }
 try{var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl)}catch(e){}
 
-// ===== Pasta lineup (facts from packaging — no invented prices) =====
-var PASTAS=[
- {code:"Nº 66",en:"Penne Rigate",es:"Penne Rigate",w:"1 lb / 454g",
-  fe:"Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",
-  fs:"Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."},
- {code:"Nº 51",en:"Mezzi Rigatoni",es:"Mezzi Rigatoni",w:"1 lb / 454g",
-  fe:"Chunky tubes built for Sunday gravy — the Kearny classic.",
-  fs:"Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."},
- {code:"Nº 221",en:"Squared Spaghetti",es:"Espagueti Cuadrado",w:"1 lb / 454g",
-  fe:"A unique square cut that holds sauce on every side. Conversation starter.",
-  fs:"Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."},
- {code:"Nº 85",en:"Farfalle",es:"Farfalle",w:"1 lb / 454g",
-  fe:"Bow ties the whole family loves — great cold in salads too.",
-  fs:"Moños que toda la familia ama — también geniales fríos en ensaladas."},
- {code:"Nº 94",en:"Egg Fettuccine",es:"Fettuccine de Huevo",w:"8.82 oz / 250g",
-  fe:"Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",
-  fs:"Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."},
- {code:"Nº 101",en:"Egg Pappardelle",es:"Pappardelle de Huevo",w:"8.82 oz / 250g",
-  fe:"Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",
-  fs:"Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."},
- {code:"Nº 83",en:"Lasagne",es:"Lasagna",w:"1 lb / 454g",
-  fe:"Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",
-  fs:"Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."}
-];
-
-// ===== 3D showcase (WebGL with graceful fallback) =====
-(function(){
-  var wrap=document.getElementById("sales3d-wrap"),cv=document.getElementById("sales3d");
-  if(!wrap||!cv||typeof THREE==="undefined")return;
-  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var renderer;
-  try{renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});}catch(e){return;}
-  wrap.hidden=false;
-  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(55,1,0.1,100);
-  camera.position.set(0,1.4,9.6);camera.lookAt(0,0.5,0);
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
-  var carousel=new THREE.Group();scene.add(carousel);
-  function roundRect(x,a,b,c,d,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+c,b,a+c,b+d,r);x.arcTo(a+c,b+d,a,b+d,r);x.arcTo(a,b+d,a,b,r);x.arcTo(a,b,a+c,b,r);x.closePath();}
-  function wrapText(ctx,text,maxW,maxLine){var words=text.split(" "),lines=[],cur="";words.forEach(function(wd){var test=cur?cur+" "+wd:wd;if(ctx.measureText(test).width>maxW&&cur){lines.push(cur);cur=wd}else cur=test});if(cur)lines.push(cur);if(lines.length>maxLine){lines=lines.slice(0,maxLine);lines[maxLine-1]+="..."}return lines;}
-  function cardTexture(p){
-    var w=512,h=768,c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");
-    x.fillStyle="#1A1A24";roundRect(x,8,8,w-16,h-16,26);x.fill();
-    x.strokeStyle="#2D6A4F";x.lineWidth=6;roundRect(x,8,8,w-16,h-16,26);x.stroke();
-    x.fillStyle="#D4A017";roundRect(x,8,8,w-16,10,6);x.fill();
-    x.fillStyle="#D4A017";x.font="700 42px Arial, sans-serif";x.textAlign="center";x.textBaseline="alphabetic";
-    x.fillText("RUMMO · "+p.code,w/2,118);
-    x.fillStyle="#F0F0F0";x.font="700 58px Arial, sans-serif";x.textBaseline="top";
-    var lines=wrapText(x,cl==="es"?p.es:p.en,w-110,2),ly=225;
-    lines.forEach(function(l){x.fillText(l,w/2,ly);ly+=70});
-    x.fillStyle="#D4A017";x.font="900 74px Arial, sans-serif";x.textBaseline="alphabetic";x.textAlign="center";
-    x.fillText(cl==="es"?"2 POR $4":"2 FOR $4",w/2,560);
-    x.fillStyle="#8888A0";x.font="700 30px Arial, sans-serif";
-    x.fillText(p.w,w/2,620);
-    x.fillStyle="#1E5631";roundRect(x,8,h-72,w-16,64,26);x.fill();
-    x.fillStyle="#E07A2F";x.font="700 30px Arial, sans-serif";x.textBaseline="middle";
-    x.fillText(cl==="es"?"HASTA AGOTAR EXISTENCIAS":"WHILE SUPPLIES LAST",w/2,h-40);
-    var tx=new THREE.CanvasTexture(c);try{tx.encoding=THREE.sRGBEncoding}catch(e){}
-    return tx;
-  }
-  var cards=[],R=4.5;
-  PASTAS.forEach(function(p,i){
-    var g=new THREE.Group();
-    var glow=new THREE.Mesh(new THREE.PlaneGeometry(2.95,4.2),new THREE.MeshBasicMaterial({color:0xE07A2F,transparent:true,opacity:0}));
-    glow.position.z=-0.03;g.add(glow);
-    var m=new THREE.Mesh(new THREE.PlaneGeometry(2.55,3.83),new THREE.MeshBasicMaterial({map:cardTexture(p)}));
-    g.add(m);
-    cards.push({g:g,m:m,glow:glow,p:p});carousel.add(g);
+// ===== Sale rack: data-driven from data/sale.json (inline fallback so the page never breaks) =====
+var DEFAULT_SALE={
+  deal:"RUMMO 2-FOR-$4",dealEs:"RUMMO 2 POR $4",
+  tagline:"Mix & match all 7 shapes — every bag $2.00.",
+  taglineEs:"Mezcla y combina las 7 formas — cada bolsa $2.00.",
+  products:[
+    {id:"penne-66",name:"Penne Rigate",nameEs:"Penne Rigate",image:"assets/promos/2026-08-pasta-night/products/rummo-penne-rigate-66.webp",price:"$2.00",code:"Nº 66",weight:"1 lb / 454g",desc:"Bronze-cut with deep ridges to grab every drop of sauce. The everyday hero.",descEs:"Corte de bronce con estrías profundas que atrapan cada gota de salsa. El héroe de todos los días."},
+    {id:"rigatoni-51",name:"Mezzi Rigatoni",nameEs:"Mezzi Rigatoni",image:"assets/promos/2026-08-pasta-night/products/rummo-mezzi-rigatoni-51.webp",price:"$2.00",code:"Nº 51",weight:"1 lb / 454g",desc:"Chunky tubes built for Sunday gravy — the Kearny classic.",descEs:"Tubos gruesos hechos para la salsa dominical — el clásico de Kearny."},
+    {id:"spaghetti-221",name:"Squared Spaghetti",nameEs:"Espagueti Cuadrado",image:"assets/promos/2026-08-pasta-night/products/rummo-squared-spaghetti-221.webp",price:"$2.00",code:"Nº 221",weight:"1 lb / 454g",desc:"A unique square cut that holds sauce on every side. Conversation starter.",descEs:"Un corte cuadrado único que retiene la salsa por todos lados. Inicia conversación."},
+    {id:"farfalle-85",name:"Farfalle",nameEs:"Farfalle",image:"assets/promos/2026-08-pasta-night/products/rummo-farfalle-85-rigatoni-51.webp",price:"$2.00",code:"Nº 85",weight:"1 lb / 454g",desc:"Bow ties the whole family loves — great cold in salads too.",descEs:"Moños que toda la familia ama — también geniales fríos en ensaladas."},
+    {id:"fettuccine-94",name:"Egg Fettuccine",nameEs:"Fettuccine de Huevo",image:"assets/promos/2026-08-pasta-night/products/rummo-egg-fettuccine-94.webp",price:"$2.00",code:"Nº 94",weight:"8.82 oz / 250g",desc:"Free-range Italian eggs. Cooks in 3 minutes. The fastest dinner in the store.",descEs:"Huevos italianos de gallinas libres. Se cocina en 3 minutos. La cena más rápida de la tienda."},
+    {id:"pappardelle-101",name:"Egg Pappardelle",nameEs:"Pappardelle de Huevo",image:"assets/promos/2026-08-pasta-night/products/rummo-egg-pappardelle-101.webp",price:"$2.00",code:"Nº 101",weight:"8.82 oz / 250g",desc:"Wide ribbons with free-range Italian eggs. Cooks in 5 minutes.",descEs:"Cintas anchas con huevos italianos de gallinas libres. Se cocina en 5 minutos."},
+    {id:"lasagne-83",name:"Lasagne",nameEs:"Lasagna",image:"assets/promos/2026-08-pasta-night/products/rummo-lasagne-83.webp",price:"$2.00",code:"Nº 83",weight:"1 lb / 454g",desc:"Oven-ready OR classic method. NON-GMO verified. Feed the whole family.",descEs:"Lista para horno o método clásico. Verificada NON-GMO. Alimenta a toda la familia."}
+  ]
+};
+function applyLang(el){if(el&&el.getAttribute("data-en"))el.innerHTML=el.getAttribute("data-"+cl);}
+function renderRack(cfg){
+  var deal=document.getElementById("rackDeal"),tag=document.getElementById("rackTag");
+  if(deal&&cfg.deal){deal.setAttribute("data-en",cfg.deal);deal.setAttribute("data-es",cfg.dealEs||cfg.deal);applyLang(deal);}
+  if(tag&&cfg.tagline){tag.setAttribute("data-en",cfg.tagline);tag.setAttribute("data-es",cfg.taglineEs||cfg.tagline);applyLang(tag);}
+  var rack=document.getElementById("productRack");if(!rack)return;
+  rack.innerHTML="";
+  (cfg.products||[]).forEach(function(p){
+    var c=document.createElement("div");c.className="rack-card";
+    var b=document.createElement("div");b.className="rack-badge";b.setAttribute("data-en","2 for $4");b.setAttribute("data-es","2 por $4");c.appendChild(b);
+    var im=document.createElement("img");im.src=p.image;im.alt=(p.name||"Rummo pasta")+" "+(p.code||"");im.loading="lazy";im.decoding="async";c.appendChild(im);
+    var info=document.createElement("div");info.className="rack-info";
+    var n=document.createElement("div");n.className="rack-name";n.setAttribute("data-en",p.name);n.setAttribute("data-es",p.nameEs||p.name);info.appendChild(n);
+    var m=document.createElement("div");m.className="rack-meta";m.textContent="RUMMO "+(p.code||"")+" · "+(p.weight||"");info.appendChild(m);
+    var d=document.createElement("div");d.className="rack-desc";d.setAttribute("data-en",p.desc||"");d.setAttribute("data-es",p.descEs||p.desc||"");info.appendChild(d);
+    var pr=document.createElement("div");pr.className="rack-price";
+    var pb=document.createElement("b");pb.setAttribute("data-en","2 for $4");pb.setAttribute("data-es","2 por $4");pr.appendChild(pb);
+    var pe=document.createElement("span");pe.className="each";pe.setAttribute("data-en",(p.price||"$2.00")+" each");pe.setAttribute("data-es",(p.price||"$2.00")+" c/u");pr.appendChild(pe);
+    info.appendChild(pr);
+    c.appendChild(info);
+    rack.appendChild(c);
   });
-  function layout(){var n=cards.length;cards.forEach(function(c,i){var th=n>1?(-1.15+i*(2.3/(n-1))):0;c.g.position.set(Math.sin(th)*R,0.4+(i%2)*0.18,-Math.cos(th)*R+R*0.25)})}
-  layout();
-  var ring=new THREE.Mesh(new THREE.RingGeometry(2.7,3.4,48),new THREE.MeshBasicMaterial({color:0x1E5631,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
-  ring.rotation.x=-Math.PI/2;ring.position.y=-1.45;scene.add(ring);
-  var gold=new THREE.Mesh(new THREE.TorusGeometry(3.15,0.035,8,64),new THREE.MeshBasicMaterial({color:0xD4A017,transparent:true,opacity:0.5}));
-  gold.rotation.x=-Math.PI/2;gold.position.y=-1.44;scene.add(gold);
-  var pc=60,pos=new Float32Array(pc*3);
-  for(var i=0;i<pc;i++){pos[i*3]=(Math.random()-0.5)*10;pos[i*3+1]=Math.random()*3.4-1;pos[i*3+2]=(Math.random()-0.5)*6-1}
-  var pgeo=new THREE.BufferGeometry();pgeo.setAttribute("position",new THREE.BufferAttribute(pos,3));
-  var pts=new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x2D6A4F,size:0.07,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending}));
-  scene.add(pts);
-  function resize(){var w=wrap.clientWidth||600,h=wrap.clientHeight||480;if(w<10)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
-  resize();
-  var raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),hover=-1,selected=-1,dragging=false,lastX=0;
-  function pick(e){var r=cv.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-(((e.clientY-r.top)/r.height)*2-1);raycaster.setFromCamera(mouse,camera);var hits=raycaster.intersectObjects(cards.map(function(c){return c.m}),false);return hits.length?hits[0].object.userData.idx:-1}
-  function paintGlow(){cards.forEach(function(c,i){c.glow.material.opacity=(i===hover?0.4:0)+(i===selected?0.25:0);c.g.scale.set(i===hover?1.07:1,i===hover?1.07:1,1)})}
-  cv.addEventListener("pointermove",function(e){
-    if(dragging){carousel.rotation.y+=(e.clientX-lastX)*0.008;lastX=e.clientX;return}
-    var h=pick(e);if(h!==hover){hover=h;paintGlow();cv.style.cursor=hover>=0?"pointer":"grab"}
-  });
-  cv.addEventListener("pointerdown",function(e){dragging=true;lastX=e.clientX;cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)});
-  cv.addEventListener("pointerup",function(e){if(!dragging)return;dragging=false;var h=pick(e);if(h>=0)select(h)});
-  cv.addEventListener("pointercancel",function(){dragging=false});
-  cv.style.cursor="grab";
-  var siTag=document.getElementById("siTag"),siName=document.getElementById("siName"),siDesc=document.getElementById("siDesc"),siPrice=document.getElementById("siPrice");
-  function select(i){
-    selected=i;hover=-1;paintGlow();
-    var p=PASTAS[i];
-    siTag.textContent="RUMMO "+p.code+" · "+p.w;
-    siName.textContent=cl==="es"?p.es:p.en;
-    siDesc.textContent=cl==="es"?p.fs:p.fe;
-    siPrice.textContent=cl==="es"?"2 POR $4":"2 FOR $4";
-  }
-  var hint=document.getElementById("s3d-hint");
-  function setHint(){hint.textContent=cl==="es"?"Arrastra o desliza para girar · Toca una forma":"Drag to spin · Tap a shape"}
-  setHint();
-  document.addEventListener("langchange",function(){
-    cards.forEach(function(c){c.m.material.map=cardTexture(c.p);c.m.material.needsUpdate=true});
-    if(selected>=0)select(selected);setHint();
-  });
-  var t0=Date.now();
-  function anim(){
-    requestAnimationFrame(anim);
-    var t=(Date.now()-t0)/1000;
-    if(!reduced&&!dragging)carousel.rotation.y+=0.0035;
-    if(!reduced)cards.forEach(function(c,i){c.g.position.y=0.4+(i%2)*0.18+Math.sin(t*1.4+i*1.7)*0.09});
-    pts.rotation.y+=0.0006;gold.rotation.z+=0.002;
-    cards.forEach(function(c){c.m.lookAt(camera.position);c.glow.lookAt(camera.position)});
-    renderer.render(scene,camera);
-  }
-  anim();
-  addEventListener("resize",resize);
-  if(PASTAS.length)select(0);
-})();
+  rack.querySelectorAll("[data-en]").forEach(applyLang);
+}
+function loadSale(){
+  fetch("data/sale.json").then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+    .then(function(cfg){renderRack(cfg&&cfg.products?cfg:DEFAULT_SALE);})
+    .catch(function(){renderRack(DEFAULT_SALE);});
+}
+loadSale();
 </script>
 </body>
 </html>

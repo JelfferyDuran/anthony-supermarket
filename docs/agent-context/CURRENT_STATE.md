@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-09
+Last updated: 2026-08-17
 
 This file is operational context, not a secret store. Verify live state before consequential actions.
 
@@ -85,13 +85,19 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 - Do not point production to feature branches during testing.
 
 ## Public website (root `index.html`)
-- Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
-- Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe), Visit Us (location/hours/call + embedded Google Map).
-- Weekly Specials are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so prices stay in sync with the menu data — no hardcoded deal prices.
-- 2026-08-12: standalone bilingual sales page `sales.html` (Pasta Night / Rummo 2-for-$4) is LIVE on Pages — hero deal box, FOMO banner, Three.js interactive showcase of 7 Rummo shapes, pair-it chips, recipes, poster display. v2 upgrade spec in `docs/agent-context/SALES_PAGE_V2_UPGRADE.md` (mobile-first rebuild, replace Three.js with DOM-based carousel, JSON-driven config; tracked in issue #31).
-- Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
-- Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
-- 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).
+- Served on Vercel: `https://anthony-supermarket.vercel.app` (manual CLI deploys; `vercel.json` at repo root forces static output). GitHub Pages URL is DEAD — do not link it.
+- Single-file bilingual (EN/ES) storefront: hero, Shop by Department (photo cards), Weekly Specials, Menu (embedded catalog), Pricing Hub (iframe → `pricing-hub/index.html`, canonical copy of `apps/pricing-hub/`), Visit Us (map/hours/call).
+- v6 responsive (2026-08-17): hamburger drawer nav on mobile, Order-on-Telegram CTAs (nav + hero → `t.me/Anthonysuperkitchen_bot`), safe-area/dvh/touch-target CSS, scroll-padding, reveal fallback (reduced-motion + timeout).
+- Sales page `sales.html` — v2 rebuild (issue #31 DONE): Three.js removed, CSS scroll-snap product rack driven by `data/sale.json` (7 Rummo shapes), recipes + poster retained, bilingual.
+- IG links hub `links.html` — bilingual Linktree-style page for the Instagram bio (same Vercel origin).
+- Policies: `terms.html` + `privacy.html` on the main site AND on `anthony-policies.vercel.app` (now has index page; separate manual deploy).
+- Weekly Specials computed from embedded catalog (`SPECIALS` + `renderSpecials()`).
+
+## Super Kitchen miniapp + staff portal
+- Customer app: `https://anthony-supermarket-superkitchen.vercel.app` (git-linked to main, rootDir `apps/superkitchen`, framework vite, `vercel.json` pins build).
+- Staff portal (2026-08-17): append `?staff=1` → Supabase Auth login (email/password) → role-gated dashboard: Kitchen tab (order lanes recibido/preparando/listo/completado/cancelado, 20s poll, audited transitions via `staff_update_order_status`) + Store tab (manager/admin: 24h gross sales, by-status, pickup/delivery, recent orders, transition counts via `superkitchen-ops`). Code in `apps/superkitchen/src/{components/AdminApp,StaffLogin,KitchenBoard,StoreBoard}.jsx` + `lib/{supabaseClient,staffApi}.js`.
+- Known issue: `MINIAPP_URL` const in live `superkitchen` edge fn points at dead GitHub Pages URL — needs a careful function redeploy (diff live source first).
+- Vercel env set: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (prod + preview).
 
 ## Phase 2 roadmap
 - #17: Merchant Operations Platform epic
