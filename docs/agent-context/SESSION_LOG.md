@@ -97,3 +97,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified: shelf prices are 65%-default estimates — owner should confirm real shelf tags. "Mama Tere Leniejon" (item 2626) name unverifiable — exception logged. Raw scans archived in Obsidian vault 03_INVOICES (RAW/PROCESSED + audit + baseline) — NOT committed here (repo root deploys to Pages).
 - Branch: direct main push (invoice data entry, same cadence as prior invoice batches).
 - Next safe action: confirm Leniejon shelf name + the $0.00 tuna invoice (replacement/credit?) with the vendor; then confirm shelf prices for the 51 new SKUs.
+
+## 2026-08-19 — Hermes (Invoice Grabber follow-up — owner answers)
+- Goal: apply owner answers — "Mamá Tere refund for expired goods", use Pricing Hub formula for the sales sheet, reference prices from other hub invoices.
+- Changed: `apps/pricing-hub/index.html` — (1) merged legacy vendor key "Family Food" (2 prior invoices 90747231 + 90747476, 6/24/26, 57 items) into "Family Food Distributors" → single vendor, 5 invoices, 109 items; (2) id 198 renamed "Mama Tere Leniejon" → "Mama Tere Lentejon" (prior invoice spells it Lentejon — today's print typo); (3) id 221 refund tuna (Florida Tuna 3pk, invoice 90772312) now sellable + flagged, reference-priced **$4.99/3pk** (per-oz parity with Florida Tuna 48/5oz @ $2.99/can).
+- Cross-reference result: 12 of today's 52 SKUs match prior-invoice item numbers — costs identical (Jelly Fruits, Florida/Ecuatun tuna, Casabe, Plantain Chips, Lentejon, Manzanilla tea, ILE Adobo, Del Frutal nectars, Yuca 12/40oz + 6/80oz) except **Van Camps 48/5oz DROPPED $113.55 → $98.95** (retail $3.99 → $2.99).
+- Verified: `scripts/verify-pricing-hub.js` extended (5 invoices, 109 FFD items, legacy key removed, Lentejon rename, Van Camps drop, refund sellable @ 4.99) — ALL CHECKS PASSED.
+- Sales price sheet delivered: stylized print-ready HTML (hub formula: 65% markup + .99 rounding, per-SKU, category-grouped, refund + price-drop badges) — 52 items, cost $2,594.94 → est. revenue $4,283.40, profit $1,688.46 (39.4%).
+- Vault: Exception_Log all 3 FFD rows RESOLVED; CSVs + audits + Vendor_Price_History regenerated (52 rows, 12 with prior refs); CHANGELOG updated.
+- Next safe action: confirm Van Camps $2.99 + refund $4.99 shelf prices; NRS POS shelf tags for the 52 SKUs.

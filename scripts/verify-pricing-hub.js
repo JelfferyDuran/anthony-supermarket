@@ -49,7 +49,8 @@ const chk = (cond, msg) => { pass(cond, msg); if (!cond) fails++; };
 chk(!!VENDORS["Hershey's Ice Cream"], "VENDORS has Hershey's Ice Cream");
 chk(!!VENDORS["Hershey's Ice Cream"].invoices.INVE0023460478, 'VENDORS has invoice INVE0023460478');
 chk(!!VENDORS["Family Food Distributors"], "VENDORS has Family Food Distributors");
-chk(!!VENDORS["Family Food Distributors"].invoices["90772340"] && !!VENDORS["Family Food Distributors"].invoices["90772444"] && !!VENDORS["Family Food Distributors"].invoices["90772312"], 'VENDORS has all 3 FFD invoices');
+chk(!!VENDORS["Family Food Distributors"].invoices["90747231"] && !!VENDORS["Family Food Distributors"].invoices["90747476"] && !!VENDORS["Family Food Distributors"].invoices["90772340"] && !!VENDORS["Family Food Distributors"].invoices["90772444"] && !!VENDORS["Family Food Distributors"].invoices["90772312"], 'VENDORS has all 5 FFD invoices');
+chk(!!VENDORS["Family Food"] === false, 'Legacy "Family Food" vendor key removed (merged)');
 chk(Array.isArray(ALL_ITEMS) && ALL_ITEMS.length === 157, 'ALL_ITEMS length = 157 (105 prior + 52 new; got ' + ALL_ITEMS.length + ')');
 
 const hers = ALL_ITEMS.filter(i => i.vendor === "Hershey's Ice Cream");
@@ -61,15 +62,21 @@ chk(!!fee && fee.internal === true, 'Delivery Fee is internal (not for sale)');
 chk(new Set(ALL_ITEMS.map(i => i.id)).size === ALL_ITEMS.length, 'All item ids unique');
 chk(hers.every(i => i.invoice === 'INVE0023460478'), 'All items tagged with invoice #');
 
-// --- Family Food Distributors 8/19/26 bundle ---
+// --- Family Food Distributors (5 invoices: 2 prior 6/24/26 + 3 today 8/19/26) ---
 const ffd = ALL_ITEMS.filter(i => i.vendor === "Family Food Distributors");
-chk(ffd.length === 52, "Family Food items = 52 (got " + ffd.length + ')');
-const ffdCost = ffd.reduce((s, i) => s + i.boxes * i.boxPrice, 0);
-chk(Math.abs(ffdCost - 2594.94) < 0.001, 'Family Food total cost = $2,594.94 (got $' + ffdCost.toFixed(2) + ')');
+chk(ffd.length === 109, "Family Food items = 109 (57 prior + 52 today; got " + ffd.length + ')');
+const TODAY = ['90772340', '90772444', '90772312'];
+const ffdToday = ffd.filter(i => TODAY.includes(i.invoice));
+const ffdCost = ffdToday.reduce((s, i) => s + i.boxes * i.boxPrice, 0);
+chk(Math.abs(ffdCost - 2594.94) < 0.001, 'Family Food today cost = $2,594.94 (got $' + ffdCost.toFixed(2) + ')');
 const noCharge = ffd.find(i => i.invoice === '90772312');
-chk(!!noCharge && noCharge.internal === true && noCharge.boxPrice === 0, 'No-charge tuna (90772312) is internal @ $0');
-chk(ffd.every(i => ['90772340', '90772444', '90772312'].includes(i.invoice)), 'All FFD items tagged with a valid invoice #');
+chk(!!noCharge && noCharge.internal === false && noCharge.retail === 4.99 && noCharge.flagged === true, 'Refund tuna (90772312) sellable @ $4.99 reference-priced, flagged');
+chk(ffd.every(i => ['90747231', '90747476', '90772340', '90772444', '90772312'].includes(i.invoice)), 'All FFD items tagged with a valid invoice #');
 chk(ffd.every(i => i.itemNo !== '—'), 'All FFD items carry vendor item numbers (no guessed codes)');
+const lentejon = ALL_ITEMS.find(i => i.id === 198);
+chk(!!lentejon && lentejon.name === 'Mama Tere Lentejon', 'id 198 renamed to Mama Tere Lentejon (typo fix, matches prior invoice)');
+const vcOld = ALL_ITEMS.find(i => i.id === 157), vcNew = ALL_ITEMS.find(i => i.id === 181);
+chk(vcOld.retail === 3.99 && vcNew.retail === 2.99 && vcNew.boxPrice < vcOld.boxPrice, 'Van Camps 48/5oz price drop reflected (113.55 → 98.95, retail 3.99 → 2.99)');
 // spot-check hub math on a few FFD rows (65% markup default)
 const spot = {
   170: { cpu: 3.1392, retail: 4.99 },   // Saba Ultra Long Pads 12/16ct
