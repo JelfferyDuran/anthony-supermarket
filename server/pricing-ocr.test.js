@@ -55,8 +55,15 @@ test('falls back to the webhook contract when there is no Gemini key', () => wit
   assert.equal(ocr.activeProvider(), 'webhook');
 }));
 
-test('Gemini wins when both are configured', () => withEnv({ GEMINI_API_KEY: 'k', PRICING_OCR_WEBHOOK_URL: 'https://ocr.test/x' }, ocr => {
-  assert.equal(ocr.activeProvider(), 'gemini');
+// An explicitly configured webhook URL is an operator decision about which
+// reader to use, so it takes precedence over the built-in direct call.
+test('a configured webhook wins over the in-process Gemini path', () => withEnv({ GEMINI_API_KEY: 'k', PRICING_OCR_WEBHOOK_URL: 'https://ocr.test/x' }, async ocr => {
+  assert.equal(ocr.activeProvider(), 'webhook');
+  let calledUrl = null;
+  await ocr.extractInvoice(FILE, {}, {
+    fetch: async (url) => { calledUrl = url; return { ok: true, status: 200, json: async () => ({ invoice: {}, items: [] }) }; }
+  });
+  assert.equal(calledUrl, 'https://ocr.test/x', 'the webhook was called, not Gemini');
 }));
 
 test('extraction refuses with a recognisable code when unconfigured', () => withEnv({}, async ocr => {

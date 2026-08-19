@@ -2,12 +2,15 @@
 
 // Invoice extraction. Turns a scan into candidate line items for human review.
 //
-// Provider order, first configured wins:
-//   1. Gemini Flash via a free Google AI Studio key (GEMINI_API_KEY) — the
-//      owner's choice on 2026-08-19. Reads images and PDFs directly and returns
-//      structured JSON, so no separate OCR service has to be stood up.
-//   2. A generic webhook (PRICING_OCR_WEBHOOK_URL) — the PR #32 contract, kept
-//      for a self-hosted Tesseract/PaddleOCR box or the Hermes vision path.
+// Provider order:
+//   1. A configured webhook (PRICING_OCR_WEBHOOK_URL) — the PR #32 contract.
+//      Setting a URL is an explicit operator choice, so it wins. This is the
+//      path to `server/ocr-webhook.js`, which has been validated against a real
+//      Family Food invoice (16/16 lines, line-total sum exact), and which also
+//      offers OpenRouter and keeps the provider key off the app server.
+//   2. Gemini Flash directly via GEMINI_API_KEY — the owner's 2026-08-19 choice.
+//      Reads images and PDFs and returns structured JSON with nothing extra to
+//      deploy. Used when no webhook URL is configured.
 //
 // Nothing here approves anything. Every extracted line lands in `needs_review`
 // and a manager resolves it against the source scan. That boundary is the whole
@@ -94,8 +97,8 @@ function isConfigured() {
 }
 
 function activeProvider() {
-  if (isGeminiConfigured()) return 'gemini';
   if (isWebhookConfigured()) return 'webhook';
+  if (isGeminiConfigured()) return 'gemini';
   return null;
 }
 
@@ -236,8 +239,8 @@ function clamp01(value) {
 // Extracts a scan. Throws when no provider is configured — callers report that
 // as OCR_NOT_CONFIGURED and still store the scan privately, so nothing is lost.
 async function extractInvoice(file, fields = {}, { fetch: fetchImpl = globalThis.fetch } = {}) {
-  if (isGeminiConfigured()) return extractWithGemini(file, fields, fetchImpl);
   if (isWebhookConfigured()) return extractWithWebhook(file, fields, fetchImpl);
+  if (isGeminiConfigured()) return extractWithGemini(file, fields, fetchImpl);
   const error = new Error('No OCR provider is configured');
   error.code = 'OCR_NOT_CONFIGURED';
   throw error;
