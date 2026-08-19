@@ -106,3 +106,10 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Sales price sheet delivered: stylized print-ready HTML (hub formula: 65% markup + .99 rounding, per-SKU, category-grouped, refund + price-drop badges) — 52 items, cost $2,594.94 → est. revenue $4,283.40, profit $1,688.46 (39.4%).
 - Vault: Exception_Log all 3 FFD rows RESOLVED; CSVs + audits + Vendor_Price_History regenerated (52 rows, 12 with prior refs); CHANGELOG updated.
 - Next safe action: confirm Van Camps $2.99 + refund $4.99 shelf prices; NRS POS shelf tags for the 52 SKUs.
+
+## 2026-08-19 — Hermes (Pricing Hub ↔ Kingdom OS sync)
+- Goal: let the owner edit retail prices on Kingdom OS and have the edits persist back into the Pricing Hub (source of truth).
+- Changed: `apps/pricing-hub/index.html` — `calcRetail()` now honors the stored `retail` snapshot when it differs from the 65% formula (synced override wins; formula-generated rows unchanged). New Kingdom OS write-back endpoint (`serve_os.py` POST `/api/pricing`) patches this file, OS `data.json`, miniapp staged snapshot, then commits + pushes `main` per edit (3 test syncs landed: set/clear/bulk).
+- Verified: `scripts/verify-pricing-hub.js` ALL CHECKS PASSED after calcRetail change; OS smoke 60 PASS incl. pricing overrides; live POST round-trip confirmed (id 170 set → 5.49, clear → 4.99; bulk 170/181 cleared, no-cost 221 kept reference 4.99).
+- Not verified: OS page now shows "✓ synced to hub" per edit; other browsers see synced values on reload (data.json patched in place; 2h cron re-derives from hub).
+- Next safe action: shelf-tag prices on NRS POS; any OS retail edit now flows to the hub automatically.
