@@ -113,3 +113,49 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Verified: `scripts/verify-pricing-hub.js` ALL CHECKS PASSED after calcRetail change; OS smoke 60 PASS incl. pricing overrides; live POST round-trip confirmed (id 170 set → 5.49, clear → 4.99; bulk 170/181 cleared, no-cost 221 kept reference 4.99).
 - Not verified: OS page now shows "✓ synced to hub" per edit; other browsers see synced values on reload (data.json patched in place; 2h cron re-derives from hub).
 - Next safe action: shelf-tag prices on NRS POS; any OS retail edit now flows to the hub automatically.
+
+## 2026-08-19 — Claude Code (Pricing Hub V2, Phases A + B)
+- Goal: finish the PR #32 invoice-pricing foundation against current `main`, reconcile it with the live 157-item hub dataset, and rebuild the Pricing Hub UI on Supabase with an offline fallback.
+- Changed:
+  - Ported the six genuinely new files out of `feature/invoice-pricing-pipeline` onto a branch cut from current `main`, stripping the branch's UTF-8 mojibake and CRLF damage. Net change to `server/index.js` is +45/−1, entirely additive.
+  - Added `supabase/migrations/20260819213000_reconcile_pricing_hub_dataset.sql`: hub-shape product columns, `hub_item_ids` for the Kingdom OS mirror, private `pricing-invoices` storage bucket, immutable-history trigger, `pricing_set_product_retail()`, `pricing_approve_invoice()`, `pricing_label_rows()`, and a `backfilled` status for pre-pipeline invoices.
+  - Added `scripts/seed-pricing-from-hub.js` (+ `scripts/lib/hub-data.js`) and the generated `supabase/seed/pricing_hub_seed.sql`.
+  - Completed the documented next slice: private invoice storage, the authenticated approval transaction, OCR webhook wiring, and the catalog/queue/history/export endpoints in `server/pricing-router.js` + `server/pricing-store.js`.
+  - Rebuilt `apps/pricing-hub/index.html` as v2 (Catalog / Approval Queue / Price Changes / Export) on a Supabase data layer with the embedded arrays as a first-render offline fallback; synced the root iframe copy.
+  - Rewrote `scripts/verify-pricing-hub.js`: removed a hardcoded `/opt/data` path that meant it only ever ran on the VPS, made it verify the hub's shipped math rather than a copy, and added structural checks for the Kingdom OS contract and the root/apps sync.
+- Verified:
+  - `node scripts/test-pricing-migrations.js` — both migrations apply to a clean PostgreSQL 16 database and 14 checks pass, including deny-by-default RLS, SHA-256 upload idempotency, immutable history, the $0.01 tolerance, and refusal to approve an unmatched line or without an approver.
+  - Generated seed loaded into local PostgreSQL: all 9 invoice totals reconcile to $0.00 variance, and Hershey's $234.42 / Family Food $2,594.94 match the figures `verify-pricing-hub.js` asserts independently.
+  - `node --test server/pricing-engine.test.js server/pricing-pipeline.test.js` — 18 + 8 tests pass, including a full sample-invoice run and the auth-boundary cases.
+  - `node scripts/verify-pricing-hub.js` — ALL CHECKS PASSED.
+  - Browser (Chromium, desktop 1280 and mobile 390): console clean over HTTP, offline fallback renders 154 rows with no network, no horizontal overflow; and against a stubbed live API the server retail overrides the embedded value, variance pills, history timeline, approval queue, and a persisted retail edit all work, with a below-cost edit rolled back.
+  - Ordering runtime unaffected: server boots, `/api/health` reports 132 menu items, emoji render correctly.
+- Not verified / blockers:
+  - The migration and seed have **not** been applied to the production Supabase project — that needs owner approval.
+  - No OCR provider is configured, so the OCR leg is exercised only against a stub.
+  - No production deploy was run; the main site is a manual Vercel CLI deploy.
+- Security or rollback notes: service-role access is confined to `server/pricing-store.js` (server-side); invoice scans go to a private bucket reached only by short-lived signed URLs; RLS is deny-by-default with zero policies on the pricing tables and no anon/authenticated grants; approvals require a real `auth.users` identity, so the shared operator token cannot approve. Rollback is `git revert` — nothing was applied to production.
+- PR/issue/commit: supersedes PR #32; see `brain/Decisions/2026-08-19-pricing-hub-v2-supabase-cutover.md`.
+- Next safe action: owner reviews the four open decisions (markup rule, slider behaviour, iframe strategy, OCR provider), then apply the migration + seed to Supabase in that order and re-run the end-to-end test against one real invoice.
+
+## 2026-08-19 — Claude Code (Pricing Hub V2, Phase C)
+- Goal: complete Phase C of `PRICING_HUB_V2_UPGRADE.md` — staff invoice intake, NRS POS CSV sales import, and the financials dashboard. Phase D remains explicitly out of scope.
+- Changed:
+  - `supabase/migrations/20260819230000_add_pos_sales_and_financials.sql`: `pos_import_batches` + `pos_sales`, NET21 payment terms on invoices, and six reporting functions (`pricing_cost_at`, `pricing_vendor_spend`, `pricing_invoice_aging`, `pricing_margin_by`, `pricing_pnl_summary`, `pricing_increase_alerts`), all SECURITY DEFINER and service-role only.
+  - `server/pos-import.js`: NRS CSV parser whose column aliases, numeric coercion, summary-row skipping and void/refund conventions mirror the existing `nrs/nrs-analyze.py`, so the dashboard and the daily Telegram briefing cannot disagree about a row.
+  - `server/pricing-router.js` + `pricing-store.js`: `POST /pos/import`, `GET /pos/batches`, `GET /financials`.
+  - `apps/pricing-hub/index.html`: Invoice Intake and Financials tabs; root iframe copy synced.
+  - Verifier extended to 79 checks, including one asserting the uncosted-revenue caveat is shown where the margin is read.
+- Verified:
+  - `node scripts/test-pricing-migrations.js` — all three migrations apply to a clean PostgreSQL 16 database; 28 checks pass. The financials suite runs in its own database so its totals are exact rather than polluted by the pipeline suite's fixtures. Asserted by hand-computed value: COGS valued per sale date (10 units at $2.00 + 10 at $3.00 = $50.00), NET21 bucketing of an invoice 9 days late, paid invoices excluded from aging, and P&L gross/COGS/profit/costed-share.
+  - `cd server && npm test` — 51 tests pass (engine 18, POS parser 18, end-to-end 15).
+  - `node scripts/verify-pricing-hub.js` — 79 checks, ALL PASS.
+  - Browser (Chromium, 1360 and 390): console clean on both, no horizontal overflow; financials render P&L cards, NET21 buckets, margin table and cost alerts; invoice intake shows extracted lines with every line in `needs_review`; POS import reports its match rate and warns that unmatched rows make margin a floor; an unreadable export reports the header it saw.
+- Not verified / blockers:
+  - **The POS parser has not been run against a real NRS export** — only against fixtures shaped like one. Confirm the live column names when an export is available.
+  - Migrations and seed are still **not applied to production**; that needs owner approval.
+  - No OCR provider configured, so the OCR leg is still stubbed.
+  - The current catalog carries no UPCs, so POS→product matching will start with a low match rate. This is reported honestly rather than hidden: margin is labelled a floor until items are matched.
+- Security or rollback notes: POS tables follow the same deny-by-default RLS posture (RLS on, zero policies, no anon/authenticated grants). Importing sales requires an identified approver — a shared operator token is refused. Voids and refunds are retained and flagged rather than deleted, preserving the leak-detection record. Rollback is `git revert`; nothing was applied to production.
+- PR/issue/commit: PR #39 (draft), same branch.
+- Next safe action: confirm the NRS export column names against one real file, then apply the three migrations + seed to Supabase in order and run one real invoice and one real POS export end to end.
