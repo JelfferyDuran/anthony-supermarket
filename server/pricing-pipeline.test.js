@@ -36,9 +36,12 @@ function createFakeStore() {
   const history = [];
   const labelBatches = [];
   const objects = new Map();
+  const posBatches = new Map();
+  const posSales = [];
+  const round = value => Math.round(value * 100) / 100;
 
   return {
-    _state: { invoices, linesByInvoice, products, history, labelBatches, objects },
+    _state: { invoices, linesByInvoice, products, history, labelBatches, objects, posBatches, posSales },
 
     seedProduct(product) {
       products.set(product.id, { internal: false, ...product });
@@ -144,6 +147,47 @@ function createFakeStore() {
       invoice.approved_by = approvedBy;
       return { invoice_id: invoiceId, status: 'imported', applied, reconciliation_variance: 0 };
     },
+
+    // ── POS + financials ───────────────────────────────────────────────────
+    async findPosBatchByHash(hash) {
+      return [...posBatches.values()].find(batch => batch.source_sha256 === hash) || null;
+    },
+    async createPosBatch(record) {
+      const batch = { id: crypto.randomUUID(), ...record };
+      posBatches.set(batch.id, batch);
+      return batch;
+    },
+    async insertPosSales(batchId, rows) {
+      for (const row of rows) posSales.push({ ...row, batch_id: batchId });
+      return rows.length;
+    },
+    async listPosBatches() {
+      return [...posBatches.values()];
+    },
+    async pnlSummary(from, to) {
+      const inRange = posSales.filter(row => (!from || row.sold_at >= from) && (!to || row.sold_at <= to));
+      const sold = inRange.filter(row => !row.is_void && !row.is_refund);
+      const gross = round(sold.reduce((sum, row) => sum + row.gross_sales, 0));
+      const cogs = round(sold.reduce((sum, row) => {
+        const product = row.product_id && products.get(row.product_id);
+        return sum + (product ? (product.current_unit_cost || 0) * row.quantity : 0);
+      }, 0));
+      const costed = round(sold.filter(row => row.product_id).reduce((sum, row) => sum + row.gross_sales, 0));
+      return {
+        gross_sales: gross,
+        cost_of_goods: cogs,
+        gross_profit: round(gross - cogs),
+        voids: round(inRange.filter(r => r.is_void).reduce((s, r) => s + Math.abs(r.gross_sales), 0)),
+        refunds: round(inRange.filter(r => r.is_refund).reduce((s, r) => s + Math.abs(r.gross_sales), 0)),
+        costed_revenue_share: gross ? round((costed / gross) * 100) : null,
+        vendor_spend: 0,
+        invoice_count: invoices.size
+      };
+    },
+    async vendorSpend() { return []; },
+    async invoiceAging() { return []; },
+    async marginBy() { return []; },
+    async priceIncreaseAlerts() { return []; },
 
     async listLabelRows(invoiceId) {
       return [...products.values()]
@@ -430,4 +474,149 @@ test('without OCR configured the scan is still stored privately and reported', a
   assert.equal(body.code, 'OCR_NOT_CONFIGURED');
   assert.ok(body.invoice.source_object_path, 'the scan is not lost when OCR is unavailable');
   assert.equal(body.lines.length, 0);
+});
+
+// ── Phase C: POS import and financials ───────────────────────────────────────
+
+const POS_CSV = [
+  'Date,Item Description,UPC,Qty,Unit Price,Line Total,Payment,Cashier,Department',
+  '08/15/2026,Sample Coffee 12/10oz,0074471000500,10,5.99,59.90,CASH,Ana,Tea/Coffee',
+  '08/15/2026,Sample Rice 20/2lb,0012000001260,5,3.99,19.95,VISA,Ana,Rice',
+  '08/15/2026,Unknown Snack,,2,1.50,3.00,CASH,Ana,Snacks',
+  '08/15/2026,Voided Line,,1,4.00,4.00,CASH,Ana,Snacks',
+  'Grand Total,,,,,86.85,,,'
+].join('\n');
+
+function posBody(text, filename = 'nrs_sales_2026-08-15.csv') {
+  const form = new FormData();
+  form.append('sales', new Blob([text], { type: 'text/csv' }), filename);
+  return form;
+}
+
+function seedCatalog(store) {
+  return {
+    coffee: store.seedProduct({ id: crypto.randomUUID(), name: 'Sample Coffee 12/10oz', upc: '0074471000500', department: 'Tea/Coffee', category: 'Tea/Coffee', current_unit_cost: 4.00, current_retail_price: 5.99 }),
+    rice: store.seedProduct({ id: crypto.randomUUID(), name: 'Sample Rice 20/2lb', upc: '0012000001260', department: 'Rice', category: 'Rice', current_unit_cost: 2.00, current_retail_price: 3.99 })
+  };
+}
+
+test('POS import parses, matches products, and reports what it could not match', async t => {
+  const store = createFakeStore();
+  seedCatalog(store);
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/pos/import`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${MANAGER_JWT}` },
+    body: posBody(POS_CSV)
+  });
+  assert.equal(response.status, 200);
+  const body = await response.json();
+
+  // 59.90 + 19.95 + 3.00 + 4.00; the Grand Total footer row is skipped, not summed.
+  assert.equal(body.summary.gross_sales, 86.85);
+  assert.equal(body.matched, 2, 'the two catalog items matched on UPC');
+  assert.equal(body.unmatched, 2, 'the unknown snack and voided line stay unmatched');
+  assert.equal(body.batch.period_start, '2026-08-15');
+  assert.equal(store._state.posSales.length, 4);
+  // The report footer must not have become a sale.
+  assert.ok(!store._state.posSales.some(row => /grand total/i.test(row.item_name)));
+});
+
+test('re-uploading the same POS export does not double-count a day of sales', async t => {
+  const store = createFakeStore();
+  seedCatalog(store);
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const first = await fetch(`${base}/pos/import`, { method: 'POST', headers: { Authorization: `Bearer ${MANAGER_JWT}` }, body: posBody(POS_CSV) });
+  assert.equal(first.status, 200);
+  const rowsAfterFirst = store._state.posSales.length;
+
+  const second = await fetch(`${base}/pos/import`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${MANAGER_JWT}` },
+    body: posBody(POS_CSV, 'manually-dropped-copy.csv')
+  });
+  const body = await second.json();
+  assert.equal(body.duplicate, true);
+  assert.equal(store._state.posSales.length, rowsAfterFirst, 'no rows were added twice');
+  assert.equal(store._state.posBatches.size, 1);
+});
+
+test('an unreadable POS export is rejected with the header it saw', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/pos/import`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${MANAGER_JWT}` },
+    body: posBody('alpha,beta,gamma\n1,2,3', 'weird.csv')
+  });
+  assert.equal(response.status, 422);
+  const body = await response.json();
+  assert.equal(body.code, 'POS_FORMAT_UNRECOGNIZED');
+  assert.match(body.error, /alpha, beta, gamma/);
+  assert.equal(store._state.posSales.length, 0, 'nothing was imported from a file we could not read');
+});
+
+test('importing POS sales requires an identified approver, not a shared token', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/pos/import`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${MANAGER_TOKEN}` },
+    body: posBody(POS_CSV)
+  });
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).code, 'APPROVER_IDENTITY_REQUIRED');
+});
+
+test('financials report margin and flag how much revenue actually has a known cost', async t => {
+  const store = createFakeStore();
+  seedCatalog(store);
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  await fetch(`${base}/pos/import`, { method: 'POST', headers: { Authorization: `Bearer ${MANAGER_JWT}` }, body: posBody(POS_CSV) });
+
+  const response = await fetch(`${base}/financials?from=2026-08-01&to=2026-08-31`, {
+    headers: { Authorization: `Bearer ${MANAGER_JWT}` }
+  });
+  assert.equal(response.status, 200);
+  const { summary, period } = await response.json();
+
+  assert.deepEqual(period, { from: '2026-08-01', to: '2026-08-31' });
+  // 59.90 + 19.95 + 3.00 + 4.00 = 86.85 (the void is not flagged in this export,
+  // so every line counts as sold).
+  assert.equal(summary.gross_sales, 86.85);
+  // Coffee 10 x $4.00 + rice 5 x $2.00 = $50.00.
+  assert.equal(summary.cost_of_goods, 50.00);
+  assert.equal(summary.gross_profit, 36.85);
+  // 79.85 of 86.85 has a known cost.
+  assert.equal(summary.costed_revenue_share, 91.94);
+});
+
+test('a malformed date filter narrows nothing instead of erroring', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/financials?from=not-a-date`, { headers: { Authorization: `Bearer ${MANAGER_JWT}` } });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).period.from, null);
+});
+
+test('financials are not readable without a manager identity', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  assert.equal((await fetch(`${base}/financials`)).status, 401);
+  assert.equal((await fetch(`${base}/financials`, { headers: { Authorization: `Bearer ${CASHIER_JWT}` } })).status, 401);
+  assert.equal((await fetch(`${base}/pos/batches`, { headers: { 'x-pricing-agent-key': AGENT_KEY } })).status, 401);
 });

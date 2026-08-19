@@ -118,6 +118,15 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 - **PR #32 is superseded, not merged** — it was 16 commits stale and would have wiped the 157-item catalog and corrupted `server/index.js`. See `brain/Decisions/2026-08-19-pricing-hub-v2-supabase-cutover.md`.
 - Verification: `node scripts/test-pricing-migrations.js` applies both migrations to a throwaway PostgreSQL instance and asserts the SQL guarantees; `node --test server/pricing-engine.test.js server/pricing-pipeline.test.js` covers the math and a full end-to-end run.
 
+## POS sales + financials (Phase C)
+- Migration `supabase/migrations/20260819230000_add_pos_sales_and_financials.sql`: `pos_import_batches` (SHA-256 idempotent per file), `pos_sales` (voids/refunds retained and flagged, never deleted), `payment_terms_days`/`paid_at` on invoices (NET21 default), and reporting functions `pricing_cost_at`, `pricing_vendor_spend`, `pricing_invoice_aging`, `pricing_margin_by`, `pricing_pnl_summary`, `pricing_increase_alerts`. Same deny-by-default RLS posture. **Not applied to production.**
+- Parser: `server/pos-import.js`. NRS has no public API — CSV download only. Column aliases and conventions mirror `nrs/nrs-analyze.py` so the dashboard and the daily Telegram briefing agree about what a row means. A file whose columns cannot be resolved is rejected with the header it saw; undated rows are skipped rather than back-filled.
+- Endpoints: `POST /api/pricing/pos/import` (approver identity required), `GET /api/pricing/pos/batches`, `GET /api/pricing/financials` (one call assembles the whole dashboard for a single period).
+- **COGS is valued at the cost in effect on the sale date**, not today's cost, resolved through the immutable price history.
+- **`costed_revenue_share`**: revenue whose POS row never matched a product contributes sales but no cost. The hub reports that share next to every margin figure and labels the profit a *floor* — a margin over a partly unmatched catalog is not a fact. Today's catalog carries no UPCs, so expect a low match rate until UPCs are captured.
+- Hub tabs added: **Invoice Intake** (upload scan → extracted lines shown for review, nothing approves itself) and **Financials** (P&L cards, NET21 aging buckets, margin by item/category/vendor, vendor spend by month, cost-increase alerts).
+- Not yet run against a real NRS export — the parser is exercised against fixtures shaped like the store's files. Confirm the column names on a live export when one is available.
+
 ## Phase 2 roadmap
 - #17: Merchant Operations Platform epic
 - #18: Kitchen Dashboard MVP

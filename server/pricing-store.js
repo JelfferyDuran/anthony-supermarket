@@ -181,6 +181,64 @@ function createPricingStore(client = getClient()) {
       return Array.isArray(rows) ? rows[0] : rows;
     },
 
+    // ── POS sales import ───────────────────────────────────────────────────
+    async findPosBatchByHash(hash) {
+      const rows = unwrap(
+        await client.from('pos_import_batches').select('*').eq('source_sha256', hash).limit(1),
+        'POS batch lookup'
+      );
+      return rows[0] || null;
+    },
+
+    async createPosBatch(record) {
+      const rows = unwrap(await client.from('pos_import_batches').insert(record).select(), 'POS batch insert');
+      return rows[0];
+    },
+
+    async insertPosSales(batchId, rows) {
+      if (!rows.length) return 0;
+      // Chunked so a large monthly export does not exceed the request limit.
+      for (let i = 0; i < rows.length; i += 500) {
+        unwrap(
+          await client.from('pos_sales').insert(rows.slice(i, i + 500).map(row => ({ ...row, batch_id: batchId }))),
+          'POS sales insert'
+        );
+      }
+      return rows.length;
+    },
+
+    async listPosBatches(limit = 50) {
+      return unwrap(
+        await client.from('pos_import_batches').select('*').order('created_at', { ascending: false }).limit(limit),
+        'POS batch listing'
+      );
+    },
+
+    // ── Financial reporting ────────────────────────────────────────────────
+    async vendorSpend(from, to) {
+      return unwrap(await client.rpc('pricing_vendor_spend', { p_from: from || null, p_to: to || null }), 'vendor spend');
+    },
+
+    async invoiceAging(asOf) {
+      return unwrap(await client.rpc('pricing_invoice_aging', { p_as_of: asOf || null }), 'invoice aging');
+    },
+
+    async marginBy(dimension, from, to) {
+      return unwrap(
+        await client.rpc('pricing_margin_by', { p_dimension: dimension, p_from: from || null, p_to: to || null }),
+        'margin report'
+      );
+    },
+
+    async pnlSummary(from, to) {
+      const data = unwrap(await client.rpc('pricing_pnl_summary', { p_from: from || null, p_to: to || null }), 'P&L summary');
+      return Array.isArray(data) ? data[0] : data;
+    },
+
+    async priceIncreaseAlerts(sinceDays) {
+      return unwrap(await client.rpc('pricing_increase_alerts', { p_since_days: sinceDays }), 'price increase alerts');
+    },
+
     async listLabelRows(invoiceId) {
       return unwrap(
         await client.rpc('pricing_label_rows', { p_invoice_id: invoiceId || null }),

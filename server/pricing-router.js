@@ -29,8 +29,11 @@ const {
   unitCostFromCase
 } = require('./pricing-engine');
 const { createPricingStore, isConfigured, sha256 } = require('./pricing-store');
+const { matchProducts, parsePosCsv } = require('./pos-import');
 
 const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+const POS_TYPES = new Set(['text/csv', 'application/vnd.ms-excel', 'text/plain', 'application/csv', 'application/octet-stream']);
+const MAX_POS_BYTES = 20 * 1024 * 1024;
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const MANAGER_ROLES = new Set(['manager', 'admin']);
 
@@ -38,6 +41,16 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
   fileFilter: (_req, file, callback) => callback(null, ALLOWED_TYPES.has(file.mimetype))
+});
+
+// POS exports are plain CSV. Browsers and OSes label them inconsistently, so the
+// type check is permissive and the parser is the real gate: a file it cannot
+// understand is rejected with the header it saw.
+const posUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_POS_BYTES, files: 1 },
+  fileFilter: (_req, file, callback) =>
+    callback(null, POS_TYPES.has(file.mimetype) || /\.csv$/i.test(file.originalname || ''))
 });
 
 function timingSafeEqualText(left, right) {
@@ -365,6 +378,102 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // ── POS sales import ───────────────────────────────────────────────────────
+  // NRS exports CSV only, so sales arrive as periodic uploads. The batch hash
+  // makes a re-upload of the same export a no-op instead of double-counting a
+  // day's sales — which matters because the daily fetch job and a manual drop
+  // can both deliver the same file.
+  router.post('/pos/import', limitWrites, authorize('approver'), posUpload.single('sales'), async (req, res) => {
+    if (!requireStore(res)) return;
+    if (!req.file) return res.status(400).json({ error: 'A POS sales CSV export is required' });
+
+    try {
+      const hash = sha256(req.file.buffer);
+      const existing = await store.findPosBatchByHash(hash);
+      if (existing) {
+        return res.json({ batch: existing, duplicate: true });
+      }
+
+      let parsed;
+      try {
+        parsed = parsePosCsv(req.file.buffer.toString('utf8'), { fallbackDate: req.body.sale_date || null });
+      } catch (error) {
+        // A format the parser cannot read must not become revenue. Report what
+        // it saw so a changed NRS export is diagnosable rather than mysterious.
+        return res.status(422).json({ error: error.message, code: 'POS_FORMAT_UNRECOGNIZED' });
+      }
+
+      if (!parsed.rows.length) {
+        return res.status(422).json({
+          error: 'No sales rows could be read from this export',
+          code: 'POS_NO_ROWS',
+          skipped: parsed.skipped.slice(0, 20),
+          summary: parsed.summary
+        });
+      }
+
+      const products = await store.listProducts();
+      const match = matchProducts(parsed.rows, products);
+
+      const batch = await store.createPosBatch({
+        filename: req.file.originalname || null,
+        source_sha256: hash,
+        period_start: parsed.summary.period_start,
+        period_end: parsed.summary.period_end,
+        row_count: parsed.summary.row_count,
+        imported_count: parsed.rows.length,
+        matched_count: match.matched,
+        gross_sales: parsed.summary.gross_sales,
+        void_total: parsed.summary.void_total,
+        refund_total: parsed.summary.refund_total,
+        imported_by: req.pricingIdentity.userId
+      });
+      await store.insertPosSales(batch.id, parsed.rows);
+
+      return res.json({
+        batch,
+        summary: parsed.summary,
+        matched: match.matched,
+        unmatched: match.unmatched,
+        skipped: parsed.skipped.slice(0, 20)
+      });
+    } catch (error) {
+      return fail(res, error, 'POS import');
+    }
+  });
+
+  router.get('/pos/batches', authorize('manager'), async (_req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      return res.json({ batches: await store.listPosBatches() });
+    } catch (error) {
+      return fail(res, error, 'POS batch listing');
+    }
+  });
+
+  // ── Financials ─────────────────────────────────────────────────────────────
+  // One call assembles the dashboard so the browser makes a single request and
+  // every panel describes the same period.
+  router.get('/financials', authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    const from = normalizeDate(req.query.from);
+    const to = normalizeDate(req.query.to);
+    const dimension = ['item', 'category', 'vendor'].includes(req.query.dimension) ? req.query.dimension : 'category';
+
+    try {
+      const [summary, vendorSpend, aging, margin, alerts] = await Promise.all([
+        store.pnlSummary(from, to),
+        store.vendorSpend(from, to),
+        store.invoiceAging(null),
+        store.marginBy(dimension, from, to),
+        store.priceIncreaseAlerts(Number(req.query.alertDays) || 90)
+      ]);
+      return res.json({ period: { from, to }, dimension, summary, vendorSpend, aging, margin, alerts });
+    } catch (error) {
+      return fail(res, error, 'financial report');
+    }
+  });
+
   // ── Legacy path kept for the existing Hermes integration ───────────────────
   router.post('/invoices/extract', limitWrites, authorize('manager'), upload.single('invoice'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'A supported PDF or image invoice is required' });
@@ -395,6 +504,13 @@ function createPricingRouter(options = {}) {
   });
 
   return router;
+}
+
+// Accepts only an ISO date from a query string; anything else becomes null so a
+// malformed parameter narrows nothing rather than erroring deep in SQL.
+function normalizeDate(value) {
+  const text = String(value == null ? '' : value).trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
 }
 
 // Quotes a CSV cell only when it needs it, so the price-gun importer sees clean

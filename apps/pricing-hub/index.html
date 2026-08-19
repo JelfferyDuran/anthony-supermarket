@@ -229,6 +229,8 @@ tbody tr.row{cursor:pointer}
     <button class="tab" role="tab" id="tab-catalog"  aria-controls="panel-catalog"  aria-selected="true">Catalog</button>
     <button class="tab" role="tab" id="tab-queue"    aria-controls="panel-queue"    aria-selected="false">Approval Queue<span class="badge" id="queueBadge" hidden>0</span></button>
     <button class="tab" role="tab" id="tab-variance" aria-controls="panel-variance" aria-selected="false">Price Changes<span class="badge" id="varianceBadge" hidden>0</span></button>
+    <button class="tab" role="tab" id="tab-intake"   aria-controls="panel-intake"   aria-selected="false">Invoice Intake</button>
+    <button class="tab" role="tab" id="tab-financials" aria-controls="panel-financials" aria-selected="false">Financials</button>
     <button class="tab" role="tab" id="tab-export"   aria-controls="panel-export"   aria-selected="false">Export</button>
   </nav>
 
@@ -309,6 +311,79 @@ tbody tr.row{cursor:pointer}
       Costs are compared per unit, so a pack-size change shows up here too.
     </div>
     <div id="varianceList"></div>
+  </section>
+
+  <!-- ── Invoice intake ───────────────────────────────────────────────── -->
+  <section class="panel" id="panel-intake" role="tabpanel" aria-labelledby="tab-intake" hidden>
+    <div class="note">
+      Scan or photograph the invoice, upload it, then check every line against the source before approving.
+      Nothing here changes a shelf price until you approve it, and an invoice will not approve while any line
+      is unmatched or the totals are more than a cent apart.
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">Upload an invoice</span><span class="qmeta" id="intakeAccepts"></span></div>
+      <div class="ctrl-row">
+        <div class="field grow">
+          <label for="invoiceFile">Invoice scan (PDF or photo)</label>
+          <input type="file" id="invoiceFile" accept=".pdf,.jpg,.jpeg,.png,.webp">
+        </div>
+        <div class="field">
+          <label for="invoiceNumberInput">Invoice number</label>
+          <input type="text" id="invoiceNumberInput" placeholder="optional" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="invoiceDateInput">Invoice date</label>
+          <input type="text" id="invoiceDateInput" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <button class="btn primary" id="uploadInvoiceBtn" type="button">Upload</button>
+      </div>
+      <div id="intakeStatus" class="qmeta" style="margin-top:10px"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">POS sales import</span><span class="qmeta">NRS exports CSV only</span></div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0 0 12px">
+        Upload the sales CSV from the NRS merchant portal. Re-uploading the same export is safe — it is
+        recognised by content and will not double-count a day.
+      </p>
+      <div class="ctrl-row">
+        <div class="field grow">
+          <label for="posFile">NRS sales export (CSV)</label>
+          <input type="file" id="posFile" accept=".csv,text/csv">
+        </div>
+        <button class="btn primary" id="uploadPosBtn" type="button">Import sales</button>
+      </div>
+      <div id="posStatus" class="qmeta" style="margin-top:10px"></div>
+    </div>
+
+    <div id="intakeResult"></div>
+  </section>
+
+  <!-- ── Financials ───────────────────────────────────────────────────── -->
+  <section class="panel" id="panel-financials" role="tabpanel" aria-labelledby="tab-financials" hidden>
+    <div class="controls">
+      <div class="ctrl-row">
+        <div class="field">
+          <label for="finFrom">From</label>
+          <input type="text" id="finFrom" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="finTo">To</label>
+          <input type="text" id="finTo" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="finDimension">Break down by</label>
+          <select id="finDimension">
+            <option value="category">Category</option>
+            <option value="item">Item</option>
+            <option value="vendor">Vendor</option>
+          </select>
+        </div>
+        <button class="btn primary" id="finRefreshBtn" type="button">Refresh</button>
+      </div>
+    </div>
+    <div id="financialsBody"></div>
   </section>
 
   <!-- ── Export ───────────────────────────────────────────────────────── -->
@@ -799,6 +874,25 @@ function render(){
   renderQueue();
   renderVariance();
   renderExportCounts();
+  renderIntakeAvailability();
+  renderFinancials();
+}
+
+function renderIntakeAvailability(){
+  const accepts = $('intakeAccepts');
+  if(accepts) accepts.textContent = 'PDF, JPEG, PNG or WebP · up to 10 MB';
+
+  // Uploading needs a live connection and a signed-in manager. Disable rather
+  // than let the owner fill in a form that cannot submit.
+  const live = server.status==='live';
+  for(const id of ['uploadInvoiceBtn','uploadPosBtn']){
+    const button = $(id);
+    if(button) button.disabled = !live;
+  }
+  const status = $('intakeStatus');
+  if(status && !live && !status.dataset.sticky){
+    status.textContent = 'Connect to the pricing database and sign in as a manager to upload invoices.';
+  }
 }
 
 function renderMasthead(){
@@ -1057,6 +1151,276 @@ function renderExportCounts(){
   if(csv) csv.textContent = rows.length+' row'+(rows.length===1?'':'s');
 }
 
+// ════════ INVOICE INTAKE ════════
+// Multipart uploads bypass the JSON api() helper, which sets a Content-Type that
+// would break the form boundary.
+async function upload(path, formData){
+  const response = await fetch(API_BASE+path, { method:'POST', credentials:'same-origin', body: formData });
+  let body = null;
+  try { body = await response.json(); } catch(_){ /* non-JSON error page */ }
+  if(!response.ok){
+    const error = new Error((body && body.error) || ('HTTP '+response.status));
+    error.status = response.status; error.body = body; throw error;
+  }
+  return body;
+}
+
+function requireLive(what){
+  if(server.status==='live') return true;
+  showToast(what+' needs a connection to the pricing database.');
+  return false;
+}
+
+async function uploadInvoice(){
+  if(!requireLive('Invoice upload')) return;
+  const input = $('invoiceFile');
+  const file = input.files && input.files[0];
+  if(!file){ showToast('Choose an invoice scan first.'); return; }
+
+  const button = $('uploadInvoiceBtn');
+  button.disabled = true;
+  $('intakeStatus').textContent = 'Uploading and extracting…';
+
+  const form = new FormData();
+  form.append('invoice', file);
+  const number = $('invoiceNumberInput').value.trim();
+  const date = $('invoiceDateInput').value.trim();
+  if(number) form.append('invoice_number', number);
+  if(date) form.append('invoice_date', date);
+
+  try{
+    const result = await upload('/invoices', form);
+    if(result.duplicate){
+      $('intakeStatus').textContent = 'This exact scan was already uploaded — showing the existing invoice.';
+    }else if(result.code==='OCR_NOT_CONFIGURED'){
+      $('intakeStatus').textContent = 'Stored privately, but OCR is not configured so no lines were read.';
+    }else{
+      $('intakeStatus').textContent = 'Extracted '+(result.lines||[]).length+' line(s). Review every one before approving.';
+    }
+    renderIntakeResult(result);
+    await loadServerData();
+  }catch(error){
+    $('intakeStatus').textContent = 'Upload failed: '+error.message;
+  }finally{
+    button.disabled = false;
+  }
+}
+
+function renderIntakeResult(result){
+  const host = $('intakeResult');
+  if(!host) return;
+  const lines = result.lines || [];
+  if(!lines.length){ host.innerHTML = ''; return; }
+
+  const rec = result.reconciliation;
+  const recNote = rec
+    ? '<div class="qmeta">Invoice subtotal '+fmt(rec.invoice_subtotal)+' · lines '+fmt(rec.extracted_line_sum)
+      + ' · variance '+fmt(rec.variance)+(rec.within_tolerance?'':' — outside the $0.01 tolerance')+'</div>'
+    : '';
+
+  host.innerHTML = '<div class="qcard">'
+    + '<div class="qhead"><span class="qtitle">Extracted lines</span>'
+    +   '<span class="qmeta">'+esc(result.invoice && result.invoice.invoice_number || 'unnumbered')+'</span></div>'
+    + recNote
+    + '<div class="table-scroll" style="margin-top:12px"><table><thead><tr>'
+    +   '<th>#</th><th>Description</th><th class="num">Cases</th><th class="num">Units</th>'
+    +   '<th class="num">Line total</th><th class="num">Cost / unit</th><th class="num">Proposed</th><th>Status</th>'
+    + '</tr></thead><tbody>'
+    + lines.map(line =>
+        '<tr><td class="money">'+esc(line.line_number)+'</td>'
+        + '<td>'+esc(line.extracted_description||'—')
+        +   (line.review_reason?'<div class="isub" style="color:var(--red)">'+esc(line.review_reason)+'</div>':'')+'</td>'
+        + '<td class="num money">'+esc(line.case_quantity==null?'—':line.case_quantity)+'</td>'
+        + '<td class="num money">'+esc(line.units_per_case==null?'—':line.units_per_case)+'</td>'
+        + '<td class="num money">'+(line.line_total==null?'—':fmt(line.line_total))+'</td>'
+        + '<td class="num money">'+(line.calculated_unit_cost==null?'—':fmt(line.calculated_unit_cost))+'</td>'
+        + '<td class="num money">'+(line.proposed_retail_price==null?'—':fmt(line.proposed_retail_price))+'</td>'
+        + '<td><span class="pill '+(line.review_status==='needs_review'?'flag':'custom')+'">'+esc(line.review_status||'—')+'</span></td></tr>'
+      ).join('')
+    + '</tbody></table></div>'
+    + '<p style="font-size:12.5px;color:var(--ink-3);margin:12px 0 0">'
+    +   'Matching each line to a product and approving the invoice is done by a manager against the source scan. '
+    +   'An invoice cannot be approved while any line is unmatched.'
+    + '</p></div>';
+}
+
+async function uploadPos(){
+  if(!requireLive('Sales import')) return;
+  const input = $('posFile');
+  const file = input.files && input.files[0];
+  if(!file){ showToast('Choose an NRS sales CSV first.'); return; }
+
+  const button = $('uploadPosBtn');
+  button.disabled = true;
+  $('posStatus').textContent = 'Importing sales…';
+
+  const form = new FormData();
+  form.append('sales', file);
+  try{
+    const result = await upload('/pos/import', form);
+    if(result.duplicate){
+      $('posStatus').textContent = 'Already imported — this exact export is on file, so nothing was counted twice.';
+    }else{
+      const s = result.summary;
+      $('posStatus').textContent =
+        'Imported '+s.imported_count+' row(s) covering '+(s.period_start||'?')+' to '+(s.period_end||'?')
+        + ' · gross '+fmt(s.gross_sales)
+        + ' · matched '+result.matched+' of '+(result.matched+result.unmatched)+' to catalog products'
+        + (s.void_total?(' · voids '+fmt(s.void_total)):'')
+        + (s.refund_total?(' · refunds '+fmt(s.refund_total)):'')
+        + (result.unmatched?' — unmatched rows contribute revenue but no cost, so margin is a floor until they are matched.':'');
+    }
+    showToast('Sales import finished');
+  }catch(error){
+    $('posStatus').textContent = error.body && error.body.code==='POS_FORMAT_UNRECOGNIZED'
+      ? 'Could not read this export: '+error.message
+      : 'Import failed: '+error.message;
+  }finally{
+    button.disabled = false;
+  }
+}
+
+// ════════ FINANCIALS ════════
+let financials = null;
+
+async function loadFinancials(){
+  if(server.status!=='live'){ renderFinancials(); return; }
+  const params = new URLSearchParams();
+  const from = $('finFrom').value.trim(), to = $('finTo').value.trim();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  params.set('dimension', $('finDimension').value);
+  $('financialsBody').innerHTML = '<div class="empty"><div class="big">Loading…</div></div>';
+  try{
+    financials = await api('/financials?'+params.toString());
+  }catch(error){
+    financials = { error: error.message };
+  }
+  renderFinancials();
+}
+
+function renderFinancials(){
+  const host = $('financialsBody');
+  if(!host) return;
+
+  if(server.status!=='live'){
+    host.innerHTML = '<div class="empty"><div class="big">Not connected</div>'
+      + '<div>Financials are computed from invoices and POS sales in the pricing database.</div></div>';
+    return;
+  }
+  if(!financials){ host.innerHTML = '<div class="empty"><div class="big">Choose a period and refresh</div></div>'; return; }
+  if(financials.error){
+    host.innerHTML = '<div class="empty"><div class="big">Could not load financials</div><div>'+esc(financials.error)+'</div></div>';
+    return;
+  }
+
+  const s = financials.summary || {};
+  const num = value => Number(value||0);
+  const card = (label, value, sub, tone) =>
+    '<div class="stat"><div class="slabel">'+esc(label)+'</div>'
+    + '<div class="sval'+(tone?' '+tone:'')+'">'+esc(value)+'</div>'
+    + '<div class="ssub">'+esc(sub)+'</div></div>';
+
+  const profit = num(s.gross_profit);
+  const margin = num(s.gross_sales) ? (profit/num(s.gross_sales))*100 : 0;
+  const costedShare = s.costed_revenue_share==null ? null : num(s.costed_revenue_share);
+
+  let html = '<div class="stats">'
+    + card('Gross sales', fmt(num(s.gross_sales)), 'Excludes voids and refunds', 'b')
+    + card('Cost of goods', fmt(num(s.cost_of_goods)), 'Valued at the cost on the sale date')
+    + card('Gross profit', fmt(profit), 'Sales less cost', profit>=0?'g':'r')
+    + card('Gross margin', margin.toFixed(1)+'%', 'Of gross sales', margin>=0?'g':'r')
+    + card('Vendor spend', fmt(num(s.vendor_spend)), num(s.invoice_count)+' invoice(s) this period')
+    + card('Voids + refunds', fmt(num(s.voids)+num(s.refunds)), fmt(num(s.voids))+' voided · '+fmt(num(s.refunds))+' refunded',
+        (num(s.voids)+num(s.refunds))>0?'r':'')
+    + '</div>';
+
+  // A margin computed over a partly unmatched catalog is a floor, not a fact.
+  // Say so where the owner reads the number, not in a footnote.
+  if(costedShare!==null && costedShare < 99){
+    html += '<div class="note" style="border-left-color:var(--red)">'
+      + 'Only <b>'+costedShare.toFixed(1)+'%</b> of revenue is matched to a product with a known cost. '
+      + 'Unmatched sales contribute revenue but no cost, so the profit and margin above are a <b>floor</b> — '
+      + 'the real margin is lower until those items are matched.</div>';
+  }
+
+  const aging = financials.aging || [];
+  if(aging.length){
+    const buckets = {};
+    for(const row of aging){ buckets[row.bucket] = (buckets[row.bucket]||0) + Number(row.amount||0); }
+    const labels = { not_due:'Not yet due', due_today:'Due today', overdue_1_7:'1–7 days late',
+                     overdue_8_14:'8–14 days late', overdue_15_30:'15–30 days late', overdue_30_plus:'Over 30 days late' };
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Vendor payables (NET21)</span>'
+      + '<span class="qmeta">'+aging.length+' unpaid invoice(s)</span></div>'
+      + '<div class="chips" style="margin-bottom:12px">'
+      + Object.keys(labels).filter(key=>buckets[key]).map(key=>
+          '<span class="pill '+(key==='not_due'||key==='due_today'?'cat':'flag')+'">'
+          + esc(labels[key])+' · '+fmt(buckets[key])+'</span>').join('')
+      + '</div>'
+      + '<div class="table-scroll"><table><thead><tr><th>Vendor</th><th>Invoice</th><th>Due</th>'
+      + '<th class="num">Amount</th><th class="num">Days late</th></tr></thead><tbody>'
+      + aging.slice(0,40).map(row=>
+          '<tr><td>'+esc(row.vendor_name||'—')+'</td><td class="money">'+esc(row.invoice_number||'—')+'</td>'
+          + '<td class="money">'+esc(row.due_date||'—')+'</td>'
+          + '<td class="num money">'+fmt(row.amount)+'</td>'
+          + '<td class="num money'+(row.days_overdue>0?' r':' g')+'">'
+          +   (row.days_overdue>0?row.days_overdue:'—')+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const margins = financials.margin || [];
+  if(margins.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Margin by '+esc(financials.dimension)+'</span>'
+      + '<span class="qmeta">'+margins.length+' row(s)</span></div>'
+      + '<div class="table-scroll"><table><thead><tr><th>'+esc(financials.dimension)+'</th>'
+      + '<th class="num">Units</th><th class="num">Revenue</th><th class="num">Cost</th>'
+      + '<th class="num">Profit</th><th class="num">Margin</th><th class="num">Uncosted</th>'
+      + '</tr></thead><tbody>'
+      + margins.slice(0,60).map(row=>
+          '<tr><td>'+esc(row.label)+'</td>'
+          + '<td class="num money">'+Number(row.units_sold||0).toFixed(0)+'</td>'
+          + '<td class="num money">'+fmt(row.revenue)+'</td>'
+          + '<td class="num money">'+fmt(row.cost_of_goods)+'</td>'
+          + '<td class="num money'+(Number(row.gross_profit)>=0?' g':' r')+'">'+fmt(row.gross_profit)+'</td>'
+          + '<td class="num money">'+(row.margin_pct==null?'—':Number(row.margin_pct).toFixed(1)+'%')+'</td>'
+          + '<td class="num money'+(Number(row.unmatched_revenue)>0?' r':'')+'">'
+          +   (Number(row.unmatched_revenue)>0?fmt(row.unmatched_revenue):'—')+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const spend = financials.vendorSpend || [];
+  if(spend.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Vendor spend by month</span></div>'
+      + '<div class="table-scroll"><table><thead><tr><th>Month</th><th>Vendor</th>'
+      + '<th class="num">Invoices</th><th class="num">Spend</th></tr></thead><tbody>'
+      + spend.slice(0,40).map(row=>
+          '<tr><td class="money">'+esc(String(row.month||'').slice(0,7))+'</td>'
+          + '<td>'+esc(row.vendor_name||'—')+'</td>'
+          + '<td class="num money">'+esc(row.invoice_count)+'</td>'
+          + '<td class="num money">'+fmt(row.total_spend)+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const alerts = financials.alerts || [];
+  if(alerts.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Cost increases</span>'
+      + '<span class="qmeta">'+alerts.length+' item(s)</span></div>'
+      + alerts.slice(0,25).map(row=>
+          '<div class="qmeta" style="padding:4px 0">'+esc(row.product_name)+' — '
+          + fmt(row.previous_unit_cost)+' → '+fmt(row.new_unit_cost)
+          + ' <span class="pill up">▲ '+fmt(row.delta)
+          + (row.percent_change!=null?(' · +'+Number(row.percent_change).toFixed(1)+'%'):'')+'</span></div>').join('')
+      + '</div>';
+  }
+
+  if(!aging.length && !margins.length && !spend.length && !alerts.length){
+    html += '<div class="empty"><div class="big">No financial data for this period</div>'
+      + '<div>Import a POS sales export and approve an invoice to populate these figures.</div></div>';
+  }
+
+  host.innerHTML = html;
+}
+
 // ════════ EXPORTS ════════
 // Quote only when needed so the price-gun importer sees clean values.
 function csvCell(value){
@@ -1110,6 +1474,10 @@ function selectTab(name){
     const panel = $(tab.getAttribute('aria-controls'));
     if(panel) panel.hidden = !isActive;
   }
+  // Financials are a server round-trip, so they load when the tab is first
+  // opened rather than on every page load.
+  if(name==='financials' && !financials && server.status==='live') loadFinancials();
+  if(name==='financials') renderFinancials();
 }
 
 function bind(){
@@ -1188,6 +1556,11 @@ function bind(){
   $('connRetry').addEventListener('click', connect);
   $('exportLabelsBtn').addEventListener('click', exportLabels);
   $('exportCsvBtn').addEventListener('click', exportCatalog);
+
+  $('uploadInvoiceBtn').addEventListener('click', uploadInvoice);
+  $('uploadPosBtn').addEventListener('click', uploadPos);
+  $('finRefreshBtn').addEventListener('click', loadFinancials);
+  $('finDimension').addEventListener('change', loadFinancials);
 }
 
 // ════════ BOOT ════════
@@ -1196,6 +1569,14 @@ function bind(){
 // owner looking at an empty page.
 function boot(){
   bind();
+  // Default the financials period to the current month so the first look is
+  // useful without anyone typing a date.
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const monthStart = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-01';
+  const monthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  $('finFrom').value = monthStart;
+  $('finTo').value = monthEnd.getFullYear()+'-'+pad(monthEnd.getMonth()+1)+'-'+pad(monthEnd.getDate());
   selectTab('catalog');
   render();
   connect();

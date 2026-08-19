@@ -23,7 +23,8 @@ const MIGRATION_DIR = path.join(REPO_ROOT, 'supabase', 'migrations');
 const TEST_DIR = path.join(REPO_ROOT, 'supabase', 'tests');
 const MIGRATIONS = [
   '20260812013000_add_invoice_pricing_pipeline.sql',
-  '20260819213000_reconcile_pricing_hub_dataset.sql'
+  '20260819213000_reconcile_pricing_hub_dataset.sql',
+  '20260819230000_add_pos_sales_and_financials.sql'
 ];
 
 // Each entry is a negative case: the substring that must appear in psql output
@@ -39,7 +40,26 @@ const REQUIRED_GUARDS = [
   ['exceeds the $0.01 tolerance', 'reconciliation tolerance enforced'],
   ['"status": "imported"', 'clean approval commits'],
   ['"already_imported": true', 'approval is idempotent'],
-  ['duplicate key value violates unique constraint "pricing_products_hub_item_id_key"', 'hub item ids stay unique']
+  ['duplicate key value violates unique constraint "pricing_products_hub_item_id_key"', 'hub item ids stay unique'],
+  // Phase C: POS import and financial reporting.
+  ['duplicate key value violates unique constraint "pos_import_batches_source_sha256_key"', 'POS batch idempotency'],
+  ['violates check constraint "pos_sales_match_method"', 'POS match method stays auditable']
+];
+
+// Financial figures asserted against hand-computed values. Each entry is a
+// regex the psql output must contain.
+const REQUIRED_FIGURES = [
+  [/aug5_expect_2\s*\|\s*aug15_expect_3[\s\S]*?2\.0000\s*\|\s*3\.0000/, 'cost_at resolves the cost in effect on the sale date'],
+  [/INV-AUG\s*\|\s*2026-07-20\s*\|\s*2026-08-10\s*\|\s*600\.00\s*\|\s*9\s*\|\s*overdue_8_14/, 'NET21 aging buckets an invoice 9 days late'],
+  [/Tea\/Coffee\s*\|\s*20\.000\s*\|\s*119\.80\s*\|\s*50\.0+\s*\|\s*69\.80+/, 'COGS valued per-date: 10x$2.00 + 10x$3.00 = $50.00'],
+  [/"gross_sales": 129\.80/, 'P&L gross sales excludes the void'],
+  [/"cost_of_goods": 50\.0+/, 'P&L cost of goods'],
+  [/"gross_profit": 79\.80*/, 'P&L gross profit'],
+  [/"costed_revenue_share": 92\.30/, 'P&L reports what share of revenue has a known cost'],
+  [/"vendor_spend": 0,/, 'P&L scopes vendor spend to the period (August = $0, both invoices are July)'],
+  [/"vendor_spend": 1000\.00/, 'P&L vendor spend over the full range'],
+  [/"invoice_count": 2/, 'P&L invoice count over the full range'],
+  [/void_rows_retained\s*[\s\S]*?\n\s*1/, 'voids are retained rather than deleted']
 ];
 
 function findPgBin(name) {
@@ -92,8 +112,12 @@ function run(command, { allowFailure = false } = {}) {
   return output;
 }
 
-function psqlFile(file, extra = '') {
-  return run(`${psql} -h ${sockDir} -p ${port} -U postgres -q ${extra} -f ${file}`, { allowFailure: true });
+function psqlFile(file, extra = '', database = 'postgres') {
+  return run(`${psql} -h ${sockDir} -p ${port} -U postgres -d ${database} -q ${extra} -f ${file}`, { allowFailure: true });
+}
+
+function createDatabase(name) {
+  run(`${psql} -h ${sockDir} -p ${port} -U postgres -q -c "create database ${name}"`);
 }
 
 let started = false;
@@ -123,10 +147,31 @@ try {
   console.log('PASS | both pricing migrations apply to a clean database');
 
   output = psqlFile(path.join(TEST_DIR, 'pricing_pipeline_test.sql'), `-v migration_dir=${MIGRATION_DIR}`);
+  // The financials suite asserts exact totals, so it gets a clean database of
+  // its own: fixtures from the pipeline suite would otherwise be counted into
+  // vendor spend and quietly change every figure.
+  createDatabase('financials');
+  psqlFile(path.join(TEST_DIR, 'local_harness.sql'), '', 'financials');
+  for (const migration of MIGRATIONS) {
+    psqlFile(path.join(MIGRATION_DIR, migration), '', 'financials');
+  }
+  output += psqlFile(path.join(TEST_DIR, 'financials_test.sql'), '', 'financials');
 
   let failures = 0;
   for (const [needle, label] of REQUIRED_GUARDS) {
     const ok = output.includes(needle);
+    console.log(`${ok ? 'PASS' : 'FAIL'} | ${label}`);
+    if (!ok) failures++;
+  }
+
+  // A paid invoice must not appear in the aging report at all.
+  const agingBlock = (output.match(/--- 4\. NET21 aging[\s\S]*?--- 5\./) || [''])[0];
+  const paidExcluded = agingBlock.length > 0 && !agingBlock.includes('INV-JUL');
+  console.log(`${paidExcluded ? 'PASS' : 'FAIL'} | paid invoices are excluded from aging`);
+  if (!paidExcluded) failures++;
+
+  for (const [pattern, label] of REQUIRED_FIGURES) {
+    const ok = pattern.test(output);
     console.log(`${ok ? 'PASS' : 'FAIL'} | ${label}`);
     if (!ok) failures++;
   }

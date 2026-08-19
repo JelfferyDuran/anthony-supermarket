@@ -96,8 +96,55 @@ reviewer sees a readable list instead of a raw SQL error.
   asserts the SQL guarantees directly: deny-by-default RLS, SHA-256 upload idempotency, immutable history,
   the $0.01 tolerance, and the all-or-nothing approval transaction.
 
+## Phase C — POS sales and financials
+
+### NRS POS import
+
+NRS has no public API (the merchant portal offers CSV download reporting only), so sales arrive as periodic
+file uploads through `POST /api/pricing/pos/import`. Column aliases, numeric coercion, summary-row skipping
+and the void/refund conventions in `server/pos-import.js` deliberately mirror `nrs/nrs-analyze.py`, which
+already processes these exports for the daily Telegram briefing — the two paths must agree about what a row
+means, or the dashboard and the briefing would report different sales for the same day.
+
+- **Idempotent by content.** The batch is keyed on the file's SHA-256, so the daily fetch job and a manual
+  drop of the same export cannot double-count a day.
+- **Never guesses.** A file whose item/total columns cannot be resolved is rejected with the header it
+  actually saw, so a changed NRS export format surfaces as an error rather than as wrong revenue. Undated
+  rows are skipped, not back-filled.
+- **Ambiguous dates.** `15/08/2026` is unambiguously D/M/Y because 15 cannot be a month. When both readings
+  are valid the US convention wins, because NRS is a US POS — that choice is only ever made when either
+  reading would produce a real date.
+- **Voids and refunds are kept, flagged.** They are the store's leak indicators; deleting them would hide
+  exactly what the owner needs to see. They are excluded from revenue, not from the record.
+- **Matching.** A UPC match is evidence (`match_method = 'upc'`); a name match is a convenience
+  (`'name'`). An ambiguous name matches nothing rather than the wrong product. Matching attributes cost to
+  revenue — it never changes a price.
+
+### Financials
+
+`GET /api/pricing/financials` assembles the whole dashboard in one call so every panel describes the same
+period: P&L summary, vendor spend by month, NET21 aging, margin by item/category/vendor, and cost-increase
+alerts.
+
+Two things worth knowing about the arithmetic:
+
+- **COGS is valued at the cost in effect on the sale date**, resolved through `pricing_cost_at()` against the
+  immutable price history. Using today's cost to value a sale from three weeks ago would silently misstate
+  margin every time a vendor moved a price.
+- **`costed_revenue_share` is reported alongside every margin figure.** Revenue whose POS row never matched a
+  product contributes sales but no cost, which inflates margin. The hub shows that share next to the numbers
+  and labels the profit a *floor*, because a margin computed over a partly unmatched catalog is not a fact.
+
+NET21 is the store's standard vendor term, stored per-invoice as `payment_terms_days` so an invoice on other
+terms ages correctly.
+
 ## Next implementation slice
 
 Configure the OCR webhook and the protected Telegram/Hermes secrets in staging, then run the flow against a
-real vendor invoice. After that, Phase C: NRS POS CSV sales import and the financials view. Browser and
-Telegram clients must never receive the Supabase service-role key.
+real vendor invoice and one real NRS export. The POS parser has been exercised against fixtures shaped like
+the store's exports but **not yet against a real NRS file** — confirming the column names on a live export is
+the first thing to do when one is available.
+
+Phase D (catalog API for the customer app, NRS/bank/Telegram integrations, Kingdom OS collector port) remains
+out of scope until A–C have run against real data. Browser and Telegram clients must never receive the
+Supabase service-role key.

@@ -130,10 +130,24 @@ for (const [needle, label] of [
   ['id="exportLabelsBtn"', 'price-gun export present'],
   ['id="exportCsvBtn"', 'CSV export present'],
   ['item_name\',\'upc\',\'price\',\'department', 'price-gun export uses the four documented columns'],
-  ['function renderTimeline', 'price history timeline present']
+  ['function renderTimeline', 'price history timeline present'],
+  // Phase C
+  ['id="panel-intake"', 'invoice intake panel present'],
+  ['id="invoiceFile"', 'invoice scan upload present'],
+  ['id="posFile"', 'NRS POS CSV import present'],
+  ['id="panel-financials"', 'financials panel present'],
+  ['id="finDimension"', 'financials break-down selector present'],
+  ['Vendor payables (NET21)', 'NET21 aging view present'],
+  ['function renderFinancials', 'financials renderer present']
 ]) {
   chk(appHtml.includes(needle), label);
 }
+
+// The margin figures are only as good as the share of revenue matched to a
+// costed product. That caveat has to appear next to the number, not in a
+// footnote, or the owner reads a floor as a fact.
+chk(/costed_revenue_share/.test(appHtml) && /floor/i.test(appHtml),
+  'financials disclose how much revenue actually has a known cost');
 
 // ── Offline fallback ─────────────────────────────────────────────────────────
 // The arrays must render without any network call: the owner never gets a blank

@@ -137,3 +137,25 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: service-role access is confined to `server/pricing-store.js` (server-side); invoice scans go to a private bucket reached only by short-lived signed URLs; RLS is deny-by-default with zero policies on the pricing tables and no anon/authenticated grants; approvals require a real `auth.users` identity, so the shared operator token cannot approve. Rollback is `git revert` — nothing was applied to production.
 - PR/issue/commit: supersedes PR #32; see `brain/Decisions/2026-08-19-pricing-hub-v2-supabase-cutover.md`.
 - Next safe action: owner reviews the four open decisions (markup rule, slider behaviour, iframe strategy, OCR provider), then apply the migration + seed to Supabase in that order and re-run the end-to-end test against one real invoice.
+
+## 2026-08-19 — Claude Code (Pricing Hub V2, Phase C)
+- Goal: complete Phase C of `PRICING_HUB_V2_UPGRADE.md` — staff invoice intake, NRS POS CSV sales import, and the financials dashboard. Phase D remains explicitly out of scope.
+- Changed:
+  - `supabase/migrations/20260819230000_add_pos_sales_and_financials.sql`: `pos_import_batches` + `pos_sales`, NET21 payment terms on invoices, and six reporting functions (`pricing_cost_at`, `pricing_vendor_spend`, `pricing_invoice_aging`, `pricing_margin_by`, `pricing_pnl_summary`, `pricing_increase_alerts`), all SECURITY DEFINER and service-role only.
+  - `server/pos-import.js`: NRS CSV parser whose column aliases, numeric coercion, summary-row skipping and void/refund conventions mirror the existing `nrs/nrs-analyze.py`, so the dashboard and the daily Telegram briefing cannot disagree about a row.
+  - `server/pricing-router.js` + `pricing-store.js`: `POST /pos/import`, `GET /pos/batches`, `GET /financials`.
+  - `apps/pricing-hub/index.html`: Invoice Intake and Financials tabs; root iframe copy synced.
+  - Verifier extended to 79 checks, including one asserting the uncosted-revenue caveat is shown where the margin is read.
+- Verified:
+  - `node scripts/test-pricing-migrations.js` — all three migrations apply to a clean PostgreSQL 16 database; 28 checks pass. The financials suite runs in its own database so its totals are exact rather than polluted by the pipeline suite's fixtures. Asserted by hand-computed value: COGS valued per sale date (10 units at $2.00 + 10 at $3.00 = $50.00), NET21 bucketing of an invoice 9 days late, paid invoices excluded from aging, and P&L gross/COGS/profit/costed-share.
+  - `cd server && npm test` — 51 tests pass (engine 18, POS parser 18, end-to-end 15).
+  - `node scripts/verify-pricing-hub.js` — 79 checks, ALL PASS.
+  - Browser (Chromium, 1360 and 390): console clean on both, no horizontal overflow; financials render P&L cards, NET21 buckets, margin table and cost alerts; invoice intake shows extracted lines with every line in `needs_review`; POS import reports its match rate and warns that unmatched rows make margin a floor; an unreadable export reports the header it saw.
+- Not verified / blockers:
+  - **The POS parser has not been run against a real NRS export** — only against fixtures shaped like one. Confirm the live column names when an export is available.
+  - Migrations and seed are still **not applied to production**; that needs owner approval.
+  - No OCR provider configured, so the OCR leg is still stubbed.
+  - The current catalog carries no UPCs, so POS→product matching will start with a low match rate. This is reported honestly rather than hidden: margin is labelled a floor until items are matched.
+- Security or rollback notes: POS tables follow the same deny-by-default RLS posture (RLS on, zero policies, no anon/authenticated grants). Importing sales requires an identified approver — a shared operator token is refused. Voids and refunds are retained and flagged rather than deleted, preserving the leak-detection record. Rollback is `git revert`; nothing was applied to production.
+- PR/issue/commit: PR #39 (draft), same branch.
+- Next safe action: confirm the NRS export column names against one real file, then apply the three migrations + seed to Supabase in order and run one real invoice and one real POS export end to end.
