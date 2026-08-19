@@ -23,6 +23,30 @@ visibility. It must NOT become the customer ordering surface.
   `docs/INVOICE_PRICING_PIPELINE.md` (from PR #32): the customer app **consumes an approved catalog
   API**; it never calculates or approves retail prices.
 
+## 1b. Owner decisions (answered 2026-08-19 — binding)
+
+1. **Markup rule → 70% (1.70×)** — the vault rule wins. The hub's 65% default becomes **70%** and the
+   server becomes the single authority. ⚠️ **Coordinated switch (do not half-apply):** all 157 stored
+   `retail` snapshots were computed at 65% — the V2 seed must **recompute every retail snapshot at
+   70%** (`.99` rounding), else the "synced override" logic will pin stale 65% prices. The Kingdom OS
+   collector + its write-back endpoint hardcode `1.65` — Hermes flips those to `1.70` in the same
+   change window. The vault 1.70× rule then matches everywhere.
+2. **Iframe strategy → keep the iframe in place.** The site keeps loading the hub where it is today;
+   `apps/pricing-hub/index.html` becomes a thin loader for the v2 bundle (or the bundle replaces the
+   file in place). Root `pricing-hub/index.html` stays a synced copy.
+3. **OCR provider → FREE, upload-the-invoice-here flow.** Primary: **Gemini Flash via Google AI
+   Studio free API key** (`GEMINI_API_KEY`; Gemini 2.5 Flash / 3 Flash, free tier ≈ 15 RPM / 1,500
+   requests/day, image + PDF vision, structured JSON output — enough for a small store's invoice
+   volume). Wired as `PRICING_OCR_WEBHOOK_URL` per PR #32: upload → extract raw text + candidate line
+   items + JSON → `needs_review`. Fallbacks: local **Tesseract/PaddleOCR** (zero cost, no key) and the
+   existing Hermes vision review path. ⚠️ Free tier = Google may use content to improve products —
+   invoices are internal; if that's a problem later, the paid tier is a few $/month (no training use).
+4. **Intake channels → hub UI + Telegram + WhatsApp (per-number allowlists).** The store owner
+   uploads the invoice directly in chat (Kingdom Hermes bot on Telegram, and the WhatsApp bridge —
+   "other numbers" = other chat IDs get allowlisted per channel). PR #32's Telegram allowlist commands
+   extend to a multi-channel intake: any channel sends the scan → same OCR → same `needs_review` queue.
+   Hub UI remains the staff approval surface.
+
 ## 2. Current verified state (2026-08-19, main @ `3058c09`)
 
 - **Pricing Hub app:** `apps/pricing-hub/index.html` — single-file, ALL data embedded as JS arrays
@@ -142,10 +166,12 @@ layer instead of the file. Do not start D until A–C ship.
 
 ## 7. Open decisions for the owner (call these out in the PR)
 
-1. Iframe strategy: thin-loader in place vs repoint the site iframe to a new URL.
-2. Unified markup rule: keep 65% (hub) / 70% (vault) or pick ONE server-authoritative rule.
-3. OCR provider choice + cost ceiling for invoice scans (webhook-based per PR #32).
-4. Whether invoice intake happens only from the hub UI, or also via Telegram/email intake later.
+All four were **answered 2026-08-19** (see §1b): 70% markup · keep iframe · Gemini free-tier OCR ·
+hub UI + Telegram + WhatsApp intake. Remaining micro-decisions for the builder:
+1. Gemini model choice for extraction (2.5 Flash vs 3 Flash) + JSON schema for invoice lines.
+2. Whether OCR runs on every upload or only on images the UI marks "needs OCR" (cost/rate saving).
+3. WhatsApp intake mechanics: forward-to-bot vs direct chat allowlist (depends on the bridge's
+   capabilities — coordinate with Hermes).
 
 ## 8. Acceptance criteria (phase exits)
 
