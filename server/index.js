@@ -8,6 +8,8 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
 const kitchenAide = require('./kitchen-aide');
+const { createPricingRouter } = require('./pricing-router');
+const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -21,6 +23,13 @@ const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
+// Chats allowed to use the pricing calculator commands. Everything else gets no
+// pricing response at all — not an error, which would confirm the feature exists.
+const PRICING_TELEGRAM_CHAT_IDS = new Set(
+  [process.env.HERMES_CHAT_ID, ...(process.env.PRICING_TELEGRAM_CHAT_IDS || '').split(',')]
+    .map(value => String(value || '').trim())
+    .filter(Boolean)
+);
 
 // Supabase client
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -187,6 +196,7 @@ flattenMenu();
 const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json());
+app.use('/api/pricing', createPricingRouter());
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -704,9 +714,43 @@ function startBot() {
         `/checkout — Place order\n` +
         `/clear — Clear cart\n` +
         `/hours — Store hours & contact\n` +
-        `/help — This message`,
+        `/help — This message` +
+        (PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))
+          ? `\n\n*Authorized pricing:*\n/price <unit-cost>\n/caseprice <line-total> <cases> <units-per-case>`
+          : ''),
         { parse_mode: 'Markdown' }
       );
+    });
+
+    // Restricted manager/Hermes calculator. These commands CALCULATE ONLY: they
+    // never read or write a live price, and unlisted chats get no reply at all.
+    bot.onText(/\/price(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const unitCost = Number(match[1]);
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Pricing*\nUnit cost: $${unitCost.toFixed(2)}\nFormula: $${unitCost.toFixed(2)} × 1.70\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
+    });
+
+    bot.onText(/\/caseprice(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const lineTotal = Number(match[1]);
+        const caseQuantity = Number(match[2]);
+        const unitsPerCase = Number(match[3]);
+        const unitCost = unitCostFromCase({ lineTotal, caseQuantity, unitsPerCase });
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Case Pricing*\nLine total: $${lineTotal.toFixed(2)}\nPack: ${caseQuantity} case(s) × ${unitsPerCase} units\nUnit cost: $${unitCost.toFixed(2)}\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
     });
 
     // Hours / contact
