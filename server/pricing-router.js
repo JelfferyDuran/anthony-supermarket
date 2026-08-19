@@ -173,6 +173,27 @@ function createPricingRouter(options = {}) {
     acceptedTypes: [...ALLOWED_TYPES]
   }));
 
+  // ── Manager sign-in for the hub UI ─────────────────────────────────────────
+  // Exchanges email/password for a Supabase session token the browser stores
+  // locally and sends as Bearer. Only sign-in is exposed here — the token is
+  // verified by Supabase Auth on every subsequent call (defaultVerifyUser).
+  router.post('/login', async (req, res) => {
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+    try {
+      const { getClient } = require('./pricing-store');
+      const { data, error } = await getClient().auth.signInWithPassword({ email, password });
+      if (error || !data.session) return res.status(401).json({ error: 'invalid credentials' });
+      return res.json({
+        token: data.session.access_token,
+        email: data.user.email,
+        role: (data.user.app_metadata && data.user.app_metadata.role) || ''
+      });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  });
+
   // ── Calculator (no writes, no database) ────────────────────────────────────
   router.post('/calculate', authorize('calculate'), (req, res) => {
     try {

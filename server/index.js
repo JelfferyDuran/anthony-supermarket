@@ -198,6 +198,22 @@ app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS })
 app.use(express.json());
 app.use('/api/pricing', createPricingRouter());
 
+// ─── Pricing Hub V2 static serving (opt-in: PRICING_SERVE_STATIC=1) ───────
+// Serves the rebuilt hub (apps/pricing-hub) on the SAME origin as /api/pricing
+// so the hub's API_BASE works. Never serves repo internals — only that folder.
+if (process.env.PRICING_SERVE_STATIC === '1') {
+  const fs = require('fs');
+  const path = require('path');
+  const HUB_DIR = path.resolve(__dirname, '..', 'apps', 'pricing-hub');
+  if (fs.existsSync(HUB_DIR)) {
+    app.use('/pricing-hub', express.static(HUB_DIR, { index: 'index.html' }));
+    app.get('/', (_req, res) => res.redirect('/pricing-hub/'));
+    console.log(`🏷️  Serving Pricing Hub v2 static at /pricing-hub/ (${HUB_DIR})`);
+  } else {
+    console.warn('⚠️  PRICING_SERVE_STATIC=1 but apps/pricing-hub not found');
+  }
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', restaurant: menuData?.nombre, items: flatItems.length, supabase: !!supabase });

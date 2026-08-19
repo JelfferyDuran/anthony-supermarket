@@ -322,6 +322,11 @@ tbody tr.row{cursor:pointer}
     </div>
 
     <div class="qcard">
+      <div class="qhead"><span class="qtitle">Manager sign-in</span><span class="qmeta" id="authStatus"></span></div>
+      <div id="authBox" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+    </div>
+
+    <div class="qcard">
       <div class="qhead"><span class="qtitle">Upload an invoice</span><span class="qmeta" id="intakeAccepts"></span></div>
       <div class="ctrl-row">
         <div class="field grow">
@@ -716,10 +721,13 @@ function showToast(message){
 // Every call is best-effort. A failure downgrades the hub to offline mode and is
 // reported in the banner; it never throws into the render path.
 async function api(path, options){
+  const token = localStorage.getItem('pricingToken') || '';
   const response = await fetch(API_BASE+path, {
     credentials:'same-origin',
     ...options,
-    headers:{ 'Content-Type':'application/json', ...(options&&options.headers) }
+    headers:{ 'Content-Type':'application/json',
+      ...(token ? { Authorization:'Bearer '+token } : {}),
+      ...(options&&options.headers) }
   });
   if(!response.ok){
     let detail = 'HTTP '+response.status;
@@ -882,6 +890,7 @@ function render(){
   renderVariance();
   renderExportCounts();
   renderIntakeAvailability();
+  renderAuth();
   renderFinancials();
 }
 
@@ -900,6 +909,45 @@ function renderIntakeAvailability(){
   if(status && !live && !status.dataset.sticky){
     status.textContent = 'Connect to the pricing database and sign in as a manager to upload invoices.';
   }
+}
+
+function renderAuth(){
+  const box = $('authBox'), st = $('authStatus');
+  if(!box) return;
+  const token = localStorage.getItem('pricingToken') || '';
+  const email = localStorage.getItem('pricingEmail') || '';
+  const inp = 'padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg1);color:var(--ink-2);font-size:13px;min-width:170px';
+  if(token){
+    box.innerHTML = '<b style="font-size:13px;color:var(--ink-2)">Signed in as '+esc(email||'manager')+'</b>'
+      + '<button class="btn" id="authOut" type="button" style="margin-left:auto">Sign out</button>';
+    const out = $('authOut');
+    if(out) out.onclick = ()=>{ localStorage.removeItem('pricingToken'); localStorage.removeItem('pricingEmail'); render(); connect(); };
+    if(st) st.textContent = 'live session — edits propose, approval persists';
+    return;
+  }
+  box.innerHTML = '<input type="email" id="authEmail" placeholder="manager@email" style="'+inp+'" autocomplete="username">'
+    + '<input type="password" id="authPass" placeholder="password" style="'+inp+'" autocomplete="current-password">'
+    + '<button class="btn primary" id="authLogin" type="button">Sign in</button>'
+    + '<button class="btn" id="authLocal" type="button" title="Keep using the catalog embedded in this file">Use local data</button>';
+  const lg = $('authLogin');
+  if(lg) lg.onclick = async ()=>{
+    const em = $('authEmail').value.trim(), pw = $('authPass').value;
+    if(!em || !pw) return;
+    lg.disabled = true;
+    if(st) st.textContent = 'signing in…';
+    try{
+      const r = await api('/login', { method:'POST', body: JSON.stringify({ email: em, password: pw }) });
+      localStorage.setItem('pricingToken', r.token);
+      localStorage.setItem('pricingEmail', r.email || em);
+      if(st) st.textContent = 'signed in as '+(r.role||'manager');
+      render(); connect();
+    }catch(e){
+      if(st) st.textContent = 'sign-in failed: '+e.message;
+      lg.disabled = false;
+    }
+  };
+  const ll = $('authLocal');
+  if(ll) ll.onclick = ()=>{ setConnection('local','Using the catalog stored in this file.'); render(); };
 }
 
 function renderMasthead(){
