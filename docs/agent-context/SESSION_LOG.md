@@ -89,3 +89,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: anon key (public publishable) set via Vercel env + local `.env.local` (gitignored); no secrets committed; staff session persisted only in browser localStorage; rollback = revert branches.
 - PR/issue/commit: branches `fix/site-hotfix-2026-08` (5e415d6) + `feat/site-v2-responsive` (ae0a541) — PRs opened. Issues: #31 sales v2 DONE.
 - Next safe action: owner smoke-tests staff portal with staff credentials; decide on MINIAPP_URL function redeploy + git-linking main site.
+
+## 2026-08-19 — Hermes (Invoice Grabber)
+- Goal: grab the Family Food Distributors invoice bundle (5-page PDF via Telegram) into the Pricing Hub calculator.
+- Changed: `apps/pricing-hub/index.html` — added vendor "Family Food Distributors" + 3 invoices to VENDORS (90772340 $2,162.69, 90772444 $432.25, 90772312 $0.00); appended 52 items to ALL_ITEMS (ids 170–221; 51 sellable SKUs with vendor item numbers, 1 internal no-charge Florida Tuna 3pk @ $0). costPerUnit from invoice pack math (first number = sellable units/case); retail = hub 65% default. Verified invoice math programmatically (A: 46 cases $2,162.69 ✓, B: 11 cases $432.25 ✓, C: 1 case $0.00 ✓; bundle $2,594.94). Vendor policy note: 3% surcharge on cards, Zelle preferred, NET21 terms.
+- Verified: `scripts/verify-pricing-hub.js` extended with FFD assertions — ALL CHECKS PASSED (vendor + 3 invoices, 157 items, unique ids, per-SKU cpu/retail, no-charge internal, itemNo coverage). FFD hub math @65%: revenue $4,203.56, profit $1,608.62, margin 38.3%.
+- Not verified: shelf prices are 65%-default estimates — owner should confirm real shelf tags. "Mama Tere Leniejon" (item 2626) name unverifiable — exception logged. Raw scans archived in Obsidian vault 03_INVOICES (RAW/PROCESSED + audit + baseline) — NOT committed here (repo root deploys to Pages).
+- Branch: direct main push (invoice data entry, same cadence as prior invoice batches).
+- Next safe action: confirm Leniejon shelf name + the $0.00 tuna invoice (replacement/credit?) with the vendor; then confirm shelf prices for the 51 new SKUs.
