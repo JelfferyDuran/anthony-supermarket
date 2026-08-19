@@ -24,7 +24,8 @@ const TEST_DIR = path.join(REPO_ROOT, 'supabase', 'tests');
 const MIGRATIONS = [
   '20260812013000_add_invoice_pricing_pipeline.sql',
   '20260819213000_reconcile_pricing_hub_dataset.sql',
-  '20260819230000_add_pos_sales_and_financials.sql'
+  '20260819230000_add_pos_sales_and_financials.sql',
+  '20260819234500_add_intake_channel_provenance.sql'
 ];
 
 // Each entry is a negative case: the substring that must appear in psql output
@@ -43,7 +44,9 @@ const REQUIRED_GUARDS = [
   ['duplicate key value violates unique constraint "pricing_products_hub_item_id_key"', 'hub item ids stay unique'],
   // Phase C: POS import and financial reporting.
   ['duplicate key value violates unique constraint "pos_import_batches_source_sha256_key"', 'POS batch idempotency'],
-  ['violates check constraint "pos_sales_match_method"', 'POS match method stays auditable']
+  ['violates check constraint "pos_sales_match_method"', 'POS match method stays auditable'],
+  ['violates check constraint "pricing_invoice_chat_sender_recorded"', 'a chat scan must record which sender it came from'],
+  ['violates check constraint "pricing_invoice_source_channel"', 'unknown intake channels are refused']
 ];
 
 // Financial figures asserted against hand-computed values. Each entry is a

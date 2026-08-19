@@ -96,3 +96,18 @@ select count(*) as anon_or_authenticated_grants
 select '--- 12. match_method is constrained to auditable values ---' as t;
 insert into public.pos_sales(batch_id,sold_at,item_name,quantity,gross_sales,match_method)
  values ('eeeeeeee-0000-0000-0000-000000000001','2026-08-12','Bad',1,1.00,'vibes');
+
+select '--- 13. intake provenance: a chat scan must record its sender ref ---' as t;
+insert into public.pricing_invoices(vendor_id,invoice_number,source_object_path,source_sha256,status,source_channel)
+ values ('bbbbbbbb-0000-0000-0000-000000000001','CHAT-1','ab/chat1','chathash1','uploaded','telegram');
+
+select '--- 14. a hub scan needs no sender ref ---' as t;
+insert into public.pricing_invoices(vendor_id,invoice_number,source_object_path,source_sha256,status,source_channel)
+ values ('bbbbbbbb-0000-0000-0000-000000000001','HUB-1','ab/hub1','hubhash1','uploaded','hub');
+select invoice_number, source_channel from public.pricing_invoices where invoice_number='HUB-1';
+
+select '--- 15. an unknown intake channel is refused ---' as t;
+-- A sender ref is supplied so the channel constraint is the one under test,
+-- rather than the sender-ref constraint catching it first.
+insert into public.pricing_invoices(vendor_id,invoice_number,source_object_path,source_sha256,status,source_channel,source_sender_ref)
+ values ('bbbbbbbb-0000-0000-0000-000000000001','SMS-1','ab/sms1','smshash1','uploaded','sms','sms:deadbeef');

@@ -27,6 +27,7 @@ const AGENT_KEY = 'test-agent-key';
 const MANAGER_JWT = 'test-manager-jwt';
 const CASHIER_JWT = 'test-cashier-jwt';
 const MANAGER_USER_ID = '11111111-1111-1111-1111-111111111111';
+const BRIDGE_KEY = 'test-bridge-key';
 
 // ── In-memory stand-in for the Supabase-backed store ─────────────────────────
 function createFakeStore() {
@@ -208,9 +209,15 @@ function startServer({ store, ocr = true } = {}) {
   process.env.PRICING_MANAGER_TOKEN = MANAGER_TOKEN;
   process.env.PRICING_AGENT_KEY = AGENT_KEY;
   process.env.PRICING_OCR_WEBHOOK_URL = ocr ? 'https://ocr.test/extract' : '';
+  delete process.env.GEMINI_API_KEY;              // exercise the webhook contract here
+  process.env.PRICING_INTAKE_BRIDGE_KEY = BRIDGE_KEY;
+  process.env.PRICING_TELEGRAM_CHAT_IDS = '4242';
+  process.env.PRICING_WHATSAPP_NUMBERS = '+1 (201) 555-0100';
 
   // Reloaded per server so the router re-reads the environment above.
-  delete require.cache[require.resolve('./pricing-router')];
+  for (const mod of ['./pricing-router', './pricing-ocr', './pricing-intake']) {
+    delete require.cache[require.resolve(mod)];
+  }
   const { createPricingRouter } = require('./pricing-router');
 
   const app = express();
@@ -619,4 +626,131 @@ test('financials are not readable without a manager identity', async t => {
   assert.equal((await fetch(`${base}/financials`)).status, 401);
   assert.equal((await fetch(`${base}/financials`, { headers: { Authorization: `Bearer ${CASHIER_JWT}` } })).status, 401);
   assert.equal((await fetch(`${base}/pos/batches`, { headers: { 'x-pricing-agent-key': AGENT_KEY } })).status, 401);
+});
+
+// ── Owner decision 4: multi-channel intake ───────────────────────────────────
+
+function intakeBody(bytes = SAMPLE_SCAN, sender = '4242') {
+  const form = new FormData();
+  form.append('invoice', new Blob([bytes], { type: 'application/pdf' }), 'chat-scan.pdf');
+  form.append('sender', sender);
+  return form;
+}
+
+test('a scan sent from an allowlisted Telegram chat lands in the same review queue', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/intake/telegram`, {
+    method: 'POST',
+    headers: { 'x-intake-bridge-key': BRIDGE_KEY },
+    body: intakeBody()
+  });
+  assert.equal(response.status, 200);
+  const body = await response.json();
+
+  assert.equal(body.ok, true);
+  assert.equal(body.lines, 3, 'the sample invoice extracted three lines');
+  // The reply must not imply anything was priced.
+  assert.match(body.message, /Nothing is priced yet/);
+
+  // Same queue, same rule: every line needs a human.
+  const queue = await (await fetch(`${base}/queue`, { headers: { Authorization: `Bearer ${MANAGER_JWT}` } })).json();
+  assert.equal(queue.lines.length, 3);
+  assert.ok(queue.lines.every(line => line.review_status === 'needs_review'));
+
+  // Provenance recorded, raw sender id not stored.
+  const invoice = store._state.invoices.get(body.invoice_id);
+  assert.equal(invoice.source_channel, 'telegram');
+  assert.match(invoice.source_sender_ref, /^telegram:[0-9a-f]{12}$/);
+  assert.ok(!JSON.stringify(invoice).includes('4242'), 'the raw chat id is not persisted');
+});
+
+test('a WhatsApp number is matched regardless of the format the bridge sends', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/intake/whatsapp`, {
+    method: 'POST',
+    headers: { 'x-intake-bridge-key': BRIDGE_KEY },
+    body: intakeBody(SAMPLE_SCAN, '12015550100@c.us')
+  });
+  assert.equal(response.status, 200);
+  assert.equal(store._state.invoices.size, 1);
+});
+
+test('an unlisted chat sender is refused and told nothing useful', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/intake/telegram`, {
+    method: 'POST',
+    headers: { 'x-intake-bridge-key': BRIDGE_KEY },
+    body: intakeBody(SAMPLE_SCAN, '9999')
+  });
+  assert.equal(response.status, 404, 'a 404 does not confirm the endpoint exists');
+  assert.equal(store._state.invoices.size, 0, 'nothing was stored');
+});
+
+test('a Telegram chat id cannot authorise the WhatsApp channel', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  const response = await fetch(`${base}/intake/whatsapp`, {
+    method: 'POST',
+    headers: { 'x-intake-bridge-key': BRIDGE_KEY },
+    body: intakeBody(SAMPLE_SCAN, '4242')
+  });
+  assert.equal(response.status, 404);
+  assert.equal(store._state.invoices.size, 0);
+});
+
+test('intake without the bridge key is refused even for an allowlisted sender', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  assert.equal((await fetch(`${base}/intake/telegram`, { method: 'POST', body: intakeBody() })).status, 404);
+  const wrong = await fetch(`${base}/intake/telegram`, {
+    method: 'POST', headers: { 'x-intake-bridge-key': 'guessed' }, body: intakeBody()
+  });
+  assert.equal(wrong.status, 404);
+  assert.equal(store._state.invoices.size, 0);
+});
+
+test('a chat submission cannot approve anything — it only deposits a scan', async t => {
+  const store = createFakeStore();
+  const productId = store.seedProduct({ id: crypto.randomUUID(), name: 'Sample Rice 20/2lb', current_unit_cost: 2.30, current_retail_price: 3.99 });
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  await fetch(`${base}/intake/telegram`, { method: 'POST', headers: { 'x-intake-bridge-key': BRIDGE_KEY }, body: intakeBody() });
+
+  // The bridge key is not an approver identity, so the approval and price-edit
+  // routes stay closed to it.
+  const edit = await fetch(`${base}/products/${productId}/retail`, {
+    method: 'PATCH',
+    headers: { 'x-intake-bridge-key': BRIDGE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ retailPrice: 9.99 })
+  });
+  assert.equal(edit.status, 401);
+  assert.equal(store._state.products.get(productId).current_retail_price, 3.99, 'price untouched');
+});
+
+test('the same scan sent twice from chat is recognised, not duplicated', async t => {
+  const store = createFakeStore();
+  const { server, base } = await startServer({ store });
+  t.after(() => server.close());
+
+  await fetch(`${base}/intake/telegram`, { method: 'POST', headers: { 'x-intake-bridge-key': BRIDGE_KEY }, body: intakeBody() });
+  const second = await fetch(`${base}/intake/telegram`, { method: 'POST', headers: { 'x-intake-bridge-key': BRIDGE_KEY }, body: intakeBody() });
+  const body = await second.json();
+
+  assert.equal(body.duplicate, true);
+  assert.match(body.message, /Already have this exact scan/);
+  assert.equal(store._state.invoices.size, 1);
 });

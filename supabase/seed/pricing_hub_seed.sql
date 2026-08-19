@@ -91,7 +91,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   'a6c7c3fc-da00-5830-bf5b-401333fb6865', 9, '{9}', 'Cheerios L 14ct', 'Cereal', 'Cereal',
-  14, 3.8571, 5.99, false, false, null, 'hub-backfill')
+  14, 3.8571, 6.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -434,14 +434,14 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '48347134-3837-5dc3-b193-ac3be0fe0758', 127, '{127}', 'Mama Tere Jasmine Rice Hom Mali 2/320oz', 'Rice', 'Rice',
-  2, 22.475, 36.99, false, false, null, 'hub-backfill')
+  2, 22.475, 37.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   'e57872a3-cd65-5994-8221-4dc5d525d8a9', 128, '{128}', 'Mama Tere Jasmine Rice Hom Mali 8/80oz', 'Rice', 'Rice',
-  8, 5.7188, 8.99, false, false, null, 'hub-backfill')
+  8, 5.7188, 9.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -483,21 +483,21 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '764ea2a2-a2a6-5b40-a792-6a7299c11ea7', 135, '{135}', 'Tapiorica Manzana 6/14.1oz', 'Dry Goods', 'Dry Goods',
-  6, 3.325, 4.99, false, false, null, 'hub-backfill')
+  6, 3.325, 5.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '767247ae-9208-5af9-ac0b-272f50995595', 136, '{136}', 'Tapiorica Fresa 6/14.1oz', 'Dry Goods', 'Dry Goods',
-  6, 3.325, 4.99, false, false, null, 'hub-backfill')
+  6, 3.325, 5.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '6666a7e8-c1e7-5137-8cb0-aabd30f5fa10', 137, '{137}', 'Mama Tere Pacaya 12/32oz (907g)', 'Canned/Jarred', 'Canned/Jarred',
-  12, 6.2458, 9.99, false, false, null, 'hub-backfill')
+  12, 6.2458, 10.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -518,14 +518,14 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '01e9df39-24d3-5225-a808-b5a4183a923f', 140, '{140}', 'La Favorita Achiote Liquido 30/16.9oz', 'Condiments', 'Condiments',
-  30, 3.3317, 4.99, false, false, null, 'hub-backfill')
+  30, 3.3317, 5.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '3fb0eb0c-48e5-5db4-b01a-6c55282338dd', 141, '{141}', 'Oriental Salsa China 24/13.52oz', 'Condiments', 'Condiments',
-  24, 2.7229, 3.99, false, false, null, 'hub-backfill')
+  24, 2.7229, 4.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -770,7 +770,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   'b6188181-497d-5b86-913d-2d17898d01b2', 181, '{157,181}', 'Van Camps Yellowfin Tuna in Oil', 'Canned Goods', 'Canned Goods',
-  48, 2.0615, 2.99, false, false, null, 'hub-backfill')
+  48, 2.0615, 3.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -882,7 +882,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '7aabe60f-dfb9-5afb-b09d-d7fc179ea270', 197, '{197}', 'Mama Tere Achiote en Grano (Bag)', 'Condiments', 'Condiments',
-  24, 3.8313, 5.99, false, false, null, 'hub-backfill')
+  24, 3.8313, 6.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -952,7 +952,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   'a38fa797-c36a-53d4-951b-136d7be43972', 207, '{207}', 'Nestle PE Sublime Clasico', 'Candy', 'Candy',
-  4, 14.4875, 23.99, false, false, null, 'hub-backfill')
+  4, 14.4875, 24.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -987,7 +987,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 212, '{102,212}', 'Mama Tere Yuca en Trozos / Frozen Cassava (FZ)', 'Frozen', 'Frozen',
-  12, 3.8292, 5.99, false, false, null, 'hub-backfill')
+  12, 3.8292, 6.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -1008,14 +1008,14 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '65cc9bbb-8700-5638-845b-d9ebefb9b5f1', 215, '{215}', 'Mama Tere Papa Criolla (FZ)', 'Frozen', 'Frozen',
-  6, 5.7, 8.99, false, false, null, 'hub-backfill')
+  6, 5.7, 9.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   '257b7fc3-f87b-569c-9d64-3a471ff16ced', 216, '{216}', 'Mama Tere Choclo Entero (FZ)', 'Frozen', 'Frozen',
-  6, 8.1583, 12.99, false, false, null, 'hub-backfill')
+  6, 8.1583, 13.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -1043,7 +1043,7 @@ insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, catego
     flag_reason = excluded.flag_reason, source = excluded.source, updated_at = now();
 insert into public.pricing_products (id, hub_item_id, hub_item_ids, name, category, department, units_per_case, current_unit_cost, current_retail_price, internal, flagged, flag_reason, source) values (
   'abede8ac-139b-5634-8c78-61153297710f', 220, '{220}', 'Mama Tere Pulpa Guanabana (FZ)', 'Frozen', 'Frozen',
-  12, 3.2458, 4.99, false, false, null, 'hub-backfill')
+  12, 3.2458, 5.99, false, false, null, 'hub-backfill')
   on conflict (id) do update set hub_item_id = excluded.hub_item_id, hub_item_ids = excluded.hub_item_ids, name = excluded.name, category = excluded.category,
     department = excluded.department, units_per_case = excluded.units_per_case, current_unit_cost = excluded.current_unit_cost,
     current_retail_price = excluded.current_retail_price, internal = excluded.internal, flagged = excluded.flagged,
@@ -1359,7 +1359,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   42, 3.5, 5.99, '2ab5fe45-b9ff-53d8-8ff5-bc463c58c45c', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '010ba9b5-3dd7-5351-9bbb-f827b1eab04c', 9, 'Cheerios L 14ct', null, 1, 14,
-  54, 3.8571, 5.99, 'a6c7c3fc-da00-5830-bf5b-401333fb6865', 'hub-backfill', 'backfilled');
+  54, 3.8571, 6.99, 'a6c7c3fc-da00-5830-bf5b-401333fb6865', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '010ba9b5-3dd7-5351-9bbb-f827b1eab04c', 10, 'Coco Pebbles 12ct', null, 1, 12,
   42, 3.5, 5.99, 'a29c6260-266a-504e-b626-a4a98d605eb2', 'hub-backfill', 'backfilled');
@@ -1482,7 +1482,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   35.95, 5.9917, 9.99, 'ffa88345-941e-539e-9fd6-29bfe9e30386', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '56af8b83-e7b5-5383-9d19-ef5f6c39d768', 2, 'Mama Tere Yuca en Trozos (FZ) 12/40oz', '1705', 1, 12,
-  45.95, 3.8292, 5.99, '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 'hub-backfill', 'backfilled');
+  45.95, 3.8292, 6.99, '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '56af8b83-e7b5-5383-9d19-ef5f6c39d768', 3, 'Mama Tere Yuca en Trozos (FZ) 6/80oz', '1708', 1, 6,
   45.95, 7.6583, 12.99, '514ea94e-7033-5a35-b7e9-f43e076d96a9', 'hub-backfill', 'backfilled');
@@ -1557,10 +1557,10 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   15.55, 1.555, 2.99, '4e9016e3-6e70-5349-80d8-fb2dd2e44d88', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 17, 'Mama Tere Jasmine Rice Hom Mali 2/320oz', '1021', 2, 2,
-  89.9, 22.475, 36.99, '48347134-3837-5dc3-b193-ac3be0fe0758', 'hub-backfill', 'backfilled');
+  89.9, 22.475, 37.99, '48347134-3837-5dc3-b193-ac3be0fe0758', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 18, 'Mama Tere Jasmine Rice Hom Mali 8/80oz', '1023', 1, 8,
-  45.75, 5.7188, 8.99, 'e57872a3-cd65-5994-8221-4dc5d525d8a9', 'hub-backfill', 'backfilled');
+  45.75, 5.7188, 9.99, 'e57872a3-cd65-5994-8221-4dc5d525d8a9', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 19, 'Toops Chocolate 12/7.8oz', '1051', 1, 12,
   34.5, 2.875, 4.99, '1a697e67-b896-5254-a1e5-002590d0c25e', 'hub-backfill', 'backfilled');
@@ -1581,13 +1581,13 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   34.3, 1.4292, 1.99, 'b3ca16fb-3dc3-5a27-a322-0e86a6e4d1e5', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 25, 'Tapiorica Manzana 6/14.1oz', '4210', 1, 6,
-  19.95, 3.325, 4.99, '764ea2a2-a2a6-5b40-a792-6a7299c11ea7', 'hub-backfill', 'backfilled');
+  19.95, 3.325, 5.99, '764ea2a2-a2a6-5b40-a792-6a7299c11ea7', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 26, 'Tapiorica Fresa 6/14.1oz', '4215', 1, 6,
-  19.95, 3.325, 4.99, '767247ae-9208-5af9-ac0b-272f50995595', 'hub-backfill', 'backfilled');
+  19.95, 3.325, 5.99, '767247ae-9208-5af9-ac0b-272f50995595', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 27, 'Mama Tere Pacaya 12/32oz (907g)', '1500', 1, 12,
-  74.95, 6.2458, 9.99, '6666a7e8-c1e7-5137-8cb0-aabd30f5fa10', 'hub-backfill', 'backfilled');
+  74.95, 6.2458, 10.99, '6666a7e8-c1e7-5137-8cb0-aabd30f5fa10', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 28, 'ILE Alino Adobo Glass 12/8.8oz', '5441', 1, 12,
   26.5, 2.2083, 3.99, '9cf77f7c-ce7e-56f9-b65b-c08c6ce50e10', 'hub-backfill', 'backfilled');
@@ -1596,10 +1596,10 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   62.95, 1.7486, 2.99, '0c687c7e-d685-5b03-9d58-5f6d5936625e', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 30, 'La Favorita Achiote Liquido 30/16.9oz', '5114', 1, 30,
-  99.95, 3.3317, 4.99, '01e9df39-24d3-5225-a808-b5a4183a923f', 'hub-backfill', 'backfilled');
+  99.95, 3.3317, 5.99, '01e9df39-24d3-5225-a808-b5a4183a923f', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 31, 'Oriental Salsa China 24/13.52oz', '2407', 1, 24,
-  65.35, 2.7229, 3.99, '3fb0eb0c-48e5-5db4-b01a-6c55282338dd', 'hub-backfill', 'backfilled');
+  65.35, 2.7229, 4.99, '3fb0eb0c-48e5-5db4-b01a-6c55282338dd', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   'cfd7968d-4d3d-5a36-8b85-adad828fbf5d', 32, 'Mama Tere Pasta de Ajo Pet 12/17.6oz', '2559', 1, 12,
   42.8, 3.5667, 5.99, 'a9fdc3a3-f0cf-5fcc-8a35-3ea828d3d7de', 'hub-backfill', 'backfilled');
@@ -1677,7 +1677,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   93.55, 1.949, 2.99, '941eabc2-9a01-518c-b1c2-92586a8a584d', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 9, 'Van Camps Yellowfin Tuna in Oil', '1101', 5, 48,
-  494.75, 2.0615, 2.99, 'b6188181-497d-5b86-913d-2d17898d01b2', 'hub-backfill', 'backfilled');
+  494.75, 2.0615, 3.99, 'b6188181-497d-5b86-913d-2d17898d01b2', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 10, 'Saba Ultra Invisible Long Pads Wings', '2098', 1, 12,
   37.67, 3.1392, 4.99, 'e73dccf9-b4de-5053-bc83-301920b3662a', 'hub-backfill', 'backfilled');
@@ -1743,7 +1743,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   14.4, 2.4, 3.99, '108072e2-b4c5-5933-8a8b-8cf8c4b065c8', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 31, 'Mama Tere Achiote en Grano (Bag)', '2863', 1, 24,
-  91.95, 3.8313, 5.99, '7aabe60f-dfb9-5afb-b09d-d7fc179ea270', 'hub-backfill', 'backfilled');
+  91.95, 3.8313, 6.99, '7aabe60f-dfb9-5afb-b09d-d7fc179ea270', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 32, 'Hornimans Te Relajante', '5299', 1, 12,
   36.6, 3.05, 4.99, '5b5a96ce-8b2d-5c76-8f8f-f32edac08c14', 'hub-backfill', 'backfilled');
@@ -1764,7 +1764,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   51.95, 2.1646, 3.99, '65826603-c87e-5e4a-92da-7d5c51c3099f', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 38, 'Nestle PE Sublime Clasico', '2696', 1, 4,
-  57.95, 14.4875, 23.99, 'a38fa797-c36a-53d4-951b-136d7be43972', 'hub-backfill', 'backfilled');
+  57.95, 14.4875, 24.99, 'a38fa797-c36a-53d4-951b-136d7be43972', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '51441fee-8ea9-5475-8240-e854aae87139', 39, 'Nestle PE Princesa Bombom', '2698', 1, 8,
   51.5, 6.4375, 10.99, '89c7f971-ba17-5fb5-b88e-d451db0f06c3', 'hub-backfill', 'backfilled');
@@ -1773,7 +1773,7 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   70.2, 2.34, 3.99, 'a40a83a3-960a-5a15-9d7f-d7fedfdec71e', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 1, 'Mama Tere Yuca en Trozos / Frozen Cassava (FZ)', '1705', 1, 12,
-  45.95, 3.8292, 5.99, '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 'hub-backfill', 'backfilled');
+  45.95, 3.8292, 6.99, '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 2, 'MamaTere Yuca en Trozos / Frozen Cassava (FZ)', '1708', 1, 6,
   45.95, 7.6583, 12.99, '514ea94e-7033-5a35-b7e9-f43e076d96a9', 'hub-backfill', 'backfilled');
@@ -1788,10 +1788,10 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   34.5, 2.875, 4.99, '71cf2af5-81fc-5724-9cfb-ef223d32fcd0', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 6, 'Mama Tere Papa Criolla (FZ)', '2929', 1, 6,
-  34.2, 5.7, 8.99, '65cc9bbb-8700-5638-845b-d9ebefb9b5f1', 'hub-backfill', 'backfilled');
+  34.2, 5.7, 9.99, '65cc9bbb-8700-5638-845b-d9ebefb9b5f1', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 7, 'Mama Tere Choclo Entero (FZ)', '2948', 1, 6,
-  48.95, 8.1583, 12.99, '257b7fc3-f87b-569c-9d64-3a471ff16ced', 'hub-backfill', 'backfilled');
+  48.95, 8.1583, 13.99, '257b7fc3-f87b-569c-9d64-3a471ff16ced', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 8, 'Mama Tere Mote Precocido (FZ)', '2926', 1, 8,
   52.8, 6.6, 10.99, '55d40674-30f1-5c49-b454-6c6ec153a062', 'hub-backfill', 'backfilled');
@@ -1803,13 +1803,13 @@ insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_des
   22.95, 1.9125, 2.99, '7b22cdd5-f2bc-59d8-8115-00bb2d7f7996', 'hub-backfill', 'backfilled');
 insert into public.pricing_invoice_lines (invoice_id, line_number, extracted_description, vendor_sku, case_quantity, units_per_case, line_total, calculated_unit_cost, proposed_retail_price, matched_product_id, match_method, review_status) values (
   '31e76f2f-1e8c-5b62-8947-7345565c5a2b', 11, 'Mama Tere Pulpa Guanabana (FZ)', '2936', 1, 12,
-  38.95, 3.2458, 4.99, 'abede8ac-139b-5634-8c78-61153297710f', 'hub-backfill', 'backfilled');
+  38.95, 3.2458, 5.99, 'abede8ac-139b-5634-8c78-61153297710f', 'hub-backfill', 'backfilled');
 
 -- ── Price history derived from repeat purchases ────────────────────────────
 -- One immutable row per observed cost/retail move. source_key makes the
 -- backfill re-runnable without ever rewriting a history row.
 insert into public.pricing_price_history (source_key, product_id, previous_unit_cost, new_unit_cost, previous_retail_price, new_retail_price, retail_multiplier, changed_at) values (
-  'hub-backfill:102->212', '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 3.8292, 3.8292, 5.99, 5.99,
+  'hub-backfill:102->212', '88b496bc-9145-5dc8-bc1d-e9ab0defe5ca', 3.8292, 3.8292, 6.99, 6.99,
   1.7, '2026-08-19')
   on conflict (source_key) where source_key is not null do nothing;
 insert into public.pricing_price_history (source_key, product_id, previous_unit_cost, new_unit_cost, previous_retail_price, new_retail_price, retail_multiplier, changed_at) values (
@@ -1849,7 +1849,7 @@ insert into public.pricing_price_history (source_key, product_id, previous_unit_
   1.7, '2026-08-19')
   on conflict (source_key) where source_key is not null do nothing;
 insert into public.pricing_price_history (source_key, product_id, previous_unit_cost, new_unit_cost, previous_retail_price, new_retail_price, retail_multiplier, changed_at) values (
-  'hub-backfill:157->181', 'b6188181-497d-5b86-913d-2d17898d01b2', 2.3656, 2.0615, 3.99, 2.99,
+  'hub-backfill:157->181', 'b6188181-497d-5b86-913d-2d17898d01b2', 2.3656, 2.0615, 3.99, 3.99,
   1.7, '2026-08-19')
   on conflict (source_key) where source_key is not null do nothing;
 

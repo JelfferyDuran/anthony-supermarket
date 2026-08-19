@@ -16,7 +16,7 @@ const { HUB_APP_PATH, HUB_SITE_PATH, REPO_ROOT, readHubData, readHubMath } = req
 const { VENDORS, ALL_ITEMS } = readHubData(HUB_APP_PATH);
 // Verify the shipped functions, not a reimplementation of them: a copy here
 // could agree with itself while the page does something else entirely.
-const { calcRetail, calcBoxRev, calcBoxProfit, costOf } = readHubMath(HUB_APP_PATH, { markup: 65 });
+const { calcRetail, calcBoxRev, calcBoxProfit, costOf } = readHubMath(HUB_APP_PATH, { markup: 70 });
 
 // --- assertions ---
 const pass = (cond, msg) => console.log((cond ? 'PASS' : 'FAIL') + ' | ' + msg);
@@ -53,15 +53,17 @@ chk(ffd.every(i => i.itemNo !== '—'), 'All FFD items carry vendor item numbers
 const lentejon = ALL_ITEMS.find(i => i.id === 198);
 chk(!!lentejon && lentejon.name === 'Mama Tere Lentejon', 'id 198 renamed to Mama Tere Lentejon (typo fix, matches prior invoice)');
 const vcOld = ALL_ITEMS.find(i => i.id === 157), vcNew = ALL_ITEMS.find(i => i.id === 181);
-chk(vcOld.retail === 3.99 && vcNew.retail === 2.99 && vcNew.boxPrice < vcOld.boxPrice, 'Van Camps 48/5oz price drop reflected (113.55 → 98.95, retail 3.99 → 2.99)');
-// spot-check hub math on a few FFD rows (65% markup default)
+chk(vcNew.boxPrice < vcOld.boxPrice, 'Van Camps 48/5oz case-cost drop still reflected (113.55 → 98.95)');
+// spot-check hub math on a few FFD rows at the locked 70% markup
+// Spot values at the locked 70% rule. Costs are untouched by the markup switch;
+// only the retail snapshots moved, and only where .99 rounding actually shifts.
 const spot = {
-  170: { cpu: 3.1392, retail: 4.99 },   // Saba Ultra Long Pads 12/16ct
-  181: { cpu: 2.0615, retail: 2.99 },   // Van Camps Yellowfin Tuna 48/5oz
-  194: { cpu: 1.088,  retail: 1.99 },   // Allegra Rigatoni 20/16oz
-  203: { cpu: 2.9125, retail: 4.99 },   // ILE Sabora Pasta 12/17.6oz
-  209: { cpu: 2.34,   retail: 3.99 },   // Nestle PE Morochas 30/6.35oz
-  215: { cpu: 5.7,    retail: 8.99 },   // Mama Tere Papa Criolla (FZ) 6/32oz
+  170: { cpu: 3.1392, retail: 4.99 },   // Saba Ultra Long Pads 12/16ct (unchanged)
+  181: { cpu: 2.0615, retail: 3.99 },   // Van Camps Yellowfin Tuna 48/5oz (2.99 -> 3.99)
+  194: { cpu: 1.088,  retail: 1.99 },   // Allegra Rigatoni 20/16oz (unchanged)
+  203: { cpu: 2.9125, retail: 4.99 },   // ILE Sabora Pasta 12/17.6oz (unchanged)
+  209: { cpu: 2.34,   retail: 3.99 },   // Nestle PE Morochas 30/6.35oz (unchanged)
+  215: { cpu: 5.7,    retail: 9.99 },   // Mama Tere Papa Criolla (FZ) 6/32oz (8.99 -> 9.99)
 };
 for (const [id, e] of Object.entries(spot)) {
   const it = ALL_ITEMS.find(i => i.id === +id);
@@ -71,7 +73,7 @@ for (const [id, e] of Object.entries(spot)) {
 const ffdSellable = ffd.filter(i => !i.internal);
 const ffdRev = ffdSellable.reduce((s, i) => s + calcBoxRev(i), 0);
 const ffdProfit = ffdSellable.reduce((s, i) => s + calcBoxProfit(i), 0);
-console.log('--- FFD hub calc (65% markup default) ---');
+console.log('--- FFD hub calc (70% markup) ---');
 console.log('FFD retail cost: $' + ffdSellable.reduce((s, i) => s + i.boxes * i.boxPrice, 0).toFixed(2));
 console.log('Projected revenue: $' + ffdRev.toFixed(2));
 console.log('Projected profit:  $' + ffdProfit.toFixed(2));
@@ -91,14 +93,29 @@ for (const [id, e] of Object.entries(exp)) {
   chk(it && it.retail === e.retail, `id ${id} retail=${e.retail} (got ${it && it.retail})`);
   chk(it && it.units === e.units, `id ${id} units=${e.units} (got ${it && it.units})`);
 }
-// live hub math at default 65% markup
+// live hub math at the locked 70% markup
 chk(calcRetail(ALL_ITEMS.find(i => i.id === 158)) === 7.99, 'calcRetail scround = 7.99');
 chk(calcRetail(ALL_ITEMS.find(i => i.id === 165)) === 3.99, 'calcRetail twix = 3.99');
+
+// ── Markup rule is locked at 70% everywhere ──────────────────────────────────
+// The hub preview and the server's approved-retail rule must agree. They used to
+// differ (65% here, 1.70 in the vault), which meant the browser showed one price
+// while the server approved another.
+const roundRetail70 = p => { const b = Math.floor(p); return (p - b >= 0.5) ? b + 0.99 : Math.max(0.99, b - 1 + 0.99); };
+const offRule = ALL_ITEMS.filter(i => !i.internal && i.costPerUnit > 0
+  && Math.abs(i.retail - roundRetail70(i.costPerUnit * 1.70)) >= 0.001);
+chk(offRule.length === 0, 'every sellable retail snapshot matches cost x 1.70 with .99 rounding'
+  + (offRule.length ? ' (off-rule: ' + offRule.map(i => i.id).join(', ') + ')' : ''));
+
+const zeroCost = ALL_ITEMS.filter(i => !i.internal && i.costPerUnit === 0);
+chk(zeroCost.length === 1 && zeroCost[0].id === 221 && zeroCost[0].retail === 4.99,
+  'zero-cost reference price preserved through the markup switch (id 221 @ $4.99)');
+chk(ALL_ITEMS.filter(i => i.internal).every(i => i.retail === 0), 'internal items still carry no retail');
 
 const sellable = hers.filter(i => !i.internal);
 const totRev = sellable.reduce((s, i) => s + calcBoxRev(i), 0);
 const totProfit = sellable.reduce((s, i) => s + calcBoxProfit(i), 0);
-console.log('--- hub calc (65% markup default) ---');
+console.log('--- hub calc (70% markup) ---');
 console.log('Hershey\'s retail cost: $' + sellable.reduce((s, i) => s + i.boxes * i.boxPrice, 0).toFixed(2));
 console.log('Projected revenue: $' + totRev.toFixed(2));
 console.log('Projected profit:  $' + totProfit.toFixed(2));
@@ -124,7 +141,8 @@ for (const [needle, label] of [
   ['id="catTabs"', 'category chips present'],
   ['id="searchInput"', 'item search present'],
   ['id="markupSlider"', 'markup slider present'],
-  ['value="65"', 'markup slider defaults to 65%'],
+  ['value="70"', 'markup slider defaults to 70%'],
+  ['Reset to 70%', 'reset restores the locked 70% rule'],
   ['id="queueList"', 'approval queue present'],
   ['id="varianceList"', 'price-change view present'],
   ['id="exportLabelsBtn"', 'price-gun export present'],

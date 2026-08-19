@@ -3,7 +3,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
+  HUB_PREVIEW_MARKUP_PCT,
   MAX_RECONCILIATION_VARIANCE,
+  RETAIL_MULTIPLIER,
   approvalBlockers,
   costVariance,
   normalizeUpc,
@@ -67,6 +69,25 @@ test('shelf rounding never falls below the minimum retail step', () => {
   assert.equal(roundRetail(0.10), 0.99);
   assert.equal(roundRetail(1.20), 0.99);
   assert.equal(roundRetail(1.60), 1.99);
+});
+
+// The owner locked one markup rule on 2026-08-19. Before that the hub previewed
+// 65% while the server approved at 1.70, so the browser showed a price the
+// server would not write. These two constants are the same rule expressed twice
+// and must never drift apart again.
+test('the hub preview markup and the approved-retail multiplier are one rule', () => {
+  assert.equal(RETAIL_MULTIPLIER, 1.70);
+  assert.equal(HUB_PREVIEW_MARKUP_PCT, 70);
+  assert.equal(HUB_PREVIEW_MARKUP_PCT, Math.round((RETAIL_MULTIPLIER - 1) * 100));
+});
+
+test('a shelf suggestion is the approved price snapped to .99', () => {
+  for (const cost of [0.46, 1.088, 2.0615, 3.1392, 3.3333, 5.7]) {
+    const approved = retailFromUnitCost(cost);
+    const shelf = suggestedRetail(cost);
+    // The shelf price is the .99 rounding of the same underlying number.
+    assert.equal(shelf, roundRetail(approved), `cost ${cost}`);
+  }
 });
 
 test('matches the Pricing Hub rounding on known live items', () => {

@@ -30,6 +30,8 @@ const {
 } = require('./pricing-engine');
 const { createPricingStore, isConfigured, sha256 } = require('./pricing-store');
 const { matchProducts, parsePosCsv } = require('./pos-import');
+const ocr = require('./pricing-ocr');
+const intake = require('./pricing-intake');
 
 const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
 const POS_TYPES = new Set(['text/csv', 'application/vnd.ms-excel', 'text/plain', 'application/csv', 'application/octet-stream']);
@@ -90,8 +92,6 @@ function createPricingRouter(options = {}) {
 
   const managerToken = process.env.PRICING_MANAGER_TOKEN || '';
   const agentKey = process.env.PRICING_AGENT_KEY || '';
-  const ocrUrl = process.env.PRICING_OCR_WEBHOOK_URL || '';
-  const ocrToken = process.env.PRICING_OCR_WEBHOOK_TOKEN || '';
 
   // Local demo access is only ever granted outside production AND only when no
   // credential is configured at all, so a misconfigured production box fails
@@ -165,7 +165,8 @@ function createPricingRouter(options = {}) {
     multiplier: RETAIL_MULTIPLIER,
     hubPreviewMarkupPct: HUB_PREVIEW_MARKUP_PCT,
     reconciliationTolerance: MAX_RECONCILIATION_VARIANCE,
-    ocrConfigured: Boolean(ocrUrl),
+    ocrConfigured: ocr.isConfigured(),
+    ocrProvider: ocr.activeProvider(),
     storeConfigured: Boolean(store),
     localDemo,
     maxUploadMb: MAX_UPLOAD_BYTES / (1024 * 1024),
@@ -249,68 +250,86 @@ function createPricingRouter(options = {}) {
     if (!req.file) return res.status(400).json({ error: 'A supported PDF or image invoice is required' });
 
     try {
-      const hash = sha256(req.file.buffer);
-      const existing = await store.findInvoiceByHash(hash);
-      if (existing) {
-        return res.json({ invoice: existing, duplicate: true, lines: await store.listInvoiceLines(existing.id) });
+      const result = await ingestInvoice(req.file, req.body, { channel: 'hub' });
+      if (result.duplicate) {
+        return res.json({ invoice: result.invoice, duplicate: true, lines: result.lines });
       }
-
-      const objectPath = await store.putInvoiceObject(hash, req.file.buffer, req.file.mimetype);
-      const invoice = await store.createInvoice({
-        vendor_id: req.body.vendor_id || null,
-        invoice_number: req.body.invoice_number || null,
-        invoice_date: req.body.invoice_date || null,
-        source_object_path: objectPath,
-        source_sha256: hash,
-        status: ocrUrl ? 'extracting' : 'uploaded'
-      });
-
-      if (!ocrUrl) {
+      if (result.code === 'OCR_NOT_CONFIGURED') {
         return res.status(202).json({
-          invoice,
+          invoice: result.invoice,
           lines: [],
           warning: 'Stored privately, but OCR is not configured so no lines were extracted.',
           code: 'OCR_NOT_CONFIGURED'
         });
       }
-
-      const extracted = await callOcr(req.file, req.body);
-      const priced = priceInvoice(extracted);
-      const lines = await store.replaceInvoiceLines(invoice.id, priced.items.map(item => ({
-        line_number: item.line_number,
-        raw_text: item.description,
-        vendor_sku: item.vendor_sku || null,
-        extracted_upc: item.upc || null,
-        extracted_description: item.description,
-        case_quantity: item.case_quantity || null,
-        units_per_case: item.units_per_case || null,
-        line_total: item.line_total,
-        calculated_unit_cost: item.unit_cost,
-        proposed_retail_price: item.final_retail_price,
-        ocr_confidence: item.ocr_confidence,
-        // OCR never matches a product. Matching is a separate, evidence-based step.
-        matched_product_id: null,
-        match_method: 'ocr',
-        review_status: 'needs_review',
-        review_reason: item.review_reason || null
-      })));
-
-      // Persist the invoice's own stated subtotal alongside the extracted sum.
-      // Without this the approval gate has nothing to reconcile against and
-      // would wave through an invoice whose lines do not add up.
-      const reconciled = await store.updateInvoice(invoice.id, {
-        invoice_subtotal: priced.reconciliation.invoice_subtotal,
-        extracted_line_sum: priced.reconciliation.extracted_line_sum,
-        reconciliation_variance: priced.reconciliation.variance,
-        line_count: lines.length,
-        status: 'needs_review'
-      });
-
-      return res.json({ invoice: reconciled || invoice, lines, reconciliation: priced.reconciliation });
+      return res.json({ invoice: result.invoice, lines: result.lines, reconciliation: result.reconciliation });
     } catch (error) {
       return fail(res, error, 'invoice intake');
     }
   });
+
+  // The one path a scan takes, whichever channel it arrived on. Hub uploads and
+  // chat submissions MUST share this: two code paths would eventually disagree
+  // about what gets stored, deduped, or sent to review.
+  async function ingestInvoice(file, fields = {}, context = {}) {
+    const hash = sha256(file.buffer);
+    const existing = await store.findInvoiceByHash(hash);
+    if (existing) {
+      return { invoice: existing, duplicate: true, lines: await store.listInvoiceLines(existing.id) };
+    }
+
+    // The scan is stored BEFORE extraction is attempted, so a reader outage
+    // never loses the document — the lines can be entered by hand instead.
+    const objectPath = await store.putInvoiceObject(hash, file.buffer, file.mimetype);
+    const invoice = await store.createInvoice({
+      vendor_id: fields.vendor_id || null,
+      invoice_number: fields.invoice_number || null,
+      invoice_date: fields.invoice_date || null,
+      source_object_path: objectPath,
+      source_sha256: hash,
+      source_channel: context.channel || 'hub',
+      source_sender_ref: context.senderRef || null,
+      status: ocr.isConfigured() ? 'extracting' : 'uploaded'
+    });
+
+    if (!ocr.isConfigured()) {
+      return { invoice, lines: [], code: 'OCR_NOT_CONFIGURED' };
+    }
+
+    const extracted = await callOcr(file, fields);
+    const priced = priceInvoice(extracted);
+    const lines = await store.replaceInvoiceLines(invoice.id, priced.items.map(item => ({
+      line_number: item.line_number,
+      raw_text: item.description,
+      vendor_sku: item.vendor_sku || null,
+      extracted_upc: item.upc || null,
+      extracted_description: item.description,
+      case_quantity: item.case_quantity || null,
+      units_per_case: item.units_per_case || null,
+      line_total: item.line_total,
+      calculated_unit_cost: item.unit_cost,
+      proposed_retail_price: item.final_retail_price,
+      ocr_confidence: item.ocr_confidence,
+      // OCR never matches a product. Matching is a separate, evidence-based step.
+      matched_product_id: null,
+      match_method: 'ocr',
+      review_status: 'needs_review',
+      review_reason: item.review_reason || null
+    })));
+
+    // Persist the invoice's own stated subtotal alongside the extracted sum.
+    // Without this the approval gate has nothing to reconcile against and would
+    // wave through an invoice whose lines do not add up.
+    const reconciled = await store.updateInvoice(invoice.id, {
+      invoice_subtotal: priced.reconciliation.invoice_subtotal,
+      extracted_line_sum: priced.reconciliation.extracted_line_sum,
+      reconciliation_variance: priced.reconciliation.variance,
+      line_count: lines.length,
+      status: 'needs_review'
+    });
+
+    return { invoice: reconciled || invoice, lines, reconciliation: priced.reconciliation };
+  }
 
   // Short-lived signed link to the source scan for the review UI.
   router.get('/invoices/:id/source', authorize('manager'), async (req, res) => {
@@ -375,6 +394,61 @@ function createPricingRouter(options = {}) {
       return res.send(csv);
     } catch (error) {
       return fail(res, error, 'label export');
+    }
+  });
+
+  // ── Chat-channel intake (Telegram / WhatsApp) ──────────────────────────────
+  // The owner may send a scan straight from chat. It lands in the SAME queue as
+  // a hub upload and is subject to the same rule: arriving is evidence, not
+  // approval. Authorisation is the channel's own allowlist — a chat sender is
+  // never a Supabase identity, so this route cannot approve anything, only
+  // deposit a scan for a manager to review.
+  router.post('/intake/:channel', limitWrites, upload.single('invoice'), async (req, res) => {
+    if (!requireStore(res)) return;
+
+    const channel = String(req.params.channel || '').toLowerCase();
+    const sender = req.body.sender || req.headers['x-intake-sender'] || '';
+
+    // The shared secret proves the request came from the bot bridge rather than
+    // from anyone who guessed the URL. The allowlist then proves WHICH sender.
+    const bridgeKey = process.env.PRICING_INTAKE_BRIDGE_KEY || '';
+    if (!bridgeKey || !timingSafeEqualText(req.headers['x-intake-bridge-key'], bridgeKey)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const check = intake.validateSubmission({ channel, sender, file: req.file });
+    if (!check.ok) {
+      console.warn(`Pricing intake refused (${check.code}) on channel ${channel}`);
+      return res.status(check.status).json({ error: check.error, code: check.code });
+    }
+
+    try {
+      const result = await ingestInvoice(req.file, {
+        vendor_name: req.body.vendor_name,
+        invoice_number: req.body.invoice_number,
+        invoice_date: req.body.invoice_date
+      }, {
+        channel,
+        // The sender's identity is reduced to a fingerprint: the pipeline needs
+        // to know the channel and that it is the same sender, not the number.
+        senderRef: intake.senderFingerprint(channel, sender)
+      });
+
+      return res.json({
+        ok: true,
+        duplicate: Boolean(result.duplicate),
+        invoice_id: result.invoice.id,
+        lines: (result.lines || []).length,
+        // Wording the bridge can relay verbatim without overstating what happened.
+        message: intake.acknowledgement({
+          lineCount: (result.lines || []).length,
+          duplicate: Boolean(result.duplicate),
+          invoiceNumber: result.invoice.invoice_number,
+          ocrConfigured: ocr.isConfigured()
+        })
+      });
+    } catch (error) {
+      return fail(res, error, 'chat intake');
     }
   });
 
@@ -477,7 +551,7 @@ function createPricingRouter(options = {}) {
   // ── Legacy path kept for the existing Hermes integration ───────────────────
   router.post('/invoices/extract', limitWrites, authorize('manager'), upload.single('invoice'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'A supported PDF or image invoice is required' });
-    if (!ocrUrl) return res.status(503).json({ error: 'OCR is not configured', code: 'OCR_NOT_CONFIGURED' });
+    if (!ocr.isConfigured()) return res.status(503).json({ error: 'OCR is not configured', code: 'OCR_NOT_CONFIGURED' });
     try {
       return res.json(priceInvoice(await callOcr(req.file, req.body)));
     } catch (error) {
@@ -486,15 +560,10 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // Provider selection lives in pricing-ocr.js: Gemini when a key is set,
+  // otherwise the webhook contract from PR #32.
   async function callOcr(file, fields) {
-    const body = new FormData();
-    body.append('invoice', new Blob([file.buffer], { type: file.mimetype }), file.originalname);
-    body.append('vendor_name', fields.vendor_name || '');
-    body.append('invoice_number', fields.invoice_number || '');
-    const headers = ocrToken ? { Authorization: `Bearer ${ocrToken}` } : {};
-    const response = await fetchImpl(ocrUrl, { method: 'POST', headers, body, signal: AbortSignal.timeout(45000) });
-    if (!response.ok) throw new Error(`OCR service returned HTTP ${response.status}`);
-    return response.json();
+    return ocr.extractInvoice(file, fields, { fetch: fetchImpl });
   }
 
   router.use((error, _req, res, next) => {

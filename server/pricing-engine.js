@@ -2,15 +2,15 @@
 
 // Server-authoritative pricing math for the invoice pipeline.
 //
-// Two multipliers exist in the business today and they are NOT the same rule:
-//   - RETAIL_MULTIPLIER (1.70) is the AGENTS.md / vault rule used to derive an
-//     approved retail price from an invoice's cost per unit.
-//   - HUB_PREVIEW_MARKUP_PCT (65) is the Pricing Hub slider default used only to
-//     preview "what would this sell for?" in the browser. It never writes a price.
-// Unifying them is an open owner decision; until it is made, both stay explicit
-// and neither silently overrides a retail price a manager already approved.
+// One markup rule, locked by the owner on 2026-08-19: retail is cost x 1.70.
+//
+// These two constants are the same rule expressed two ways — a multiplier for
+// deriving an approved price, and a percentage for the hub's slider — and they
+// must stay in agreement. They used to disagree (1.70 in the vault, 65% in the
+// hub), which meant the browser previewed one price while the server approved
+// another; closing that gap is what the 2026-08-19 decision did.
 const RETAIL_MULTIPLIER = normalizeMultiplier(process.env.PRICING_RETAIL_MULTIPLIER, 1.70);
-const HUB_PREVIEW_MARKUP_PCT = 65;
+const HUB_PREVIEW_MARKUP_PCT = Math.round((RETAIL_MULTIPLIER - 1) * 100);
 
 // Reconciliation tolerance between an invoice's stated subtotal and the sum of
 // its extracted lines. Anything wider blocks approval.
