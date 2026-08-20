@@ -1,0 +1,22 @@
+"Reorder Now"
+UPC,Name,Department,"In Stock","Predicted Days","Count Threshold","Days Threshold"
+029243050092,"Allegra Thin Spaghetti","Grocery Non-Taxable",2,9,1,14
+029243050177,"Allegra Linguine No. 17","General Food",0,,1,14
+050000159918,"Nestle Carnation:Evaporated Lowfat 2% Milk","Grocery Non-Taxable",3,4,1,14
+074471000500,"Cafe Bustelo","General Food",4,12,1,14
+081864000511,"Hampton Farms Creamu Peanut Butter","General Food",5,11,1,14
+761720001875,"Mazola Oil","General Food",0,,1,14
+7891095006878,"Yoki Pre Cooked Corn Flour","Grocery Non-Taxable",4,12,1,14
+818848020018,Spaguetl,"General Food",0,,1,14
+818848020667,"Doria fettuccine","General Food",1,,1,14
+" "
+" "
+"Reorder Soon"
+UPC,Name,Department,"In Stock","Predicted Days","Count Threshold","Days Threshold"
+028000184292,"Nescafe colombia","General Food",2,14,1,14
+029243050085,"Allegra Spaghetti 8","Grocery Non-Taxable",5,18,1,14
+041387613582,4C:Itm-Sugar-Lemon,"General Food",2,15,1,14
+048001711273,"Maizena Fecula De Maiz","General Food",9,14,1,14
+049200007228,"Domino:Pure Cane Granulated w/Spout","General Food",5,20,1,14
+" "
+" "
