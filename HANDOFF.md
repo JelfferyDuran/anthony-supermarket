@@ -43,6 +43,19 @@ Password (config at `~/.config/himalaya/config.toml`).
 - `docs/skills/product-price-monitor.md` — price-watch/watchdog patterns
   (silent unless change; baseline before scheduling).
 
+## Bots (2026-08-20 update)
+
+- `server/invoice-bot.js` — **standalone invoice bot** (@Anthonysinvoicebot,
+  token `ANTHONY_INVOICE_BOT_TOKEN` in server/.env). Own long-poll loop, zero
+  kitchen code. PDF/photo → vault RAW_UPLOADS save → POST /api/pricing/invoices
+  (dedupe + OCR + 70% pricing) → reply to sender → Hermes sync (home channel +
+  `nrs/invoice-sync.jsonl` queue). Allowlist = PRICING_TELEGRAM_CHAT_IDS +
+  HERMES_CHAT_ID.
+- The kitchen/ordering bot (index.js TELEGRAM_TOKEN) is DISABLED — server/.env
+  has no TELEGRAM_TOKEN, so @Anthonysuperkitchen_bot code does not run. The
+  invoice bot owns the invoice token exclusively (no getUpdates conflict).
+- Restart-safe: kfs-os-bootstrap.sh 4b (hub), 4b2 (invoice bot), 4c (OCR).
+
 ## DB state — TREAT AS DIRTY, do a clean slate
 
 An earlier import run inserted 35 batches with WRONG data (UPC-as-item-name,
