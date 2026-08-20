@@ -322,6 +322,11 @@ tbody tr.row{cursor:pointer}
     </div>
 
     <div class="qcard">
+      <div class="qhead"><span class="qtitle">Manager sign-in</span><span class="qmeta" id="authStatus"></span></div>
+      <div id="authBox" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+    </div>
+
+    <div class="qcard">
       <div class="qhead"><span class="qtitle">Upload an invoice</span><span class="qmeta" id="intakeAccepts"></span></div>
       <div class="ctrl-row">
         <div class="field grow">
@@ -451,6 +456,13 @@ const VENDORS = {
     "90772340":{label:"#90772340 — 8/19/26"},
     "90772444":{label:"#90772444 — 8/19/26"},
     "90772312":{label:"#90772312 — 8/19/26"} }},
+  "Amaro Food Enterprises": { label:"Amaro Food Enterprises", invoices:{ "1671390":{label:"#1671390 — 8/6/26"} } },
+  "JCC Ganoza LLC": { label:"JCC Ganoza LLC", invoices:{ "012830":{label:"#012830 — 8/6/26"} } },
+  "NACfoods": { label:"NACfoods", invoices:{ "3057:5":{label:"#3057:5 — 8/6/26"} } },
+  "TAINO Trading Corp": { label:"TAINO Trading Corp", invoices:{ "27810":{label:"#27810 — 8/6/26"} } },
+  "GOYA Foods": { label:"GOYA Foods", invoices:{ "27727700":{label:"#27727700 — 8/5/26"} } },
+  "Peru Food": { label:"Peru Food", invoices:{ "0271478-00":{label:"#0271478-00 — 8/4/26"} } },
+  "Peruvian Import Co": { label:"Peruvian Import Co", invoices:{ "INVNJ23126":{label:"#INVNJ23126 — 8/4/26"}, "INVNJ23127":{label:"#INVNJ23127 — 8/4/26"} } },
 };
 
 const ALL_ITEMS = [
@@ -622,6 +634,143 @@ const ALL_ITEMS = [
   {id:219,itemNo:"2937",name:'Mama Tere Pulpa Guayaba (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:22.95, units:12, costPerUnit:1.9125, retail:2.99, internal:false},
   {id:220,itemNo:"2936",name:'Mama Tere Pulpa Guanabana (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:38.95, units:12, costPerUnit:3.2458, retail:5.99, internal:false},
   {id:221,itemNo:"1155",name:'Florida Tuna in vegetable Oil 3pk',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772312', boxes:1, boxPrice:0.00, units:16, costPerUnit:0.0000, retail:4.99, internal:false, flagged:true},
+  {id:222,itemNo:"—",name:"1/4 Legs Reg Medium HOR",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:30.4000, units:1, costPerUnit:30.4000, retail:51.99, internal:false},
+  {id:223,itemNo:"3303",name:"Rib Belle Hat CH #1757",cat:"Pantry",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:48.8200, units:1, costPerUnit:48.8200, retail:82.99, internal:false},
+  {id:224,itemNo:"3511",name:"Mazita Cushion Hat c/v # 16",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:36.8100, units:1, costPerUnit:36.8100, retail:62.99, internal:false},
+  {id:225,itemNo:"5502",name:"Chulera Ahumada Hat # 2301 Catchuts: 20.80",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:76.7500, units:1, costPerUnit:76.7500, retail:129.99, internal:false},
+  {id:226,itemNo:"—",name:"Universal Gelatina Fresa x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:16.5000, units:12, costPerUnit:1.3750, retail:1.99, internal:false},
+  {id:227,itemNo:"—",name:"Universal Gelatina Pi\u00f1a x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:16.5000, units:12, costPerUnit:1.3750, retail:1.99, internal:false},
+  {id:228,itemNo:"—",name:"Colapiz Universal x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:18.0000, units:12, costPerUnit:1.5000, retail:2.99, internal:false},
+  {id:229,itemNo:"—",name:"Sublime Chocolate x 24",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:3, boxPrice:18.0000, units:24, costPerUnit:0.7500, retail:0.99, internal:false},
+  {id:230,itemNo:"—",name:"Galleta Soda San Jorge Caja 7-pack x 4",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:6, boxPrice:7.0000, units:4, costPerUnit:1.7500, retail:2.99, internal:false},
+  {id:231,itemNo:"—",name:"Galleta Soda San Jorge Gourmet Caja x 12",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:4, boxPrice:12.0000, units:12, costPerUnit:1.0000, retail:1.99, internal:false},
+  {id:232,itemNo:"—",name:"Sibarita Sazon 6 Pack 8.4 Gr x 50 Unidades",cat:"Spices & Condiments",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:65.0000, units:50, costPerUnit:1.3000, retail:1.99, internal:false},
+  {id:233,itemNo:"—",name:"Vitalina Linaza 20 OZ x 12",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:234,itemNo:"—",name:"Vitalina Linaza Pi\u00f1a 20 OZ x 12",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:235,itemNo:"—",name:"Chicha Lime\u00f1a 20 OZ x 24",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:36.0000, units:24, costPerUnit:1.5000, retail:2.99, internal:false},
+  {id:236,itemNo:"—",name:"Guarana Backus 450 ML x 15",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:16.5000, units:15, costPerUnit:1.1000, retail:1.99, internal:false},
+  {id:237,itemNo:"—",name:"Chicha Lime\u00f1a 64 OZ x 8",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:5, boxPrice:24.0000, units:8, costPerUnit:3.0000, retail:4.99, internal:false},
+  {id:238,itemNo:"—",name:"Vitalina Linaza 64OZ x 8",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:24.0000, units:8, costPerUnit:3.0000, retail:4.99, internal:false},
+  {id:239,itemNo:"—",name:"Kola Inglesa 2 Lt x 6",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:12.0000, units:6, costPerUnit:2.0000, retail:2.99, internal:false},
+  {id:240,itemNo:"M203",name:"M9.5-CLOVES 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:38.9200, units:12, costPerUnit:3.2433, retail:5.99, internal:false},
+  {id:241,itemNo:"M413",name:"M28-GROUND CINNAMON 6/12 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:2, boxPrice:26.0000, units:6, costPerUnit:4.3333, retail:6.99, internal:false},
+  {id:242,itemNo:"PC306",name:"PEPITO CHILI GUAJILLO 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:243,itemNo:"PC301",name:"PEPITO CHILI ARBOL 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:17.0800, units:12, costPerUnit:1.4233, retail:1.99, internal:false},
+  {id:244,itemNo:"PC405",name:"PEPITO CHILI GUAJILLO 12/8 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:35.0200, units:12, costPerUnit:2.9183, retail:4.99, internal:false},
+  {id:245,itemNo:"PC328",name:"PEPITO CORN HUSK 12/6 OZ",cat:"Canned Goods",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:57.6000, units:12, costPerUnit:4.8000, retail:7.99, internal:false},
+  {id:246,itemNo:"PS534",name:"PEPITO HIBISCUS FLOWER 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:22.0000, units:12, costPerUnit:1.8333, retail:2.99, internal:false},
+  {id:247,itemNo:"PS518",name:"PEPITO CINNAMON STICKS MEXICAN 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:38.9200, units:12, costPerUnit:3.2433, retail:5.99, internal:false},
+  {id:248,itemNo:"PS136",name:"PEPITO CLOVES WHOLE 12/5 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:249,itemNo:"PS517",name:"PEPITO CINNAMON STICK 12/75 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:250,itemNo:"PS176",name:"PEPITO ALLSPICE WHOLE 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:251,itemNo:"PS179",name:"PEPITO BLACK PEPPER GROUND 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:252,itemNo:"PS178",name:"PEPITO BLACK PEPPER WHOLE 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:13.9600, units:12, costPerUnit:1.1633, retail:1.99, internal:false},
+  {id:253,itemNo:"PS679",name:"PEPITO HOJA DE GUANABANA 12.5 OZ 70742590086",cat:"Pantry",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:19.7000, units:1, costPerUnit:19.7000, retail:32.99, internal:false},
+  {id:254,itemNo:"PS649",name:"PEPITO AVOCADO LEAVES 12/8 OZ",cat:"Pantry",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:19.7000, units:12, costPerUnit:1.6417, retail:2.99, internal:false},
+  {id:255,itemNo:"01034745571226",name:"Azucar Domino (Blanca) 4lb 10/1",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:3, boxPrice:41.8200, units:10, costPerUnit:4.1820, retail:6.99, internal:false},
+  {id:256,itemNo:"0787545052823",name:"Baldom Ajo En Pasta 12/8oz",cat:"Spices & Condiments",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:32.5000, units:12, costPerUnit:2.7083, retail:4.99, internal:false},
+  {id:257,itemNo:"7410003710555",name:"Biokemical Artribion 20/4",cat:"Health",vendor:"TAINO Trading Corp", invoice:"27810", boxes:2, boxPrice:24.9500, units:20, costPerUnit:1.2475, retail:1.99, internal:false},
+  {id:258,itemNo:"074471017201",name:"Cafe Bustelo Brick (Paq) 10oz 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:148.9500, units:24, costPerUnit:6.2062, retail:10.99, internal:false},
+  {id:259,itemNo:"10748325000561",name:"Cafe Santo Domingo 10oz (Lata) 12/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:105.0000, units:12, costPerUnit:8.7500, retail:14.99, internal:false},
+  {id:260,itemNo:"0786119000680",name:"Campesino Salami Short 16oz 20/1",cat:"Meat",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:73.5000, units:20, costPerUnit:3.6750, retail:5.99, internal:false},
+  {id:261,itemNo:"00050000015016",name:"Carnation Evapov Milk 24/12oz",cat:"Dairy",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:37.5000, units:24, costPerUnit:1.5625, retail:2.99, internal:false},
+  {id:262,itemNo:"7461063",name:"Casabe Mechi 10/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:23.5000, units:10, costPerUnit:2.3500, retail:3.99, internal:false},
+  {id:263,itemNo:"71016440054",name:"Casabe Soy Dominicano 10/10oz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:25.5000, units:10, costPerUnit:2.5500, retail:3.99, internal:false},
+  {id:264,itemNo:"0790330061023",name:"Choco Rica Gd 12/1lt (32oz)",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:41.5000, units:12, costPerUnit:3.4583, retail:5.99, internal:false},
+  {id:265,itemNo:"764090024031",name:"Chocolate Embajador 36/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:84.5000, units:36, costPerUnit:2.3472, retail:3.99, internal:false},
+  {id:266,itemNo:"089087671525",name:"Country Club Merengue 2lt 8/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:16.7500, units:8, costPerUnit:2.0938, retail:3.99, internal:false},
+  {id:267,itemNo:"051202008295",name:"Country Club Uva 12oz 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:23.5000, units:24, costPerUnit:0.9792, retail:1.99, internal:false},
+  {id:268,itemNo:"767556901068",name:"Domino Blanco",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:6, boxPrice:4.7500, units:1, costPerUnit:4.7500, retail:7.99, internal:false},
+  {id:269,itemNo:"0895605601116",name:"Estelar Salami Super Especial 2lb 12/1",cat:"Meat",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:124.0000, units:12, costPerUnit:10.3333, retail:17.99, internal:false},
+  {id:270,itemNo:"10753079000422",name:"Galletas Dino Chocolate 18/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:51.7500, units:18, costPerUnit:2.8750, retail:4.99, internal:false},
+  {id:271,itemNo:"0021882002890",name:"Galletas La Paloma 16/1loz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:47.9500, units:16, costPerUnit:2.9969, retail:4.99, internal:false},
+  {id:272,itemNo:"051228637769",name:"Guarina Wafer Fresa 21/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:41.0000, units:21, costPerUnit:1.9524, retail:2.99, internal:false},
+  {id:273,itemNo:"021882002722",name:"Kika Crackers (Galleta) 16/1loz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:47.9500, units:16, costPerUnit:2.9969, retail:4.99, internal:false},
+  {id:274,itemNo:"0858037006034",name:"La Constanzera Azucar Brown 2lb 12/1",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:30.5000, units:12, costPerUnit:2.5417, retail:3.99, internal:false},
+  {id:275,itemNo:"104800171127",name:"Maizena Fecula De Maiz 24/14oz",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:58.2500, units:24, costPerUnit:2.4271, retail:3.99, internal:false},
+  {id:276,itemNo:"718791808155",name:"Mango Best (Gd) 946ml 6/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:19.9500, units:6, costPerUnit:3.3250, retail:5.99, internal:false},
+  {id:277,itemNo:"718791808254",name:"Mango Best (Peq) 246ml 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:24.5000, units:24, costPerUnit:1.0208, retail:1.99, internal:false},
+  {id:278,itemNo:"837464000204",name:"Mini Pan Original 12/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:22.9000, units:12, costPerUnit:1.9083, retail:2.99, internal:false},
+  {id:279,itemNo:"072728002062",name:"Pasta de Tomate Victorina 29oz",cat:"Spices & Condiments",vendor:"TAINO Trading Corp", invoice:"27810", boxes:2, boxPrice:31.2500, units:1, costPerUnit:31.2500, retail:52.99, internal:false},
+  {id:280,itemNo:"10030600229961",name:"Pringles Original (Gd) 5.5oz 14/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:30.0000, units:14, costPerUnit:2.1429, retail:3.99, internal:false},
+  {id:281,itemNo:"00038000845635",name:"Pringles Original 2.5oz (Med) 12/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:14.9500, units:12, costPerUnit:1.2458, retail:1.99, internal:false},
+  {id:282,itemNo:"1312",name:"PERDIGON OLIVES 20 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:41.9500, units:1, costPerUnit:41.9500, retail:70.99, internal:false, flagged:true},
+  {id:283,itemNo:"1331",name:"STUFF MANZANILLA OLIVES",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:37.5000, units:1, costPerUnit:37.5000, retail:63.99, internal:false, flagged:true},
+  {id:284,itemNo:"2001",name:"GREEN PIGEON PEAS 15 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.9500, units:1, costPerUnit:33.9500, retail:57.99, internal:false, flagged:true},
+  {id:285,itemNo:"2003",name:"GREEN PIGEON PEAS 29 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.4500, units:1, costPerUnit:33.4500, retail:56.99, internal:false, flagged:true},
+  {id:286,itemNo:"2146",name:"SOFRITO 12 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:287,itemNo:"2148",name:"SOFRITO 6 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:32.9500, units:1, costPerUnit:32.9500, retail:55.99, internal:false, flagged:true},
+  {id:288,itemNo:"2353",name:"CANNED BLACK BEANS 46 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:35.5000, units:1, costPerUnit:35.5000, retail:59.99, internal:false, flagged:true},
+  {id:289,itemNo:"2390",name:"ROMAN BEANS 46 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:2, boxPrice:35.5000, units:1, costPerUnit:35.5000, retail:59.99, internal:false, flagged:true},
+  {id:290,itemNo:"2410",name:"DARK RED KIDNEY BEANS 12",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:291,itemNo:"2420",name:"SMALL RED BEANS 5.5 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.7500, units:1, costPerUnit:26.7500, retail:44.99, internal:false, flagged:true},
+  {id:292,itemNo:"2452",name:"SMALL WHITE BEANS 29 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:293,itemNo:"2456",name:"GOYA LENTIL BEANS 15.5 O",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.7500, units:1, costPerUnit:26.7500, retail:44.99, internal:false, flagged:true},
+  {id:294,itemNo:"2465",name:"BLACK BEANS 29 OZ (1 LB",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:295,itemNo:"2469",name:"BLACK BEANS 10.5. OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.9500, units:1, costPerUnit:24.9500, retail:41.99, internal:false, flagged:true},
+  {id:296,itemNo:"2486",name:"SMALL RED BEANS 1 LB",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.9500, units:1, costPerUnit:33.9500, retail:57.99, internal:false, flagged:true},
+  {id:297,itemNo:"2503",name:"FRIJOL DE SEDA 1 LE",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:53.9500, units:1, costPerUnit:53.9500, retail:91.99, internal:false, flagged:true},
+  {id:298,itemNo:"2517",name:"CENTRAL AMERICAN RED BEA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:53.5000, units:1, costPerUnit:53.5000, retail:90.99, internal:false, flagged:true},
+  {id:299,itemNo:"2556",name:"WHOLE KERNEL CORN 15.25",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:27.5000, units:1, costPerUnit:27.5000, retail:46.99, internal:false, flagged:true},
+  {id:300,itemNo:"2569",name:"SLICED BEETS 15.OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:301,itemNo:"2573",name:"SLICED CARROTS 14.5 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:302,itemNo:"2617",name:"GOYA JASMINE RICE 20 LB",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:303,itemNo:"2619",name:"JASMINE RICE 10 LB",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:58.9500, units:1, costPerUnit:58.9500, retail:99.99, internal:false, flagged:true},
+  {id:304,itemNo:"2634",name:"CANILLA LONG GRAIN RICE",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:22.9500, units:1, costPerUnit:22.9500, retail:38.99, internal:false, flagged:true},
+  {id:305,itemNo:"2637",name:"CANILLA LONG GRAIN RICE",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:40.3500, units:1, costPerUnit:40.3500, retail:68.99, internal:false, flagged:true},
+  {id:306,itemNo:"2824",name:"GUANABANA NECTAR",cat:"Beverages",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:32.9500, units:1, costPerUnit:32.9500, retail:55.99, internal:false, flagged:true},
+  {id:307,itemNo:"3069",name:"LIME JUICE 12/32 FL. OZ.",cat:"Beverages",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:31.5000, units:12, costPerUnit:2.6250, retail:3.99, internal:false},
+  {id:308,itemNo:"3613",name:"OVAL SARDINE TMTO SAUCE",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:309,itemNo:"50512",name:"BARDINE INTO HOT-TINAPA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:35.9500, units:1, costPerUnit:35.9500, retail:60.99, internal:false, flagged:true},
+  {id:310,itemNo:"37",name:"SAZON CENTRO/ACHTE JUMB",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:60.8000, units:1, costPerUnit:60.8000, retail:102.99, internal:false, flagged:true},
+  {id:311,itemNo:"36",name:"SAZON CENTRO / ACHTE",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:44.5500, units:1, costPerUnit:44.5500, retail:75.99, internal:false, flagged:true},
+  {id:312,itemNo:"FREC",name:"COYA ADOBO CON P-IMIENTA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:66.5000, units:1, costPerUnit:66.5000, retail:112.99, internal:false, flagged:true},
+  {id:313,itemNo:"200",name:"GOYA MONO-BOW 20/7 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:11.9500, units:20, costPerUnit:0.5975, retail:0.99, internal:false},
+  {id:314,itemNo:"PQ",name:"GOYA SODA CRACKERS 24 0",cat:"Snacks",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:37.9500, units:1, costPerUnit:37.9500, retail:64.99, internal:false, flagged:true},
+  {id:315,itemNo:"—",name:"RIGATONI 16 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:316,itemNo:"—",name:"ELBOWS 16 07",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:317,itemNo:"—",name:"FIDELINT 12 DZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.8500, units:1, costPerUnit:24.8500, retail:41.99, internal:false, flagged:true},
+  {id:318,itemNo:"6975",name:"CABELLO DE ANGEL 12 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.3500, units:1, costPerUnit:24.3500, retail:40.99, internal:false, flagged:true},
+  {id:319,itemNo:"—",name:"MARIA J PACK (FLOW PACK)",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:25.7500, units:1, costPerUnit:25.7500, retail:43.99, internal:false, flagged:true},
+  {id:320,itemNo:"—",name:"LADY FINGERS 701",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:18.9500, units:1, costPerUnit:18.9500, retail:31.99, internal:false, flagged:true},
+  {id:321,itemNo:"53:",name:"NESTLE MEDIA CREMA 7.6 0",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:81.5000, units:1, costPerUnit:81.5000, retail:138.99, internal:false, flagged:true},
+  {id:322,itemNo:"—",name:"NIDO POWDERED MICK 12 69",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:51.9500, units:1, costPerUnit:51.9500, retail:87.99, internal:false, flagged:true},
+  {id:323,itemNo:"E538",name:"NIDO 1+KINDER CRECIMIENT",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:54.5000, units:1, costPerUnit:54.5000, retail:92.99, internal:false, flagged:true},
+  {id:324,itemNo:"6502",name:"NESTUM WHEAT AND RUIT",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:74.5000, units:1, costPerUnit:74.5000, retail:126.99, internal:false, flagged:true},
+  {id:325,itemNo:"6475",name:"SUYA DORADAS CRACKERS 10",cat:"Snacks",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:19.2500, units:1, costPerUnit:19.2500, retail:32.99, internal:false, flagged:true},
+  {id:326,itemNo:"51838",name:"MORADO 6* 54 ONZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:52.0000, units:1, costPerUnit:52.0000, retail:87.99, internal:false},
+  {id:327,itemNo:"51845",name:"MAIZ CHULPE - CHULPE CORN 6 X 54 OZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:45.9700, units:1, costPerUnit:45.9700, retail:77.99, internal:false},
+  {id:328,itemNo:"51940",name:"BLACK OLIVES IN BRINES (12*20 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:55.0000, units:1, costPerUnit:55.0000, retail:93.99, internal:false},
+  {id:329,itemNo:"51426",name:"PERU FOOD PEACH IN HALVES 12*29.10 OZ",cat:"Canned Goods",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:30.6800, units:1, costPerUnit:30.6800, retail:51.99, internal:false},
+  {id:330,itemNo:"51835",name:"PERU FOO MAIZ CANCHA CARGUAY (24X150Z)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:38.7800, units:1, costPerUnit:38.7800, retail:65.99, internal:false},
+  {id:331,itemNo:"51969",name:"PERU TRIGO PELADO-PEELED WHEAT (24*15 OZ)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:36.7300, units:1, costPerUnit:36.7300, retail:61.99, internal:false},
+  {id:332,itemNo:"51974",name:"PERU SEMOLA - SEMOLIN 24*15 OZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:36.9300, units:1, costPerUnit:36.9300, retail:62.99, internal:false},
+  {id:333,itemNo:"51996",name:"PERU FIDEO CHINO - CHINESE NOODLES (30*8.8 OZ)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:39.9900, units:1, costPerUnit:39.9900, retail:67.99, internal:false},
+  {id:334,itemNo:"51049A",name:"GLORIA EVAPORATED MILK (24*12FL OZ)",cat:"Dairy",vendor:"Peru Food", invoice:"0271478-00", boxes:5, boxPrice:30.0000, units:1, costPerUnit:30.0000, retail:50.99, internal:false},
+  {id:335,itemNo:"51227",name:"FRESA GELATINA - STRAWBERRY JELLY (12*5.30Z)",cat:"Desserts",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:20.2700, units:1, costPerUnit:20.2700, retail:33.99, internal:false},
+  {id:336,itemNo:"51631A",name:"PERU FOOD GROUND BLACK PEPPER // PIMIENTA (24*1.5",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:39.7300, units:1, costPerUnit:39.7300, retail:67.99, internal:false},
+  {id:337,itemNo:"51998",name:"PERU SIYAU KIKKO-SOY SAUCE 30*500 ML",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:34.6800, units:1, costPerUnit:34.6800, retail:58.99, internal:false},
+  {id:338,itemNo:"51822",name:"PERU FOOD CANELA Y CLAVO (24*1.15 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:25.4900, units:1, costPerUnit:25.4900, retail:42.99, internal:false},
+  {id:339,itemNo:"51871",name:"ROCOTO PASTA-RED HOT PEPPER PASTE (12*15.00 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:35.5300, units:1, costPerUnit:35.5300, retail:59.99, internal:false},
+  {id:340,itemNo:"51876",name:"MILD PANCA PEPPER // AJI PANCA POCO PIQUE 12*15 OZ",cat:"Snacks",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:38.0700, units:1, costPerUnit:38.0700, retail:64.99, internal:false},
+  {id:341,itemNo:"I-041",name:"INCA'S FOOD Haba Frita 24x4oz (113g) - Salty Fried Fava Beans",cat:"Canned Goods",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:32.4000, units:1, costPerUnit:32.4000, retail:54.99, internal:false},
+  {id:342,itemNo:"I-7662",name:"INCA'S FOOD Aji Panca Especial Pasta 24x7.5oz (212.6g) - Panca Pepper Paste NOT SPICY",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:44.4000, units:1, costPerUnit:44.4000, retail:74.99, internal:false},
+  {id:343,itemNo:"I-7478",name:"INCA'S FOOD Aji Panca Especial Pasta Etiqueta Negra 12x15oz (425g) - Panca Pepper Paste Special Black Label",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:35.8800, units:1, costPerUnit:35.8800, retail:60.99, internal:false},
+  {id:344,itemNo:"I-7479",name:"INCA'S FOOD Aji Amarillo Especial Pasta Etiqueta Negra 12x15oz (425g) - Yellow Hot Pepper Paste Special Black Label",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:51.4800, units:1, costPerUnit:51.4800, retail:87.99, internal:false},
+  {id:345,itemNo:"I-237",name:"INCA'S FOOD Aderezo Adobo de Cerdo Etiqueta Negra 12x15oz (425g) - Pork Adobo Marinade",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.4800, units:1, costPerUnit:39.4800, retail:66.99, internal:false},
+  {id:346,itemNo:"I-044",name:"INCA'S FOOD Ajo Pasta Familiar 12x15.7oz (445g) - Garlic Paste Family Size",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:53.8800, units:1, costPerUnit:53.8800, retail:91.99, internal:false},
+  {id:347,itemNo:"I-7665",name:"INCA'S FOOD Olluco Picado Lata 12x20oz (567g) - Sliced Ollucus (Melloco) Can",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.0000, units:1, costPerUnit:39.0000, retail:65.99, internal:false},
+  {id:348,itemNo:"I-146",name:"INCA'S FOOD Ajo Pasta 24x7.5oz (212.6g) - Garlic Paste",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:58.8000, units:1, costPerUnit:58.8000, retail:99.99, internal:false},
+  {id:349,itemNo:"CAS-543",name:"VICTORIA Galleta Casino Menta 8xPack6x1.52oz (258g) - Mint Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:11.9200, units:1, costPerUnit:11.9200, retail:19.99, internal:false},
+  {id:350,itemNo:"CAS-567",name:"VICTORIA Galleta Casino Lucuma 8xPack6x1.52oz (258g) - Lucuma Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:11.9200, units:1, costPerUnit:11.9200, retail:19.99, internal:false},
+  {id:351,itemNo:"GN-383",name:"GN Galleta Rellenita Chocolate 5xPack8x1.27oz (288g) - Chocolate Sandwich Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:2, boxPrice:7.9500, units:1, costPerUnit:7.9500, retail:13.99, internal:false},
+  {id:352,itemNo:"GN-376",name:"GN Galleta Rellenita Coco 5xPack8x1.27oz (288g) - Coconut Sandwich Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:2, boxPrice:7.9500, units:1, costPerUnit:7.9500, retail:13.99, internal:false},
+  {id:353,itemNo:"I-552",name:"INCA'S FOOD Trigo Resbalado 24x15oz (425g) - Hulled Wheat",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.6000, units:1, costPerUnit:39.6000, retail:66.99, internal:false},
+  {id:354,itemNo:"I-160",name:"INCA'S FOOD Harina de Chuno 12x12oz (340g) - Chuno Flour",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:20.2800, units:1, costPerUnit:20.2800, retail:33.99, internal:false},
+  {id:355,itemNo:"I-551",name:"INCA'S FOOD Trigo Pelado 24x15oz (425g) - Dried Hulled Wheat",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:42.0000, units:1, costPerUnit:42.0000, retail:70.99, internal:false},
+  {id:356,itemNo:"I-7174",name:"INCA'S FOOD Maiz Morado Familiar 8x3lb (1.36kg) - Dried Purple Corn Family Size",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:54.3200, units:1, costPerUnit:54.3200, retail:91.99, internal:false},
+  {id:357,itemNo:"I-7633",name:"INCA'S FOOD Bebida Chia Maracuya 12x16fl oz (473mL) - Chia Passion Fruit Drink",cat:"Beverages",vendor:"Peruvian Import Co", invoice:"INVNJ23127", boxes:1, boxPrice:19.0800, units:1, costPerUnit:19.0800, retail:31.99, internal:false},
+  {id:358,itemNo:"I-919",name:"INCA'S FOOD Bebida Chicha de Jora 12x16fl oz (473mL) - Corn Jora Drink",cat:"Beverages",vendor:"Peruvian Import Co", invoice:"INVNJ23127", boxes:1, boxPrice:16.2000, units:1, costPerUnit:16.2000, retail:27.99, internal:false},
 ];
 
 // ════════ CONFIG ════════
@@ -716,10 +865,13 @@ function showToast(message){
 // Every call is best-effort. A failure downgrades the hub to offline mode and is
 // reported in the banner; it never throws into the render path.
 async function api(path, options){
+  const token = localStorage.getItem('pricingToken') || '';
   const response = await fetch(API_BASE+path, {
     credentials:'same-origin',
     ...options,
-    headers:{ 'Content-Type':'application/json', ...(options&&options.headers) }
+    headers:{ 'Content-Type':'application/json',
+      ...(token ? { Authorization:'Bearer '+token } : {}),
+      ...(options&&options.headers) }
   });
   if(!response.ok){
     let detail = 'HTTP '+response.status;
@@ -882,6 +1034,7 @@ function render(){
   renderVariance();
   renderExportCounts();
   renderIntakeAvailability();
+  renderAuth();
   renderFinancials();
 }
 
@@ -900,6 +1053,45 @@ function renderIntakeAvailability(){
   if(status && !live && !status.dataset.sticky){
     status.textContent = 'Connect to the pricing database and sign in as a manager to upload invoices.';
   }
+}
+
+function renderAuth(){
+  const box = $('authBox'), st = $('authStatus');
+  if(!box) return;
+  const token = localStorage.getItem('pricingToken') || '';
+  const email = localStorage.getItem('pricingEmail') || '';
+  const inp = 'padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg1);color:var(--ink-2);font-size:13px;min-width:170px';
+  if(token){
+    box.innerHTML = '<b style="font-size:13px;color:var(--ink-2)">Signed in as '+esc(email||'manager')+'</b>'
+      + '<button class="btn" id="authOut" type="button" style="margin-left:auto">Sign out</button>';
+    const out = $('authOut');
+    if(out) out.onclick = ()=>{ localStorage.removeItem('pricingToken'); localStorage.removeItem('pricingEmail'); render(); connect(); };
+    if(st) st.textContent = 'live session — edits propose, approval persists';
+    return;
+  }
+  box.innerHTML = '<input type="email" id="authEmail" placeholder="manager@email" style="'+inp+'" autocomplete="username">'
+    + '<input type="password" id="authPass" placeholder="password" style="'+inp+'" autocomplete="current-password">'
+    + '<button class="btn primary" id="authLogin" type="button">Sign in</button>'
+    + '<button class="btn" id="authLocal" type="button" title="Keep using the catalog embedded in this file">Use local data</button>';
+  const lg = $('authLogin');
+  if(lg) lg.onclick = async ()=>{
+    const em = $('authEmail').value.trim(), pw = $('authPass').value;
+    if(!em || !pw) return;
+    lg.disabled = true;
+    if(st) st.textContent = 'signing in…';
+    try{
+      const r = await api('/login', { method:'POST', body: JSON.stringify({ email: em, password: pw }) });
+      localStorage.setItem('pricingToken', r.token);
+      localStorage.setItem('pricingEmail', r.email || em);
+      if(st) st.textContent = 'signed in as '+(r.role||'manager');
+      render(); connect();
+    }catch(e){
+      if(st) st.textContent = 'sign-in failed: '+e.message;
+      lg.disabled = false;
+    }
+  };
+  const ll = $('authLocal');
+  if(ll) ll.onclick = ()=>{ setConnection('local','Using the catalog stored in this file.'); render(); };
 }
 
 function renderMasthead(){

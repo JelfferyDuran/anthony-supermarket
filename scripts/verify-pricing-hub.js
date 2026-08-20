@@ -28,7 +28,7 @@ chk(!!VENDORS["Hershey's Ice Cream"].invoices.INVE0023460478, 'VENDORS has invoi
 chk(!!VENDORS["Family Food Distributors"], "VENDORS has Family Food Distributors");
 chk(!!VENDORS["Family Food Distributors"].invoices["90747231"] && !!VENDORS["Family Food Distributors"].invoices["90747476"] && !!VENDORS["Family Food Distributors"].invoices["90772340"] && !!VENDORS["Family Food Distributors"].invoices["90772444"] && !!VENDORS["Family Food Distributors"].invoices["90772312"], 'VENDORS has all 5 FFD invoices');
 chk(!!VENDORS["Family Food"] === false, 'Legacy "Family Food" vendor key removed (merged)');
-chk(Array.isArray(ALL_ITEMS) && ALL_ITEMS.length === 157, 'ALL_ITEMS length = 157 (105 prior + 52 new; got ' + ALL_ITEMS.length + ')');
+chk(Array.isArray(ALL_ITEMS) && ALL_ITEMS.length === 294, 'ALL_ITEMS length = 294 (157 prior + 137 from 08/19 bundle; got ' + ALL_ITEMS.length + ')');
 
 const hers = ALL_ITEMS.filter(i => i.vendor === "Hershey's Ice Cream");
 chk(hers.length === 12, "Hershey's items = 12 (got " + hers.length + ')');

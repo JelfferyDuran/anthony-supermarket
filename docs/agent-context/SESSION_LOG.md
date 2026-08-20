@@ -159,3 +159,10 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: POS tables follow the same deny-by-default RLS posture (RLS on, zero policies, no anon/authenticated grants). Importing sales requires an identified approver — a shared operator token is refused. Voids and refunds are retained and flagged rather than deleted, preserving the leak-detection record. Rollback is `git revert`; nothing was applied to production.
 - PR/issue/commit: PR #39 (draft), same branch.
 - Next safe action: confirm the NRS export column names against one real file, then apply the three migrations + seed to Supabase in order and run one real invoice and one real POS export end to end.
+
+## 2026-08-19 — Invoice bundle 08/19 (8 invoices, 6 vendors) integrated
+- OCR'd 11-page bundle via live webhook (port 8799) → 8 invoices: Amaro #1671390, JCC Ganoza #012830, NACfoods #3057:5, TAINO #27810, GOYA #27727700 (2pp), Peru Food #0271478-00, Peruvian Import #INVNJ23126 + #INVNJ23127.
+- Bundle $5,510.54 | 137 lines | 171 cases | all 6 vendors NEW to hub.
+- Owner corrections: AMARO Rib Belly $48.82, Masita $36.81 → line sum $192.78 vs printed $192.73 (subtract $0.05). GOYA line sum $1,694.25 vs printed $1,686.28 (subtract $7.97). Owner rule: use printed total.
+- Hub: +137 items (ids 222–358) at 70% markup; 294 total; verifier updated (294) + ALL PASSED; root pricing-hub synced.
+- Vault: bundle PDF → RAW_UPLOADS; 8 processed CSVs + audits; 137 price-history baselines; register now 17 invoices / $12,851.20; 44 GOYA pack-size exceptions open.
