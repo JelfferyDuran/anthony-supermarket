@@ -46,3 +46,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Next safe action: review and merge the PR, confirm GH Pages deploy, then continue Phase 2A kitchen dashboard (PR #21) per owner sequencing.
 
 - 2026-08-10: Added NRS POS daily sales intelligence pipeline (`nrs/`). Analyzer (nrs-analyze.py) reads NRS portal CSV exports from nrs/inbox/, computes daily KPIs + leak flags (voids/refunds/no-sales/discounts/cashier stats/trend anomalies), appends to nrs/data/daily_history.json, writes briefing to nrs/reports/. Daily Hermes cron "Anthony's NRS Daily Sales Report" (07:30 ET) attempts browser fetch of mystore.nrsplus.com CSV Download report, falls back to manual inbox drop. Creds go in nrs/.env (NRS_USER/NRS_PASS, gitignored).
+
+## 2026-08-19 20:26 ET — Codex
+- Goal: deliver Pricing Hub V3 "Catalog Arcade" for Anthony's Supermarket with a restrained game layer, pricing auditability, and backend hardening.
+- Changed: added `docs/agent-context/PHASE3_PLAN.md` and `docs/agent-context/PHASE3_PR_DESCRIPTION.md`; extended `apps/pricing-hub/index.html` with manager sign-in, XP/level/streak/badge dashboard cards, margin watch, activity feed, vendor freshness, inline scan preview, duplicate-invoice handling, inline price-history charts, and approval/rejection actions; added `server/pricing-hub-seed.js`, `server/pricing-hub-store.js`, `server/pricing-hub-api.js`, `server/test/pricing-hub.test.js`, `scripts/verify-pricing-hub.js`, and `supabase/migrations/20260819120000_pricing_hub_phase3.sql`; updated `server/index.js`, `server/package.json`, and `server/.env.example`.
+- Verified: `node --check` passes on the new server files and test file; the extracted `apps/pricing-hub/index.html` script parses cleanly; `node scripts/verify-pricing-hub.js` passes; `npm test` in `server/` passes with 7 tests.
+- Not verified / blockers: branch is not yet pushed; PR is not yet opened; live Supabase migration and frontend runtime behavior still need deployment-side verification.
+- Security or rollback notes: no secrets or customer PII were added; pricing-hub state persists server-side in a dedicated JSON file for local/dev use; rollback is limited to reverting the phase-3 commit and removing the new migration if needed.
+- PR/issue/commit: branch `codex/pricing-hub-v3-catalog-arcade`.
+- Next safe action: review the diff, commit the phase-3 changes, push the branch, and open the requested PR against `main`.

@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-09
+Last updated: 2026-08-19
 
 This file is operational context, not a secret store. Verify live state before consequential actions.
 
@@ -29,6 +29,8 @@ This file is operational context, not a secret store. Verify live state before c
 - Kitchen Dashboard branch: `phase2-kitchen-dashboard`
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
 - Obsidian brain node branch: `obsidian-brain-node-v1`
+- Pricing Hub V3 branch: `codex/pricing-hub-v3-catalog-arcade`
+- Pricing Hub V3 now has a server-backed `apps/pricing-hub/index.html` arcade layer, `/api/pricing/*` Express routes, pricing hub state persistence, inline price-history charts, audit/margin tooling, and a verification script at `scripts/verify-pricing-hub.js`.
 
 ## Kitchen Dashboard status
 Phase 2A currently provides:

@@ -40,6 +40,82 @@ body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',syste
 .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text)}
 .btn-outline:hover{border-color:var(--brand);color:var(--brand)}
 
+/* AUTH + GAME LAYER */
+.auth-panel,.arcade-panel{margin:14px 22px 0;background:linear-gradient(180deg,var(--s1),var(--s2));border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.22)}
+.auth-panel{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;flex-wrap:wrap}
+.auth-title{font-size:13px;font-weight:800;color:var(--white);letter-spacing:-.01em}
+.auth-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.auth-fields{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.auth-fields input{background:var(--s3);border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:8px 10px;font-size:12px;min-width:160px;font-family:inherit;outline:none}
+.auth-fields input:focus{border-color:var(--brand)}
+.auth-state{font-size:11px;color:var(--muted)}
+.auth-state strong{color:var(--brand)}
+.arcade-panel{padding:16px}
+.arcade-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.arcade-title{font-size:15px;font-weight:900;color:var(--white);letter-spacing:-.02em}
+.arcade-copy{font-size:11px;color:var(--muted);margin-top:4px;max-width:72ch}
+.arcade-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.card{background:rgba(7,10,6,.18);border:1px solid var(--border);border-radius:14px;padding:12px;min-height:100px}
+.card h3{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.metric-grid{grid-column:span 12;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.metric{display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.metric .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.metric .value{font-size:26px;font-weight:900;color:var(--white);line-height:1}
+.metric .note{font-size:11px;color:var(--muted)}
+.metric .trend{font-size:11px;color:var(--brand);font-weight:700}
+.ring-row{display:flex;gap:10px;flex-wrap:wrap}
+.ring{width:92px;height:92px;position:relative;display:grid;place-items:center}
+.ring svg{width:92px;height:92px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.ring .bg{stroke:rgba(255,255,255,.08)}
+.ring .fg{stroke:var(--brand);stroke-linecap:round;transition:stroke-dashoffset .35s ease}
+.ring .pct{position:absolute;font-size:18px;font-weight:900;color:var(--white)}
+.ring .lbl{position:absolute;bottom:10px;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.flex-row{display:flex;gap:12px;flex-wrap:wrap}
+.col-6{grid-column:span 6}
+.col-4{grid-column:span 4}
+.col-8{grid-column:span 8}
+.col-12{grid-column:span 12}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:var(--s3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text)}
+.pill strong{color:var(--brand)}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(180deg,rgba(129,181,84,.16),rgba(129,181,84,.06));border:1px solid rgba(129,181,84,.24);color:var(--white);font-size:11px;font-weight:800}
+.badge.locked{opacity:.42;filter:saturate(.7)}
+.badge .xp{color:var(--brand);font-size:10px}
+.feed{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.feed-item{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.feed-item .when{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.feed-item .what{font-size:12px;color:var(--white);font-weight:700;margin-top:3px}
+.feed-item .meta{font-size:11px;color:var(--muted);margin-top:3px}
+.watch-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}
+.watch-item{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.watch-item .name{font-size:12px;font-weight:800;color:var(--white)}
+.watch-item .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.heat-low{color:var(--brand)}
+.heat-mid{color:var(--amber)}
+.heat-high{color:var(--red)}
+.mission{display:flex;flex-direction:column;gap:8px}
+.mission .mission-title{font-size:15px;font-weight:900;color:var(--white)}
+.mission .mission-copy{font-size:11px;color:var(--muted)}
+.mini-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mini-actions .btn{padding:7px 11px;font-size:11px}
+.chart-wrap{display:flex;align-items:end;gap:6px;height:72px}
+.spark{width:100%;height:72px;display:block}
+.spark path{stroke:var(--brand);stroke-width:2;fill:none}
+.spark .fill{fill:rgba(129,181,84,.12);stroke:none}
+.spark .grid{stroke:rgba(255,255,255,.06);stroke-width:1}
+.small{font-size:11px;color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+@media (max-width:1100px){
+  .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .col-6,.col-4,.col-8{grid-column:span 12}
+}
+
 /* UPLOAD ZONE */
 .upload-zone{margin:16px 22px 0;background:var(--s1);border:2px dashed var(--border2);border-radius:14px;padding:22px;text-align:center;transition:all .2s;cursor:pointer}
 .upload-zone:hover{border-color:var(--brand);background:var(--s2)}
@@ -203,6 +279,118 @@ td:nth-child(2){text-align:left;font-weight:600;color:var(--white);max-width:280
   </div>
 </div>
 
+<div class="auth-panel" id="authPanel">
+  <div>
+    <div class="auth-title">Manager sign-in</div>
+    <div class="auth-sub">Use the approved pricing account to keep game-state and audit entries server-side when online.</div>
+  </div>
+  <div class="auth-fields">
+    <input id="authEmail" type="email" value="pricing@kingdomfiservices.com" aria-label="Email">
+    <input id="authPassword" type="password" placeholder="Password" aria-label="Password">
+    <button class="btn btn-brand" onclick="signInPricingHub()">Sign In</button>
+  </div>
+  <div class="auth-state" id="authState">Offline mode available. Server sync not yet connected.</div>
+</div>
+
+<div class="arcade-panel" id="arcadePanel">
+  <div class="arcade-head">
+    <div>
+      <div class="arcade-title">Catalog Arcade</div>
+      <div class="arcade-copy">A restrained game layer on top of the pricing sheet. Every point, streak day, and badge is tied to a real action: invoice intake, verified pricing, or sync work.</div>
+    </div>
+    <div class="pill-row">
+      <div class="pill">Level <strong id="levelName">Shelf Stocker</strong></div>
+      <div class="pill">XP <strong id="xpCounter">0</strong></div>
+      <div class="pill">🔥 <strong id="streakCount">0</strong> day streak</div>
+    </div>
+  </div>
+  <div class="arcade-grid">
+    <div class="card metric-grid">
+      <div class="metric">
+        <div class="label">Today</div>
+        <div class="value" id="metricToday">0</div>
+        <div class="note">actions completed</div>
+      </div>
+      <div class="metric">
+        <div class="label">Approved</div>
+        <div class="value" id="metricApproved">0</div>
+        <div class="note">verified prices</div>
+      </div>
+      <div class="metric">
+        <div class="label">Invoices</div>
+        <div class="value" id="metricInvoices">0</div>
+        <div class="note">processed today</div>
+      </div>
+      <div class="metric">
+        <div class="label">Freshness</div>
+        <div class="value" id="metricFreshness">--</div>
+        <div class="note">avg days since verification</div>
+      </div>
+    </div>
+
+    <div class="card col-4">
+      <h3>Progress Rings</h3>
+      <div class="ring-row">
+        <div class="ring" data-ring="margin">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="bg" cx="50" cy="50" r="38"></circle>
+            <circle class="fg" cx="50" cy="50" r="38"></circle>
+          </svg>
+          <div class="pct" id="ringMarginPct">0%</div>
+          <div class="lbl">Margin</div>
+        </div>
+        <div class="ring" data-ring="sync">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="bg" cx="50" cy="50" r="38"></circle>
+            <circle class="fg" cx="50" cy="50" r="38"></circle>
+          </svg>
+          <div class="pct" id="ringSyncPct">0%</div>
+          <div class="lbl">Sync</div>
+        </div>
+        <div class="ring" data-ring="freshness">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="bg" cx="50" cy="50" r="38"></circle>
+            <circle class="fg" cx="50" cy="50" r="38"></circle>
+          </svg>
+          <div class="pct" id="ringFreshPct">0%</div>
+          <div class="lbl">Fresh</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-4 mission">
+      <h3>Today's Mission</h3>
+      <div class="mission-title" id="missionTitle">Review 3 pending lines</div>
+      <div class="mission-copy" id="missionCopy">Approve or reject three real lines to earn XP.</div>
+      <div class="mini-actions">
+        <button class="btn btn-brand" id="missionBtn" onclick="claimMissionXp()">Claim XP</button>
+        <button class="btn btn-outline" onclick="refreshArcade()">Refresh</button>
+      </div>
+      <div class="small" id="missionMeta">Completes only when the requirement is actually met.</div>
+    </div>
+
+    <div class="card col-4">
+      <h3>Badge Shelf</h3>
+      <div class="badge-row" id="badgeRow"></div>
+    </div>
+
+    <div class="card col-6">
+      <h3>Margin Watch</h3>
+      <div class="watch-list" id="watchList"></div>
+    </div>
+
+    <div class="card col-6">
+      <h3>Activity Feed</h3>
+      <div class="feed" id="activityFeed"></div>
+    </div>
+
+    <div class="card col-12">
+      <h3>Vendor Freshness</h3>
+      <div class="watch-list" id="vendorFreshness"></div>
+    </div>
+  </div>
+</div>
+
 <!-- UPLOAD TOGGLE -->
 <div class="uz-toggle">
   <button onclick="toggleUpload()" id="uploadToggleBtn">＋ Upload Invoice</button>
@@ -239,6 +427,7 @@ td:nth-child(2){text-align:left;font-weight:600;color:var(--white);max-width:280
       <div class="ip-meta" id="ipMeta"></div>
     </div>
   </div>
+  <div id="ipScanWrap"></div>
   <div style="overflow-x:auto">
     <table class="ip-table" id="ipTable"></table>
   </div>
@@ -424,6 +613,26 @@ const customRetail={}; let currentMarkup=65;
 let activeVendor='all',activeInvoice='all',activeCategory='all';
 let openRows=new Set(); let sortField='id',sortDir=1;
 let pendingImport=null;
+const PRICING_HUB_STATE_KEY='anthony_pricing_hub_v3_state';
+const PRICING_HUB_TOKEN_KEY='anthony_pricing_hub_v3_token';
+const PRICING_HUB_API_BASE=window.ANTHONY_PRICING_API_URL||window.ANTHONY_API_URL||'';
+const LEVEL_NAMES=[
+  {name:'Shelf Stocker',xp:0},
+  {name:'Price Runner',xp:150},
+  {name:'Margin Scout',xp:400},
+  {name:'Markup Captain',xp:800},
+  {name:'Margin Legend',xp:1500},
+];
+const BADGE_DEFS=[
+  {id:'first_ocr',name:'First OCR',xp:40,check:stats=>stats.invoices>=1},
+  {id:'ten_invoices',name:'10 Invoices',xp:120,check:stats=>stats.invoices>=10},
+  {id:'hundred_70_margin',name:'100 at 70%',xp:180,check:stats=>stats.approvedAt70>=100},
+  {id:'perfect_scan',name:'Perfect Scan',xp:90,check:stats=>stats.perfectRuns>=1},
+  {id:'weekend_warrior',name:'Weekend Warrior',xp:75,check:stats=>stats.weekendActions>=1},
+];
+const prefersReducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+let hubState=loadHubState();
+let activeSession={token:loadToken(),email:'',role:'',source:'offline'};
 
 function roundRetail(p){const b=Math.floor(p);return(p-b>=0.5)?b+0.99:Math.max(0.99,b-1+0.99)}
 function calcRetail(i){if(i.internal)return 0;if(customRetail[i.id]!==undefined)return customRetail[i.id];return roundRetail(i.costPerUnit*(1+currentMarkup/100))}
@@ -432,6 +641,47 @@ function calcBoxProfit(i){return i.internal?0:calcBoxRev(i)-(i.boxes*i.boxPrice)
 function calcMargin(i){const r=calcBoxRev(i);if(!r)return null;return((calcBoxProfit(i)/r)*100).toFixed(1)}
 function fmt(n){return '$'+n.toFixed(2)}
 function catChip(c){const m={'Frozen Fruit':'chip-fz','Frozen Veg':'chip-fz','Frozen Bakery':'chip-fz','Frozen Pulpa':'chip-fz','Beverages':'chip-bev','Candy/Snacks':'chip-snk','Snacks':'chip-snk','Dry Goods':'chip-dry','Condiments':'chip-con','Canned Tuna':'chip-tun','Tea/Coffee':'chip-tea','Rice':'chip-rice','Canned/Jarred':'chip-can','Cereal':'chip-snk','Grocery':'chip-dry','Cleaning':'chip-con','Laundry':'chip-con','Personal Care':'chip-bev','Baby':'chip-tea','Paper & Foil':'chip-rice','Hot Food Supplies':'chip-tun','Deli Containers':'chip-can'};return m[c]||'chip-dry'}
+
+function cryptoRandomId(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
+function todayISO(d=new Date()){return d.toISOString().slice(0,10)}
+function round2(n){return Math.round((Number(n)||0)*100)/100}
+function targetRetail(cost){return round2((Number(cost)||0)*1.7)}
+function localStateDefault(){return {xp:0,badges:[],activity:[],streak:{current:0,best:0,lastDay:null},items:{},missions:{},session:null}}
+function loadHubState(){try{const raw=localStorage.getItem(PRICING_HUB_STATE_KEY);return raw?{...localStateDefault(),...JSON.parse(raw)}:localStateDefault()}catch{return localStateDefault()}}
+function saveHubState(){try{localStorage.setItem(PRICING_HUB_STATE_KEY,JSON.stringify(hubState))}catch{}}
+function loadToken(){try{return localStorage.getItem(PRICING_HUB_TOKEN_KEY)||''}catch{return''}}
+function saveToken(token){try{token?localStorage.setItem(PRICING_HUB_TOKEN_KEY,token):localStorage.removeItem(PRICING_HUB_TOKEN_KEY)}catch{}}
+function levelForXp(xp){let level=LEVEL_NAMES[0];for(const entry of LEVEL_NAMES){if(xp>=entry.xp)level=entry}return level}
+function itemHubState(item){const key=String(item.id);if(!hubState.items[key])hubState.items[key]={verifiedAt:null,status:item.internal?'internal':'pending',approvals:0,rejections:0,lastRetail:null,lastAction:null,history:[]};return hubState.items[key]}
+function countReviewedToday(){const key=todayISO();return Object.values(hubState.items).filter(it=>it.verifiedAt&&String(it.verifiedAt).slice(0,10)===key).length}
+function countInvoicesProcessedToday(){const key=todayISO();return hubState.activity.filter(a=>a.type==='invoice'&&String(a.at).slice(0,10)===key).length}
+function countTodayActions(){const key=todayISO();return hubState.activity.filter(a=>String(a.at).slice(0,10)===key&&['price_change','invoice','mission','signin'].includes(a.type)).length}
+function freshnessDaysFor(item){const st=itemHubState(item);const date=st.verifiedAt||item.updatedAt||null;if(!date)return null;return (Date.now()-new Date(date).getTime())/86400000}
+function vendorFreshness(){const vendors={};ALL_ITEMS.forEach(item=>{const days=freshnessDaysFor(item);if(!vendors[item.vendor])vendors[item.vendor]=[];if(days!==null)vendors[item.vendor].push(days)});return Object.entries(vendors).map(([vendor,days])=>({vendor,avg:days.length?days.reduce((s,v)=>s+v,0)/days.length:null,count:days.length})).sort((a,b)=>String(a.vendor).localeCompare(String(b.vendor)))}
+function calcMetrics(){const sellable=ALL_ITEMS.filter(i=>!i.internal);const approved=sellable.filter(item=>itemHubState(item).status==='approved').length;const reviewed=sellable.filter(item=>itemHubState(item).verifiedAt).length;const freshnessVals=sellable.map(freshnessDaysFor).filter(v=>v!==null);const freshness=freshnessVals.length?freshnessVals.reduce((s,v)=>s+v,0)/freshnessVals.length:null;const approvedTarget=sellable.filter(item=>Math.abs((customRetail[item.id]??item.retail)-targetRetail(item.costPerUnit))<=0.02).length;const weekendActions=hubState.activity.filter(a=>{const d=new Date(a.at).getDay();return d===0||d===6}).length;const perfectRuns=hubState.activity.filter(a=>a.type==='csv_dry_run'&&a.errorCount===0).length;return {sellable,approved,reviewed,approvedTarget,freshness,weekendActions,perfectRuns,invoices:hubState.activity.filter(a=>a.type==='invoice').length,approvedAt70:approvedTarget};}
+function unreadBadgeDefs(){const stats=calcMetrics();return BADGE_DEFS.map(def=>({...def,unlocked:hubState.badges.some(b=>b.id===def.id)||def.check(stats)}))}
+function trackActivity(type, meta={}){const entry={id:cryptoRandomId(),type,meta,at:new Date().toISOString()};hubState.activity.unshift(entry);hubState.activity=hubState.activity.slice(0,100);saveHubState();return entry}
+function awardXp(xp, reason, meta={}, checkBadges=true){const before=Number(hubState.xp||0);hubState.xp=before+Number(xp||0);hubState.activity.unshift({id:cryptoRandomId(),type:'xp',meta:{reason,xp,...meta},at:new Date().toISOString()});saveHubState();if(checkBadges)maybeUnlockBadges();const beforeLevel=levelForXp(before).name;const afterLevel=levelForXp(hubState.xp).name;if(afterLevel!==beforeLevel)setTimeout(()=>levelUpToast(afterLevel),0);return hubState.xp}
+function bumpStreak(){const key=todayISO();if(hubState.streak.lastDay===key)return hubState.streak;const y=new Date();y.setDate(y.getDate()-1);const yKey=todayISO(y);hubState.streak.current=hubState.streak.lastDay===yKey?hubState.streak.current+1:1;hubState.streak.best=Math.max(hubState.streak.best||0,hubState.streak.current);hubState.streak.lastDay=key;saveHubState();return hubState.streak}
+function maybeUnlockBadges(){const stats=calcMetrics();const unlocked=[];for(const def of BADGE_DEFS){const already=hubState.badges.some(b=>b.id===def.id);if(!already&&def.check(stats)){const badge={id:def.id,name:def.name,xp:def.xp,at:new Date().toISOString()};hubState.badges.unshift(badge);hubState.activity.unshift({id:cryptoRandomId(),type:'badge_unlock',meta:{badgeId:def.id,badgeName:def.name,xp:def.xp},at:badge.at});awardXp(def.xp,`badge:${def.id}`,{badgeId:def.id},false);unlocked.push(badge)}}if(unlocked.length){saveHubState();burstConfetti(unlocked[0].name)}return unlocked}
+async function apiJson(path, options={}){const token=loadToken();const headers={...(options.headers||{})};if(token)headers.Authorization=`Bearer ${token}`;if(!headers['Content-Type']&&!headers['content-type']&&options.body)headers['Content-Type']='application/json';const res=await fetch(`${PRICING_HUB_API_BASE}${path}`,{...options,headers});let data=null;try{data=await res.json()}catch{}if(!res.ok)throw new Error((data&&data.error&&data.error.message)||`HTTP ${res.status}`);return data}
+async function signInPricingHub(){const email=(document.getElementById('authEmail').value||'').trim();const password=document.getElementById('authPassword').value||'';const state=document.getElementById('authState');if(!email||!password){state.textContent='Enter the pricing email and password.';return}try{const data=await apiJson('/api/pricing/login',{method:'POST',body:JSON.stringify({email,password})});saveToken(data.access_token);hubState.session={email:data.user.email,role:data.user.role,at:data.issued_at};saveHubState();state.innerHTML=`Signed in as <strong>${data.user.email}</strong>.`;await refreshArcade(true)}catch(err){state.textContent=err.message||'Sign-in failed';}}
+async function pullServerDashboard(){const token=loadToken();if(!token||!PRICING_HUB_API_BASE)return null;try{return await apiJson('/api/pricing/dashboard')}catch{return null}}
+async function syncAction(path,payload,method='POST'){const token=loadToken();if(!token||!PRICING_HUB_API_BASE)return null;try{return await apiJson(path,{method,body:JSON.stringify(payload)})}catch{return null}}
+function animateNumber(node,target){const start=Number(node.dataset.current||0);const end=Number(target)||0;node.dataset.current=String(end);if(prefersReducedMotion.matches){node.textContent=end.toLocaleString();return}const startTime=performance.now();const duration=500;function tick(now){const p=Math.min(1,(now-startTime)/duration);const value=Math.round(start+(end-start)*(1-Math.pow(1-p,3)));node.textContent=value.toLocaleString();if(p<1)requestAnimationFrame(tick)}requestAnimationFrame(tick)}
+function setRing(name,pct){const ring=document.querySelector(`.ring[data-ring="${name}"] .fg`);if(!ring)return;const r=38;const circumference=2*Math.PI*r;const clamped=Math.max(0,Math.min(100,Number(pct)||0));ring.style.strokeDasharray=`${circumference}`;ring.style.strokeDashoffset=String(circumference-(clamped/100)*circumference);ring.style.stroke=clamped>=85?'var(--brand)':clamped>=60?'var(--amber)':'var(--red)';const label=document.getElementById(`ring${name.charAt(0).toUpperCase()+name.slice(1)}Pct`);if(label)label.textContent=`${Math.round(clamped)}%`}
+function levelUpToast(levelName){showToast(`LEVEL UP → ${levelName}`)}
+function burstConfetti(label=''){if(prefersReducedMotion.matches)return;const burst=document.createElement('div');burst.style.position='fixed';burst.style.inset='0';burst.style.pointerEvents='none';burst.style.zIndex='9999';for(let i=0;i<28;i++){const piece=document.createElement('span');piece.style.position='absolute';piece.style.left=`${45+Math.random()*10}%`;piece.style.top='24%';piece.style.width='8px';piece.style.height='8px';piece.style.borderRadius='2px';piece.style.background=['#81B554','#f0b246','#5aa9f0','#ef7fc0','#fff'][i%5];piece.style.transform=`translate(-50%,-50%) rotate(${Math.random()*180}deg)`;piece.style.opacity='1';piece.style.transition='transform .9s cubic-bezier(.2,.8,.2,1), opacity .9s ease';burst.appendChild(piece);requestAnimationFrame(()=>{piece.style.transform=`translate(${(Math.random()-.5)*280}px, ${220+Math.random()*220}px) rotate(${360+Math.random()*520}deg)`;piece.style.opacity='0'})}document.body.appendChild(burst);setTimeout(()=>burst.remove(),1000);if(label)showToast(`Unlocked ${label}`)}
+function renderBadgeShelf(){const row=document.getElementById('badgeRow');if(!row)return;const defs=unreadBadgeDefs();row.innerHTML=defs.map(def=>`<div class="badge ${def.unlocked?'':'locked'}">${def.unlocked?'✓':'•'} ${def.name}<span class="xp">+${def.xp} XP</span></div>`).join('')}
+function renderActivityFeed(){const feed=document.getElementById('activityFeed');if(!feed)return;const items=hubState.activity.slice(0,8);feed.innerHTML=items.length?items.map(entry=>{const meta=entry.meta||{};let label=entry.type.replace(/_/g,' ');let detail=meta.reason||meta.note||meta.missionId||meta.invoiceNo||'';if(entry.type==='price_change')label='Price change';if(entry.type==='invoice')label='Invoice processed';if(entry.type==='signin')label='Sign in';if(entry.type==='badge_unlock')label='Badge unlocked';if(entry.type==='mission')label='Mission complete';return `<div class="feed-item"><div class="when">${new Date(entry.at).toLocaleString()}</div><div class="what">${label}</div><div class="meta">${detail||JSON.stringify(meta)}</div></div>`}).join(''):`<div class="feed-item"><div class="what">No activity yet</div><div class="meta">Approve a line, process an invoice, or sign in to start the audit trail.</div></div>`}
+function renderMarginWatch(){const list=document.getElementById('watchList');if(!list)return;const rows=ALL_ITEMS.filter(item=>!item.internal).map(item=>{const current=customRetail[item.id]??item.retail;const target=targetRetail(item.costPerUnit);const margin=((current/item.costPerUnit)-1)*100;const off=margin<70||margin>120;return {...item,current,target,margin,off}}).filter(item=>item.off).sort((a,b)=>a.margin-b.margin).slice(0,12);list.innerHTML=rows.length?rows.map(item=>`<div class="watch-item"><div><div class="name">${item.name}</div><div class="sub">${item.vendor} • ${item.cat}</div></div><div style="text-align:right"><div class="name ${item.margin<70?'heat-high':'heat-mid'}">${item.margin.toFixed(0)}%</div><div class="sub">Target ${item.target.toFixed(2)} / Now ${item.current.toFixed(2)}</div></div></div>`).join(''):`<div class="watch-item"><div><div class="name">No margin watch issues</div><div class="sub">Everything shown is at or above the target markup.</div></div></div>`}
+function renderVendorFreshness(){const list=document.getElementById('vendorFreshness');if(!list)return;const rows=vendorFreshness().map(v=>{const value=v.avg===null?'—':`${v.avg.toFixed(1)} days`;const cls=v.avg===null?'heat-mid':v.avg<=2?'heat-low':v.avg<=7?'heat-mid':'heat-high';return `<div class="watch-item"><div><div class="name">${v.vendor}</div><div class="sub">${v.count} items tracked</div></div><div style="text-align:right"><div class="name ${cls}">${value}</div><div class="sub">Average days since verified</div></div></div>`});list.innerHTML=rows.join('')}
+function renderMission(){const mission=hubState.missions.today||{id:`mission-${todayISO()}`,title:'Review 3 pending lines',detail:'Approve or reject three real lines to earn XP.',xp:35,completedAt:null};hubState.missions.today=mission;saveHubState();const count=countReviewedToday();document.getElementById('missionTitle').textContent=mission.title;document.getElementById('missionCopy').textContent=mission.detail;document.getElementById('missionMeta').textContent=`Reviewed today: ${count}. Reward: ${mission.xp} XP.`;document.getElementById('missionBtn').disabled=mission.completedAt||count<3;document.getElementById('missionBtn').textContent=mission.completedAt?'Claimed':'Claim XP'}
+async function refreshArcade(forceServer=false){const stats=calcMetrics();const prevLevel=levelForXp(Number(hubState.xp||0)).name;const level=levelForXp(Number(hubState.xp||0));document.getElementById('levelName').textContent=level.name;document.getElementById('xpCounter').textContent=Number(hubState.xp||0).toLocaleString();document.getElementById('streakCount').textContent=hubState.streak.current||0;animateNumber(document.getElementById('metricToday'),countTodayActions());animateNumber(document.getElementById('metricApproved'),stats.approved);animateNumber(document.getElementById('metricInvoices'),countInvoicesProcessedToday());document.getElementById('metricFreshness').textContent=stats.freshness===null?'—':`${stats.freshness.toFixed(1)}d`;setRing('margin',stats.sellable.length?stats.approvedAt70/stats.sellable.length*100:0);setRing('sync',stats.sellable.length?stats.reviewed/stats.sellable.length*100:0);setRing('freshness',stats.freshness===null?0:Math.max(0,100-Math.min(100,stats.freshness*12)));renderBadgeShelf();renderActivityFeed();renderMarginWatch();renderVendorFreshness();renderMission();const authState=document.getElementById('authState');const token=loadToken();authState.innerHTML=token&&hubState.session?`Signed in as <strong>${hubState.session.email}</strong>. Server-backed actions enabled.`:'Offline mode active. Game state is local until you sign in.';if(forceServer&&token&&PRICING_HUB_API_BASE){const dashboard=await pullServerDashboard();if(dashboard&&dashboard.dashboard){authState.innerHTML=`Signed in as <strong>${hubState.session.email}</strong>. Server dashboard connected.`}}if(Number(hubState.xp||0)>0&&prevLevel!==level.name)levelUpToast(level.name)}
+async function claimMissionXp(){const mission=hubState.missions.today||{id:`mission-${todayISO()}`,xp:35};if(countReviewedToday()<3){showToast('Review 3 real lines first');return}if(mission.completedAt){showToast('Mission already claimed');return}mission.completedAt=new Date().toISOString();hubState.missions.today=mission;trackActivity('mission',{missionId:mission.id,xp:mission.xp});awardXp(mission.xp,'mission',{missionId:mission.id});bumpStreak();saveHubState();showToast(`Mission complete +${mission.xp} XP`);if(loadToken())await syncAction('/api/pricing/missions/'+encodeURIComponent(mission.id)+'/complete',{missionId:mission.id});await refreshArcade()}
+function setItemReviewed(item,status,note=''){const st=itemHubState(item);const nextRetail=Number(customRetail[item.id]??item.retail);const prev={...st};if(prev.status===status&&prev.lastRetail===nextRetail&&prev.note===note){return false}st.status=status;st.verifiedAt=new Date().toISOString();st.lastRetail=nextRetail;st.lastAction=status;st.note=note;st.approvals=status==='approved'?st.approvals+1:st.approvals;st.rejections=status==='rejected'?st.rejections+1:st.rejections;st.history=st.history||[];st.history.push({at:new Date().toISOString(),retail:st.lastRetail,status});hubState.items[String(item.id)]=st;trackActivity(status==='approved'?'price_change':'reject',{itemId:item.id,name:item.name,oldRetail:prev.lastRetail,newRetail:st.lastRetail,note});bumpStreak();saveHubState();return true}
+function refreshSpark(id){requestAnimationFrame(()=>{document.querySelectorAll(`canvas[data-spark="${id}"]`).forEach(c=>drawSparkline(c,id))})}
+function drawSparkline(canvas,itemId){if(!canvas||!canvas.getContext)return;const ctx=canvas.getContext('2d');const w=canvas.width=canvas.clientWidth||220;const h=canvas.height=canvas.clientHeight||72;ctx.clearRect(0,0,w,h);const st=hubState.items[String(itemId)]||{};const fallbackRetail=ALL_ITEMS.find(i=>i.id===itemId)?.retail||0;const history=[...(st.history||[]),{retail:(customRetail[itemId]??fallbackRetail)}].slice(-12);const values=history.map(v=>Number(v.retail)||0);if(!values.length){ctx.strokeStyle='rgba(255,255,255,.1)';ctx.strokeRect(0,0,w,h);return}const max=Math.max(...values,1);const min=Math.min(...values,0);const pad=10;const xs=values.map((_,i)=>pad+(i/(Math.max(1,values.length-1)))*(w-pad*2));const ys=values.map(v=>h-pad-((v-min)/(max-min||1))*(h-pad*2));ctx.fillStyle='rgba(129,181,84,.10)';ctx.beginPath();ctx.moveTo(xs[0],h-pad);ys.forEach((y,i)=>ctx.lineTo(xs[i],y));ctx.lineTo(xs[ys.length-1],h-pad);ctx.closePath();ctx.fill();ctx.strokeStyle='#81B554';ctx.lineWidth=2;ctx.beginPath();ys.forEach((y,i)=>{if(i===0)ctx.moveTo(xs[i],y);else ctx.lineTo(xs[i],y)});ctx.stroke()}
 
 // ════════ UPLOAD + AI ANALYSIS ════════
 function toggleUpload(){
@@ -456,6 +706,7 @@ async function handleFile(file){
 
   try{
     const b64=await fileToBase64(file);
+    const scanUrl=URL.createObjectURL(file);
     const isPdf=file.type==='application/pdf';
     const content=[
       isPdf
@@ -474,6 +725,7 @@ async function handleFile(file){
     let txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
     txt=txt.replace(/```json|```/g,'').trim();
     const parsed=JSON.parse(txt);
+    parsed.scanUrl=scanUrl;
     showImportPreview(parsed);
   }catch(err){
     document.getElementById('analysisSpinner').style.display='none';
@@ -507,6 +759,7 @@ function showImportPreview(parsed){
   const items=parsed.items||[];
   document.getElementById('ipVendor').textContent=parsed.vendor||'Imported';
   document.getElementById('ipMeta').textContent=`Invoice #${parsed.invoice||'?'} · ${parsed.date||''} · ${items.length} items found. Edit anything below before adding.`;
+  document.getElementById('ipScanWrap').innerHTML=parsed.scanUrl?`<img src="${parsed.scanUrl}" alt="Original scan" style="max-width:100%;max-height:220px;border-radius:12px;border:1px solid var(--border);margin:0 0 12px 0;display:block">`:'';
 
   let html=`<thead><tr><th>Item</th><th>Cat</th><th>Boxes</th><th>Box $</th><th>Units</th></tr></thead><tbody>`;
   items.forEach((it,idx)=>{
@@ -532,6 +785,12 @@ function confirmImport(){
   if(!pendingImport)return;
   const vendor=pendingImport.vendor||'New Vendor';
   const invoice=String(pendingImport.invoice||Date.now());
+  if(VENDORS[vendor]&&VENDORS[vendor].invoices[invoice]){
+    const label=VENDORS[vendor].invoices[invoice].label||`#${invoice}`;
+    document.getElementById('ipMeta').innerHTML=`Already in system: <a href="#" onclick="setVendor('${vendor.replace(/'/g,"\\'")}');setInvoice('${invoice.replace(/'/g,"\\'")}');return false;">open the existing entry</a> (${label}).`;
+    showToast(`Already in system: ${label}`);
+    return;
+  }
   if(!VENDORS[vendor])VENDORS[vendor]={label:vendor,invoices:{}};
   if(!VENDORS[vendor].invoices[invoice])VENDORS[vendor].invoices[invoice]={label:'#'+invoice+(pendingImport.date?' — '+pendingImport.date:'')};
 
@@ -546,12 +805,18 @@ function confirmImport(){
     });
   });
 
+  const invoiceId=trackActivity('invoice',{vendor,invoice,rowCount:pendingImport.items.length});
+  bumpStreak();
+  awardXp(Math.max(10,pendingImport.items.length*3),'invoice',{vendor,invoice,invoiceId});
+  if(loadToken())syncAction('/api/pricing/invoices',{vendor,invoiceNo:invoice,rows:pendingImport.items,scanUrl:pendingImport.scanUrl||'',sourceSha256:pendingImport.sourceSha256||'',dryRun:false});
+
   document.getElementById('importPreview').classList.remove('show');
   pendingImport=null;
   activeVendor=vendor;activeInvoice=invoice;activeCategory='all';
   buildCatFilter();render();
   showToast(`Added ${vendor} invoice #${invoice}`);
   document.getElementById('topSubtitle')&&(document.getElementById('topSubtitle').textContent=vendor);
+  refreshArcade();
 }
 
 function cancelImport(){
@@ -659,11 +924,12 @@ function render(){
   const items=getFiltered();
   buildVendorBar();buildInvChips();buildCatTabs(items);buildSummary(items);
   const body=document.getElementById('tableBody');
-  if(!items.length){body.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div>No items match your filters.</div></td></tr>`;return}
+  if(!items.length){body.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div>No items match your filters.</div></td></tr>`;requestAnimationFrame(()=>refreshArcade());return}
   const sf=document.getElementById('sortField').value,grouped=sf==='id';
   let lastKey='',html='',totCost=0,totRev=0,totProfit=0;
   items.forEach(item=>{
     const retail=calcRetail(item),rev=calcBoxRev(item),profit=calcBoxProfit(item),margin=calcMargin(item);
+    const itemState=itemHubState(item);
     const isOpen=openRows.has(item.id);
     const mc=margin&&parseFloat(margin)>50?'var(--brand)':parseFloat(margin)>30?'var(--amber)':'var(--red)';
     if(grouped){
@@ -677,7 +943,7 @@ function render(){
     const invBadge=grouped?'':`<span class="chip chip-rice">#${item.invoice}</span>`;
     html+=`<tr>
       <td><button class="xbtn" onclick="toggleRow(${item.id})">${isOpen?'▲':'▼'}</button></td>
-      <td>${item.name}<span class="chip ${catChip(item.cat)}">${item.cat}</span>${invBadge}${item.internal?'<span class="chip chip-tun">INTERNAL</span>':''}${item.flagged?'<span class="chip chip-snk">⚑ VERIFY</span>':''}</td>
+      <td>${item.name}<span class="chip ${catChip(item.cat)}">${item.cat}</span><span class="chip ${itemState.status==='approved'?'chip-bev':itemState.status==='rejected'?'chip-tun':'chip-rice'}">${itemState.status.toUpperCase()}</span>${invBadge}${item.internal?'<span class="chip chip-tun">INTERNAL</span>':''}${item.flagged?'<span class="chip chip-snk">⚑ VERIFY</span>':''}</td>
       <td>${item.boxes}</td><td>${fmt(item.boxPrice)}</td><td>${item.units}</td>
       <td>${item.internal?'—':fmt(item.costPerUnit)}</td>
       <td>${item.internal?'<span style="color:var(--red);font-size:11px">Not for sale</span>':`<input class="retail-input" type="number" step="0.01" min="0" value="${retail.toFixed(2)}" onchange="updateRetail(${item.id},this.value)">`}</td>
@@ -699,16 +965,48 @@ function render(){
          <div class="dcell"><div class="dl">Markup</div><div class="dv g">${customRetail[item.id]!==undefined?'Custom':currentMarkup+'%'}</div></div>
          <div class="dcell"><div class="dl">Box Revenue</div><div class="dv a">${fmt(rev)}</div></div>
          <div class="dcell"><div class="dl">Box Profit</div><div class="dv b">${fmt(profit)}</div></div>
-         <div class="dcell"><div class="dl">Margin</div><div class="dv ${parseFloat(margin)>50?'g':''}">${margin}%</div></div>`}
+         <div class="dcell"><div class="dl">Margin</div><div class="dv ${parseFloat(margin)>50?'g':''}">${margin}%</div></div>
+         <div class="dcell" style="grid-column:1/-1">
+           <div class="dl">Price History</div>
+           <canvas class="spark" data-spark="${item.id}" width="260" height="72"></canvas>
+           <div class="mini-actions" style="margin-top:8px">
+             <button class="btn btn-brand" onclick="approveItem(${item.id})">Approve</button>
+             <button class="btn btn-outline" onclick="rejectItem(${item.id})">Reject</button>
+             <button class="btn btn-outline" onclick="refreshSpark(${item.id})">Refresh chart</button>
+           </div>
+         </div>`}
     </div></td></tr>`;
   });
   html+=`<tr class="tot-row"><td></td><td>${items.length} items shown</td><td></td><td style="color:var(--text)">${fmt(totCost)}</td><td></td><td></td><td></td><td class="rev-c" style="font-size:14px">${fmt(totRev)}</td><td class="profit-c" style="font-size:14px">${fmt(totProfit)}</td><td style="color:var(--amber)">${totRev>0?((totProfit/totRev)*100).toFixed(1)+'%':'—'}</td></tr>`;
   body.innerHTML=html;
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('canvas[data-spark]').forEach(canvas=>drawSparkline(canvas,Number(canvas.dataset.spark)));
+    refreshArcade();
+  });
 }
-function toggleRow(id){openRows.has(id)?openRows.delete(id):openRows.add(id);render()}
-function updateRetail(id,val){const v=parseFloat(val);if(!isNaN(v)&&v>0){customRetail[id]=v;showToast(`Price → $${v.toFixed(2)}`);render()}}
-function updateMarkup(val){currentMarkup=parseInt(val);document.getElementById('markupDisplay').textContent=val+'%';render()}
-function resetMarkup(){currentMarkup=65;document.getElementById('markupSlider').value=65;document.getElementById('markupDisplay').textContent='65%';Object.keys(customRetail).forEach(k=>delete customRetail[k]);showToast('Reset to 65%');render()}
+function toggleRow(id){openRows.has(id)?openRows.delete(id):openRows.add(id);render();setTimeout(()=>refreshSpark(id),0)}
+function updateRetail(id,val){
+  const v=parseFloat(val);
+  if(!isNaN(v)&&v>0){
+    customRetail[id]=v;
+    const item=ALL_ITEMS.find(i=>i.id===id);
+    if(item){
+      const changed=setItemReviewed(item,'approved',`Retail changed to ${v.toFixed(2)}`);
+      if(changed){
+        awardXp(Math.abs(v-targetRetail(item.costPerUnit))<=0.02?8:4,'price_change',{itemId:id,retail:v});
+        if(loadToken())syncAction(`/api/pricing/items/${id}/price`,{retail:v,note:'Updated from pricing hub'});
+      }
+      refreshSpark(id);
+    }
+    showToast(`Price → $${v.toFixed(2)}`);
+    render();
+    refreshArcade();
+  }
+}
+function approveItem(id){const item=ALL_ITEMS.find(i=>i.id===id);if(!item)return;const current=customRetail[id]??item.retail;customRetail[id]=current;const changed=setItemReviewed(item,'approved','Manual approval');if(changed){awardXp(Math.abs(current-targetRetail(item.costPerUnit))<=0.02?10:6,'approve',{itemId:id,current});if(loadToken())syncAction(`/api/pricing/items/${id}/approve`,{note:'Approved from pricing hub'});burstConfetti(item.name)}showToast(`Approved ${item.name}`);render();refreshArcade()}
+function rejectItem(id){const item=ALL_ITEMS.find(i=>i.id===id);if(!item)return;const changed=setItemReviewed(item,'rejected','Manual rejection');if(changed){awardXp(2,'reject',{itemId:id});if(loadToken())syncAction(`/api/pricing/items/${id}/reject`,{note:'Rejected from pricing hub'})}showToast(`Rejected ${item.name}`);render();refreshArcade()}
+function updateMarkup(val){currentMarkup=parseInt(val);document.getElementById('markupDisplay').textContent=val+'%';render();refreshArcade()}
+function resetMarkup(){currentMarkup=65;document.getElementById('markupSlider').value=65;document.getElementById('markupDisplay').textContent='65%';Object.keys(customRetail).forEach(k=>delete customRetail[k]);showToast('Reset to 65%');render();refreshArcade()}
 function showToast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function exportCSV(){
   const items=getFiltered();

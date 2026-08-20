@@ -5,9 +5,26 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+
+// Load server/.env if present (direct-run fallback; Docker uses env_file)
+// MUST run before requiring modules that read env at load time.
+try {
+  const envPath = path.join(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      if (m && !process.env[m[1]]) {
+        process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+      }
+    }
+  }
+} catch (e) { /* ignore */ }
+
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
 const kitchenAide = require('./kitchen-aide');
+const { loadPricingHubSeed } = require('./pricing-hub-seed');
+const { createPricingHubApi } = require('./pricing-hub-api');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -21,6 +38,8 @@ const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
+const PRICING_HUB_STATE_PATH = process.env.PRICING_HUB_STATE_PATH || path.join(__dirname, 'data', 'pricing-hub-state.json');
+const PRICING_HUB_HTML_PATH = path.join(__dirname, '..', 'apps', 'pricing-hub', 'index.html');
 
 // Supabase client
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -149,13 +168,20 @@ async function updateOrderStatus(orderId, estado) {
 
 let menuData = null;
 function loadMenu() {
-  try {
-    menuData = JSON.parse(fs.readFileSync(MENU_DATA_PATH, 'utf8'));
-    console.log(`✅ Menu loaded: ${menuData.nombre}`);
-  } catch (e) {
-    console.error('❌ Failed to load menu:', e.message);
-    menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
+  const candidates = [
+    MENU_DATA_PATH,
+    path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json'), // repo-relative
+    path.join('/app', 'seed', 'anthonys-seed.json'), // Docker image
+  ];
+  for (const candidate of candidates) {
+    try {
+      menuData = JSON.parse(fs.readFileSync(candidate, 'utf8'));
+      console.log(`✅ Menu loaded: ${menuData.nombre} (${candidate})`);
+      return;
+    } catch (e) { /* try next */ }
   }
+  console.error('❌ Failed to load menu from any candidate path');
+  menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
 }
 
 // ─── Flatten menu items for easy lookup ──────────────────────────────
@@ -187,6 +213,28 @@ flattenMenu();
 const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json());
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - startedAt;
+    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
+let pricingHubSeed = { vendors: {}, items: [] };
+try {
+  pricingHubSeed = loadPricingHubSeed(PRICING_HUB_HTML_PATH);
+  console.log(`✅ Pricing hub seed loaded: ${pricingHubSeed.items.length} items`);
+} catch (e) {
+  console.warn(`⚠️ Pricing hub seed unavailable: ${e.message}`);
+}
+
+const pricingHubApi = createPricingHubApi({
+  statePath: PRICING_HUB_STATE_PATH,
+  seed: pricingHubSeed,
+});
+app.use(pricingHubApi.router);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -783,11 +831,45 @@ function startBot() {
 
 // ─── Start ────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`🦁 Anthony's Server running on http://localhost:${PORT}`);
-  console.log(`📊 Menu: ${flatItems.length} items across ${menuData?.menus?.length || 0} menus`);
-  if (KITCHEN_CHAT_ID) console.log(`👨‍🍳 Kitchen notifications enabled (chat: ${KITCHEN_CHAT_ID})`);
-  if (WHATSAPP_WEBHOOK) console.log(`📱 WhatsApp notifications enabled`);
-  if (N8N_WEBHOOK_URL) console.log(`🔗 n8n webhook enabled`);
-  startBot();
+let server = null;
+function startServer() {
+  if (server) return server;
+  server = app.listen(PORT, () => {
+    console.log(`🦁 Anthony's Server running on http://localhost:${PORT}`);
+    console.log(`📊 Menu: ${flatItems.length} items across ${menuData?.menus?.length || 0} menus`);
+    if (KITCHEN_CHAT_ID) console.log(`👨‍🍳 Kitchen notifications enabled (chat: ${KITCHEN_CHAT_ID})`);
+    if (WHATSAPP_WEBHOOK) console.log(`📱 WhatsApp notifications enabled`);
+    if (N8N_WEBHOOK_URL) console.log(`🔗 n8n webhook enabled`);
+    startBot();
+  });
+
+  const shutdown = (signal) => {
+    console.log(`Received ${signal}; shutting down cleanly`);
+    if (server) {
+      server.close(() => process.exit(0));
+      setTimeout(() => process.exit(1), 5000).unref();
+    }
+  };
+
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
+  return server;
+}
+
+app.use((err, req, res, next) => {
+  console.error('Unhandled server error:', err);
+  if (res.headersSent) return next(err);
+  return res.status(500).json({
+    ok: false,
+    error: {
+      code: 'internal_error',
+      message: 'Unexpected server error',
+    },
+  });
 });
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer, pricingHubApi };
