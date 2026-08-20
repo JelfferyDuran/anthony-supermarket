@@ -34,6 +34,15 @@ no-reply@nrsplus.com; downloads both CSV attachments per email, idempotent
 (state in `~/.hermes/nrs-gmail-grab.json`). Requires himalaya CLI + Gmail App
 Password (config at `~/.config/himalaya/config.toml`).
 
+## Skills (vendored in-repo — read before working)
+
+- `docs/skills/product-finder.md` — POS demand mining: top movers, cross-sell
+  combos, margin blind spots, fuzzy name matching (strict all-tokens rule).
+- `docs/skills/anthony-supermarket-invoices.md` — invoice/pricing SOP, 70%
+  rule (Retail = Base Cost × 1.70), vault workspace layout, vision verification.
+- `docs/skills/product-price-monitor.md` — price-watch/watchdog patterns
+  (silent unless change; baseline before scheduling).
+
 ## DB state — TREAT AS DIRTY, do a clean slate
 
 An earlier import run inserted 35 batches with WRONG data (UPC-as-item-name,
