@@ -55,3 +55,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets or customer PII were added; pricing-hub state persists server-side in a dedicated JSON file for local/dev use; rollback is limited to reverting the phase-3 commit and removing the new migration if needed.
 - PR/issue/commit: branch `codex/pricing-hub-v3-catalog-arcade`.
 - Next safe action: review the diff, commit the phase-3 changes, push the branch, and open the requested PR against `main`.
+
+## 2026-08-20 21:18 ET — Codex
+- Goal: make the upgraded Pricing Hub deployable on Vercel without breaking the existing iframe entrypoint.
+- Changed: replaced the legacy `pricing-hub/index.html` calculator with a redirect shell into `apps/pricing-hub/index.html`; added a Vercel bridge at `api/pricing/[...path].js` that reuses the Express app and routes state writes to a writable temp path on serverless; extended `scripts/verify-pricing-hub.js`; added `server/test/vercel-bridge.test.js` to cover the deployment bridge.
+- Verified: `npm test` in `server/` now passes with 9 tests; `node scripts/verify-pricing-hub.js` passes; anonymous Vercel preview deployment of `apps/pricing-hub` succeeded at `https://temporary-agile-emerald-7k0r0q6-anon-psi-blond.vercel.app`.
+- Not verified / blockers: the full-repo Vercel deploy path still fails because the workspace build expects a `public` output directory; the anonymous preview expires in 60 minutes unless claimed; preview runtime still needs manual confirmation in a browser.
+- Security or rollback notes: no secrets were added; the Vercel bridge uses ephemeral temp storage only on serverless; rollback is the revert of this bridge commit and restoring the legacy calculator file if needed.
+- PR/issue/commit: branch `codex/pricing-hub-v3-catalog-arcade`.
+- Next safe action: claim or ignore the anonymous preview, verify the preview URL in a browser, then decide whether to add a dedicated Vercel project config for the full repo.

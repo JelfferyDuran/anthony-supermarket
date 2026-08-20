@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-19
+Last updated: 2026-08-20
 
 This file is operational context, not a secret store. Verify live state before consequential actions.
 
@@ -30,7 +30,7 @@ This file is operational context, not a secret store. Verify live state before c
 - Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
 - Obsidian brain node branch: `obsidian-brain-node-v1`
 - Pricing Hub V3 branch: `codex/pricing-hub-v3-catalog-arcade`
-- Pricing Hub V3 now has a server-backed `apps/pricing-hub/index.html` arcade layer, `/api/pricing/*` Express routes, pricing hub state persistence, inline price-history charts, audit/margin tooling, and a verification script at `scripts/verify-pricing-hub.js`.
+- Pricing Hub V3 now has a server-backed `apps/pricing-hub/index.html` arcade layer, `/api/pricing/*` Express routes, pricing hub state persistence, inline price-history charts, audit/margin tooling, a Vercel bridge at `api/pricing/[...path].js`, and a verification script at `scripts/verify-pricing-hub.js`.
 
 ## Kitchen Dashboard status
 Phase 2A currently provides:
@@ -82,6 +82,7 @@ First Supabase Auth staff/admin user has been provisioned and confirmed working 
 ## Frontend/deployment
 - Vercel project has been created for Super Kitchen and production from `main` has been observed working.
 - Preview deployments are used for feature branches before production.
+- A temporary anonymous Vercel preview for the Pricing Hub subdirectory is live at `https://temporary-agile-emerald-7k0r0q6-anon-psi-blond.vercel.app` and expires in 60 minutes unless claimed.
 - GitHub Pages/tracked `dist/` has permanent source↔build consistency checks.
 - Do not point production to feature branches during testing.
 

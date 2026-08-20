@@ -6,9 +6,13 @@ const { loadPricingHubSeed } = require('../server/pricing-hub-seed');
 
 const repoRoot = path.resolve(__dirname, '..');
 const hubPath = path.join(repoRoot, 'apps', 'pricing-hub', 'index.html');
+const legacyHubPath = path.join(repoRoot, 'pricing-hub', 'index.html');
 const serverPath = path.join(repoRoot, 'server', 'pricing-hub-api.js');
+const vercelBridgePath = path.join(repoRoot, 'api', 'pricing', '[...path].js');
 const html = fs.readFileSync(hubPath, 'utf8');
+const legacyHtml = fs.readFileSync(legacyHubPath, 'utf8');
 const server = fs.readFileSync(serverPath, 'utf8');
+const bridge = fs.readFileSync(vercelBridgePath, 'utf8');
 const seed = loadPricingHubSeed(hubPath);
 
 function expectContains(label, haystack, needle) {
@@ -33,6 +37,9 @@ expectContains('pricing hub html', html, 'drawSparkline');
 expectContains('pricing hub html', html, 'prefers-reduced-motion');
 expectContains('pricing hub html', html, 'canvas[data-spark]');
 
+expectContains('legacy pricing hub redirect', legacyHtml, '../apps/pricing-hub/index.html');
+expectContains('legacy pricing hub redirect', legacyHtml, 'location.replace');
+
 expectContains('pricing api', server, '/api/pricing/health');
 expectContains('pricing api', server, '/api/pricing/login');
 expectContains('pricing api', server, '/api/pricing/catalog');
@@ -41,6 +48,10 @@ expectContains('pricing api', server, '/api/pricing/audit');
 expectContains('pricing api', server, '/api/pricing/margin-watch');
 expectContains('pricing api', server, '/api/pricing/import/csv');
 expectContains('pricing api', server, '/api/pricing/invoices');
+
+expectContains('vercel bridge', bridge, 'PRICING_HUB_STATE_PATH');
+expectContains('vercel bridge', bridge, 'anthony-pricing-hub-state.json');
+expectContains('vercel bridge', bridge, "module.exports = require('../../server').app");
 
 assert.ok(Array.isArray(seed.items), 'embedded items must parse as an array');
 assert.ok(seed.items.length > 0, 'embedded catalog must not be empty');
