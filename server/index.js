@@ -478,6 +478,71 @@ function startBot() {
       );
     });
 
+    // ─── Invoice intake (authorized chats only) ────────────────────────────
+    // Anthony/employees send a PDF or photo of a vendor invoice directly to
+    // the bot. It is routed through the SAME /api/pricing/invoices ingestion
+    // path the hub uses: hash-dedupe → Supabase storage → OCR → 70% pricing →
+    // needs_review. No second ingestion code path.
+    const ALLOWED_INVOICE_MIME = new Set([
+      'application/pdf',
+      'image/jpeg', 'image/png', 'image/webp', 'image/heic'
+    ]);
+
+    bot.on('document', async (msg) => {
+      const chatId = msg.chat.id;
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(chatId))) {
+        return; // not an authorized sender — stay silent (don't confirm the feature)
+      }
+      const doc = msg.document;
+      if (!doc || !ALLOWED_INVOICE_MIME.has(doc.mime_type)) {
+        return bot.sendMessage(chatId, '📄 Send a PDF or photo of the vendor invoice.');
+      }
+      const sent = await bot.sendMessage(chatId, '🧾 Invoice received — processing…');
+      try {
+        const file = await bot.getFile(doc.file_id);
+        const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${file.file_path}`;
+        const res = await fetch(fileUrl);
+        if (!res.ok) throw new Error(`download failed: HTTP ${res.status}`);
+        const buf = Buffer.from(await res.arrayBuffer());
+
+        const form = new FormData();
+        form.append('invoice', new Blob([buf], { type: doc.mime_type }), doc.file_name || 'invoice.pdf');
+        const ingestRes = await fetch(`http://127.0.0.1:${PORT}/api/pricing/invoices`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.PRICING_MANAGER_TOKEN || ''}` },
+          body: form
+        });
+        const body = await ingestRes.json();
+        if (!ingestRes.ok) {
+          return bot.editMessageText(
+            `⚠️ Could not store invoice: ${body.error || 'unknown error'}`,
+            { chat_id: chatId, message_id: sent.message_id }
+          );
+        }
+        if (body.duplicate) {
+          return bot.editMessageText(
+            `♻️ Invoice #${body.invoice?.invoice_number || '?'} was already stored (duplicate). No changes made.`,
+            { chat_id: chatId, message_id: sent.message_id }
+          );
+        }
+        const lines = body.lines?.length ?? 0;
+        const variance = body.reconciliation?.variance;
+        const varianceNote = typeof variance === 'number' && Math.abs(variance) > 0.01
+          ? `\n⚠️ Variance: $${variance.toFixed(2)} (needs review)`
+          : '\n✅ Lines reconcile.';
+        return bot.editMessageText(
+          `✅ Invoice #${body.invoice?.invoice_number || '?'} stored.\n` +
+          `📄 ${lines} line(s) extracted${lines ? ' → priced at 70% rule' : ''}, status *needs_review*.${varianceNote}`,
+          { chat_id: chatId, message_id: sent.message_id, parse_mode: 'Markdown' }
+        );
+      } catch (e) {
+        console.error('Invoice intake failed:', e.message);
+        return bot.editMessageText(`❌ Processing failed: ${e.message.slice(0, 200)}`, {
+          chat_id: chatId, message_id: sent.message_id
+        });
+      }
+    });
+
     // Menu handler
     bot.onText(/\/menu/, (msg) => {
       const menu = menuData?.menus.find(m => m.slug === 'kitchen');

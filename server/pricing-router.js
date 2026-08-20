@@ -29,7 +29,7 @@ const {
   unitCostFromCase
 } = require('./pricing-engine');
 const { createPricingStore, isConfigured, sha256 } = require('./pricing-store');
-const { matchProducts, parsePosCsv } = require('./pos-import');
+const { matchProducts, parsePosCsv, parseDate } = require('./pos-import');
 const ocr = require('./pricing-ocr');
 const intake = require('./pricing-intake');
 
@@ -319,6 +319,21 @@ function createPricingRouter(options = {}) {
 
     const extracted = await callOcr(file, fields);
     const priced = priceInvoice(extracted);
+    // Backfill invoice-level metadata the OCR read from the scan but the HTTP
+    // form did not provide (the Telegram bot sends a bare PDF, so the number
+    // only exists in the OCR result). Only fills fields that are still null —
+    // an operator-typed value always wins over OCR.
+    const ocrMeta = extracted.invoice || {};
+    const metaPatch = {};
+    if (!invoice.invoice_number && ocrMeta.invoice_number) metaPatch.invoice_number = String(ocrMeta.invoice_number).trim();
+    if (!invoice.invoice_date && ocrMeta.invoice_date) {
+      const d = parseDate(ocrMeta.invoice_date);
+      if (d) metaPatch.invoice_date = d;
+    }
+    if (Object.keys(metaPatch).length) {
+      const upd = await store.updateInvoice(invoice.id, metaPatch);
+      if (upd) Object.assign(invoice, upd);
+    }
     const lines = await store.replaceInvoiceLines(invoice.id, priced.items.map(item => ({
       line_number: item.line_number,
       raw_text: item.description,
