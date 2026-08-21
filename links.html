@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthony's Supermarket — Links</title>
+<meta name="description" content="Order from Anthony's Supermarket, your Latin grocery in Kearny, NJ. Telegram ordering, weekly specials, pricing hub, call, WhatsApp and directions. / Ordena en Anthony's Supermarket, tu supermercado latino en Kearny, NJ.">
+<meta property="og:title" content="Anthony's Supermarket — Links">
+<meta property="og:description" content="Order from Anthony's Supermarket — Latin grocery in Kearny, NJ. Telegram ordering, weekly specials, call, WhatsApp &amp; directions. / Ordena en Anthony's Supermarket — supermercado latino en Kearny, NJ.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://anthony-supermarket.vercel.app/links.html">
+<meta name="theme-color" content="#2D6A4F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232D6A4F'/%3E%3Cpath d='M22 20l5-6 5 4 5-4 5 6v2H22z' fill='%23C9A227'/%3E%3Ctext x='32' y='47' font-family='Georgia,serif' font-size='28' font-weight='bold' fill='%23FAF7F0' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2D6A4F;
+    --green-deep: #1B3A2A;
+    --cream: #FAF7F0;
+    --gold: #C9A227;
+    --ink-soft: rgba(27, 58, 42, 0.68);
+    --line: rgba(27, 58, 42, 0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(120% 55% at 50% 0%, rgba(201, 162, 39, 0.07), transparent 62%), var(--cream);
+    color: var(--green-deep);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+  }
+
+  /* ---- Language toggle ---- */
+  .langbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .lang-toggle {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(4px);
+  }
+  .lang-toggle button {
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 18px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .lang-toggle button[aria-pressed="true"] {
+    background: var(--green);
+    color: #FAF7F0;
+  }
+
+  /* ---- Header ---- */
+  header { text-align: center; padding-bottom: 34px; }
+  .logo-mark { display: block; margin: 0 auto 18px; width: 68px; height: 68px; }
+  h1 {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 8vw, 2.5rem);
+    letter-spacing: 0.01em;
+    color: var(--green-deep);
+    line-height: 1.15;
+  }
+  .tagline {
+    margin-top: 10px;
+    font-size: 0.86rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+  }
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 148px;
+    margin: 26px auto 0;
+  }
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider span {
+    width: 6px;
+    height: 6px;
+    transform: rotate(45deg);
+    background: var(--gold);
+    border-radius: 1px;
+  }
+
+  /* ---- Sections ---- */
+  section { margin-bottom: 30px; }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    padding: 0 6px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* ---- Buttons ---- */
+  .btn-list { display: flex; flex-direction: column; gap: 12px; }
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 17px 22px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--line);
+    color: var(--green-deep);
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(27, 58, 42, 0.04);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+  .btn:hover, .btn:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(45, 106, 79, 0.45);
+    box-shadow: 0 10px 24px rgba(27, 58, 42, 0.09);
+    outline: none;
+  }
+  .btn:active { transform: translateY(0); }
+  .btn-ico { font-size: 1.12rem; line-height: 1; }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--cream);
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(45, 106, 79, 0.22);
+  }
+  .btn-primary:hover, .btn-primary:focus-visible {
+    background: #245741;
+    border-color: #245741;
+    box-shadow: 0 12px 28px rgba(45, 106, 79, 0.3);
+  }
+  .btn-gold-tag {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8a6d14;
+    background: rgba(201, 162, 39, 0.14);
+    border: 1px solid rgba(201, 162, 39, 0.35);
+    border-radius: 999px;
+    padding: 3px 9px;
+    margin-left: 2px;
+  }
+
+  /* ---- Social row ---- */
+  .social {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+  .social a {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--line);
+    color: var(--green-deep);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .social a:hover, .social a:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--gold);
+    box-shadow: 0 8px 18px rgba(27, 58, 42, 0.08);
+    outline: none;
+  }
+  .social svg { width: 20px; height: 20px; fill: currentColor; }
+  .social .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    margin-top: 44px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+  footer .hours {
+    font-weight: 600;
+    color: var(--green-deep);
+    letter-spacing: 0.02em;
+  }
+  footer .addr { margin-top: 4px; }
+  footer .made { margin-top: 14px; font-size: 0.74rem; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language / Idioma">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="false" onclick="setLang('en')">EN</button>
+      <button type="button" data-lang-btn="es" aria-pressed="false" onclick="setLang('es')">ES</button>
+    </div>
+  </nav>
+
+  <header>
+    <!-- Logo mark: green badge with gold crown -->
+    <svg class="logo-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="32" cy="36" r="25" fill="#2D6A4F"/>
+      <path d="M18.5 22.5l5.5-7 8 5.5 8-5.5 5.5 7v2.5h-27z" fill="#C9A227"/>
+      <text x="32" y="50" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#FAF7F0">A</text>
+    </svg>
+    <h1 data-en="Anthony's Supermarket" data-es="Anthony's Supermarket">Anthony's Supermarket</h1>
+    <p class="tagline" data-en="Kearny, NJ · Serving the community for 9 years" data-es="Kearny, NJ · Sirviendo a la comunidad por 9 años">Kearny, NJ · Serving the community for 9 years</p>
+    <div class="divider"><span></span></div>
+  </header>
+
+  <main>
+    <section aria-label="Order and explore">
+      <p class="eyebrow" data-en="Order &amp; Explore" data-es="Ordena &amp; Explora">Order &amp; Explore</p>
+      <div class="btn-list">
+        <a class="btn btn-primary" href="https://t.me/Anthonysuperkitchen_bot" target="_blank" rel="noopener">
+          <span class="btn-ico" aria-hidden="true">🛒</span>
+          <span data-en="Order on Telegram" data-es="Ordena por Telegram">Order on Telegram</span>
+        </a>
+        <a class="btn" href="https://anthony-supermarket.vercel.app" target="_blank" rel="noopener">
+          <span class="btn-ico" aria-hidden="true">🌐</span>
+          <span data-en="Visit Our Website" data-es="Visita Nuestra Web">Visit Our Website</span>
+        </a>
+        <a class="btn" href="https://anthony-supermarket.vercel.app/sales.html" target="_blank" rel="noopener">
+          <span class="btn-ico" aria-hidden="true">🔥</span>
+          <span data-en="Weekly Specials" data-es="Ofertas de la Semana">Weekly Specials</span>
+          <span class="btn-gold-tag" data-en="Pasta Night" data-es="Noche de Pasta">Pasta Night</span>
+        </a>
+        <a class="btn" href="https://anthony-supermarket.vercel.app/pricing-hub/index.html" target="_blank" rel="noopener">
+          <span class="btn-ico" aria-hidden="true">📊</span>
+          <span data-en="Pricing Hub" data-es="Pricing Hub">Pricing Hub</span>
+        </a>
+      </div>
+    </section>
+
+    <section aria-label="Contact">
+      <p class="eyebrow" data-en="Contact" data-es="Contacto">Contact</p>
+      <div class="btn-list">
+        <a class="btn" href="tel:+12014281745">
+          <span class="btn-ico" aria-hidden="true">📞</span>
+          <span data-en="Call" data-es="Llama">Call</span>
+        </a>
+        <a class="btn" href="https://wa.me/12014281745">
+          <span class="btn-ico" aria-hidden="true">💬</span>
+          <span data-en="WhatsApp" data-es="WhatsApp">WhatsApp</span>
+        </a>
+        <a class="btn" href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener">
+          <span class="btn-ico" aria-hidden="true">📍</span>
+          <span data-en="Directions" data-es="Cómo Llegar">Directions</span>
+        </a>
+      </div>
+    </section>
+
+    <section aria-label="Follow us">
+      <p class="eyebrow" data-en="Follow Us" data-es="Síguenos">Follow Us</p>
+      <div class="social">
+        <!-- TODO: confirm IG handle -->
+        <a href="https://instagram.com/anthonysupermarket" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.8.1-1.1.1-1.5.2-1.8.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.3-.3.8-.3 1.8-.1 1.2-.1 1.7-.1 4.8s0 3.5.1 4.8c.1 1.1.2 1.5.3 1.8.2.5.4.8.7 1.1.3.3.6.5 1.1.7.3.1.8.3 1.8.3 1.2.1 1.7.1 4.8.1s3.5 0 4.8-.1c1.1-.1 1.5-.2 1.8-.3.5-.2.8-.4 1.1-.7.3-.3.5-.6.7-1.1.1-.3.3-.8.3-1.8.1-1.2.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.1-.2-1.5-.3-1.8-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.3-.1-.8-.3-1.8-.3-1.2-.1-1.7-.1-4.8-.1zm0 3a5 5 0 110 10 5 5 0 010-10zm0 1.8a3.2 3.2 0 100 6.4 3.2 3.2 0 000-6.4zm5.2-3.1a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/></svg>
+          <span class="sr-only">Instagram</span>
+        </a>
+        <!-- TODO: confirm Facebook page URL -->
+        <a href="https://facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.6 1.6-1.6h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.3v3.2h2.8V21h3.4z"/></svg>
+          <span class="sr-only">Facebook</span>
+        </a>
+        <a href="https://tiktok.com/@bodeguetto" target="_blank" rel="noopener" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 2h-3v13.6a2.8 2.8 0 11-2.8-2.8c.3 0 .6 0 .9.1V9.8a6 6 0 00-.9-.1 5.9 5.9 0 105.9 5.9V8.9a7.3 7.3 0 004.3 1.4V7.3a4.4 4.4 0 01-4.4-4.4V2z"/></svg>
+          <span class="sr-only">TikTok</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="hours" data-en="Open Daily" data-es="Abierto todos los días">Open Daily</p>
+    <p class="addr" data-en="288 Kearny Ave, Kearny, NJ 07032" data-es="288 Kearny Ave, Kearny, NJ 07032">288 Kearny Ave, Kearny, NJ 07032</p>
+    <p class="made" data-en="Made with ❤️ in Kearny" data-es="Hecho con ❤️ en Kearny">Made with ❤️ in Kearny</p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var saved = null;
+  try { saved = localStorage.getItem("anthony-lang"); } catch (e) { saved = null; }
+  var lang = saved === "es" ? "es" : "en";
+
+  window.setLang = function (l) {
+    lang = l === "es" ? "es" : "en";
+    document.documentElement.lang = lang === "es" ? "es" : "en";
+    var els = document.querySelectorAll("[data-en]");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var key = lang === "es" ? "data-es" : "data-en";
+      if (el.hasAttribute(key)) { el.innerHTML = el.getAttribute(key); }
+    }
+    var btns = document.querySelectorAll("[data-lang-btn]");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].setAttribute("aria-pressed", btns[j].getAttribute("data-lang-btn") === lang ? "true" : "false");
+    }
+    try { localStorage.setItem("anthony-lang", lang); } catch (e) {}
+  };
+
+  window.setLang(lang);
+})();
+</script>
+</body>
+</html>

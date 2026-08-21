@@ -1,0 +1,44 @@
+{
+  "_comment": "Non-sensitive sample OCR payload used by the end-to-end pipeline test. Fictional vendor, invented product lines, no real invoice data, no PII. Line 3 is deliberately unreadable so the test can prove OCR cannot approve itself.",
+  "invoice": {
+    "vendor_name": "Sample Wholesale Co",
+    "invoice_number": "SAMPLE-0001",
+    "invoice_date": "2026-08-19",
+    "subtotal": 148.50
+  },
+  "items": [
+    {
+      "line_number": 1,
+      "vendor_sku": "SW-1001",
+      "upc": "0074471000500",
+      "description": "Sample Coffee 12/10oz",
+      "department": "Tea/Coffee",
+      "cases": 2,
+      "units": 12,
+      "total": 96.00,
+      "confidence": 0.985
+    },
+    {
+      "line_number": 2,
+      "vendor_sku": "SW-1002",
+      "upc": "0012000001260",
+      "description": "Sample Rice 20/2lb",
+      "department": "Rice",
+      "cases": 1,
+      "units": 20,
+      "total": 42.50,
+      "confidence": 0.97
+    },
+    {
+      "line_number": 3,
+      "vendor_sku": "",
+      "upc": "",
+      "description": "Sample smudged handwritten line",
+      "department": "",
+      "cases": 1,
+      "units": 10,
+      "total": 10.00,
+      "confidence": 0.42
+    }
+  ]
+}
