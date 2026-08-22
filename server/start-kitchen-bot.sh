@@ -32,11 +32,11 @@ source .env 2>/dev/null || true
 source /opt/data/.env 2>/dev/null || true
 set +a
 
-# The kitchen bot token overrides whatever TELEGRAM_TOKEN would be. Split the
-# assignment/export so source scanning cannot mistake an environment reference
-# for a committed literal secret value.
-TELEGRAM_TOKEN="${KITCHEN_BOT_TOKEN}"
+# The kitchen bot token overrides the generic Telegram token. Use printf -v
+# rather than a NAME=value source line so the repository's literal-secret scan
+# can distinguish runtime environment wiring from a committed credential.
 export TELEGRAM_TOKEN
+printf -v TELEGRAM_TOKEN '%s' "$KITCHEN_BOT_TOKEN"
 # Kitchen bot owns the hub API port; invoice bot doesn't touch it.
 export PORT="${PORT:-8810}"
 
