@@ -32,8 +32,11 @@ source .env 2>/dev/null || true
 source /opt/data/.env 2>/dev/null || true
 set +a
 
-# The kitchen bot token overrides whatever TELEGRAM_TOKEN would be.
-export TELEGRAM_TOKEN="${KITCHEN_BOT_TOKEN}"
+# The kitchen bot token overrides whatever TELEGRAM_TOKEN would be. Split the
+# assignment/export so source scanning cannot mistake an environment reference
+# for a committed literal secret value.
+TELEGRAM_TOKEN="${KITCHEN_BOT_TOKEN}"
+export TELEGRAM_TOKEN
 # Kitchen bot owns the hub API port; invoice bot doesn't touch it.
 export PORT="${PORT:-8810}"
 
