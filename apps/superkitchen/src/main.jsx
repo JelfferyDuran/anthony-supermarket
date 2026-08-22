@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './styles.css';
+import './motion.css';
 
 // Telegram Mini App SDK (optional — enhances UX inside Telegram webview).
 // Loaded dynamically; app works fine without it too.
