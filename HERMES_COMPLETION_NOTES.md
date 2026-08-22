@@ -1,205 +1,146 @@
-# Pricing Hub V2 Upgrade: Handoff to Hermes
+# Pricing Hub — Current Hermes Handoff
 
-**Status**: Four binding owner decisions implemented, all tests passing (90 server, 30 SQL, 83 hub verifier), code committed to branch `claude/pricing-hub-v2-upgrade-cyu5dm`, tree clean and ready for production deployment.
+**Status date:** 2026-08-21 ET  
+**Source of truth:** live Supabase + current repo state. Do not use the superseded 2026-08-19 deployment checklist as if production were still empty.
 
-**Handoff Date**: 2026-08-19  
-**Previous Context**: All decisions locked in `PRICING_HUB_V2_UPGRADE.md` §1b (owner, 2026-08-19)
+## Binding owner rule
 
----
+**Retail = Base Cost × 1.70 (70% markup)** with the established `.99` shelf rounding convention. The server/database remains authoritative. Do not reintroduce a 65% default in any collector, write-back path, bot, dashboard, or customer catalog.
 
-## 1. What's Complete
+## What is already live
 
-### Decision 1: 70% Markup Rule (1.70× multiplier)
-- **Status**: Implemented and committed
-- **Files Changed**: 
-  - `apps/pricing-hub/index.html` — 16 retail prices updated (+$1.00 each)
-  - `server/pricing-engine.js` — unified rule: all retail = cost × 1.70, snapped to .99
-  - `server/pricing-engine.test.js` — test added: hub preview markup always equals 70% when multiplier is 1.70
-  - `scripts/verify-pricing-hub.js` — 83 verification checks (all pass)
-  - `supabase/seed/pricing_hub_seed.sql` — regenerated at 70%
-- **Retail Impact**: 16 items increased $1.00 each; projected +$420 revenue on current stock
-- **Tests**: All passing; retail prices verified for consistency with formula
+The Pricing Hub A–C production cutover has already occurred.
 
-### Decision 2: Keep the Iframe
-- **Status**: No changes needed; iframe strategy already satisfied in existing code
+Applied Supabase migrations:
+- `20260812013000_add_invoice_pricing_pipeline`
+- `20260819213000_reconcile_pricing_hub_dataset`
+- `20260819230000_add_pos_sales_and_financials`
+- `20260819234500_add_intake_channel_provenance`
+- `20260822002824_pricing_hub_production_security_hardening`
+- `20260822003315_phase_d_inventory_and_pos_aliases`
 
-### Decision 3: Gemini Free-Tier OCR Provider
-- **Status**: Implemented with webhook fallback strategy
-- **Files Created**:
-  - `server/pricing-ocr.js` — provider selection, Gemini API calls (key in `x-goog-api-key` header, not URL)
-  - `server/pricing-ocr.test.js` — 14 tests (all passing)
-- **Provider Precedence**: Explicit `PRICING_OCR_WEBHOOK_URL` wins if set (operator's choice); falls back to in-process Gemini if `GEMINI_API_KEY` is configured
-- **Security Note**: Gemini API key travels as header, never in URL (prevents log/error exposure)
-- **Webhook Integration**: Hermes's ocr-webhook.js service proven against real Family Food invoice (16/16 lines, $1,239.19 exact)
+**Do not blindly rerun the old four-migration + seed deployment sequence.** Inspect migration state first.
 
-### Decision 4: Multi-Channel Intake (Hub + Telegram + WhatsApp)
-- **Status**: Implemented with per-channel allowlists and sender fingerprinting
-- **Files Created**:
-  - `server/pricing-intake.js` — channel validation, per-channel allowlists, sender normalization
-  - `server/pricing-intake.test.js` — 16 tests (all passing)
-  - `supabase/migrations/20260819234500_add_intake_channel_provenance.sql` — new columns on `pricing_invoices`
-- **Key Behavior**: 
-  - Telegram: allowlist from `HERMES_CHAT_ID` + `PRICING_TELEGRAM_CHAT_IDS`
-  - WhatsApp: allowlist from `PRICING_WHATSAPP_NUMBERS` (supports multiple number formats)
-  - Sender stored as `channel:sha256(sender)[:12]` fingerprint (privacy-preserving)
-  - Reply message: "Nothing is priced yet: every line is waiting for review in the Pricing Hub"
+Live snapshot observed 2026-08-21:
+- Hub ledger: 294 embedded rows
+- Canonical active products: 283
+- Vendors: 10
+- Pricing invoices: 21
+- Invoice lines: 331
+- Price-history transitions: 11
+- POS sales stored: 11,222
+- POS rows linked to products before Phase D alias enrichment: 525 (4.68%)
+- Active products with UPC: 93 / 283
+- Invoice states: 17 backfilled · 3 needs_review · 1 uploaded
 
----
+## Phase D now live
 
-## 2. ⚠️ CRITICAL TIMING: OS Multiplier Sync
+### `pricing-catalog`
+Supabase Edge Function version 1, `ACTIVE`, `verify_jwt=true`.
 
-**The 16 retail price increases (+$1.00 each) will be REVERTED unless OS multiplier flips to 1.70 in the same deployment window.**
+Purpose: approved read-only catalog for SuperApp/customer consumers.
 
-### What to do:
-1. **Identify**: Kingdom OS collector hardcodes `1.65` multiplier (check both write-back endpoint and sync logic)
-2. **Change to**: `1.70` (must match hub decision)
-3. **Timing**: Deploy this change **before** next scheduled OS sync or immediately after hub prices go live — do not allow a gap where hub shows 70% but OS still calculates 65%
-4. **Validation**: After OS flip, run next sync and confirm retail prices remain at +$1.00 levels (do not revert to old prices)
+Exposes only:
+- id
+- UPC
+- name
+- category / department
+- approved retail price
+- updated timestamp
 
----
+It does **not** expose costs, vendor/invoice internals, service-role credentials, or pricing writes.
 
-## 3. Production Deployment Steps
+Tracked source: `supabase/functions/pricing-catalog/index.ts`.
 
-### Phase 1: Database Migrations (in order)
+### `pricing-integrations`
+Supabase Edge Function version 1, `ACTIVE`, `verify_jwt=true`.
 
-Run these Supabase migrations in sequence. They are idempotent but depend on ordering:
+Only `manager` / `admin` roles from protected Supabase `app_metadata` may use it.
 
-```bash
-# Migration 1: invoice pricing pipeline (base tables)
-supabase db push 20260812013000_add_invoice_pricing_pipeline.sql
+Capabilities:
+- list inventory balances
+- list/start/save/complete/cancel inventory count sessions
+- inspect safe product identities
+- inspect approved POS aliases
+- inspect top unmatched POS names
+- register a manager-approved exact UPC/name alias
 
-# Migration 2: reconcile pricing hub dataset (align inventory)
-supabase db push 20260819213000_reconcile_pricing_hub_dataset.sql
+Tracked source: `supabase/functions/pricing-integrations/index.ts`.
 
-# Migration 3: POS sales and financials (add costing history)
-supabase db push 20260819230000_add_pos_sales_and_financials.sql
+## Inventory model
 
-# Migration 4: intake provenance (channel tracking)
-supabase db push 20260819234500_add_intake_channel_provenance.sql
-```
+Phase D added:
+- `inventory_count_sessions`
+- `inventory_count_lines`
+- `inventory_balances`
+- atomic `inventory_complete_count(...)`
 
-### Phase 2: Seed Data
+Counts remain auditable and human-attributed. A completed count updates balances atomically; empty or non-draft sessions are refused.
 
-After all migrations pass:
+## POS matching model
 
-```bash
-node scripts/seed-pricing-from-hub.js --apply
-```
+Phase D added `pos_product_aliases` plus:
+- `pricing_register_pos_alias(...)`
+- `pricing_apply_pos_alias_to_sale()` trigger
+- `pricing_unmatched_pos_summary(...)`
 
-This regenerates the hub at 70% markup and commits the seed transaction.
+Rules:
+1. Alias evidence must be exact UPC and/or exact normalized name.
+2. A manager/admin must approve the alias.
+3. An alias already owned by another product is refused.
+4. Historical backfill touches only exact currently-unmatched rows.
+5. Future imports inherit approved aliases automatically.
+6. If UPC and name evidence conflict, the sale stays unmatched rather than guessing.
 
-### Phase 3: Environment Configuration
+A deterministic audit found **0 additional historical rows** that can be auto-linked by unique exact UPC/name beyond the current matcher. Do not use fuzzy matching merely to raise the percentage.
 
-Ensure these are set in production before deploying server code:
+The largest unmatched revenue includes generic POS buttons such as `GENERAL FOOD`, `PRODUCE`, `MEAT/FISH` and `BISTEC/STEAK`; these are not one canonical product and must remain unresolved unless the POS workflow itself gains item-level identity. Other unmatched real UPC products should be resolved by catalog enrichment or explicit aliases.
 
-```bash
-# Gemini OCR (if using in-process provider)
-GEMINI_API_KEY=<your-api-key>
-GEMINI_MODEL=gemini-2.5-flash
+## Production verification performed
 
-# OR Webhook OCR (if using Hermes's service)
-PRICING_OCR_WEBHOOK_URL=https://your-ocr-webhook-host/extract
-PRICING_OCR_WEBHOOK_TOKEN=<shared-secret>
-OCR_MODEL=google/gemini-2.5-flash
-OCR_PORT=8799
+A rollback-only production transaction verified:
+1. inventory count session creation;
+2. count-line save;
+3. atomic count completion and balance update;
+4. exact POS alias registration;
+5. future POS insert automatically mapped by the alias trigger;
+6. transaction rollback removed all test data.
 
-# Multi-channel intake
-PRICING_INTAKE_BRIDGE_KEY=<shared-secret>
-PRICING_WHATSAPP_NUMBERS=1201555010,12015550101  # comma-separated
-PRICING_TELEGRAM_CHAT_IDS=<chat-id-list>
-HERMES_CHAT_ID=<hermes-chat-id>
-```
+The two Edge Functions deployed successfully and are reported ACTIVE with `verify_jwt=true`.
 
-**Note**: Explicit `PRICING_OCR_WEBHOOK_URL` takes precedence over `GEMINI_API_KEY`. Both can be set (webhook for primary, Gemini as fallback).
+## Security changes
 
-### Phase 4: Server Deploy
+Completed:
+- removed scratch table `public._hermes_test` (one integer test row, no production data);
+- pinned the immutable-history trigger function's search path;
+- new inventory/alias tables use RLS deny-by-default with no direct anon/authenticated grants;
+- service-role access remains only inside trusted server/Edge Function code.
 
-Deploy `server/` code to production. All tests have passed locally:
-- 90 server tests ✓
-- 30 SQL constraint checks ✓
-- 83 hub verifier checks ✓
+Supabase security advisor no longer reports the previous exposed scratch-table error or mutable-search-path warning.
 
----
+Remaining advisor warning: **leaked-password protection is disabled** in Supabase Auth. Consider enabling it through the Supabase Auth security settings; do not weaken existing authentication to compensate.
 
-## 4. Validation Checklist Before Go-Live
+## NRS boundary
 
-- [ ] **OS Multiplier Sync**: Confirm `1.70` is deployed and synced before hub prices go live
-- [ ] **Database Migrations**: All 4 migrations applied successfully; no rollback errors
-- [ ] **Seed Data**: Pricing hub regenerated at 70%; spot checks confirm new retail values (e.g., Van Camps 3.99, Mama Tere Papa Criolla 9.99)
-- [ ] **OCR Provider Test**: 
-  - If webhook: submit test invoice to `POST /intake/hub`, confirm extraction succeeds
-  - If Gemini: confirm `GEMINI_API_KEY` is set and API is accessible
-- [ ] **Intake Channel Test**: Submit test intake to each channel (hub, Telegram, WhatsApp); confirm allowlist works and `source_channel` + `source_sender_ref` are recorded
-- [ ] **Real NRS Export Validation** (if available): Run `node server/pos-import.js <path-to-nrs-export>` and confirm parser matches live column names and produces valid cost history
-- [ ] **Browser Live Test**: Open Pricing Hub, verify slider defaults to 70%, modify a cost value, confirm retail recalculates to 70% with .99 rounding
+Current supported ingestion remains NRS CSV exports. NRS publicly advertises real-time inventory integration in its own ecommerce/delivery ecosystem, but a documented public merchant/developer API for Anthony's direct use was not verified. Do not invent or reverse-engineer a private API.
 
----
+## Bank-feed boundary
 
-## 5. Remaining Tasks
+Plaid/bank feeds are not active. Connecting financial accounts creates a separate credential/consent boundary and requires explicit owner/provider setup. Do not treat Phase D approval as permission to connect bank data automatically.
 
-### Real NRS Export Validation
-When you obtain the live NRS export file, run:
+## Kingdom OS boundary
 
-```bash
-node server/pos-import.js <path-to-export.xlsx>
-```
+The embedded `VENDORS` / `ALL_ITEMS` arrays and root Pricing Hub copy remain compatibility contracts for the current Kingdom OS collector/write-back path.
 
-This parser is intentionally mirrored from `nrs/nrs-analyze.py` so the dashboard and daily briefing agree on row meaning. Tested against fixtures; needs real file to confirm live column names match expectations.
+Phase D has created the replacement data/API layer, but **Kingdom OS has not yet been ported**. Preserve file compatibility until the OS consumer is migrated and parity-tested.
 
-**Expected behavior**:
-- Parses vendor/SKU/cost columns
-- Stores immutable cost history (cost in effect on sale date, walked back through price changes)
-- Computes costed revenue (unit cost × qty sold)
-- Validates no zero-cost sales (except reference items)
+## Next safe work
 
-### Browser Live Test (Optional but Recommended)
-After deployment, open the Pricing Hub in a browser:
+1. Review and merge `feat/pricing-hub-phase-d-prod-hardening` after CI/review; production migrations/functions already exist, so merge is source reconciliation, not a fresh cutover.
+2. Add a manager UI for inventory counts and POS alias review.
+3. Enrich catalog UPC coverage by unmatched revenue, beginning with real UPC SKUs rather than generic department buttons.
+4. Wire SuperApp to the read-only `pricing-catalog` function and smoke-test before replacing its current catalog source.
+5. Port Kingdom OS to the new read-only API/data layer and verify parity before retiring the file mirror.
+6. Verify the current web/server deployment directly; the connected Vercel listing did not prove the manual production site/server state.
 
-1. Verify slider defaults to 70%
-2. Enter a new cost value (e.g., cost $10.00 → retail should be $17.99)
-3. Verify .99 rounding applies consistently
-4. Check that old prices (from before markup change) render correctly
-5. Monitor console for errors (expect favicon 404 is normal; watch for pricing calculation errors)
-
----
-
-## 6. Decisions Already Locked
-
-These decisions are finalized and should not be revisited without owner approval:
-
-| Decision | Choice | Lock Date | Rationale |
-|----------|--------|-----------|-----------|
-| Markup rule | 70% (1.70×) | 2026-08-19 | Unified rule: all retail = cost × 1.70, snapped to .99 |
-| Iframe strategy | Keep existing | 2026-08-19 | No rearchitecting; iframe scope/sandbox as-is |
-| OCR provider | Gemini free-tier | 2026-08-19 | Free API; webhook fallback if needed; in-process Gemini for local dev |
-| Intake channels | Hub + Telegram + WhatsApp | 2026-08-19 | Per-channel allowlists; sender fingerprinting for privacy |
-
----
-
-## 7. Contact Points
-
-- **Pricing Hub V2 decisions**: See `PRICING_HUB_V2_UPGRADE.md` §1b (owner approval document)
-- **Test results**: All 90 server tests, 30 SQL checks, and 83 hub verifier checks pass locally. Run `npm test` to confirm
-- **PR History**: Branch `claude/pricing-hub-v2-upgrade-cyu5dm` contains three commits:
-  - Your OCR webhook service (Hermes)
-  - Merge + security fix (Gemini key in header, not URL)
-  - Four binding decisions implementation (Claude)
-
----
-
-## 8. Quick Start Checklist
-
-1. **Pull latest**: `git fetch origin claude/pricing-hub-v2-upgrade-cyu5dm && git checkout claude/pricing-hub-v2-upgrade-cyu5dm`
-2. **Run tests**: `npm test` (expect 90/90 server tests passing)
-3. **Review changes**: `git log --oneline -3` (confirm three commits present)
-4. **Flip OS multiplier**: Update Kingdom OS collector to `1.70` before deployment window
-5. **Deploy migrations**: Run 4 Supabase migrations in order
-6. **Seed data**: `node scripts/seed-pricing-from-hub.js --apply`
-7. **Deploy server**: Push `server/` code to production
-8. **Validate**: Test OCR, intake channels, and browser rendering at 70%
-
----
-
-**End of Handoff**
-
-All code is ready for production. The critical path is: OS multiplier sync → DB migrations → seed → server deploy → validation.
+For full live state see `docs/agent-context/CURRENT_STATE.md` and `brain/Sessions/2026-08-21 Pricing Hub Phase D.md`.
