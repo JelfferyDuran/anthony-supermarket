@@ -53,9 +53,9 @@ const FRAGMENT_SHADER = `
   }
 
   float grid(vec2 uv, float scale, float thickness) {
-    vec2 line = abs(fract(uv * scale - 0.5) - 0.5) / fwidth(uv * scale);
-    float axis = min(line.x, line.y);
-    return 1.0 - min(axis, thickness);
+    vec2 cell = abs(fract(uv * scale) - 0.5);
+    float axis = min(cell.x, cell.y);
+    return 1.0 - smoothstep(0.0, max(0.004, thickness * 0.018), axis);
   }
 
   float ring(vec2 uv, float radius, float width) {
@@ -64,7 +64,6 @@ const FRAGMENT_SHADER = `
   }
 
   void main() {
-    vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
     vec2 pointer = (u_pointer - 0.5) * vec2(u_resolution.x / u_resolution.y, 1.0);
 
@@ -191,10 +190,18 @@ export default function ExperienceLayer({ mode = 'customer' }) {
       return undefined;
     }
 
+    let program;
+    try {
+      program = createProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER);
+    } catch (error) {
+      console.warn('Decorative WebGL layer disabled:', error);
+      canvas.dataset.fallback = 'true';
+      return undefined;
+    }
+
     let frame = 0;
     let width = 1;
     let height = 1;
-    const program = createProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER);
     const buffer = gl.createBuffer();
     const positions = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
 
