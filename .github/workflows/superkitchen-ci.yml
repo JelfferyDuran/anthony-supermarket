@@ -64,6 +64,13 @@ jobs:
           fi
       - run: npm ci --workspaces=false
       - run: npm run build --workspaces=false
+      - name: Capture generated Pages build for sync repair
+        uses: actions/upload-artifact@v4
+        with:
+          name: superkitchen-dist-${{ github.sha }}
+          path: apps/superkitchen/dist
+          if-no-files-found: error
+          retention-days: 1
       - name: Verify tracked Pages build matches source
         shell: bash
         run: |
