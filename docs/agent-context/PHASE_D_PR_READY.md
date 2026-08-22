@@ -1,1 +1,0 @@
-Phase D source reconciliation is ready for pull-request review. Production migrations/functions represented by this branch are already live; merging reconciles source control and should not trigger blind re-deployment.
