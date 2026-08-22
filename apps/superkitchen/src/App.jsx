@@ -6,6 +6,7 @@ import CustomizeModal from './components/CustomizeModal.jsx';
 import CartScreen from './components/CartScreen.jsx';
 import CheckoutModal from './components/CheckoutModal.jsx';
 import AdminApp from './components/AdminApp.jsx';
+import ExperienceLayer from './components/ExperienceLayer.jsx';
 
 const CATEGORY_ORDER = ['Yaroas', 'Chimis', 'Mofongos', 'Pica Pollo'];
 
@@ -13,7 +14,15 @@ const CATEGORY_ORDER = ['Yaroas', 'Chimis', 'Mofongos', 'Pica Pollo'];
 const IS_STAFF = new URLSearchParams(window.location.search).get('staff') === '1';
 
 export default function App() {
-  if (IS_STAFF) return <AdminApp />;
+  if (IS_STAFF) {
+    return (
+      <>
+        <ExperienceLayer mode="ops" />
+        <AdminApp />
+      </>
+    );
+  }
+
   const cart = useCart();
   const [activeCategory, setActiveCategory] = useState(CATEGORY_ORDER[0]);
   const [screen, setScreen] = useState('menu'); // 'menu' | 'cart'
@@ -35,7 +44,9 @@ export default function App() {
   };
 
   return (
-    <div className="app">
+    <>
+      <ExperienceLayer mode="customer" />
+      <div className="app">
       <header className="app-header">
         <div className="brand-row">
           <img src="logo.jpg" alt="Anthony's Super Kitchen logo" className="brand-logo" />
@@ -116,6 +127,7 @@ export default function App() {
           }}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
