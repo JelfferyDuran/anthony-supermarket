@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js';
 import StaffLogin from './StaffLogin.jsx';
 import KitchenBoard from './KitchenBoard.jsx';
 import StoreBoard from './StoreBoard.jsx';
+import PricingManagerBoard from './PricingManagerBoard.jsx';
 
 const SESSION_KEY = 'sk-staff-session';
 
@@ -46,7 +47,7 @@ export default function AdminApp() {
   }
 
   const role = session.user?.app_metadata?.role || 'unknown';
-  const canStore = role === 'manager' || role === 'admin';
+  const canManageStore = role === 'manager' || role === 'admin';
 
   async function logout() {
     await supabase.auth.signOut().catch(() => {});
@@ -69,9 +70,14 @@ export default function AdminApp() {
             <button className={tab === 'kitchen' ? 'admin-tab active' : 'admin-tab'} onClick={() => setTab('kitchen')}>
               🍳 Kitchen
             </button>
-            {canStore && (
+            {canManageStore && (
               <button className={tab === 'store' ? 'admin-tab active' : 'admin-tab'} onClick={() => setTab('store')}>
                 🏬 Store
+              </button>
+            )}
+            {canManageStore && (
+              <button className={tab === 'pricing' ? 'admin-tab active' : 'admin-tab'} onClick={() => setTab('pricing')}>
+                🏷️ Pricing & Inventory
               </button>
             )}
           </nav>
@@ -80,9 +86,10 @@ export default function AdminApp() {
       </header>
       <main className="admin-main">
         {tab === 'kitchen' && <KitchenBoard token={session.access_token} role={role} />}
-        {tab === 'store' && canStore && <StoreBoard token={session.access_token} />}
-        {tab === 'store' && !canStore && (
-          <div className="admin-error">Your role ({role}) does not have access to store analytics.</div>
+        {tab === 'store' && canManageStore && <StoreBoard token={session.access_token} />}
+        {tab === 'pricing' && canManageStore && <PricingManagerBoard token={session.access_token} />}
+        {(tab === 'store' || tab === 'pricing') && !canManageStore && (
+          <div className="admin-error">Your role ({role}) does not have access to store management.</div>
         )}
       </main>
     </div>
