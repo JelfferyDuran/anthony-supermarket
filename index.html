@@ -306,7 +306,7 @@
 
   <nav class="navbar" id="navbar" aria-label="Main navigation">
     <div class="brand" data-brand translate="no">&#x1F981; Anthony's <span>Market</span></div>
-    <div class="links">
+<div class="links" id="navLinks">
       <a href="#home" class="active" data-en="Home" data-es="Inicio">Home</a>
       <a href="#menu" data-en="Menu" data-es="Menú">Menu</a>
       <a href="#departments" data-en="Departments" data-es="Departamentos">Departments</a>
@@ -673,7 +673,6 @@ renderOrderHistory();}
 (function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
 
 function scrollToMenu(){document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
-function goToPricing(){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
 function toggleNav(){var l=document.getElementById("navLinks"),b=document.getElementById("navToggle"),d=document.getElementById("navBackdrop");var open=l.classList.toggle("open");d.classList.toggle("open",open);b.setAttribute("aria-expanded",open);b.setAttribute("aria-label",open?"Close menu":"Open menu")}
 document.getElementById("navLinks").addEventListener("click",function(e){if(e.target.tagName==="A"){document.getElementById("navLinks").classList.remove("open");document.getElementById("navBackdrop").classList.remove("open");document.getElementById("navToggle").setAttribute("aria-expanded","false")}});
 
