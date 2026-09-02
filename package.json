@@ -17,7 +17,12 @@
     "server:superkitchen": "cd apps/superkitchen/server && npm start",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "verify:pricing-hub": "node scripts/verify-pricing-hub.js",
+    "verify:pricing-migrations": "node scripts/test-pricing-migrations.js",
+    "seed:pricing": "node scripts/seed-pricing-from-hub.js",
+    "seed:pricing:check": "node scripts/seed-pricing-from-hub.js --check",
+    "test:pricing": "cd server && npm test"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

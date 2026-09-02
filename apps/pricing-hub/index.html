@@ -5,316 +5,464 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anthony's Supermarket — Pricing Hub</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+/* ═══════════════════════════════════════════════════════════════════════════
+   Pricing Hub v2 — editorial, calm, dense where it counts.
+   Single self-contained file: the site iframes this, and the Kingdom OS
+   collector parses the data arrays out of it. No external requests.
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  /* Brand palette derived from logo */
-  --brand:#77b045;        /* logo green */
-  --brand-dark:#5e9134;   /* darker green */
-  --brand-light:#8fc95e;  /* lighter green */
-  --brand-glow:rgba(119,176,69,.15);
-  --bg:#0f130d;           /* near-black warm green-black */
-  --s1:#161c11;
-  --s2:#1e2718;
-  --s3:#28331f;
-  --border:#33402a;
-  --border2:#445437;
-  --blue:#5aa9f0;--amber:#f0b246;--red:#e8584a;--purple:#b08ef0;--pink:#ef7fc0;
-  --text:#e4eadc;--muted:#8a9a78;--white:#fff;
+  --ink:#14140f; --ink-2:#3d3d34; --ink-3:#6f6f62; --ink-4:#9a9a8c;
+  --paper:#f7f5ef; --card:#fffefa; --line:#e4e0d4; --line-2:#efece2;
+  --gold:#a8801f; --gold-soft:#f3ead2;
+  --green:#2f6b43; --green-soft:#e6f0e6;
+  --red:#a3352c; --red-soft:#f8e9e5;
+  --blue:#2c5578; --blue-soft:#e6eef5;
+  --shadow:0 1px 2px rgba(20,20,15,.04), 0 8px 24px -12px rgba(20,20,15,.12);
+  --radius:14px;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:'SF Mono',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
 }
-body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ink:#f2efe6; --ink-2:#cfcabb; --ink-3:#9d9a8c; --ink-4:#7a7668;
+    --paper:#16160f; --card:#1e1e16; --line:#33322a; --line-2:#282720;
+    --gold:#d8b45c; --gold-soft:#3a3020;
+    --green:#8fc79f; --green-soft:#1f3226;
+    --red:#e39187; --red-soft:#3a2320;
+    --blue:#9ec2e0; --blue-soft:#1f2d3a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-padding-top:80px}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1320px; margin:0 auto; padding:22px 18px 80px}
 
-/* TOP BAR */
-.topbar{background:linear-gradient(180deg,var(--s1),var(--bg));border-bottom:1px solid var(--border);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;gap:14px;flex-wrap:wrap}
-.brand-block{display:flex;align-items:center;gap:13px}
-.logo-img{width:46px;height:46px;border-radius:11px;object-fit:cover;box-shadow:0 2px 12px var(--brand-glow);border:1.5px solid var(--brand)}
-.brand-text h1{font-size:17px;font-weight:800;color:var(--white);letter-spacing:-.01em;line-height:1.1}
-.brand-text .tag{font-size:11px;font-weight:600;color:var(--brand);letter-spacing:.14em;text-transform:uppercase}
-.topbar-right{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.markup-ctl{display:flex;align-items:center;gap:9px;background:var(--s2);padding:7px 13px;border-radius:9px;border:1px solid var(--border)}
-.markup-ctl label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.06em;white-space:nowrap}
-.markup-ctl input[type=range]{width:90px;accent-color:var(--brand)}
-.mval{font-weight:800;color:var(--brand);font-size:14px;min-width:36px}
-.btn{padding:8px 14px;border-radius:9px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
-.btn-brand{background:var(--brand);color:#0f130d}
-.btn-brand:hover{background:var(--brand-light)}
-.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text)}
-.btn-outline:hover{border-color:var(--brand);color:var(--brand)}
+/* ── Masthead ─────────────────────────────────────────────────────────── */
+.masthead{
+  display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between;
+  gap:14px; padding-bottom:16px; margin-bottom:20px;
+  border-bottom:2px solid var(--ink);
+}
+.mast-title{font-family:var(--serif); font-size:clamp(26px,4.2vw,40px); line-height:1.05; letter-spacing:-.02em; margin:0; font-weight:600}
+.mast-kicker{
+  font-family:var(--sans); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold); font-weight:700; margin:0 0 6px;
+}
+.mast-meta{font-size:12.5px; color:var(--ink-3); text-align:right; line-height:1.7}
+.mast-meta b{color:var(--ink-2); font-weight:600}
 
-/* UPLOAD ZONE */
-.upload-zone{margin:16px 22px 0;background:var(--s1);border:2px dashed var(--border2);border-radius:14px;padding:22px;text-align:center;transition:all .2s;cursor:pointer}
-.upload-zone:hover{border-color:var(--brand);background:var(--s2)}
-.upload-zone.dragover{border-color:var(--brand);background:var(--brand-glow)}
-.upload-zone.hidden{display:none}
-.uz-icon{font-size:34px;margin-bottom:8px}
-.uz-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
-.uz-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
-.uz-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.uz-toggle{margin:16px 22px 0;display:flex;justify-content:flex-end}
-.uz-toggle button{background:var(--s2);border:1px solid var(--border);color:var(--brand);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit}
-.uz-toggle button:hover{border-color:var(--brand)}
+/* ── Connection banner ────────────────────────────────────────────────── */
+.conn{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  padding:9px 14px; border-radius:10px; font-size:12.5px; margin-bottom:18px;
+  border:1px solid var(--line);
+}
+.conn.live{background:var(--green-soft); border-color:transparent; color:var(--green)}
+.conn.local{background:var(--gold-soft); border-color:transparent; color:var(--gold)}
+.conn.err{background:var(--red-soft); border-color:transparent; color:var(--red)}
+.conn .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none}
+.conn b{font-weight:700}
+.conn .conn-act{
+  margin-left:auto; font-size:11.5px; background:none; border:1px solid currentColor;
+  color:inherit; border-radius:99px; padding:3px 11px; cursor:pointer; font-weight:600;
+}
+.conn .conn-act:hover{background:rgba(0,0,0,.05)}
 
-/* analysis status */
-.analysis-status{margin:14px 22px 0;background:var(--s2);border:1px solid var(--brand);border-radius:12px;padding:16px 20px;display:none}
-.analysis-status.show{display:block}
-.as-row{display:flex;align-items:center;gap:12px}
-.spinner{width:20px;height:20px;border:2.5px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.as-text{font-size:13px;font-weight:600;color:var(--text)}
-.as-detail{font-size:11px;color:var(--muted);margin-top:2px}
-.as-error{color:var(--red)}
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+.tabs{display:flex; gap:4px; margin-bottom:18px; border-bottom:1px solid var(--line); overflow-x:auto; -webkit-overflow-scrolling:touch}
+.tab{
+  appearance:none; background:none; border:0; border-bottom:2px solid transparent;
+  padding:9px 15px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink-3);
+  cursor:pointer; white-space:nowrap; margin-bottom:-1px;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--gold)}
+.tab .badge{
+  display:inline-block; min-width:17px; padding:0 5px; margin-left:6px; border-radius:99px;
+  background:var(--red); color:#fff; font-size:10.5px; line-height:17px; font-weight:700; text-align:center;
+}
+.panel[hidden]{display:none}
 
-/* preview imported items */
-.import-preview{margin:14px 22px 0;background:var(--s2);border:1px solid var(--brand);border-radius:12px;padding:18px 20px;display:none}
-.import-preview.show{display:block}
-.ip-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.ip-title{font-size:14px;font-weight:800;color:var(--white)}
-.ip-title span{color:var(--brand)}
-.ip-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.ip-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
-.ip-table th{text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
-.ip-table td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text)}
-.ip-table input{background:var(--s3);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:3px 6px;width:100%;font-size:11px;font-family:inherit;outline:none}
-.ip-table input:focus{border-color:var(--brand)}
-.ip-table input.num{width:62px;text-align:right}
-.ip-actions{display:flex;gap:10px;flex-wrap:wrap}
+/* ── Stats ────────────────────────────────────────────────────────────── */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:10px; margin-bottom:20px}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:13px 15px; box-shadow:var(--shadow)}
+.slabel{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-4); font-weight:700; margin-bottom:5px}
+.sval{font-family:var(--serif); font-size:23px; font-weight:600; letter-spacing:-.01em; line-height:1.15}
+.sval.g{color:var(--green)} .sval.r{color:var(--red)} .sval.b{color:var(--blue)}
+.ssub{font-size:11.5px; color:var(--ink-4); margin-top:3px}
 
-/* VENDOR TABS */
-.vendor-bar{background:var(--s2);border-bottom:2px solid var(--border);padding:0 22px;display:flex;overflow-x:auto;margin-top:16px}
-.vtab{padding:12px 18px;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:8px;user-select:none}
-.vtab:hover{color:var(--text)}
-.vtab.active{color:var(--white);border-bottom-color:var(--brand)}
-.vbadge{background:var(--s3);border-radius:11px;font-size:10px;padding:1px 8px;color:var(--muted)}
-.vtab.active .vbadge{background:var(--brand-glow);color:var(--brand)}
+/* ── Controls ─────────────────────────────────────────────────────────── */
+.controls{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:15px; margin-bottom:16px; box-shadow:var(--shadow)}
+.ctrl-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+.ctrl-row + .ctrl-row{margin-top:13px; padding-top:13px; border-top:1px solid var(--line-2)}
+.field{display:flex; flex-direction:column; gap:4px; min-width:0}
+.field label{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-4); font-weight:700}
+select,input[type=text],input[type=search],input[type=number]{
+  font:inherit; font-size:13.5px; padding:7px 10px; border:1px solid var(--line);
+  border-radius:9px; background:var(--card); color:var(--ink); min-width:0;
+}
+select:focus,input:focus{outline:2px solid var(--gold); outline-offset:1px}
+.grow{flex:1 1 190px}
+.slider-wrap{display:flex; flex-direction:row; align-items:center; gap:11px; flex:1 1 300px}
+input[type=range]{flex:1; accent-color:var(--gold); min-width:110px}
+.markup-val{font-family:var(--mono); font-size:15px; font-weight:700; color:var(--gold); min-width:52px; text-align:right}
+.btn{
+  font:inherit; font-size:13px; font-weight:600; padding:7px 14px; border-radius:9px;
+  border:1px solid var(--line); background:var(--card); color:var(--ink-2); cursor:pointer;
+}
+.btn:hover{border-color:var(--ink-3); color:var(--ink)}
+.btn.primary{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.btn.primary:hover{opacity:.88}
+.btn:disabled{opacity:.45; cursor:not-allowed}
 
-/* INVOICE CHIPS */
-.inv-selector-bar{background:var(--s1);border-bottom:1px solid var(--border);padding:9px 22px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
-.inv-selector-bar > label{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.inv-chips{display:flex;gap:7px;flex-wrap:wrap}
-.inv-chip{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:var(--s3);transition:all .15s;white-space:nowrap}
-.inv-chip:hover{border-color:var(--brand);color:var(--brand)}
-.inv-chip.active{background:var(--brand-glow);border-color:var(--brand);color:var(--brand)}
-.inv-chip.active-all{background:var(--brand-glow);border-color:var(--brand);color:var(--brand)}
+/* ── Chips ────────────────────────────────────────────────────────────── */
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  font-size:12px; font-weight:600; padding:4px 11px; border-radius:99px;
+  border:1px solid var(--line); background:var(--card); color:var(--ink-3); cursor:pointer;
+}
+.chip:hover{border-color:var(--ink-4); color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.chip .n{opacity:.6; margin-left:4px; font-weight:500}
 
-/* CONTROLS */
-.controls{background:var(--s2);border-bottom:1px solid var(--border);padding:10px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.search-box{position:relative;flex:1;min-width:180px}
-.search-box input{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:9px;padding:8px 12px 8px 34px;color:var(--text);font-size:12px;outline:none;transition:border .15s;font-family:inherit}
-.search-box input:focus{border-color:var(--brand)}
-.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px}
-select{background:var(--s3);border:1px solid var(--border2);border-radius:9px;padding:8px 30px 8px 12px;color:var(--text);font-size:12px;outline:none;cursor:pointer;appearance:none;font-family:inherit;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a9a78'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;transition:border .15s}
-select:focus{border-color:var(--brand)}
-.markup-ctl-2{display:flex;align-items:center;gap:8px}
-.markup-ctl-2 label{color:var(--muted);font-size:11px;white-space:nowrap}
+/* ── Table ────────────────────────────────────────────────────────────── */
+.table-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:880px}
+thead th{
+  position:sticky; top:0; z-index:2; background:var(--card);
+  font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-4);
+  font-weight:700; text-align:left; padding:11px 12px; border-bottom:1px solid var(--line);
+  white-space:nowrap; cursor:pointer; user-select:none;
+}
+thead th:hover{color:var(--ink-2)}
+thead th.num,tbody td.num{text-align:right}
+tbody td{padding:10px 12px; border-bottom:1px solid var(--line-2); vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.row:hover{background:var(--line-2)}
+tbody tr.row{cursor:pointer}
+.iname{font-weight:600; color:var(--ink); display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.isub{font-size:11.5px; color:var(--ink-4); margin-top:2px; font-family:var(--mono)}
+.money{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.money.g{color:var(--green)} .money.r{color:var(--red)}
+.pill{font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:99px; white-space:nowrap}
+.pill.cat{background:var(--gold-soft); color:var(--gold)}
+.pill.flag{background:var(--red-soft); color:var(--red)}
+.pill.int{background:var(--blue-soft); color:var(--blue)}
+.pill.custom{background:var(--green-soft); color:var(--green)}
+.pill.up{background:var(--red-soft); color:var(--red)}
+.pill.down{background:var(--green-soft); color:var(--green)}
+.retail-edit{
+  font-family:var(--mono); font-size:13.5px; width:82px; text-align:right;
+  padding:5px 8px; border:1px solid var(--line); border-radius:7px;
+  background:var(--paper); color:var(--ink);
+}
+.retail-edit.dirty{border-color:var(--gold); background:var(--gold-soft)}
 
-/* SUMMARY STRIP */
-.summary-strip{display:flex;background:linear-gradient(180deg,var(--s1),var(--bg));border-bottom:1px solid var(--border);overflow-x:auto}
-.stat{padding:14px 20px;border-right:1px solid var(--border);white-space:nowrap;flex-shrink:0}
-.stat:last-child{border-right:none}
-.slabel{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.sval{font-size:19px;font-weight:800;margin-top:3px}
-.sval.g{color:var(--brand)}.sval.b{color:var(--blue)}.sval.a{color:var(--amber)}.sval.w{color:var(--white)}.sval.r{color:var(--red)}
-.ssub{font-size:10px;color:var(--muted);margin-top:2px}
+/* ── Detail drawer ────────────────────────────────────────────────────── */
+.detail{background:var(--paper); border-bottom:1px solid var(--line-2)}
+.detail-in{padding:16px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px}
+.dcell .dl{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-4); font-weight:700; margin-bottom:3px}
+.dcell .dv{font-family:var(--mono); font-size:14px; font-weight:600}
+.dcell .dv.g{color:var(--green)} .dcell .dv.r{color:var(--red)}
+.timeline{grid-column:1/-1; border-top:1px solid var(--line); padding-top:13px; margin-top:2px}
+.tl-title{font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-4); font-weight:700; margin-bottom:9px}
+.tl-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0}
+.tl-item{display:flex; gap:12px; align-items:flex-start; padding:7px 0; border-left:2px solid var(--line); padding-left:14px; margin-left:4px; position:relative}
+.tl-item::before{content:''; position:absolute; left:-5px; top:12px; width:8px; height:8px; border-radius:50%; background:var(--gold); border:2px solid var(--card)}
+.tl-when{font-size:11.5px; color:var(--ink-4); min-width:78px; font-family:var(--mono)}
+.tl-what{font-size:12.5px; color:var(--ink-2)}
+.tl-empty{font-size:12.5px; color:var(--ink-4); font-style:italic}
 
-/* CAT TABS */
-.cat-tabs{display:flex;padding:0 22px;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto}
-.ctab{padding:10px 15px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;transition:all .15s;user-select:none}
-.ctab:hover{color:var(--text)}
-.ctab.active{color:var(--white);border-bottom-color:var(--brand)}
-.cn{background:var(--s3);border-radius:11px;font-size:10px;padding:1px 6px;margin-left:5px;color:var(--muted)}
+/* ── Queue / generic list cards ───────────────────────────────────────── */
+.qcard{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:15px 17px; margin-bottom:10px; box-shadow:var(--shadow)}
+.qhead{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:7px}
+.qtitle{font-weight:600; font-size:14.5px}
+.qmeta{font-size:11.5px; color:var(--ink-4); font-family:var(--mono)}
+.qreason{font-size:12.5px; color:var(--red); background:var(--red-soft); border-radius:8px; padding:6px 11px; margin-top:8px}
+.empty{text-align:center; padding:52px 20px; color:var(--ink-4)}
+.empty .big{font-family:var(--serif); font-size:19px; color:var(--ink-3); margin-bottom:6px}
+.note{font-size:12.5px; color:var(--ink-3); background:var(--card); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:9px; padding:11px 14px; margin-bottom:16px}
 
-/* TABLE */
-.table-wrap{overflow-x:auto;padding:0 22px 28px}
-table{width:100%;border-collapse:collapse;margin-top:14px}
-thead th{padding:9px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--s2);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
-thead th:first-child{text-align:left;cursor:default}
-thead th:nth-child(2){text-align:left}
-thead th:hover:not(:first-child){color:var(--text)}
-thead th.sorted{color:var(--brand)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-tbody tr:hover{background:var(--brand-glow)}
-td{padding:10px 12px;text-align:right;font-size:12px}
-td:first-child{width:34px}
-td:nth-child(2){text-align:left;font-weight:600;color:var(--white);max-width:280px}
-.retail-input{background:transparent;border:1px solid transparent;border-radius:6px;color:var(--brand);font-weight:800;font-size:13px;width:70px;text-align:right;padding:4px 6px;outline:none;transition:all .15s;font-family:inherit}
-.retail-input:hover{border-color:var(--border2);background:var(--s3)}
-.retail-input:focus{border-color:var(--brand);background:var(--s3)}
-.profit-c{color:var(--blue);font-weight:700}
-.rev-c{color:var(--amber);font-weight:700}
+/* ── Toast ────────────────────────────────────────────────────────────── */
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translate(-50%,120%);
+  background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:99px;
+  font-size:13.5px; font-weight:600; box-shadow:0 8px 28px rgba(0,0,0,.3);
+  transition:transform .28s cubic-bezier(.2,.8,.3,1); z-index:99; max-width:90vw; text-align:center;
+}
+.toast.show{transform:translate(-50%,0)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 
-.chip{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:11px;white-space:nowrap;margin-left:6px;text-transform:uppercase}
-.chip-fz{background:rgba(90,169,240,.13);color:var(--blue)}
-.chip-bev{background:var(--brand-glow);color:var(--brand)}
-.chip-snk{background:rgba(240,178,70,.13);color:var(--amber)}
-.chip-dry{background:rgba(176,142,240,.13);color:var(--purple)}
-.chip-con{background:rgba(239,127,192,.13);color:var(--pink)}
-.chip-tun{background:rgba(232,88,74,.13);color:var(--red)}
-.chip-tea{background:rgba(90,200,150,.13);color:#5ac896}
-.chip-rice{background:rgba(160,170,150,.13);color:#a0aa96}
-.chip-can{background:rgba(120,130,240,.13);color:#8290f0}
-
-.xbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:5px;transition:all .15s}
-.xbtn:hover{background:var(--s3);color:var(--text)}
-.drow{display:none}
-.drow.open{display:table-row}
-.drow td{background:var(--s2);border-bottom:2px solid var(--border)}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:11px;padding:11px 4px}
-.dcell{background:var(--s3);border-radius:9px;padding:10px 12px}
-.dl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
-.dv{font-size:14px;font-weight:700;color:var(--white)}
-.dv.g{color:var(--brand)}.dv.b{color:var(--blue)}.dv.a{color:var(--amber)}
-
-.sec-hdr td{background:var(--s3);padding:7px 12px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);border-top:2px solid var(--border)}
-
-.tot-row td{background:var(--s2);font-weight:800;font-size:13px;border-top:2px solid var(--brand);padding:12px 12px}
-.tot-row td:nth-child(2){color:var(--muted);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
-
-.empty{text-align:center;padding:44px;color:var(--muted)}
-.empty-icon{font-size:34px;margin-bottom:10px}
-
-.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--brand);border-radius:11px;padding:12px 18px;font-size:12px;font-weight:700;color:var(--brand);transform:translateY(70px);opacity:0;transition:all .25s;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.toast.show{transform:translateY(0);opacity:1}
-
-.inv-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:.04em}
-
-@media print{.controls,.vendor-bar,.inv-selector-bar,.cat-tabs,.topbar .btn,.markup-ctl,.xbtn,.toast,.upload-zone,.uz-toggle,.analysis-status,.import-preview{display:none}body{background:white;color:black}}
-@media (max-width:768px){.summary-strip{font-size:11px}.stat{padding:11px 14px}.brand-text h1{font-size:14px}}
+@media (max-width:640px){
+  .wrap{padding:16px 13px 60px}
+  .mast-meta{text-align:left}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+  .sval{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="brand-block">
-    <img class="logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACRAMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDeooor85PnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooopAOVWb7qs2OuBmlMcn/PN/8Avk1s+EvEt74buJ5rOC3maZQrCZSQAPTBrufCPxFvdU8Q2unalZWEcFwxTdGhBBI46k967MPQo1LKU7N+RvTpwla71PKqK9I1P4W6k+oXD2uo6fHA8jNGrswKqTkDpVcfCvWP+grpn/fbf4VUsuxMXblB4ape1jz+ivQP+FV6z/0FNM/77b/Cj/hVWs/9BTTP++2/wqf7PxP8gvq9Tsef0V6B/wAKr1jH/IV0z/vtv8KxvF3g2+8NWUNzeXlpKJX2KsRbJ4znkVM8HXhFylGyQpUKkVdo5iilpK5jIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACp7aBJzhrqGDnrJu/oDUFH0oWjBG7a6DaT8N4l0eL/AHnf+qitnTfCNgtzFOnjTRkkjcOpVuQRyOpFctawac6j7RqEsJ7gWxb+ta1ppnhN8ef4muIz3H2Bv55Nd1Dkbvyr7zohbsvvOo+NdmJDpuuW04kjmQwyPG3ysRyCP1/KvNg8g/5aP/31XrS2mkar8M77RtI1M6k1gPPQtGUZTktjB/4EK8jq8yi1UVRbSV/n1HiU+ZSXUcXkP/LR/wA6TdJ/z0f/AL6NdhoHgG/1nSYNRttT05I5gTtd2DKQcEHir/8AwqzVv+grpf8A38b/AArKODxMkmouxKpVWtEcboVpPqes2mnxPIWnlVOp4BPJ/Kut+Mt+kmvW2kQMPI0+BUwOzEDP6AV0XgnwPN4c1WTXNTvLOaK1hdl8licHHJOR6Zry3WL19S1W6v5Dlp5Wf8zwK2qwnh8Nyz0cn+CKknTp2e7KlFFFeacwUUUUAHeiiigAooooAKKKKACiiigAooooAKKKKACiiigB0ezePM37O+08/rWnanw5/wAvK6uf+uZj/rWVT4o5JpUiiRnkchVVRkkntVQk09FccXbY9L+Gmo+FbTXBaaeNVSa9XyiLnYYz3HT/ADzXDeK9OOk+I76wxhYpjs/3TyP0NdLpvw58WxSQXsJtLaeNhIm+b5lI5HY1c1nwD401i9N7qFzp805UKW8zbkDp0WvVqUa9Wioezs09NOh1yhOUEuXU87DMBgMQPY0b3/vt+dduPhb4m/vWH/f4/wCFOi+F3iQyASSWKrkbiJieO/auVYLFbcrMvY1excDNoPwczuYXGry4znkKf/rD9a84rvfjJeRjU7HRLb/UafbgYB/iP/1gPzrgqMfNe0UFtFWFXfvcvYKKKK4jEKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArX8G31tpvinT767H7iKYFzjOB6/h1rIpaqnNwmpLoOL5Wmer+KPCOqa/rMuq6d4jtjaz4aNWnYbRjoMcVmf8K48RdvEFn/4EP/hUnwi8J6XrFjc6jqafaAkvlRxFiFHGSTj61S+Lfhmw0C5s7jTcxQ3O5TFuJwR3Ge3Ne7OEZUfrMoaP+8zvkk4e0a/Es/8ACt/EP/Qfs/8AwIf/AAo/4Vv4h7eILPP/AF8PXnZJH8TfnXuPhv4feHxoFv8Aa7c3M80Su8xkIIJGeMHgVnhIU8U2oQen94mlGFVvlX4nnvibwNqWj6bNql7qllOFIyFkZnYk4GMiuPrU8V6d/ZHiG901ZmljhkwpJ7YyKy68vEcvtGoxtb5nLUcebRWCiiisDMKKKKACiiigAooooAKKKKACiiigAooooAKKKWgCxbWF9dW8txb2c80MX+sdEJVPqe1NsrO7vZDHZ20tw6ruKxqWIHrx2r13wjHJoWjaHpDWEsyatvkvnWIsEV1woJHTqP1rD+GtlJonxB1izdctaWsuM/xAMpH5jFeosu1gm99/LqdX1fWPnuefWdnd3k5t7S2lnlAJKIpJAHXirVtoetXMKzW+k3s0TfddIWKn6HFen+FNNtrjxZb+KtKXFjf2kvmoP+WM2BuU1z/wh1HUG8Qz2TXtw1tHZyskJkOxSCMEDp3NKOAipRU2/ebtYFh0mk+pmeE7/wAWeF7ySG00y4YzJ5j280LcgcbsdR9aoa5q+ueMNT86WB53iQ7IYEJCL3OP610fwqvrzUfFF2+oXs05GnyqHlcvtGV9avfDnStGsdVuptP8SQajL9jkHlJAyEDHXJrSFGdWnGEZvkbejt0KjByiknoec2VleX03kWdpNcS90jQsf0rsLPxr4t8N6YmlXNmEKLiJ7qJg6j+uKnubu58PfDTTJ9HcwTajNIbq4T7/AAThQe3T9KNGvrrxF4A16LWpHuRYIJba4k5ZW5+XP4D86mjS9i+WE2pWv5dxQhyO0W07HG6vFqS3H2vVILhJLnMgeVCN+e4z1oTSNVkaJI9Nu2aVN8YERJZfUeo5616r4ogstb07TfDU22O+fTo7mxlJ6yAYKfiBWJ4yv7vw/J4PvFRkntbTDoeM4wGU/hkUVcBGDlKUrx01/MJYdRbbeh5/aWV5eTtb2trNPMoJZI0LMAOvAoks7uO1S6e2mWB22pIUO1j6A+temeJ5dN8O6Pf65pEg+0eIQBb4H+qjIy5H4k/pXH2XiU/afD8Nxaj7FpT7vLXkyEtlmPvWFXC06T5JS1/q34akSpRi7N6mVc6Nq9rai6uNMu4oOvmPCwX88VQr1i9uNQ1h9TvPC/iVL5Joy02mXUZ3Ivoqnj/PWvKOnFRi8PGi1yu6ZNamoWsJRRRXIYhRRRQAUUUUAFFFFABRRRQAVJbukdxG8kfmIrgsmcbhnkZqOihOwHU614516+v2ntLyfT4NqqlvDKdqgCrP/CdP/wAJFNrQ0tBNPZG1lAlOGP8Af6deOlcbS10/XK97uRr7ed73Oj8E+Lr3wx58cUQubedeYmbADeoNVfCevv4e1WW/jtlnaSF4thfbjcRznHtXJ3U90mu20SmZoHADIqfKPvZYnByOB3BHHXNVo7jUTJNGfMzDBcb8x4G/f+7wcc/LnpQqtZKNpbbeQlVkra7Ha+Etefw/qE92lsJ/NgeHaX243Y56e1N8Ja4/h+/luktxcGSBodpbbgN3rjJDqkOkwm4uSJHnUllGWRCvIJCev+z3x70+SXUh4iijQyfYdqBm25Una5PbOeF5zx6c0RlUja0tr2EqklbyO68O+KZdN0+XTLywt9S02Ry/2ef+FvVT2p2veK5b7SxpGnafbaVpxO54YeS59yeteeWd5rD30FvLE6xi5cvJ5fDRkvsH4bef+A+tSJeam41XME8YETvZkxj+HK4HrnCsM+tX7WuocnNoNVZ2tc7nxB4ludUvNNu44haS6fbpDGyPknachqk8aeKJ/E7WT3FqkL20ZQsrZ35xk47V51Nc63Fo0LqJWuvtexwU3ER4PsAfUcDqBV8y3H9sWqCaX7MbcNyuN757/L1x2yKU6lVqSct9/kDqzad3udbrWvPqei6XphtliXT4ygcNnfn27dKztOu57C/gvbZgs0Lh1JGRke1ZmnpMst0ZZpZF87EYfHC4B4wB3J/KrdYTnNy5m9SXJt3O1n8eAfabqx0Gys9SukKS3aMSSD1IXtXFUUU6tepVtzsc6kp7hRRRWRAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAtFJRQAtHHpSUUALRSUUALx6UUlFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//Z" alt="Anthony's">
-    <div class="brand-text">
-      <h1>Anthony's Supermarket</h1>
-      <div class="tag">Pricing Hub</div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <div class="markup-ctl">
-      <label>MARKUP</label>
-      <input type="range" id="markupSlider" min="20" max="150" value="65" oninput="updateMarkup(this.value)">
-      <span class="mval" id="markupDisplay">65%</span>
-    </div>
-    <button class="btn btn-outline" onclick="resetMarkup()">Reset</button>
-    <button class="btn btn-outline" onclick="window.print()">Print</button>
-    <button class="btn btn-brand" onclick="exportCSV()">Export CSV</button>
-  </div>
-</div>
-
-<!-- UPLOAD TOGGLE -->
-<div class="uz-toggle">
-  <button onclick="toggleUpload()" id="uploadToggleBtn">＋ Upload Invoice</button>
-</div>
-
-<!-- UPLOAD ZONE -->
-<div class="upload-zone hidden" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-  <div class="uz-icon">📄</div>
-  <div class="uz-title">Drop an invoice here, or click to browse</div>
-  <div class="uz-sub">Upload a photo or PDF of a wholesale invoice. Claude will read it, extract every line item, calculate markup, and add it to your sheet.</div>
-  <div class="uz-actions">
-    <button class="btn btn-brand" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Choose File</button>
-    <button class="btn btn-outline" onclick="event.stopPropagation();toggleUpload()">Cancel</button>
-  </div>
-  <input type="file" id="fileInput" accept="image/*,application/pdf" style="display:none" onchange="handleFile(this.files[0])">
-</div>
-
-<!-- ANALYSIS STATUS -->
-<div class="analysis-status" id="analysisStatus">
-  <div class="as-row">
-    <div class="spinner" id="analysisSpinner"></div>
+  <header class="masthead">
     <div>
-      <div class="as-text" id="analysisText">Reading invoice…</div>
-      <div class="as-detail" id="analysisDetail">Claude is extracting line items, prices, and case counts.</div>
+      <p class="mast-kicker">Anthony's Supermarket · Staff</p>
+      <h1 class="mast-title">Pricing Hub</h1>
     </div>
-  </div>
-</div>
+    <div class="mast-meta" id="mastMeta"></div>
+  </header>
 
-<!-- IMPORT PREVIEW -->
-<div class="import-preview" id="importPreview">
-  <div class="ip-header">
-    <div>
-      <div class="ip-title">Review <span id="ipVendor">Imported</span> items before adding</div>
-      <div class="ip-meta" id="ipMeta"></div>
+  <div class="conn" id="connBanner" role="status">
+    <span class="dot"></span><span id="connText">Checking pricing service…</span>
+    <button class="conn-act" id="connRetry" type="button" hidden>Retry</button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Pricing Hub sections">
+    <button class="tab" role="tab" id="tab-catalog"  aria-controls="panel-catalog"  aria-selected="true">Catalog</button>
+    <button class="tab" role="tab" id="tab-queue"    aria-controls="panel-queue"    aria-selected="false">Approval Queue<span class="badge" id="queueBadge" hidden>0</span></button>
+    <button class="tab" role="tab" id="tab-variance" aria-controls="panel-variance" aria-selected="false">Price Changes<span class="badge" id="varianceBadge" hidden>0</span></button>
+    <button class="tab" role="tab" id="tab-intake"   aria-controls="panel-intake"   aria-selected="false">Invoice Intake</button>
+    <button class="tab" role="tab" id="tab-financials" aria-controls="panel-financials" aria-selected="false">Financials</button>
+    <button class="tab" role="tab" id="tab-export"   aria-controls="panel-export"   aria-selected="false">Export</button>
+  </nav>
+
+  <!-- ── Catalog ──────────────────────────────────────────────────────── -->
+  <section class="panel" id="panel-catalog" role="tabpanel" aria-labelledby="tab-catalog">
+    <div class="stats" id="summaryStrip"></div>
+
+    <div class="controls">
+      <div class="ctrl-row">
+        <div class="field grow">
+          <label for="searchInput">Search</label>
+          <input type="search" id="searchInput" placeholder="Item name, item number, category…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="vendorSelect">Vendor</label>
+          <select id="vendorSelect"></select>
+        </div>
+        <div class="field">
+          <label for="invoiceSelect">Invoice</label>
+          <select id="invoiceSelect"></select>
+        </div>
+        <div class="field">
+          <label for="showFilter">Show</label>
+          <select id="showFilter">
+            <option value="sellable">For sale</option>
+            <option value="all">Everything</option>
+            <option value="internal">Store supplies</option>
+            <option value="flagged">Flagged only</option>
+            <option value="custom">Edited only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <div class="field slider-wrap">
+          <label for="markupSlider" class="sr">Markup</label>
+          <span style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-4);font-weight:700">Markup</span>
+          <input type="range" id="markupSlider" min="0" max="200" step="5" value="70"
+                 aria-label="Markup percentage" aria-describedby="markupDisplay">
+          <span class="markup-val" id="markupDisplay">70%</span>
+        </div>
+        <button class="btn" id="resetMarkupBtn" type="button">Reset to 70%</button>
+        <div class="chips" id="catTabs" style="flex:1 1 100%"></div>
+      </div>
     </div>
-  </div>
-  <div style="overflow-x:auto">
-    <table class="ip-table" id="ipTable"></table>
-  </div>
-  <div class="ip-actions">
-    <button class="btn btn-brand" onclick="confirmImport()">✓ Add to Pricing Sheet</button>
-    <button class="btn btn-outline" onclick="cancelImport()">Discard</button>
-  </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="name">Item</th>
+              <th data-sort="cat">Category</th>
+              <th data-sort="boxes" class="num">Cases</th>
+              <th data-sort="units" class="num">Units</th>
+              <th data-sort="costPerUnit" class="num">Cost / unit</th>
+              <th data-sort="retail" class="num">Retail</th>
+              <th data-sort="margin" class="num">Margin</th>
+              <th data-sort="profit" class="num">Case profit</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Approval queue ───────────────────────────────────────────────── -->
+  <section class="panel" id="panel-queue" role="tabpanel" aria-labelledby="tab-queue" hidden>
+    <div class="note" id="queueNote"></div>
+    <div id="queueList"></div>
+  </section>
+
+  <!-- ── Price changes ────────────────────────────────────────────────── -->
+  <section class="panel" id="panel-variance" role="tabpanel" aria-labelledby="tab-variance" hidden>
+    <div class="note">
+      A variance flag means the same vendor item number arrived at a different cost than last time.
+      Costs are compared per unit, so a pack-size change shows up here too.
+    </div>
+    <div id="varianceList"></div>
+  </section>
+
+  <!-- ── Invoice intake ───────────────────────────────────────────────── -->
+  <section class="panel" id="panel-intake" role="tabpanel" aria-labelledby="tab-intake" hidden>
+    <div class="note">
+      Scan or photograph the invoice, upload it, then check every line against the source before approving.
+      Nothing here changes a shelf price until you approve it, and an invoice will not approve while any line
+      is unmatched or the totals are more than a cent apart.
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">Manager sign-in</span><span class="qmeta" id="authStatus"></span></div>
+      <div id="authBox" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">Upload an invoice</span><span class="qmeta" id="intakeAccepts"></span></div>
+      <div class="ctrl-row">
+        <div class="field grow">
+          <label for="invoiceFile">Invoice scan (PDF or photo)</label>
+          <input type="file" id="invoiceFile" accept=".pdf,.jpg,.jpeg,.png,.webp">
+        </div>
+        <div class="field">
+          <label for="invoiceNumberInput">Invoice number</label>
+          <input type="text" id="invoiceNumberInput" placeholder="optional" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="invoiceDateInput">Invoice date</label>
+          <input type="text" id="invoiceDateInput" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <button class="btn primary" id="uploadInvoiceBtn" type="button">Upload</button>
+      </div>
+      <div id="intakeStatus" class="qmeta" style="margin-top:10px"></div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">POS sales import</span><span class="qmeta">NRS exports CSV only</span></div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0 0 12px">
+        Upload the sales CSV from the NRS merchant portal. Re-uploading the same export is safe — it is
+        recognised by content and will not double-count a day.
+      </p>
+      <div class="ctrl-row">
+        <div class="field grow">
+          <label for="posFile">NRS sales export (CSV)</label>
+          <input type="file" id="posFile" accept=".csv,text/csv">
+        </div>
+        <button class="btn primary" id="uploadPosBtn" type="button">Import sales</button>
+      </div>
+      <div id="posStatus" class="qmeta" style="margin-top:10px"></div>
+    </div>
+
+    <div id="intakeResult"></div>
+  </section>
+
+  <!-- ── Financials ───────────────────────────────────────────────────── -->
+  <section class="panel" id="panel-financials" role="tabpanel" aria-labelledby="tab-financials" hidden>
+    <div class="controls">
+      <div class="ctrl-row">
+        <div class="field">
+          <label for="finFrom">From</label>
+          <input type="text" id="finFrom" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="finTo">To</label>
+          <input type="text" id="finTo" placeholder="YYYY-MM-DD" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="finDimension">Break down by</label>
+          <select id="finDimension">
+            <option value="category">Category</option>
+            <option value="item">Item</option>
+            <option value="vendor">Vendor</option>
+          </select>
+        </div>
+        <button class="btn primary" id="finRefreshBtn" type="button">Refresh</button>
+      </div>
+    </div>
+    <div id="financialsBody"></div>
+  </section>
+
+  <!-- ── Export ───────────────────────────────────────────────────────── -->
+  <section class="panel" id="panel-export" role="tabpanel" aria-labelledby="tab-export" hidden>
+    <div class="note">
+      Exports reflect the filters set on the Catalog tab, at the markup currently on the slider.
+      Store supplies are never included in a price-gun file — they are not sold.
+    </div>
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">Price-gun labels</span><span class="qmeta" id="labelCount"></span></div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0 0 12px">
+        Four columns, exactly as the label printer expects: <code>item_name,upc,price,department</code>.
+      </p>
+      <button class="btn primary" id="exportLabelsBtn" type="button">Download labels CSV</button>
+    </div>
+    <div class="qcard">
+      <div class="qhead"><span class="qtitle">Full catalog view</span><span class="qmeta" id="csvCount"></span></div>
+      <p style="font-size:13px;color:var(--ink-3);margin:0 0 12px">
+        Every column shown in the table, for the current filter — costs, retail, margin and case profit.
+      </p>
+      <button class="btn primary" id="exportCsvBtn" type="button">Download catalog CSV</button>
+    </div>
+  </section>
+
 </div>
-
-<!-- VENDOR TABS -->
-<div class="vendor-bar" id="vendorBar"></div>
-
-<!-- INVOICE CHIPS -->
-<div class="inv-selector-bar" id="invSelectorBar">
-  <label>Invoice</label>
-  <div class="inv-chips" id="invChips"></div>
-</div>
-
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search items, categories, item numbers..." oninput="render()">
-  </div>
-  <select id="catFilter" onchange="render()"><option value="all">All Categories</option></select>
-  <select id="sortField" onchange="render()">
-    <option value="id">Default Order</option>
-    <option value="profit">Profit (high to low)</option>
-    <option value="retail">Retail Price</option>
-    <option value="boxRev">Box Revenue</option>
-    <option value="name">Name A–Z</option>
-    <option value="cpu">Cost per Unit</option>
-  </select>
-  <select id="showFilter" onchange="render()">
-    <option value="all">All Items</option>
-    <option value="retail">For Sale Only</option>
-    <option value="internal">Internal Use</option>
-  </select>
-</div>
-
-<!-- SUMMARY -->
-<div class="summary-strip" id="summaryStrip"></div>
-
-<!-- CAT TABS -->
-<div class="cat-tabs" id="catTabs"></div>
-
-<!-- TABLE -->
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th style="cursor:default">Item</th>
-        <th onclick="setSort('id')">Order</th>
-        <th onclick="setSort('boxPrice')">Box Cost</th>
-        <th onclick="setSort('units')">Units</th>
-        <th onclick="setSort('cpu')">Cost/Unit</th>
-        <th>Retail $</th>
-        <th onclick="setSort('boxRev')">Box Rev</th>
-        <th onclick="setSort('profit')">Box Profit</th>
-        <th>Margin</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
-
-<div class="toast" id="toast"></div>
-
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANTHONY'S PRICING HUB v2
+
+   Data model note — read before editing the arrays below.
+
+   VENDORS and ALL_ITEMS are the offline source of truth for this file. They are
+   ALSO a published interface: the Kingdom OS collector parses this file every
+   two hours to mirror the catalog, and its write-back endpoint patches item
+   lines in place. Keep the declarations, the one-object-per-line formatting, and
+   the field names exactly as they are. Anything that reformats them will break
+   the mirror even if the page still renders.
+
+   When Supabase is reachable the hub overlays live server data on top of these
+   arrays (costs, approved retail, price history, review queue). When it is not,
+   the arrays alone drive the page — the hub must never blank out in front of the
+   owner because a network call failed.
+
+   Retail prices are server-authoritative. Editing a price here proposes it; the
+   server decides whether the write is legal and records who made it. With no
+   server configured, edits stay local to the session and are labelled as such.
+
+   Markup is 70% (cost x 1.70), locked by the owner on 2026-08-19. The hub
+   preview and the server's approved-retail rule are now the SAME number; they
+   used to differ (65% here, 1.70 in the vault) and that gap is closed. The
+   embedded retail snapshots below were recomputed at 70% in the same change.
+   The Kingdom OS collector and its write-back endpoint hardcode the multiplier
+   too - Hermes flips those to 1.70 in the same window.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 // ════════ VENDOR REGISTRY ════════
 const VENDORS = {
   "Super Trading": { label:"Super Trading Wholesale", invoices:{
     "65990":{label:"#65990 — 6/20/26"}, "65991":{label:"#65991 — 6/22/26"}, "65992":{label:"#65992 — 6/22/26"} }},
-  "Family Food": { label:"Family Food Distributors", invoices:{
-    "90747231":{label:"#90747231 — 6/24/26 (Parada 23)"}, "90747476":{label:"#90747476 — 6/24/26 (Parada 22)"} }},
+  "Hershey's Ice Cream": { label:"Hershey's Ice Cream", invoices:{
+    "INVE0023460478":{label:"#INVE0023460478 — 8/13/26"} }},
+  "Family Food Distributors": { label:"Family Food Distributors", invoices:{
+    "90747231":{label:"#90747231 — 6/24/26 (Parada 23)"}, "90747476":{label:"#90747476 — 6/24/26 (Parada 22)"},
+    "90772340":{label:"#90772340 — 8/19/26"},
+    "90772444":{label:"#90772444 — 8/19/26"},
+    "90772312":{label:"#90772312 — 8/19/26"} }},
+  "Amaro Food Enterprises": { label:"Amaro Food Enterprises", invoices:{ "1671390":{label:"#1671390 — 8/6/26"} } },
+  "JCC Ganoza LLC": { label:"JCC Ganoza LLC", invoices:{ "012830":{label:"#012830 — 8/6/26"} } },
+  "NACfoods": { label:"NACfoods", invoices:{ "3057:5":{label:"#3057:5 — 8/6/26"} } },
+  "TAINO Trading Corp": { label:"TAINO Trading Corp", invoices:{ "27810":{label:"#27810 — 8/6/26"} } },
+  "GOYA Foods": { label:"GOYA Foods", invoices:{ "27727700":{label:"#27727700 — 8/5/26"} } },
+  "Peru Food": { label:"Peru Food", invoices:{ "0271478-00":{label:"#0271478-00 — 8/4/26"} } },
+  "Peruvian Import Co": { label:"Peruvian Import Co", invoices:{ "INVNJ23126":{label:"#INVNJ23126 — 8/4/26"}, "INVNJ23127":{label:"#INVNJ23127 — 8/4/26"} } },
 };
 
 const ALL_ITEMS = [
@@ -327,7 +475,7 @@ const ALL_ITEMS = [
   {id:6,  itemNo:"—",  name:'OKF Aloe L 12ct',            cat:'Beverages',         vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:30,    units:12,  costPerUnit:2.5,     retail:3.99, internal:false},
   {id:7,  itemNo:"—",  name:'Trix Cereal 12ct',           cat:'Cereal',            vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:42,    units:12,  costPerUnit:3.5,     retail:5.99, internal:false},
   {id:8,  itemNo:"—",  name:'Cinnamon Toast 12ct',        cat:'Cereal',            vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:42,    units:12,  costPerUnit:3.5,     retail:5.99, internal:false},
-  {id:9,  itemNo:"—",  name:'Cheerios L 14ct',            cat:'Cereal',            vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:54,    units:14,  costPerUnit:3.8571,  retail:5.99, internal:false},
+  {id:9,  itemNo:"—",  name:'Cheerios L 14ct',            cat:'Cereal',            vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:54,    units:14,  costPerUnit:3.8571,  retail:6.99, internal:false},
   {id:10, itemNo:"—",  name:'Coco Pebbles 12ct',          cat:'Cereal',            vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:42,    units:12,  costPerUnit:3.5,     retail:5.99, internal:false},
   {id:11, itemNo:"—",  name:'Peanut Butter 11ct',         cat:'Grocery',           vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:19,    units:11,  costPerUnit:1.7273,  retail:2.99, internal:false},
   {id:12, itemNo:"—",  name:'Oatmeal 16/18oz',            cat:'Grocery',           vendor:'Super Trading', invoice:'65990', boxes:1, boxPrice:20,    units:16,  costPerUnit:1.25,    retail:1.99, internal:false},
@@ -359,370 +507,1281 @@ const ALL_ITEMS = [
   {id:36, itemNo:"—",  name:'Scott Issue 36ct',           cat:'Paper & Foil',      vendor:'Super Trading', invoice:'65992', boxes:1, boxPrice:29,    units:36,  costPerUnit:0.8056,  retail:0.99, internal:false},
 
   // ── FAMILY FOOD #90747231 ────────────────────────────────────────────
-  {id:101,itemNo:"2953",name:'Mama Tere Maracuya Entera (FZ) 6/32oz',      cat:'Frozen Fruit',  vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:35.95,  units:6,  costPerUnit:5.992,  retail:9.99,  internal:false},
-  {id:102,itemNo:"1705",name:'Mama Tere Yuca en Trozos (FZ) 12/40oz',      cat:'Frozen Veg',    vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:45.95,  units:12, costPerUnit:3.829,  retail:5.99,  internal:false},
-  {id:103,itemNo:"1708",name:'Mama Tere Yuca en Trozos (FZ) 6/80oz',       cat:'Frozen Veg',    vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:45.95,  units:6,  costPerUnit:7.658,  retail:12.99, internal:false},
-  {id:104,itemNo:"7003",name:'Naturissimo Pan de Yuca/Cheese Bread 16ct',   cat:'Frozen Bakery', vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:72.95,  units:16, costPerUnit:4.559,  retail:7.99,  internal:false},
-  {id:105,itemNo:"2142",name:'Mama Tere Cheese Tequeno Precooked 12/8ct',   cat:'Frozen Bakery', vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:50.40,  units:12, costPerUnit:4.2,    retail:6.99,  internal:false},
-  {id:106,itemNo:"2933",name:'Mama Tere Pulpa Maracuya (FZ) 12/14oz',       cat:'Frozen Pulpa',  vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:37.70,  units:12, costPerUnit:3.142,  retail:4.99,  internal:false},
-  {id:107,itemNo:"2938",name:'Mama Tere Pulpa Mora (FZ) 12/14oz',           cat:'Frozen Pulpa',  vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
-  {id:108,itemNo:"2935",name:'Mama Tere Pulpa Naranjilla (FZ) 12/14oz',     cat:'Frozen Pulpa',  vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
-  {id:109,itemNo:"2988",name:'Mama Tere Pulpa Tomate Arbol (FZ) 12/14oz',   cat:'Frozen Pulpa',  vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
-  {id:110,itemNo:"2905",name:'Mama Tere Choclo Desgranado (FZ) 20/16oz',    cat:'Frozen Veg',    vendor:'Family Food', invoice:'90747231', boxes:1, boxPrice:50.40,  units:20, costPerUnit:2.52,   retail:3.99,  internal:false},
+  {id:101,itemNo:"2953",name:'Mama Tere Maracuya Entera (FZ) 6/32oz',      cat:'Frozen Fruit',  vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:35.95,  units:6,  costPerUnit:5.992,  retail:9.99,  internal:false},
+  {id:102,itemNo:"1705",name:'Mama Tere Yuca en Trozos (FZ) 12/40oz',      cat:'Frozen Veg',    vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:45.95,  units:12, costPerUnit:3.829,  retail:6.99,  internal:false},
+  {id:103,itemNo:"1708",name:'Mama Tere Yuca en Trozos (FZ) 6/80oz',       cat:'Frozen Veg',    vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:45.95,  units:6,  costPerUnit:7.658,  retail:12.99, internal:false},
+  {id:104,itemNo:"7003",name:'Naturissimo Pan de Yuca/Cheese Bread 16ct',   cat:'Frozen Bakery', vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:72.95,  units:16, costPerUnit:4.559,  retail:7.99,  internal:false},
+  {id:105,itemNo:"2142",name:'Mama Tere Cheese Tequeno Precooked 12/8ct',   cat:'Frozen Bakery', vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:50.40,  units:12, costPerUnit:4.2,    retail:6.99,  internal:false},
+  {id:106,itemNo:"2933",name:'Mama Tere Pulpa Maracuya (FZ) 12/14oz',       cat:'Frozen Pulpa',  vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:37.70,  units:12, costPerUnit:3.142,  retail:4.99,  internal:false},
+  {id:107,itemNo:"2938",name:'Mama Tere Pulpa Mora (FZ) 12/14oz',           cat:'Frozen Pulpa',  vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
+  {id:108,itemNo:"2935",name:'Mama Tere Pulpa Naranjilla (FZ) 12/14oz',     cat:'Frozen Pulpa',  vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
+  {id:109,itemNo:"2988",name:'Mama Tere Pulpa Tomate Arbol (FZ) 12/14oz',   cat:'Frozen Pulpa',  vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:30.50,  units:12, costPerUnit:2.542,  retail:3.99,  internal:false},
+  {id:110,itemNo:"2905",name:'Mama Tere Choclo Desgranado (FZ) 20/16oz',    cat:'Frozen Veg',    vendor:'Family Food Distributors', invoice:'90747231', boxes:1, boxPrice:50.40,  units:20, costPerUnit:2.52,   retail:3.99,  internal:false},
   // #90747476
-  {id:111,itemNo:"2280",name:'Mama Tere Jelly Fruits Net 24/15.8oz',        cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:31.75,  units:24, costPerUnit:1.323,  retail:1.99,  internal:false},
-  {id:112,itemNo:"8714",name:'Mama Tere Plantain Chips Salted Jar 36/20oz', cat:'Snacks',        vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:187.95, units:36, costPerUnit:5.221,  retail:8.99,  internal:false},
-  {id:113,itemNo:"2202",name:'Guitig Agua Mineral Pet 12/16.9oz',           cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:13.30,  units:12, costPerUnit:1.108,  retail:1.99,  internal:false},
-  {id:114,itemNo:"2213",name:'Tropical Soda Glass 24/12oz',                 cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:30.95,  units:24, costPerUnit:1.29,   retail:1.99,  internal:false},
-  {id:115,itemNo:"2217",name:'Tropical Soda Pet 8/67.62oz (2lt)',           cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:20.80,  units:8,  costPerUnit:2.6,    retail:3.99,  internal:false},
-  {id:116,itemNo:"2001",name:'Fioravanti Strawberry Soda Pet 6/2lt',        cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:27.95,  units:6,  costPerUnit:4.658,  retail:7.99,  internal:false},
-  {id:117,itemNo:"2002",name:'Fioravanti Apple Soda Pet 6/2lt',             cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:27.95,  units:6,  costPerUnit:4.658,  retail:7.99,  internal:false},
-  {id:118,itemNo:"7713",name:'Del Frutal Pineapple Nectar Tetra 8/3pk',     cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:12.50,  units:8,  costPerUnit:1.5625, retail:2.99,  internal:false},
-  {id:119,itemNo:"7720",name:'Del Frutal Mango Nectar Tetra 8/3pk',         cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:12.50,  units:8,  costPerUnit:1.5625, retail:2.99,  internal:false},
-  {id:120,itemNo:"8410",name:'Incasur Sol Cusco Choc C&C Bar 48/3.17oz',    cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:47.50,  units:48, costPerUnit:0.9896, retail:1.99,  internal:false},
-  {id:121,itemNo:"8409",name:'Incasur Sol Cusco Chocolate Bar 48/3.17oz',   cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:47.50,  units:48, costPerUnit:0.9896, retail:1.99,  internal:false},
-  {id:122,itemNo:"7647",name:'Allegra Rotini Pasta 20/16oz',                cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:23.40,  units:20, costPerUnit:1.17,   retail:1.99,  internal:false},
-  {id:123,itemNo:"5203",name:'Nestle Galak 2 disp/12un',                    cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:71.50,  units:24, costPerUnit:2.979,  retail:4.99,  internal:false},
-  {id:124,itemNo:"5280",name:'Mama Tere Jelly Stars Jar 6/49oz',            cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:32.40,  units:6,  costPerUnit:5.4,    retail:8.99,  internal:false},
-  {id:125,itemNo:"3419",name:'Mama Tere RD Casabe Artesanal 10/11oz',       cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:24.65,  units:10, costPerUnit:2.465,  retail:3.99,  internal:false},
-  {id:126,itemNo:"1741",name:'Angelitos Malvaviscos Churro Fresa 10/7oz',   cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:15.55,  units:10, costPerUnit:1.555,  retail:2.99,  internal:false},
-  {id:127,itemNo:"1021",name:'Mama Tere Jasmine Rice Hom Mali 2/320oz',     cat:'Rice',          vendor:'Family Food', invoice:'90747476', boxes:2, boxPrice:44.95,  units:2,  costPerUnit:22.475, retail:36.99, internal:false},
-  {id:128,itemNo:"1023",name:'Mama Tere Jasmine Rice Hom Mali 8/80oz',      cat:'Rice',          vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:45.75,  units:8,  costPerUnit:5.719,  retail:8.99,  internal:false},
-  {id:129,itemNo:"1051",name:'Toops Chocolate 12/7.8oz',                    cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:34.50,  units:12, costPerUnit:2.875,  retail:4.99,  internal:false},
-  {id:130,itemNo:"2626",name:'Mama Tere Lentejon 24/14oz',                  cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:24.95,  units:24, costPerUnit:1.04,   retail:1.99,  internal:false},
-  {id:131,itemNo:"2675",name:'Mama Tere Canguil 12/32oz (2lb)',             cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:31.20,  units:12, costPerUnit:2.6,    retail:3.99,  internal:false},
-  {id:132,itemNo:"4550",name:'Harina Ya 25/35.2oz (1kg)',                   cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:72.95,  units:25, costPerUnit:2.918,  retail:4.99,  internal:false},
-  {id:133,itemNo:"4122",name:'Quaker Avena Molida 25/17.6oz',               cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:64.85,  units:25, costPerUnit:2.594,  retail:3.99,  internal:false},
-  {id:134,itemNo:"1826",name:'Picamas Hot Green Sauce 24/6.2oz',            cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:34.30,  units:24, costPerUnit:1.429,  retail:1.99,  internal:false},
-  {id:135,itemNo:"4210",name:'Tapiorica Manzana 6/14.1oz',                  cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:19.95,  units:6,  costPerUnit:3.325,  retail:4.99,  internal:false},
-  {id:136,itemNo:"4215",name:'Tapiorica Fresa 6/14.1oz',                    cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:19.95,  units:6,  costPerUnit:3.325,  retail:4.99,  internal:false},
-  {id:137,itemNo:"1500",name:'Mama Tere Pacaya 12/32oz (907g)',             cat:'Canned/Jarred', vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:74.95,  units:12, costPerUnit:6.246,  retail:9.99,  internal:false},
-  {id:138,itemNo:"5441",name:'ILE Alino Adobo Glass 12/8.8oz',              cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:26.50,  units:12, costPerUnit:2.208,  retail:3.99,  internal:false},
-  {id:139,itemNo:"4413",name:'Nestle Amor Wafer Vainilla 36/6.1oz',         cat:'Candy/Snacks',  vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:62.95,  units:36, costPerUnit:1.749,  retail:2.99,  internal:false},
-  {id:140,itemNo:"5114",name:'La Favorita Achiote Liquido 30/16.9oz',       cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:99.95,  units:30, costPerUnit:3.332,  retail:4.99,  internal:false},
-  {id:141,itemNo:"2407",name:'Oriental Salsa China 24/13.52oz',             cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:65.35,  units:24, costPerUnit:2.723,  retail:3.99,  internal:false},
-  {id:142,itemNo:"2559",name:'Mama Tere Pasta de Ajo Pet 12/17.6oz',        cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:42.80,  units:12, costPerUnit:3.567,  retail:5.99,  internal:false},
-  {id:143,itemNo:"5442",name:'ILE Alino Adobo Pet 12/17.6oz',               cat:'Condiments',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:30.35,  units:12, costPerUnit:2.529,  retail:3.99,  internal:false},
-  {id:144,itemNo:"2752",name:'Mondaisa Te Boldo 6/20ct',                    cat:'Tea/Coffee',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:14.40,  units:6,  costPerUnit:2.4,    retail:3.99,  internal:false},
-  {id:145,itemNo:"2762",name:'Mondaisa Te Jengibre & Limon 6/20ct',         cat:'Tea/Coffee',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:15.55,  units:6,  costPerUnit:2.592,  retail:3.99,  internal:false},
-  {id:146,itemNo:"2764",name:'Mondaisa Te Menta-Eucalipto 6/20ct',          cat:'Tea/Coffee',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:15.55,  units:6,  costPerUnit:2.592,  retail:3.99,  internal:false},
-  {id:147,itemNo:"5300",name:'Homimans Te de Manzanilla 12/25ct',           cat:'Tea/Coffee',    vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:27.95,  units:12, costPerUnit:2.329,  retail:3.99,  internal:false},
-  {id:148,itemNo:"4367",name:'Toni Leche Chocolate Milk 6/33.8oz (1lt)',    cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:31.20,  units:6,  costPerUnit:5.2,    retail:8.99,  internal:false},
-  {id:149,itemNo:"4356",name:'Toni Gelatina Uva-Grape Jello 24/7.05oz',    cat:'Dry Goods',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:26.50,  units:24, costPerUnit:1.104,  retail:1.99,  internal:false},
-  {id:150,itemNo:"5217",name:'Mama Tere Horchata 50/1oz',                   cat:'Beverages',     vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:64.95,  units:50, costPerUnit:1.299,  retail:1.99,  internal:false},
-  {id:151,itemNo:"1106",name:'Ecuatun Tuna in Oil 48/5oz',                  cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:89.95,  units:48, costPerUnit:1.874,  retail:2.99,  internal:false},
-  {id:152,itemNo:"1116",name:'Ecuatun Tuna In Oil Can 4pk 20/2.82oz',       cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:95.95,  units:20, costPerUnit:4.798,  retail:7.99,  internal:false},
-  {id:153,itemNo:"1105",name:'Ecuatun Encebollado Tuna Soup 24/14oz',       cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:87.40,  units:24, costPerUnit:3.642,  retail:5.99,  internal:false},
-  {id:154,itemNo:"1120",name:'Florida Tuna in Vegetable Oil 48/5oz',        cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:93.55,  units:48, costPerUnit:1.949,  retail:2.99,  internal:false},
-  {id:155,itemNo:"1119",name:'Florida Tuna in Water 48/5oz',                cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:93.55,  units:48, costPerUnit:1.949,  retail:2.99,  internal:false},
-  {id:156,itemNo:"1129",name:'Van Camps Yellowfin Tuna in Oil 24/4pk/3oz',  cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:1, boxPrice:139.95, units:24, costPerUnit:5.831,  retail:9.99,  internal:false},
-  {id:157,itemNo:"1101",name:'Van Camps Yellowfin Tuna in Oil 48/5oz',      cat:'Canned Tuna',   vendor:'Family Food', invoice:'90747476', boxes:5, boxPrice:113.55, units:48, costPerUnit:2.366,  retail:3.99,  internal:false},
+  {id:111,itemNo:"2280",name:'Mama Tere Jelly Fruits Net 24/15.8oz',        cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:31.75,  units:24, costPerUnit:1.323,  retail:1.99,  internal:false},
+  {id:112,itemNo:"8714",name:'Mama Tere Plantain Chips Salted Jar 36/20oz', cat:'Snacks',        vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:187.95, units:36, costPerUnit:5.221,  retail:8.99,  internal:false},
+  {id:113,itemNo:"2202",name:'Guitig Agua Mineral Pet 12/16.9oz',           cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:13.30,  units:12, costPerUnit:1.108,  retail:1.99,  internal:false},
+  {id:114,itemNo:"2213",name:'Tropical Soda Glass 24/12oz',                 cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:30.95,  units:24, costPerUnit:1.29,   retail:1.99,  internal:false},
+  {id:115,itemNo:"2217",name:'Tropical Soda Pet 8/67.62oz (2lt)',           cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:20.80,  units:8,  costPerUnit:2.6,    retail:3.99,  internal:false},
+  {id:116,itemNo:"2001",name:'Fioravanti Strawberry Soda Pet 6/2lt',        cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:27.95,  units:6,  costPerUnit:4.658,  retail:7.99,  internal:false},
+  {id:117,itemNo:"2002",name:'Fioravanti Apple Soda Pet 6/2lt',             cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:27.95,  units:6,  costPerUnit:4.658,  retail:7.99,  internal:false},
+  {id:118,itemNo:"7713",name:'Del Frutal Pineapple Nectar Tetra 8/3pk',     cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:12.50,  units:8,  costPerUnit:1.5625, retail:2.99,  internal:false},
+  {id:119,itemNo:"7720",name:'Del Frutal Mango Nectar Tetra 8/3pk',         cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:12.50,  units:8,  costPerUnit:1.5625, retail:2.99,  internal:false},
+  {id:120,itemNo:"8410",name:'Incasur Sol Cusco Choc C&C Bar 48/3.17oz',    cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:47.50,  units:48, costPerUnit:0.9896, retail:1.99,  internal:false},
+  {id:121,itemNo:"8409",name:'Incasur Sol Cusco Chocolate Bar 48/3.17oz',   cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:47.50,  units:48, costPerUnit:0.9896, retail:1.99,  internal:false},
+  {id:122,itemNo:"7647",name:'Allegra Rotini Pasta 20/16oz',                cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:23.40,  units:20, costPerUnit:1.17,   retail:1.99,  internal:false},
+  {id:123,itemNo:"5203",name:'Nestle Galak 2 disp/12un',                    cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:71.50,  units:24, costPerUnit:2.979,  retail:4.99,  internal:false},
+  {id:124,itemNo:"5280",name:'Mama Tere Jelly Stars Jar 6/49oz',            cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:32.40,  units:6,  costPerUnit:5.4,    retail:8.99,  internal:false},
+  {id:125,itemNo:"3419",name:'Mama Tere RD Casabe Artesanal 10/11oz',       cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:24.65,  units:10, costPerUnit:2.465,  retail:3.99,  internal:false},
+  {id:126,itemNo:"1741",name:'Angelitos Malvaviscos Churro Fresa 10/7oz',   cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:15.55,  units:10, costPerUnit:1.555,  retail:2.99,  internal:false},
+  {id:127,itemNo:"1021",name:'Mama Tere Jasmine Rice Hom Mali 2/320oz',     cat:'Rice',          vendor:'Family Food Distributors', invoice:'90747476', boxes:2, boxPrice:44.95,  units:2,  costPerUnit:22.475, retail:37.99, internal:false},
+  {id:128,itemNo:"1023",name:'Mama Tere Jasmine Rice Hom Mali 8/80oz',      cat:'Rice',          vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:45.75,  units:8,  costPerUnit:5.719,  retail:9.99,  internal:false},
+  {id:129,itemNo:"1051",name:'Toops Chocolate 12/7.8oz',                    cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:34.50,  units:12, costPerUnit:2.875,  retail:4.99,  internal:false},
+  {id:130,itemNo:"2626",name:'Mama Tere Lentejon 24/14oz',                  cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:24.95,  units:24, costPerUnit:1.04,   retail:1.99,  internal:false},
+  {id:131,itemNo:"2675",name:'Mama Tere Canguil 12/32oz (2lb)',             cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:31.20,  units:12, costPerUnit:2.6,    retail:3.99,  internal:false},
+  {id:132,itemNo:"4550",name:'Harina Ya 25/35.2oz (1kg)',                   cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:72.95,  units:25, costPerUnit:2.918,  retail:4.99,  internal:false},
+  {id:133,itemNo:"4122",name:'Quaker Avena Molida 25/17.6oz',               cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:64.85,  units:25, costPerUnit:2.594,  retail:3.99,  internal:false},
+  {id:134,itemNo:"1826",name:'Picamas Hot Green Sauce 24/6.2oz',            cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:34.30,  units:24, costPerUnit:1.429,  retail:1.99,  internal:false},
+  {id:135,itemNo:"4210",name:'Tapiorica Manzana 6/14.1oz',                  cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:19.95,  units:6,  costPerUnit:3.325,  retail:5.99,  internal:false},
+  {id:136,itemNo:"4215",name:'Tapiorica Fresa 6/14.1oz',                    cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:19.95,  units:6,  costPerUnit:3.325,  retail:5.99,  internal:false},
+  {id:137,itemNo:"1500",name:'Mama Tere Pacaya 12/32oz (907g)',             cat:'Canned/Jarred', vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:74.95,  units:12, costPerUnit:6.246,  retail:10.99,  internal:false},
+  {id:138,itemNo:"5441",name:'ILE Alino Adobo Glass 12/8.8oz',              cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:26.50,  units:12, costPerUnit:2.208,  retail:3.99,  internal:false},
+  {id:139,itemNo:"4413",name:'Nestle Amor Wafer Vainilla 36/6.1oz',         cat:'Candy/Snacks',  vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:62.95,  units:36, costPerUnit:1.749,  retail:2.99,  internal:false},
+  {id:140,itemNo:"5114",name:'La Favorita Achiote Liquido 30/16.9oz',       cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:99.95,  units:30, costPerUnit:3.332,  retail:5.99,  internal:false},
+  {id:141,itemNo:"2407",name:'Oriental Salsa China 24/13.52oz',             cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:65.35,  units:24, costPerUnit:2.723,  retail:4.99,  internal:false},
+  {id:142,itemNo:"2559",name:'Mama Tere Pasta de Ajo Pet 12/17.6oz',        cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:42.80,  units:12, costPerUnit:3.567,  retail:5.99,  internal:false},
+  {id:143,itemNo:"5442",name:'ILE Alino Adobo Pet 12/17.6oz',               cat:'Condiments',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:30.35,  units:12, costPerUnit:2.529,  retail:3.99,  internal:false},
+  {id:144,itemNo:"2752",name:'Mondaisa Te Boldo 6/20ct',                    cat:'Tea/Coffee',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:14.40,  units:6,  costPerUnit:2.4,    retail:3.99,  internal:false},
+  {id:145,itemNo:"2762",name:'Mondaisa Te Jengibre & Limon 6/20ct',         cat:'Tea/Coffee',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:15.55,  units:6,  costPerUnit:2.592,  retail:3.99,  internal:false},
+  {id:146,itemNo:"2764",name:'Mondaisa Te Menta-Eucalipto 6/20ct',          cat:'Tea/Coffee',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:15.55,  units:6,  costPerUnit:2.592,  retail:3.99,  internal:false},
+  {id:147,itemNo:"5300",name:'Homimans Te de Manzanilla 12/25ct',           cat:'Tea/Coffee',    vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:27.95,  units:12, costPerUnit:2.329,  retail:3.99,  internal:false},
+  {id:148,itemNo:"4367",name:'Toni Leche Chocolate Milk 6/33.8oz (1lt)',    cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:31.20,  units:6,  costPerUnit:5.2,    retail:8.99,  internal:false},
+  {id:149,itemNo:"4356",name:'Toni Gelatina Uva-Grape Jello 24/7.05oz',    cat:'Dry Goods',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:26.50,  units:24, costPerUnit:1.104,  retail:1.99,  internal:false},
+  {id:150,itemNo:"5217",name:'Mama Tere Horchata 50/1oz',                   cat:'Beverages',     vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:64.95,  units:50, costPerUnit:1.299,  retail:1.99,  internal:false},
+  {id:151,itemNo:"1106",name:'Ecuatun Tuna in Oil 48/5oz',                  cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:89.95,  units:48, costPerUnit:1.874,  retail:2.99,  internal:false},
+  {id:152,itemNo:"1116",name:'Ecuatun Tuna In Oil Can 4pk 20/2.82oz',       cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:95.95,  units:20, costPerUnit:4.798,  retail:7.99,  internal:false},
+  {id:153,itemNo:"1105",name:'Ecuatun Encebollado Tuna Soup 24/14oz',       cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:87.40,  units:24, costPerUnit:3.642,  retail:5.99,  internal:false},
+  {id:154,itemNo:"1120",name:'Florida Tuna in Vegetable Oil 48/5oz',        cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:93.55,  units:48, costPerUnit:1.949,  retail:2.99,  internal:false},
+  {id:155,itemNo:"1119",name:'Florida Tuna in Water 48/5oz',                cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:93.55,  units:48, costPerUnit:1.949,  retail:2.99,  internal:false},
+  {id:156,itemNo:"1129",name:'Van Camps Yellowfin Tuna in Oil 24/4pk/3oz',  cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:1, boxPrice:139.95, units:24, costPerUnit:5.831,  retail:9.99,  internal:false},
+  {id:157,itemNo:"1101",name:'Van Camps Yellowfin Tuna in Oil 48/5oz',      cat:'Canned Tuna',   vendor:'Family Food Distributors', invoice:'90747476', boxes:5, boxPrice:113.55, units:48, costPerUnit:2.366,  retail:3.99,  internal:false},
+  // ── HERSHEY'S ICE CREAM #INVE0023460478 (8/13/26) ─────────────────────
+  // Grabbed by Hermes Invoice Grabber from scan of 08/13/2026 delivery invoice.
+  // Terms CASH OR CHECK · Route U3 · Total $234.42 (11 cases + $5 delivery fee).
+  // Retail values = 65% hub default. Verify shelf prices before tagging.
+  {id:158,itemNo:"2468200902",name:'Neapolitan 1.5QT Scround',            cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:159,itemNo:"2468200903",name:'Chocolate 1.5QT Scround',             cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:160,itemNo:"—",         name:'Strawberry 1.5QT Scround',            cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:161,itemNo:"—",         name:'Cookies N Cream 1.5QT Scround',       cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:14.49,  units:3,  costPerUnit:4.83,   retail:7.99,  internal:false},
+  {id:162,itemNo:"—",         name:'Butter Pecan Pint',                   cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:163,itemNo:"—",         name:'Brownie Batter Pint',                 cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:164,itemNo:"—",         name:'Lil\' Blue Panda Pint',               cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:17.52,  units:6,  costPerUnit:2.92,   retail:4.99,  internal:false},
+  {id:165,itemNo:"4767747420",name:'Twix Ice Cream Bar',                  cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:52.90,  units:24, costPerUnit:2.2042, retail:3.99,  internal:false},
+  {id:166,itemNo:"2468231261",name:'Vanilla 6oz Cup',                     cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:21.96,  units:12, costPerUnit:1.83,   retail:2.99,  internal:false},
+  {id:167,itemNo:"2468231334",name:'Straw Sundae 6oz Cup',                cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:21.96,  units:12, costPerUnit:1.83,   retail:2.99,  internal:false},
+  {id:168,itemNo:"2468231352",name:'NP Mini Sandwich',                    cat:'Frozen Desserts',vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:22.08,  units:48, costPerUnit:0.46,   retail:0.99,  internal:false},
+  {id:169,itemNo:"—",         name:'Delivery Fee',                        cat:'Fees',          vendor:'Hershey\'s Ice Cream', invoice:'INVE0023460478', boxes:1, boxPrice:5.00,   units:1,  costPerUnit:5.00,   retail:0,     internal:true},
+
+  {id:170,itemNo:"2098",name:'Saba Ultra Invisible Long Pads Wings',cat:'Health & Beauty',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:37.67, units:12, costPerUnit:3.1392, retail:4.99, internal:false},
+  {id:171,itemNo:"2099",name:'Saba Ultra Invisible Overnight Pads Wings',cat:'Health & Beauty',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:50.37, units:16, costPerUnit:3.1481, retail:4.99, internal:false},
+  {id:172,itemNo:"1447",name:'Taqueritos Chile Toreado Snack',cat:'Snacks',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:51.95, units:20, costPerUnit:2.5975, retail:3.99, internal:false},
+  {id:173,itemNo:"07713",name:'Del Frutal Pineapple Nectar Tetra',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:12.50, units:8, costPerUnit:1.5625, retail:2.99, internal:false},
+  {id:174,itemNo:"07720",name:'Del Frutal Mango Nectar Tetra',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:12.50, units:8, costPerUnit:1.5625, retail:2.99, internal:false},
+  {id:175,itemNo:"1231",name:'Maltin Polar Glass',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:21.95, units:4, costPerUnit:5.4875, retail:8.99, internal:false},
+  {id:176,itemNo:"2214",name:'Manzana Soda Glass',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:30.95, units:24, costPerUnit:1.2896, retail:1.99, internal:false},
+  {id:177,itemNo:"2203",name:'Guitig Agua Mineral Pet',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:14.95, units:6, costPerUnit:2.4917, retail:3.99, internal:false},
+  {id:178,itemNo:"2218",name:'Manzana Soda Pet',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:20.80, units:8, costPerUnit:2.6000, retail:3.99, internal:false},
+  {id:179,itemNo:"2280",name:'Mama Tere Jelly Fruits Net',cat:'Candy',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:31.75, units:24, costPerUnit:1.3229, retail:1.99, internal:false},
+  {id:180,itemNo:"1120",name:'Florida Tuna in vegetable Oil',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:93.55, units:48, costPerUnit:1.9490, retail:2.99, internal:false},
+  {id:181,itemNo:"1101",name:'Van Camps Yellowfin Tuna in Oil',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772340', boxes:5, boxPrice:98.95, units:48, costPerUnit:2.0615, retail:3.99, internal:false},
+  {id:182,itemNo:"1117",name:'Ecuatun Sango/ Tuna Plantain Stew',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:56.95, units:12, costPerUnit:4.7458, retail:7.99, internal:false},
+  {id:183,itemNo:"1116",name:'Ecuatun Tuna in Oil Can 4pk',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:95.95, units:20, costPerUnit:4.7975, retail:7.99, internal:false},
+  {id:184,itemNo:"3419",name:'Mama Tere RD Casabe Artesanal',cat:'Snacks',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:24.65, units:10, costPerUnit:2.4650, retail:3.99, internal:false},
+  {id:185,itemNo:"8714",name:'Mama Tere Plantain Chips Salted Jar Shipper',cat:'Snacks',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:187.95, units:36, costPerUnit:5.2208, retail:8.99, internal:false},
+  {id:186,itemNo:"4495",name:'La Universal Manicho',cat:'Candy',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:72.30, units:36, costPerUnit:2.0083, retail:2.99, internal:false},
+  {id:187,itemNo:"7642",name:'Allegra Angel Hair Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:188,itemNo:"7641",name:'Allegra Coil Fideo Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:14.51, units:12, costPerUnit:1.2092, retail:1.99, internal:false},
+  {id:189,itemNo:"7644",name:'Allegra Linguini Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:2, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:190,itemNo:"7645",name:'Allegra Penne Rigate Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:191,itemNo:"7649",name:'Allegra Spaghetti Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:2, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:192,itemNo:"7640",name:'Allegra Thin Spaguetti #9 Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:193,itemNo:"7637",name:'Allegra Tricolor Rotini',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:14.51, units:12, costPerUnit:1.2092, retail:1.99, internal:false},
+  {id:194,itemNo:"7646",name:'Allegra Rigatoni Pasta',cat:'Pasta',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:21.76, units:20, costPerUnit:1.0880, retail:1.99, internal:false},
+  {id:195,itemNo:"2754",name:'Mondaisa Te Flor de Tilo',cat:'Tea & Coffee',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:14.40, units:6, costPerUnit:2.4000, retail:3.99, internal:false},
+  {id:196,itemNo:"2759",name:'Mondaisa Te Curcuma Jengibre',cat:'Tea & Coffee',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:14.40, units:6, costPerUnit:2.4000, retail:3.99, internal:false},
+  {id:197,itemNo:"2863",name:'Mama Tere Achiote en Grano (Bag)',cat:'Condiments',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:91.95, units:24, costPerUnit:3.8313, retail:6.99, internal:false},
+  {id:198,itemNo:"2626",name:'Mama Tere Lentejon',cat:'Snacks',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:24.95, units:24, costPerUnit:1.0396, retail:1.99, internal:false},
+  {id:199,itemNo:"5299",name:'Hornimans Te Relajante',cat:'Tea & Coffee',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:36.60, units:12, costPerUnit:3.0500, retail:4.99, internal:false},
+  {id:200,itemNo:"5300",name:'Hornimans Te de Manzanilla',cat:'Tea & Coffee',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:27.95, units:12, costPerUnit:2.3292, retail:3.99, internal:false},
+  {id:201,itemNo:"5453",name:'ILE Pasta de Ajo Pet',cat:'Condiments',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:42.80, units:12, costPerUnit:3.5667, retail:5.99, internal:false},
+  {id:202,itemNo:"5442",name:'ILE Alino Adobo Pet',cat:'Condiments',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:30.35, units:12, costPerUnit:2.5292, retail:3.99, internal:false},
+  {id:203,itemNo:"5414",name:'ILE Sabora Pasta',cat:'Condiments',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:34.95, units:12, costPerUnit:2.9125, retail:4.99, internal:false},
+  {id:204,itemNo:"1024",name:'Mama Tere Jasmine Rice Thai Hom Mali',cat:'Rice & Grains',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:46.75, units:20, costPerUnit:2.3375, retail:3.99, internal:false},
+  {id:205,itemNo:"2505",name:'Maizabrosa',cat:'Rice & Grains',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:51.40, units:12, costPerUnit:4.2833, retail:6.99, internal:false},
+  {id:206,itemNo:"1531",name:'Chocomelher Classic',cat:'Beverages',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:51.95, units:24, costPerUnit:2.1646, retail:3.99, internal:false},
+  {id:207,itemNo:"2696",name:'Nestle PE Sublime Clasico',cat:'Candy',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:57.95, units:4, costPerUnit:14.4875, retail:24.99, internal:false},
+  {id:208,itemNo:"2698",name:'Nestle PE Princesa Bombom',cat:'Candy',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:51.50, units:8, costPerUnit:6.4375, retail:10.99, internal:false},
+  {id:209,itemNo:"2699",name:'Nestle PE Morochas Galletas 6pk',cat:'Candy',vendor:'Family Food Distributors', invoice:'90772340', boxes:1, boxPrice:70.20, units:30, costPerUnit:2.3400, retail:3.99, internal:false},
+  {id:210,itemNo:"2980",name:'Mama Tere Hoja de Mashan (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:35.95, units:12, costPerUnit:2.9958, retail:4.99, internal:false},
+  {id:211,itemNo:"1708",name:'MamaTere Yuca en Trozos / Frozen Cassava (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:45.95, units:6, costPerUnit:7.6583, retail:12.99, internal:false},
+  {id:212,itemNo:"1705",name:'Mama Tere Yuca en Trozos / Frozen Cassava (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:45.95, units:12, costPerUnit:3.8292, retail:6.99, internal:false},
+  {id:213,itemNo:"2906",name:'Mama Tere Naranjilla (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:37.50, units:12, costPerUnit:3.1250, retail:4.99, internal:false},
+  {id:214,itemNo:"2902",name:'Mama Tere Tomate Arbol (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:34.50, units:12, costPerUnit:2.8750, retail:4.99, internal:false},
+  {id:215,itemNo:"2929",name:'Mama Tere Papa Criolla (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:34.20, units:6, costPerUnit:5.7000, retail:9.99, internal:false},
+  {id:216,itemNo:"2948",name:'Mama Tere Choclo Entero (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:48.95, units:6, costPerUnit:8.1583, retail:13.99, internal:false},
+  {id:217,itemNo:"2926",name:'Mama Tere Mote Precocido (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:52.80, units:8, costPerUnit:6.6000, retail:10.99, internal:false},
+  {id:218,itemNo:"2976",name:'Mama Tere Pulpa Maracuya c/semilla (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:34.55, units:12, costPerUnit:2.8792, retail:4.99, internal:false},
+  {id:219,itemNo:"2937",name:'Mama Tere Pulpa Guayaba (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:22.95, units:12, costPerUnit:1.9125, retail:2.99, internal:false},
+  {id:220,itemNo:"2936",name:'Mama Tere Pulpa Guanabana (FZ)',cat:'Frozen',vendor:'Family Food Distributors', invoice:'90772444', boxes:1, boxPrice:38.95, units:12, costPerUnit:3.2458, retail:5.99, internal:false},
+  {id:221,itemNo:"1155",name:'Florida Tuna in vegetable Oil 3pk',cat:'Canned Goods',vendor:'Family Food Distributors', invoice:'90772312', boxes:1, boxPrice:0.00, units:16, costPerUnit:0.0000, retail:4.99, internal:false, flagged:true},
+  {id:222,itemNo:"—",name:"1/4 Legs Reg Medium HOR",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:30.4000, units:1, costPerUnit:30.4000, retail:51.99, internal:false},
+  {id:223,itemNo:"3303",name:"Rib Belle Hat CH #1757",cat:"Pantry",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:48.8200, units:1, costPerUnit:48.8200, retail:82.99, internal:false},
+  {id:224,itemNo:"3511",name:"Mazita Cushion Hat c/v # 16",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:36.8100, units:1, costPerUnit:36.8100, retail:62.99, internal:false},
+  {id:225,itemNo:"5502",name:"Chulera Ahumada Hat # 2301 Catchuts: 20.80",cat:"Meat",vendor:"Amaro Food Enterprises", invoice:"1671390", boxes:1, boxPrice:76.7500, units:1, costPerUnit:76.7500, retail:129.99, internal:false},
+  {id:226,itemNo:"—",name:"Universal Gelatina Fresa x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:16.5000, units:12, costPerUnit:1.3750, retail:1.99, internal:false},
+  {id:227,itemNo:"—",name:"Universal Gelatina Pi\u00f1a x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:16.5000, units:12, costPerUnit:1.3750, retail:1.99, internal:false},
+  {id:228,itemNo:"—",name:"Colapiz Universal x 12",cat:"Desserts",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:2, boxPrice:18.0000, units:12, costPerUnit:1.5000, retail:2.99, internal:false},
+  {id:229,itemNo:"—",name:"Sublime Chocolate x 24",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:3, boxPrice:18.0000, units:24, costPerUnit:0.7500, retail:0.99, internal:false},
+  {id:230,itemNo:"—",name:"Galleta Soda San Jorge Caja 7-pack x 4",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:6, boxPrice:7.0000, units:4, costPerUnit:1.7500, retail:2.99, internal:false},
+  {id:231,itemNo:"—",name:"Galleta Soda San Jorge Gourmet Caja x 12",cat:"Snacks",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:4, boxPrice:12.0000, units:12, costPerUnit:1.0000, retail:1.99, internal:false},
+  {id:232,itemNo:"—",name:"Sibarita Sazon 6 Pack 8.4 Gr x 50 Unidades",cat:"Spices & Condiments",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:65.0000, units:50, costPerUnit:1.3000, retail:1.99, internal:false},
+  {id:233,itemNo:"—",name:"Vitalina Linaza 20 OZ x 12",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:234,itemNo:"—",name:"Vitalina Linaza Pi\u00f1a 20 OZ x 12",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:235,itemNo:"—",name:"Chicha Lime\u00f1a 20 OZ x 24",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:36.0000, units:24, costPerUnit:1.5000, retail:2.99, internal:false},
+  {id:236,itemNo:"—",name:"Guarana Backus 450 ML x 15",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:16.5000, units:15, costPerUnit:1.1000, retail:1.99, internal:false},
+  {id:237,itemNo:"—",name:"Chicha Lime\u00f1a 64 OZ x 8",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:5, boxPrice:24.0000, units:8, costPerUnit:3.0000, retail:4.99, internal:false},
+  {id:238,itemNo:"—",name:"Vitalina Linaza 64OZ x 8",cat:"Health",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:24.0000, units:8, costPerUnit:3.0000, retail:4.99, internal:false},
+  {id:239,itemNo:"—",name:"Kola Inglesa 2 Lt x 6",cat:"Beverages",vendor:"JCC Ganoza LLC", invoice:"012830", boxes:1, boxPrice:12.0000, units:6, costPerUnit:2.0000, retail:2.99, internal:false},
+  {id:240,itemNo:"M203",name:"M9.5-CLOVES 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:38.9200, units:12, costPerUnit:3.2433, retail:5.99, internal:false},
+  {id:241,itemNo:"M413",name:"M28-GROUND CINNAMON 6/12 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:2, boxPrice:26.0000, units:6, costPerUnit:4.3333, retail:6.99, internal:false},
+  {id:242,itemNo:"PC306",name:"PEPITO CHILI GUAJILLO 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:20.0000, units:12, costPerUnit:1.6667, retail:2.99, internal:false},
+  {id:243,itemNo:"PC301",name:"PEPITO CHILI ARBOL 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:17.0800, units:12, costPerUnit:1.4233, retail:1.99, internal:false},
+  {id:244,itemNo:"PC405",name:"PEPITO CHILI GUAJILLO 12/8 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:35.0200, units:12, costPerUnit:2.9183, retail:4.99, internal:false},
+  {id:245,itemNo:"PC328",name:"PEPITO CORN HUSK 12/6 OZ",cat:"Canned Goods",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:57.6000, units:12, costPerUnit:4.8000, retail:7.99, internal:false},
+  {id:246,itemNo:"PS534",name:"PEPITO HIBISCUS FLOWER 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:22.0000, units:12, costPerUnit:1.8333, retail:2.99, internal:false},
+  {id:247,itemNo:"PS518",name:"PEPITO CINNAMON STICKS MEXICAN 12/3 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:38.9200, units:12, costPerUnit:3.2433, retail:5.99, internal:false},
+  {id:248,itemNo:"PS136",name:"PEPITO CLOVES WHOLE 12/5 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:249,itemNo:"PS517",name:"PEPITO CINNAMON STICK 12/75 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:250,itemNo:"PS176",name:"PEPITO ALLSPICE WHOLE 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:251,itemNo:"PS179",name:"PEPITO BLACK PEPPER GROUND 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:15.5200, units:12, costPerUnit:1.2933, retail:1.99, internal:false},
+  {id:252,itemNo:"PS178",name:"PEPITO BLACK PEPPER WHOLE 12/1.25 OZ",cat:"Spices & Condiments",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:13.9600, units:12, costPerUnit:1.1633, retail:1.99, internal:false},
+  {id:253,itemNo:"PS679",name:"PEPITO HOJA DE GUANABANA 12.5 OZ 70742590086",cat:"Pantry",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:19.7000, units:1, costPerUnit:19.7000, retail:32.99, internal:false},
+  {id:254,itemNo:"PS649",name:"PEPITO AVOCADO LEAVES 12/8 OZ",cat:"Pantry",vendor:"NACfoods", invoice:"3057:5", boxes:1, boxPrice:19.7000, units:12, costPerUnit:1.6417, retail:2.99, internal:false},
+  {id:255,itemNo:"01034745571226",name:"Azucar Domino (Blanca) 4lb 10/1",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:3, boxPrice:41.8200, units:10, costPerUnit:4.1820, retail:6.99, internal:false},
+  {id:256,itemNo:"0787545052823",name:"Baldom Ajo En Pasta 12/8oz",cat:"Spices & Condiments",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:32.5000, units:12, costPerUnit:2.7083, retail:4.99, internal:false},
+  {id:257,itemNo:"7410003710555",name:"Biokemical Artribion 20/4",cat:"Health",vendor:"TAINO Trading Corp", invoice:"27810", boxes:2, boxPrice:24.9500, units:20, costPerUnit:1.2475, retail:1.99, internal:false},
+  {id:258,itemNo:"074471017201",name:"Cafe Bustelo Brick (Paq) 10oz 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:148.9500, units:24, costPerUnit:6.2062, retail:10.99, internal:false},
+  {id:259,itemNo:"10748325000561",name:"Cafe Santo Domingo 10oz (Lata) 12/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:105.0000, units:12, costPerUnit:8.7500, retail:14.99, internal:false},
+  {id:260,itemNo:"0786119000680",name:"Campesino Salami Short 16oz 20/1",cat:"Meat",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:73.5000, units:20, costPerUnit:3.6750, retail:5.99, internal:false},
+  {id:261,itemNo:"00050000015016",name:"Carnation Evapov Milk 24/12oz",cat:"Dairy",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:37.5000, units:24, costPerUnit:1.5625, retail:2.99, internal:false},
+  {id:262,itemNo:"7461063",name:"Casabe Mechi 10/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:23.5000, units:10, costPerUnit:2.3500, retail:3.99, internal:false},
+  {id:263,itemNo:"71016440054",name:"Casabe Soy Dominicano 10/10oz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:25.5000, units:10, costPerUnit:2.5500, retail:3.99, internal:false},
+  {id:264,itemNo:"0790330061023",name:"Choco Rica Gd 12/1lt (32oz)",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:41.5000, units:12, costPerUnit:3.4583, retail:5.99, internal:false},
+  {id:265,itemNo:"764090024031",name:"Chocolate Embajador 36/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:84.5000, units:36, costPerUnit:2.3472, retail:3.99, internal:false},
+  {id:266,itemNo:"089087671525",name:"Country Club Merengue 2lt 8/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:16.7500, units:8, costPerUnit:2.0938, retail:3.99, internal:false},
+  {id:267,itemNo:"051202008295",name:"Country Club Uva 12oz 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:23.5000, units:24, costPerUnit:0.9792, retail:1.99, internal:false},
+  {id:268,itemNo:"767556901068",name:"Domino Blanco",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:6, boxPrice:4.7500, units:1, costPerUnit:4.7500, retail:7.99, internal:false},
+  {id:269,itemNo:"0895605601116",name:"Estelar Salami Super Especial 2lb 12/1",cat:"Meat",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:124.0000, units:12, costPerUnit:10.3333, retail:17.99, internal:false},
+  {id:270,itemNo:"10753079000422",name:"Galletas Dino Chocolate 18/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:51.7500, units:18, costPerUnit:2.8750, retail:4.99, internal:false},
+  {id:271,itemNo:"0021882002890",name:"Galletas La Paloma 16/1loz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:47.9500, units:16, costPerUnit:2.9969, retail:4.99, internal:false},
+  {id:272,itemNo:"051228637769",name:"Guarina Wafer Fresa 21/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:41.0000, units:21, costPerUnit:1.9524, retail:2.99, internal:false},
+  {id:273,itemNo:"021882002722",name:"Kika Crackers (Galleta) 16/1loz",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:47.9500, units:16, costPerUnit:2.9969, retail:4.99, internal:false},
+  {id:274,itemNo:"0858037006034",name:"La Constanzera Azucar Brown 2lb 12/1",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:30.5000, units:12, costPerUnit:2.5417, retail:3.99, internal:false},
+  {id:275,itemNo:"104800171127",name:"Maizena Fecula De Maiz 24/14oz",cat:"Pantry",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:58.2500, units:24, costPerUnit:2.4271, retail:3.99, internal:false},
+  {id:276,itemNo:"718791808155",name:"Mango Best (Gd) 946ml 6/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:19.9500, units:6, costPerUnit:3.3250, retail:5.99, internal:false},
+  {id:277,itemNo:"718791808254",name:"Mango Best (Peq) 246ml 24/1",cat:"Beverages",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:24.5000, units:24, costPerUnit:1.0208, retail:1.99, internal:false},
+  {id:278,itemNo:"837464000204",name:"Mini Pan Original 12/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:22.9000, units:12, costPerUnit:1.9083, retail:2.99, internal:false},
+  {id:279,itemNo:"072728002062",name:"Pasta de Tomate Victorina 29oz",cat:"Spices & Condiments",vendor:"TAINO Trading Corp", invoice:"27810", boxes:2, boxPrice:31.2500, units:1, costPerUnit:31.2500, retail:52.99, internal:false},
+  {id:280,itemNo:"10030600229961",name:"Pringles Original (Gd) 5.5oz 14/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:30.0000, units:14, costPerUnit:2.1429, retail:3.99, internal:false},
+  {id:281,itemNo:"00038000845635",name:"Pringles Original 2.5oz (Med) 12/1",cat:"Snacks",vendor:"TAINO Trading Corp", invoice:"27810", boxes:1, boxPrice:14.9500, units:12, costPerUnit:1.2458, retail:1.99, internal:false},
+  {id:282,itemNo:"1312",name:"PERDIGON OLIVES 20 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:41.9500, units:1, costPerUnit:41.9500, retail:70.99, internal:false, flagged:true},
+  {id:283,itemNo:"1331",name:"STUFF MANZANILLA OLIVES",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:37.5000, units:1, costPerUnit:37.5000, retail:63.99, internal:false, flagged:true},
+  {id:284,itemNo:"2001",name:"GREEN PIGEON PEAS 15 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.9500, units:1, costPerUnit:33.9500, retail:57.99, internal:false, flagged:true},
+  {id:285,itemNo:"2003",name:"GREEN PIGEON PEAS 29 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.4500, units:1, costPerUnit:33.4500, retail:56.99, internal:false, flagged:true},
+  {id:286,itemNo:"2146",name:"SOFRITO 12 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:287,itemNo:"2148",name:"SOFRITO 6 OZ",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:32.9500, units:1, costPerUnit:32.9500, retail:55.99, internal:false, flagged:true},
+  {id:288,itemNo:"2353",name:"CANNED BLACK BEANS 46 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:35.5000, units:1, costPerUnit:35.5000, retail:59.99, internal:false, flagged:true},
+  {id:289,itemNo:"2390",name:"ROMAN BEANS 46 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:2, boxPrice:35.5000, units:1, costPerUnit:35.5000, retail:59.99, internal:false, flagged:true},
+  {id:290,itemNo:"2410",name:"DARK RED KIDNEY BEANS 12",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:291,itemNo:"2420",name:"SMALL RED BEANS 5.5 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.7500, units:1, costPerUnit:26.7500, retail:44.99, internal:false, flagged:true},
+  {id:292,itemNo:"2452",name:"SMALL WHITE BEANS 29 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:293,itemNo:"2456",name:"GOYA LENTIL BEANS 15.5 O",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.7500, units:1, costPerUnit:26.7500, retail:44.99, internal:false, flagged:true},
+  {id:294,itemNo:"2465",name:"BLACK BEANS 29 OZ (1 LB",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:26.2500, units:1, costPerUnit:26.2500, retail:44.99, internal:false, flagged:true},
+  {id:295,itemNo:"2469",name:"BLACK BEANS 10.5. OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.9500, units:1, costPerUnit:24.9500, retail:41.99, internal:false, flagged:true},
+  {id:296,itemNo:"2486",name:"SMALL RED BEANS 1 LB",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:33.9500, units:1, costPerUnit:33.9500, retail:57.99, internal:false, flagged:true},
+  {id:297,itemNo:"2503",name:"FRIJOL DE SEDA 1 LE",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:53.9500, units:1, costPerUnit:53.9500, retail:91.99, internal:false, flagged:true},
+  {id:298,itemNo:"2517",name:"CENTRAL AMERICAN RED BEA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:53.5000, units:1, costPerUnit:53.5000, retail:90.99, internal:false, flagged:true},
+  {id:299,itemNo:"2556",name:"WHOLE KERNEL CORN 15.25",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:27.5000, units:1, costPerUnit:27.5000, retail:46.99, internal:false, flagged:true},
+  {id:300,itemNo:"2569",name:"SLICED BEETS 15.OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:301,itemNo:"2573",name:"SLICED CARROTS 14.5 OZ",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:302,itemNo:"2617",name:"GOYA JASMINE RICE 20 LB",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:303,itemNo:"2619",name:"JASMINE RICE 10 LB",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:58.9500, units:1, costPerUnit:58.9500, retail:99.99, internal:false, flagged:true},
+  {id:304,itemNo:"2634",name:"CANILLA LONG GRAIN RICE",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:22.9500, units:1, costPerUnit:22.9500, retail:38.99, internal:false, flagged:true},
+  {id:305,itemNo:"2637",name:"CANILLA LONG GRAIN RICE",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:40.3500, units:1, costPerUnit:40.3500, retail:68.99, internal:false, flagged:true},
+  {id:306,itemNo:"2824",name:"GUANABANA NECTAR",cat:"Beverages",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:32.9500, units:1, costPerUnit:32.9500, retail:55.99, internal:false, flagged:true},
+  {id:307,itemNo:"3069",name:"LIME JUICE 12/32 FL. OZ.",cat:"Beverages",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:31.5000, units:12, costPerUnit:2.6250, retail:3.99, internal:false},
+  {id:308,itemNo:"3613",name:"OVAL SARDINE TMTO SAUCE",cat:"Canned Goods",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:47.9500, units:1, costPerUnit:47.9500, retail:81.99, internal:false, flagged:true},
+  {id:309,itemNo:"50512",name:"BARDINE INTO HOT-TINAPA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:35.9500, units:1, costPerUnit:35.9500, retail:60.99, internal:false, flagged:true},
+  {id:310,itemNo:"37",name:"SAZON CENTRO/ACHTE JUMB",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:60.8000, units:1, costPerUnit:60.8000, retail:102.99, internal:false, flagged:true},
+  {id:311,itemNo:"36",name:"SAZON CENTRO / ACHTE",cat:"Spices & Condiments",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:44.5500, units:1, costPerUnit:44.5500, retail:75.99, internal:false, flagged:true},
+  {id:312,itemNo:"FREC",name:"COYA ADOBO CON P-IMIENTA",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:66.5000, units:1, costPerUnit:66.5000, retail:112.99, internal:false, flagged:true},
+  {id:313,itemNo:"200",name:"GOYA MONO-BOW 20/7 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:11.9500, units:20, costPerUnit:0.5975, retail:0.99, internal:false},
+  {id:314,itemNo:"PQ",name:"GOYA SODA CRACKERS 24 0",cat:"Snacks",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:37.9500, units:1, costPerUnit:37.9500, retail:64.99, internal:false, flagged:true},
+  {id:315,itemNo:"—",name:"RIGATONI 16 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:316,itemNo:"—",name:"ELBOWS 16 07",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:29.5000, units:1, costPerUnit:29.5000, retail:49.99, internal:false, flagged:true},
+  {id:317,itemNo:"—",name:"FIDELINT 12 DZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.8500, units:1, costPerUnit:24.8500, retail:41.99, internal:false, flagged:true},
+  {id:318,itemNo:"6975",name:"CABELLO DE ANGEL 12 OZ",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:24.3500, units:1, costPerUnit:24.3500, retail:40.99, internal:false, flagged:true},
+  {id:319,itemNo:"—",name:"MARIA J PACK (FLOW PACK)",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:25.7500, units:1, costPerUnit:25.7500, retail:43.99, internal:false, flagged:true},
+  {id:320,itemNo:"—",name:"LADY FINGERS 701",cat:"Pantry",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:18.9500, units:1, costPerUnit:18.9500, retail:31.99, internal:false, flagged:true},
+  {id:321,itemNo:"53:",name:"NESTLE MEDIA CREMA 7.6 0",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:81.5000, units:1, costPerUnit:81.5000, retail:138.99, internal:false, flagged:true},
+  {id:322,itemNo:"—",name:"NIDO POWDERED MICK 12 69",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:51.9500, units:1, costPerUnit:51.9500, retail:87.99, internal:false, flagged:true},
+  {id:323,itemNo:"E538",name:"NIDO 1+KINDER CRECIMIENT",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:54.5000, units:1, costPerUnit:54.5000, retail:92.99, internal:false, flagged:true},
+  {id:324,itemNo:"6502",name:"NESTUM WHEAT AND RUIT",cat:"Dairy",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:74.5000, units:1, costPerUnit:74.5000, retail:126.99, internal:false, flagged:true},
+  {id:325,itemNo:"6475",name:"SUYA DORADAS CRACKERS 10",cat:"Snacks",vendor:"GOYA Foods", invoice:"27727700", boxes:1, boxPrice:19.2500, units:1, costPerUnit:19.2500, retail:32.99, internal:false, flagged:true},
+  {id:326,itemNo:"51838",name:"MORADO 6* 54 ONZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:52.0000, units:1, costPerUnit:52.0000, retail:87.99, internal:false},
+  {id:327,itemNo:"51845",name:"MAIZ CHULPE - CHULPE CORN 6 X 54 OZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:45.9700, units:1, costPerUnit:45.9700, retail:77.99, internal:false},
+  {id:328,itemNo:"51940",name:"BLACK OLIVES IN BRINES (12*20 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:55.0000, units:1, costPerUnit:55.0000, retail:93.99, internal:false},
+  {id:329,itemNo:"51426",name:"PERU FOOD PEACH IN HALVES 12*29.10 OZ",cat:"Canned Goods",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:30.6800, units:1, costPerUnit:30.6800, retail:51.99, internal:false},
+  {id:330,itemNo:"51835",name:"PERU FOO MAIZ CANCHA CARGUAY (24X150Z)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:38.7800, units:1, costPerUnit:38.7800, retail:65.99, internal:false},
+  {id:331,itemNo:"51969",name:"PERU TRIGO PELADO-PEELED WHEAT (24*15 OZ)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:36.7300, units:1, costPerUnit:36.7300, retail:61.99, internal:false},
+  {id:332,itemNo:"51974",name:"PERU SEMOLA - SEMOLIN 24*15 OZ",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:36.9300, units:1, costPerUnit:36.9300, retail:62.99, internal:false},
+  {id:333,itemNo:"51996",name:"PERU FIDEO CHINO - CHINESE NOODLES (30*8.8 OZ)",cat:"Pantry",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:39.9900, units:1, costPerUnit:39.9900, retail:67.99, internal:false},
+  {id:334,itemNo:"51049A",name:"GLORIA EVAPORATED MILK (24*12FL OZ)",cat:"Dairy",vendor:"Peru Food", invoice:"0271478-00", boxes:5, boxPrice:30.0000, units:1, costPerUnit:30.0000, retail:50.99, internal:false},
+  {id:335,itemNo:"51227",name:"FRESA GELATINA - STRAWBERRY JELLY (12*5.30Z)",cat:"Desserts",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:20.2700, units:1, costPerUnit:20.2700, retail:33.99, internal:false},
+  {id:336,itemNo:"51631A",name:"PERU FOOD GROUND BLACK PEPPER // PIMIENTA (24*1.5",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:39.7300, units:1, costPerUnit:39.7300, retail:67.99, internal:false},
+  {id:337,itemNo:"51998",name:"PERU SIYAU KIKKO-SOY SAUCE 30*500 ML",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:34.6800, units:1, costPerUnit:34.6800, retail:58.99, internal:false},
+  {id:338,itemNo:"51822",name:"PERU FOOD CANELA Y CLAVO (24*1.15 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:25.4900, units:1, costPerUnit:25.4900, retail:42.99, internal:false},
+  {id:339,itemNo:"51871",name:"ROCOTO PASTA-RED HOT PEPPER PASTE (12*15.00 OZ)",cat:"Spices & Condiments",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:35.5300, units:1, costPerUnit:35.5300, retail:59.99, internal:false},
+  {id:340,itemNo:"51876",name:"MILD PANCA PEPPER // AJI PANCA POCO PIQUE 12*15 OZ",cat:"Snacks",vendor:"Peru Food", invoice:"0271478-00", boxes:1, boxPrice:38.0700, units:1, costPerUnit:38.0700, retail:64.99, internal:false},
+  {id:341,itemNo:"I-041",name:"INCA'S FOOD Haba Frita 24x4oz (113g) - Salty Fried Fava Beans",cat:"Canned Goods",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:32.4000, units:1, costPerUnit:32.4000, retail:54.99, internal:false},
+  {id:342,itemNo:"I-7662",name:"INCA'S FOOD Aji Panca Especial Pasta 24x7.5oz (212.6g) - Panca Pepper Paste NOT SPICY",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:44.4000, units:1, costPerUnit:44.4000, retail:74.99, internal:false},
+  {id:343,itemNo:"I-7478",name:"INCA'S FOOD Aji Panca Especial Pasta Etiqueta Negra 12x15oz (425g) - Panca Pepper Paste Special Black Label",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:35.8800, units:1, costPerUnit:35.8800, retail:60.99, internal:false},
+  {id:344,itemNo:"I-7479",name:"INCA'S FOOD Aji Amarillo Especial Pasta Etiqueta Negra 12x15oz (425g) - Yellow Hot Pepper Paste Special Black Label",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:51.4800, units:1, costPerUnit:51.4800, retail:87.99, internal:false},
+  {id:345,itemNo:"I-237",name:"INCA'S FOOD Aderezo Adobo de Cerdo Etiqueta Negra 12x15oz (425g) - Pork Adobo Marinade",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.4800, units:1, costPerUnit:39.4800, retail:66.99, internal:false},
+  {id:346,itemNo:"I-044",name:"INCA'S FOOD Ajo Pasta Familiar 12x15.7oz (445g) - Garlic Paste Family Size",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:53.8800, units:1, costPerUnit:53.8800, retail:91.99, internal:false},
+  {id:347,itemNo:"I-7665",name:"INCA'S FOOD Olluco Picado Lata 12x20oz (567g) - Sliced Ollucus (Melloco) Can",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.0000, units:1, costPerUnit:39.0000, retail:65.99, internal:false},
+  {id:348,itemNo:"I-146",name:"INCA'S FOOD Ajo Pasta 24x7.5oz (212.6g) - Garlic Paste",cat:"Spices & Condiments",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:58.8000, units:1, costPerUnit:58.8000, retail:99.99, internal:false},
+  {id:349,itemNo:"CAS-543",name:"VICTORIA Galleta Casino Menta 8xPack6x1.52oz (258g) - Mint Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:11.9200, units:1, costPerUnit:11.9200, retail:19.99, internal:false},
+  {id:350,itemNo:"CAS-567",name:"VICTORIA Galleta Casino Lucuma 8xPack6x1.52oz (258g) - Lucuma Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:11.9200, units:1, costPerUnit:11.9200, retail:19.99, internal:false},
+  {id:351,itemNo:"GN-383",name:"GN Galleta Rellenita Chocolate 5xPack8x1.27oz (288g) - Chocolate Sandwich Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:2, boxPrice:7.9500, units:1, costPerUnit:7.9500, retail:13.99, internal:false},
+  {id:352,itemNo:"GN-376",name:"GN Galleta Rellenita Coco 5xPack8x1.27oz (288g) - Coconut Sandwich Cookies",cat:"Snacks",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:2, boxPrice:7.9500, units:1, costPerUnit:7.9500, retail:13.99, internal:false},
+  {id:353,itemNo:"I-552",name:"INCA'S FOOD Trigo Resbalado 24x15oz (425g) - Hulled Wheat",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:39.6000, units:1, costPerUnit:39.6000, retail:66.99, internal:false},
+  {id:354,itemNo:"I-160",name:"INCA'S FOOD Harina de Chuno 12x12oz (340g) - Chuno Flour",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:20.2800, units:1, costPerUnit:20.2800, retail:33.99, internal:false},
+  {id:355,itemNo:"I-551",name:"INCA'S FOOD Trigo Pelado 24x15oz (425g) - Dried Hulled Wheat",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:42.0000, units:1, costPerUnit:42.0000, retail:70.99, internal:false},
+  {id:356,itemNo:"I-7174",name:"INCA'S FOOD Maiz Morado Familiar 8x3lb (1.36kg) - Dried Purple Corn Family Size",cat:"Pantry",vendor:"Peruvian Import Co", invoice:"INVNJ23126", boxes:1, boxPrice:54.3200, units:1, costPerUnit:54.3200, retail:91.99, internal:false},
+  {id:357,itemNo:"I-7633",name:"INCA'S FOOD Bebida Chia Maracuya 12x16fl oz (473mL) - Chia Passion Fruit Drink",cat:"Beverages",vendor:"Peruvian Import Co", invoice:"INVNJ23127", boxes:1, boxPrice:19.0800, units:1, costPerUnit:19.0800, retail:31.99, internal:false},
+  {id:358,itemNo:"I-919",name:"INCA'S FOOD Bebida Chicha de Jora 12x16fl oz (473mL) - Corn Jora Drink",cat:"Beverages",vendor:"Peruvian Import Co", invoice:"INVNJ23127", boxes:1, boxPrice:16.2000, units:1, costPerUnit:16.2000, retail:27.99, internal:false},
 ];
 
-// ════════ STATE ════════
-const customRetail={}; let currentMarkup=65;
-let activeVendor='all',activeInvoice='all',activeCategory='all';
-let openRows=new Set(); let sortField='id',sortDir=1;
-let pendingImport=null;
+// ════════ CONFIG ════════
+// Same-origin by default so the hub works behind the site and behind the app
+// server without being rebuilt. ?api= overrides it for local testing.
+const API_BASE = (() => {
+  try {
+    const override = new URLSearchParams(location.search).get('api');
+    if (override) return override.replace(/\/$/, '');
+  } catch (_) { /* file:// with no search params */ }
+  return '/api/pricing';
+})();
 
+// ════════ STATE ════════
+const customRetail = {};          // hub item id -> retail proposed in this session
+let currentMarkup = 70;
+let activeVendor = 'all', activeInvoice = 'all', activeCategory = 'all';
+let activeShow = 'sellable', searchTerm = '';
+let openRows = new Set();
+let sortField = 'id', sortDir = 1;
+let activeTab = 'catalog';
+
+// Live server data, empty until (and unless) the server answers.
+const server = {
+  status: 'checking',   // checking | live | local | error
+  detail: '',
+  products: new Map(),  // hub item id -> server product row
+  history: new Map(),   // hub item id -> array of history rows
+  queue: [],
+  canWrite: false
+};
+
+// ════════ PRICING MATH ════════
+// roundRetail and calcRetail are the store's shelf convention and must stay
+// byte-compatible with server/pricing-engine.js — the server recomputes the same
+// numbers and a disagreement would show as a phantom variance.
 function roundRetail(p){const b=Math.floor(p);return(p-b>=0.5)?b+0.99:Math.max(0.99,b-1+0.99)}
-function calcRetail(i){if(i.internal)return 0;if(customRetail[i.id]!==undefined)return customRetail[i.id];return roundRetail(i.costPerUnit*(1+currentMarkup/100))}
+
+// Price precedence, highest first:
+//   1. an edit made in this session
+//   2. the approved retail on the server
+//   3. the retail stored in the embedded array
+//   4. the markup formula
+function calcRetail(i){
+  if(i.internal) return 0;
+  if(customRetail[i.id]!==undefined) return customRetail[i.id];
+  const live = server.products.get(i.id);
+  if(live && live.current_retail_price!=null) return Number(live.current_retail_price);
+  const f = roundRetail(costOf(i)*(1+currentMarkup/100));
+  return (i.retail>0 && Math.abs(i.retail-f)>0.001) ? i.retail : f;
+}
+// Server cost wins when present: a newer invoice may have moved it since this
+// file was last written.
+function costOf(i){
+  const live = server.products.get(i.id);
+  if(live && live.current_unit_cost!=null) return Number(live.current_unit_cost);
+  return i.costPerUnit;
+}
 function calcBoxRev(i){return i.internal?0:calcRetail(i)*i.units*i.boxes}
 function calcBoxProfit(i){return i.internal?0:calcBoxRev(i)-(i.boxes*i.boxPrice)}
 function calcMargin(i){const r=calcBoxRev(i);if(!r)return null;return((calcBoxProfit(i)/r)*100).toFixed(1)}
-function fmt(n){return '$'+n.toFixed(2)}
-function catChip(c){const m={'Frozen Fruit':'chip-fz','Frozen Veg':'chip-fz','Frozen Bakery':'chip-fz','Frozen Pulpa':'chip-fz','Beverages':'chip-bev','Candy/Snacks':'chip-snk','Snacks':'chip-snk','Dry Goods':'chip-dry','Condiments':'chip-con','Canned Tuna':'chip-tun','Tea/Coffee':'chip-tea','Rice':'chip-rice','Canned/Jarred':'chip-can','Cereal':'chip-snk','Grocery':'chip-dry','Cleaning':'chip-con','Laundry':'chip-con','Personal Care':'chip-bev','Baby':'chip-tea','Paper & Foil':'chip-rice','Hot Food Supplies':'chip-tun','Deli Containers':'chip-can'};return m[c]||'chip-dry'}
+function fmt(n){return '$'+Number(n).toFixed(2)}
 
-// ════════ UPLOAD + AI ANALYSIS ════════
-function toggleUpload(){
-  const z=document.getElementById('uploadZone');
-  z.classList.toggle('hidden');
+// ════════ VARIANCE ════════
+// A flag is raised when the live cost differs from the cost recorded in this
+// file, or when the server's history shows the last move.
+function varianceOf(i){
+  const live = server.products.get(i.id);
+  if(!live || live.current_unit_cost==null) return null;
+  const now = Number(live.current_unit_cost), was = i.costPerUnit;
+  const delta = Math.round((now-was)*10000)/10000;
+  if(Math.abs(delta) < 0.0001) return null;
+  return { was, now, delta, pct: was ? (delta/was)*100 : null, dir: delta>0?'up':'down' };
 }
 
-const dz=document.getElementById('uploadZone');
-['dragover','dragenter'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.add('dragover')}));
-['dragleave','drop'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.remove('dragover')}));
-dz.addEventListener('drop',ev=>{if(ev.dataTransfer.files.length)handleFile(ev.dataTransfer.files[0])});
+// ════════ DOM HELPERS ════════
+const $ = id => document.getElementById(id);
+function esc(value){
+  return String(value==null?'':value)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+let toastTimer = null;
+function showToast(message){
+  const el = $('toast'); if(!el) return;
+  el.textContent = message; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2600);
+}
 
-async function handleFile(file){
-  if(!file)return;
-  document.getElementById('uploadZone').classList.add('hidden');
-  const status=document.getElementById('analysisStatus');
-  status.classList.add('show');
-  document.getElementById('analysisSpinner').style.display='block';
-  document.getElementById('analysisText').classList.remove('as-error');
-  document.getElementById('analysisText').textContent='Reading invoice…';
-  document.getElementById('analysisDetail').textContent='Converting file and sending to Claude for extraction.';
+// ════════ SERVER LAYER ════════
+// Every call is best-effort. A failure downgrades the hub to offline mode and is
+// reported in the banner; it never throws into the render path.
+async function api(path, options){
+  const token = localStorage.getItem('pricingToken') || '';
+  const response = await fetch(API_BASE+path, {
+    credentials:'same-origin',
+    ...options,
+    headers:{ 'Content-Type':'application/json',
+      ...(token ? { Authorization:'Bearer '+token } : {}),
+      ...(options&&options.headers) }
+  });
+  if(!response.ok){
+    let detail = 'HTTP '+response.status;
+    try { const body = await response.json(); if(body && body.error) detail = body.error; } catch(_){}
+    const error = new Error(detail); error.status = response.status; throw error;
+  }
+  return response.status===204 ? null : response.json();
+}
 
+async function connect(){
+  setConnection('checking','Checking pricing service…');
   try{
-    const b64=await fileToBase64(file);
-    const isPdf=file.type==='application/pdf';
-    const content=[
-      isPdf
-        ? {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}}
-        : {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
-      {type:'text',text:EXTRACT_PROMPT}
-    ];
-
-    document.getElementById('analysisDetail').textContent='Claude is reading line items, prices, and case counts…';
-
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:4000,messages:[{role:"user",content}]})
-    });
-    const data=await res.json();
-    let txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
-    txt=txt.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(txt);
-    showImportPreview(parsed);
-  }catch(err){
-    document.getElementById('analysisSpinner').style.display='none';
-    document.getElementById('analysisText').classList.add('as-error');
-    document.getElementById('analysisText').textContent='Could not read this invoice automatically.';
-    document.getElementById('analysisDetail').textContent='Error: '+(err.message||err)+'. Try a clearer photo or a PDF, or add items manually.';
+    const config = await api('/config');
+    if(config && typeof config.hubPreviewMarkupPct === 'number' && !userTouchedMarkup){
+      currentMarkup = config.hubPreviewMarkupPct;
+      const slider = $('markupSlider');
+      if(slider){ slider.value = currentMarkup; $('markupDisplay').textContent = currentMarkup+'%'; }
+    }
+    if(!config || !config.storeConfigured){
+      setConnection('local','Pricing database not configured — showing the catalog stored in this file.');
+      render(); return;
+    }
+    await loadServerData();
+  }catch(error){
+    // 401 is not a fault: it means the hub is open but nobody is signed in.
+    if(error.status===401 || error.status===403){
+      setConnection('local','Sign in as a manager to load live prices. Showing the catalog stored in this file.');
+    }else{
+      setConnection('error','Pricing service unreachable ('+error.message+'). Showing the catalog stored in this file.');
+    }
+    render();
   }
 }
 
-function fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result.split(',')[1]);
-    r.onerror=()=>rej(new Error('File read failed'));
-    r.readAsDataURL(file);
-  });
+async function loadServerData(){
+  const [products, queue] = await Promise.all([
+    api('/products').then(r=>r.products||[]),
+    api('/queue').then(r=>r.lines||[]).catch(()=>[])
+  ]);
+  server.products.clear();
+  for(const product of products){
+    // hub_item_ids lets a product that was bought twice answer to either id.
+    const ids = Array.isArray(product.hub_item_ids)&&product.hub_item_ids.length
+      ? product.hub_item_ids
+      : (product.hub_item_id!=null ? [product.hub_item_id] : []);
+    for(const id of ids) server.products.set(Number(id), product);
+  }
+  server.queue = queue;
+  server.canWrite = true;
+  setConnection('live','Live — '+products.length+' product'+(products.length===1?'':'s')+' from the pricing database.');
+  render();
 }
 
-const EXTRACT_PROMPT=`You are reading a wholesale grocery invoice for a supermarket. Extract EVERY line item.
-
-For each item return: itemNo (or "—" if none), name (clean readable product name including pack size like "12/14oz"), cat (best category guess from: Frozen Fruit, Frozen Veg, Frozen Bakery, Frozen Pulpa, Beverages, Candy/Snacks, Snacks, Dry Goods, Condiments, Canned Tuna, Canned/Jarred, Tea/Coffee, Rice, Cereal, Grocery, Cleaning, Laundry, Personal Care, Baby, Paper & Foil, Deli Containers), boxes (qty of cases purchased), boxPrice (price per case), units (units per case — infer from pack notation like "12/14oz" = 12; if it is a multipack sold as a pack like "8/3pk" use the outer number 8; if unsure use 1).
-
-Also return: vendor (company name on invoice), invoice (invoice number), date (invoice date).
-
-Respond with ONLY valid JSON, no markdown, no preamble, in this exact shape:
-{"vendor":"...","invoice":"...","date":"...","items":[{"itemNo":"...","name":"...","cat":"...","boxes":1,"boxPrice":0.00,"units":1}]}`;
-
-function showImportPreview(parsed){
-  document.getElementById('analysisStatus').classList.remove('show');
-  pendingImport=parsed;
-  const items=parsed.items||[];
-  document.getElementById('ipVendor').textContent=parsed.vendor||'Imported';
-  document.getElementById('ipMeta').textContent=`Invoice #${parsed.invoice||'?'} · ${parsed.date||''} · ${items.length} items found. Edit anything below before adding.`;
-
-  let html=`<thead><tr><th>Item</th><th>Cat</th><th>Boxes</th><th>Box $</th><th>Units</th></tr></thead><tbody>`;
-  items.forEach((it,idx)=>{
-    html+=`<tr>
-      <td><input value="${(it.name||'').replace(/"/g,'&quot;')}" onchange="editImport(${idx},'name',this.value)"></td>
-      <td><input value="${it.cat||'Grocery'}" onchange="editImport(${idx},'cat',this.value)"></td>
-      <td><input class="num" type="number" value="${it.boxes||1}" onchange="editImport(${idx},'boxes',this.value)"></td>
-      <td><input class="num" type="number" step="0.01" value="${it.boxPrice||0}" onchange="editImport(${idx},'boxPrice',this.value)"></td>
-      <td><input class="num" type="number" value="${it.units||1}" onchange="editImport(${idx},'units',this.value)"></td>
-    </tr>`;
-  });
-  html+=`</tbody>`;
-  document.getElementById('ipTable').innerHTML=html;
-  document.getElementById('importPreview').classList.add('show');
+function setConnection(status, detail){
+  server.status = status; server.detail = detail;
+  const banner = $('connBanner'), text = $('connText'), retry = $('connRetry');
+  if(!banner) return;
+  banner.className = 'conn ' + (status==='live'?'live':status==='error'?'err':'local');
+  text.textContent = detail;
+  retry.hidden = (status==='live'||status==='checking');
 }
 
-function editImport(idx,field,val){
-  if(field==='boxes'||field==='boxPrice'||field==='units')val=parseFloat(val)||0;
-  pendingImport.items[idx][field]=val;
+// Loads the price history for one item, once, when its row is opened.
+async function ensureHistory(item){
+  if(server.status!=='live') return;
+  if(server.history.has(item.id)) return;
+  const product = server.products.get(item.id);
+  if(!product){ server.history.set(item.id, []); return; }
+  try{
+    const response = await api('/products/'+encodeURIComponent(product.id)+'/history');
+    server.history.set(item.id, response.history||[]);
+  }catch(_){
+    server.history.set(item.id, []);
+  }
+  render();
 }
 
-function confirmImport(){
-  if(!pendingImport)return;
-  const vendor=pendingImport.vendor||'New Vendor';
-  const invoice=String(pendingImport.invoice||Date.now());
-  if(!VENDORS[vendor])VENDORS[vendor]={label:vendor,invoices:{}};
-  if(!VENDORS[vendor].invoices[invoice])VENDORS[vendor].invoices[invoice]={label:'#'+invoice+(pendingImport.date?' — '+pendingImport.date:'')};
+// Persists a retail edit. The server is authoritative: if it refuses, the edit
+// is rolled back in the UI so the screen never shows a price the store does not
+// actually have.
+async function persistRetail(item, price){
+  const previous = customRetail[item.id];
+  customRetail[item.id] = price;
+  render();
 
-  let nextId=Math.max(...ALL_ITEMS.map(i=>i.id))+1;
-  pendingImport.items.forEach(it=>{
-    const boxes=parseFloat(it.boxes)||1,boxPrice=parseFloat(it.boxPrice)||0,units=parseFloat(it.units)||1;
-    const cpu=units>0?(boxes*boxPrice)/units/boxes:0;
-    ALL_ITEMS.push({
-      id:nextId++,itemNo:it.itemNo||'—',name:it.name||'Unnamed',cat:it.cat||'Grocery',
-      vendor,invoice,boxes,boxPrice,units,costPerUnit:Math.round(cpu*10000)/10000,
-      retail:roundRetail(cpu*1.65),internal:false
+  if(server.status!=='live'){
+    showToast('Saved for this session only — not connected to the pricing database.');
+    return;
+  }
+  const product = server.products.get(item.id);
+  if(!product){
+    showToast('This item is not in the pricing database yet — kept locally.');
+    return;
+  }
+  try{
+    const response = await api('/products/'+encodeURIComponent(product.id)+'/retail', {
+      method:'PATCH',
+      body: JSON.stringify({ retailPrice: price, reason: 'Pricing Hub edit' })
     });
-  });
-
-  document.getElementById('importPreview').classList.remove('show');
-  pendingImport=null;
-  activeVendor=vendor;activeInvoice=invoice;activeCategory='all';
-  buildCatFilter();render();
-  showToast(`Added ${vendor} invoice #${invoice}`);
-  document.getElementById('topSubtitle')&&(document.getElementById('topSubtitle').textContent=vendor);
+    if(response && response.product){
+      server.products.set(item.id, response.product);
+      delete customRetail[item.id];   // the server value is now the truth
+      server.history.delete(item.id); // force a reload of the timeline
+    }
+    showToast('Saved — '+item.name+' is now '+fmt(price));
+  }catch(error){
+    if(previous===undefined) delete customRetail[item.id]; else customRetail[item.id]=previous;
+    showToast('Not saved: '+error.message);
+  }
+  render();
 }
 
-function cancelImport(){
-  document.getElementById('importPreview').classList.remove('show');
-  pendingImport=null;
-}
-
-// ════════ VENDOR TABS ════════
-function buildVendorBar(){
-  const vendors=['all',...Object.keys(VENDORS)];
-  const counts={all:ALL_ITEMS.length};
-  ALL_ITEMS.forEach(i=>counts[i.vendor]=(counts[i.vendor]||0)+1);
-  document.getElementById('vendorBar').innerHTML=vendors.map(v=>`
-    <div class="vtab ${activeVendor===v?'active':''}" onclick="setVendor('${v.replace(/'/g,"\\'")}')">
-      ${v==='all'?'All Vendors':(VENDORS[v]?VENDORS[v].label:v)}
-      <span class="vbadge">${counts[v]||0}</span>
-    </div>`).join('');
-}
-function setVendor(v){activeVendor=v;activeInvoice='all';activeCategory='all';buildInvChips();buildCatFilter();render();}
-
-// ════════ INVOICE CHIPS ════════
-function buildInvChips(){
-  const bar=document.getElementById('invSelectorBar');
-  let invs={};
-  ALL_ITEMS.filter(i=>activeVendor==='all'||i.vendor===activeVendor).forEach(i=>invs[i.invoice]=i.vendor);
-  const keys=Object.keys(invs);
-  if(keys.length<=1){bar.style.display='none';return}
-  bar.style.display='flex';
-  let html=`<div class="inv-chip ${activeInvoice==='all'?'active-all':''}" onclick="setInvoice('all')">All</div>`;
-  keys.sort().forEach(inv=>{
-    const vend=VENDORS[invs[inv]];
-    const label=vend&&vend.invoices[inv]?vend.invoices[inv].label:'#'+inv;
-    html+=`<div class="inv-chip ${activeInvoice===inv?'active':''}" onclick="setInvoice('${inv}')">${label}</div>`;
-  });
-  document.getElementById('invChips').innerHTML=html;
-}
-function setInvoice(inv){activeInvoice=inv;activeCategory='all';render();}
-
-// ════════ CAT FILTER ════════
-function buildCatFilter(){
-  const cats=[...new Set(ALL_ITEMS.filter(i=>activeVendor==='all'||i.vendor===activeVendor).map(i=>i.cat))].sort();
-  document.getElementById('catFilter').innerHTML='<option value="all">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-}
-
-// ════════ CAT TABS ════════
-function buildCatTabs(items){
-  const counts={all:items.length};items.forEach(i=>counts[i.cat]=(counts[i.cat]||0)+1);
-  const cats=['all',...new Set(items.map(i=>i.cat))];
-  document.getElementById('catTabs').innerHTML=cats.map(c=>`
-    <div class="ctab ${activeCategory===c?'active':''}" onclick="setCategory('${c.replace(/'/g,"\\'")}')">
-      ${c==='all'?'All':c}<span class="cn">${counts[c]||0}</span></div>`).join('');
-}
-function setCategory(c){activeCategory=c;render();}
-
-// ════════ SUMMARY ════════
-function buildSummary(items){
-  const ri=items.filter(i=>!i.internal);
-  const totCost=items.reduce((s,i)=>s+i.boxes*i.boxPrice,0);
-  const retCost=ri.reduce((s,i)=>s+i.boxes*i.boxPrice,0);
-  const totRev=ri.reduce((s,i)=>s+calcBoxRev(i),0);
-  const totProfit=ri.reduce((s,i)=>s+calcBoxProfit(i),0);
-  const intCost=items.filter(i=>i.internal).reduce((s,i)=>s+i.boxes*i.boxPrice,0);
-  const margin=totRev>0?((totProfit/totRev)*100).toFixed(1):0;
-  const roi=retCost>0?((totProfit/retCost)*100).toFixed(0):0;
-  document.getElementById('summaryStrip').innerHTML=`
-    <div class="stat"><div class="slabel">Total Paid</div><div class="sval w">${fmt(totCost)}</div><div class="ssub">${items.length} items</div></div>
-    ${intCost>0?`<div class="stat"><div class="slabel">Internal Use</div><div class="sval r">${fmt(intCost)}</div><div class="ssub">Not for sale</div></div>`:''}
-    <div class="stat"><div class="slabel">Retail Cost</div><div class="sval w">${fmt(retCost)}</div><div class="ssub">${ri.length} sellable</div></div>
-    <div class="stat"><div class="slabel">Proj Revenue</div><div class="sval g">${fmt(totRev)}</div><div class="ssub">At ${currentMarkup}% markup</div></div>
-    <div class="stat"><div class="slabel">Proj Profit</div><div class="sval b">${fmt(totProfit)}</div><div class="ssub">All units sold</div></div>
-    <div class="stat"><div class="slabel">Gross Margin</div><div class="sval a">${margin}%</div><div class="ssub">ROI: ${roi}%</div></div>`;
-}
-
-// ════════ FILTER + SORT ════════
-function getFiltered(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  const catF=document.getElementById('catFilter').value;
-  const show=document.getElementById('showFilter').value;
-  let items=ALL_ITEMS.filter(i=>{
-    if(activeVendor!=='all'&&i.vendor!==activeVendor)return false;
-    if(activeInvoice!=='all'&&i.invoice!==activeInvoice)return false;
-    if(activeCategory!=='all'&&i.cat!==activeCategory)return false;
-    if(catF!=='all'&&i.cat!==catF)return false;
-    if(q&&!i.name.toLowerCase().includes(q)&&!i.cat.toLowerCase().includes(q)&&!String(i.itemNo).includes(q))return false;
-    if(show==='retail'&&i.internal)return false;
-    if(show==='internal'&&!i.internal)return false;
+// ════════ FILTERING ════════
+function visibleItems(){
+  const term = searchTerm.trim().toLowerCase();
+  let rows = ALL_ITEMS.filter(item=>{
+    if(activeVendor!=='all' && item.vendor!==activeVendor) return false;
+    if(activeInvoice!=='all' && item.invoice!==activeInvoice) return false;
+    if(activeCategory!=='all' && item.cat!==activeCategory) return false;
+    if(activeShow==='sellable' && item.internal) return false;
+    if(activeShow==='internal' && !item.internal) return false;
+    if(activeShow==='flagged' && !item.flagged) return false;
+    if(activeShow==='custom' && customRetail[item.id]===undefined) return false;
+    if(term){
+      const haystack = (item.name+' '+item.cat+' '+item.itemNo+' '+item.vendor).toLowerCase();
+      if(!haystack.includes(term)) return false;
+    }
     return true;
   });
-  const sf=document.getElementById('sortField').value,dir=sortDir;
-  if(sf==='profit')items=[...items].sort((a,b)=>dir*(calcBoxProfit(b)-calcBoxProfit(a)));
-  else if(sf==='retail')items=[...items].sort((a,b)=>dir*(calcRetail(b)-calcRetail(a)));
-  else if(sf==='boxRev')items=[...items].sort((a,b)=>dir*(calcBoxRev(b)-calcBoxRev(a)));
-  else if(sf==='name')items=[...items].sort((a,b)=>dir*a.name.localeCompare(b.name));
-  else if(sf==='cpu')items=[...items].sort((a,b)=>dir*(b.costPerUnit-a.costPerUnit));
-  else if(sf==='boxPrice')items=[...items].sort((a,b)=>dir*(b.boxPrice-a.boxPrice));
-  else if(sf==='units')items=[...items].sort((a,b)=>dir*(b.units-a.units));
-  else items=[...items].sort((a,b)=>a.id-b.id);
-  return items;
+
+  const key = item => {
+    switch(sortField){
+      case 'name': return item.name.toLowerCase();
+      case 'cat': return item.cat.toLowerCase();
+      case 'costPerUnit': return costOf(item);
+      case 'retail': return calcRetail(item);
+      case 'margin': return Number(calcMargin(item)||-999);
+      case 'profit': return calcBoxProfit(item);
+      case 'boxes': return item.boxes;
+      case 'units': return item.units;
+      default: return item.id;
+    }
+  };
+  rows.sort((a,b)=>{
+    const left = key(a), right = key(b);
+    if(left<right) return -1*sortDir;
+    if(left>right) return 1*sortDir;
+    return 0;
+  });
+  return rows;
 }
-function setSort(f){if(sortField===f)sortDir*=-1;else{sortField=f;sortDir=1}
-  const map={boxPrice:'id',units:'id'};document.getElementById('sortField').value=map[f]||f;render();}
 
 // ════════ RENDER ════════
 function render(){
-  const items=getFiltered();
-  buildVendorBar();buildInvChips();buildCatTabs(items);buildSummary(items);
-  const body=document.getElementById('tableBody');
-  if(!items.length){body.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div>No items match your filters.</div></td></tr>`;return}
-  const sf=document.getElementById('sortField').value,grouped=sf==='id';
-  let lastKey='',html='',totCost=0,totRev=0,totProfit=0;
-  items.forEach(item=>{
-    const retail=calcRetail(item),rev=calcBoxRev(item),profit=calcBoxProfit(item),margin=calcMargin(item);
-    const isOpen=openRows.has(item.id);
-    const mc=margin&&parseFloat(margin)>50?'var(--brand)':parseFloat(margin)>30?'var(--amber)':'var(--red)';
-    if(grouped){
-      const key=item.vendor+'|'+item.invoice;
-      if(key!==lastKey){lastKey=key;
-        const vend=VENDORS[item.vendor];
-        const il=vend&&vend.invoices[item.invoice]?vend.invoices[item.invoice].label:item.invoice;
-        html+=`<tr class="sec-hdr"><td colspan="10">${vend?vend.label:item.vendor} — Invoice ${il}</td></tr>`;}
-    }
-    totCost+=item.boxes*item.boxPrice;if(!item.internal){totRev+=rev;totProfit+=profit}
-    const invBadge=grouped?'':`<span class="chip chip-rice">#${item.invoice}</span>`;
-    html+=`<tr>
-      <td><button class="xbtn" onclick="toggleRow(${item.id})">${isOpen?'▲':'▼'}</button></td>
-      <td>${item.name}<span class="chip ${catChip(item.cat)}">${item.cat}</span>${invBadge}${item.internal?'<span class="chip chip-tun">INTERNAL</span>':''}${item.flagged?'<span class="chip chip-snk">⚑ VERIFY</span>':''}</td>
-      <td>${item.boxes}</td><td>${fmt(item.boxPrice)}</td><td>${item.units}</td>
-      <td>${item.internal?'—':fmt(item.costPerUnit)}</td>
-      <td>${item.internal?'<span style="color:var(--red);font-size:11px">Not for sale</span>':`<input class="retail-input" type="number" step="0.01" min="0" value="${retail.toFixed(2)}" onchange="updateRetail(${item.id},this.value)">`}</td>
-      <td class="rev-c">${item.internal?'—':fmt(rev)}</td>
-      <td class="profit-c">${item.internal?'—':fmt(profit)}</td>
-      <td>${margin?`<span style="color:${mc}">${margin}%</span>`:'—'}</td>
-    </tr>
-    <tr class="drow ${isOpen?'open':''}"><td colspan="10"><div class="dgrid">
-      ${item.itemNo!=='—'?`<div class="dcell"><div class="dl">Item No.</div><div class="dv">${item.itemNo}</div></div>`:''}
-      <div class="dcell"><div class="dl">Vendor</div><div class="dv" style="font-size:12px">${item.vendor}</div></div>
-      <div class="dcell"><div class="dl">Invoice</div><div class="dv" style="font-size:12px">#${item.invoice}</div></div>
-      <div class="dcell"><div class="dl">Boxes</div><div class="dv">${item.boxes}</div></div>
-      <div class="dcell"><div class="dl">Box Price</div><div class="dv">${fmt(item.boxPrice)}</div></div>
-      <div class="dcell"><div class="dl">Units/Box</div><div class="dv">${item.units}</div></div>
-      <div class="dcell"><div class="dl">Total Units</div><div class="dv">${item.units*item.boxes}</div></div>
-      ${item.internal?`<div class="dcell"><div class="dl">Status</div><div class="dv" style="color:var(--red)">Internal Use</div></div>`:
-        `<div class="dcell"><div class="dl">Cost/Unit</div><div class="dv">${fmt(item.costPerUnit)}</div></div>
-         <div class="dcell"><div class="dl">Retail</div><div class="dv g">${fmt(retail)}</div></div>
-         <div class="dcell"><div class="dl">Markup</div><div class="dv g">${customRetail[item.id]!==undefined?'Custom':currentMarkup+'%'}</div></div>
-         <div class="dcell"><div class="dl">Box Revenue</div><div class="dv a">${fmt(rev)}</div></div>
-         <div class="dcell"><div class="dl">Box Profit</div><div class="dv b">${fmt(profit)}</div></div>
-         <div class="dcell"><div class="dl">Margin</div><div class="dv ${parseFloat(margin)>50?'g':''}">${margin}%</div></div>`}
-    </div></td></tr>`;
-  });
-  html+=`<tr class="tot-row"><td></td><td>${items.length} items shown</td><td></td><td style="color:var(--text)">${fmt(totCost)}</td><td></td><td></td><td></td><td class="rev-c" style="font-size:14px">${fmt(totRev)}</td><td class="profit-c" style="font-size:14px">${fmt(totProfit)}</td><td style="color:var(--amber)">${totRev>0?((totProfit/totRev)*100).toFixed(1)+'%':'—'}</td></tr>`;
-  body.innerHTML=html;
+  renderMasthead();
+  renderControls();
+  renderSummary();
+  renderTable();
+  renderQueue();
+  renderVariance();
+  renderExportCounts();
+  renderIntakeAvailability();
+  renderAuth();
+  renderFinancials();
 }
-function toggleRow(id){openRows.has(id)?openRows.delete(id):openRows.add(id);render()}
-function updateRetail(id,val){const v=parseFloat(val);if(!isNaN(v)&&v>0){customRetail[id]=v;showToast(`Price → $${v.toFixed(2)}`);render()}}
-function updateMarkup(val){currentMarkup=parseInt(val);document.getElementById('markupDisplay').textContent=val+'%';render()}
-function resetMarkup(){currentMarkup=65;document.getElementById('markupSlider').value=65;document.getElementById('markupDisplay').textContent='65%';Object.keys(customRetail).forEach(k=>delete customRetail[k]);showToast('Reset to 65%');render()}
-function showToast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function exportCSV(){
-  const items=getFiltered();
-  const rows=[['#','Item No','Name','Category','Vendor','Invoice','Boxes','Box Cost','Units','Cost/Unit','Retail','Box Revenue','Box Profit','Margin','Status']];
-  items.forEach(i=>{const retail=calcRetail(i),rev=calcBoxRev(i),profit=calcBoxProfit(i),margin=calcMargin(i);
-    rows.push([i.id,i.itemNo,i.name,i.cat,i.vendor,'#'+i.invoice,i.boxes,i.boxPrice.toFixed(2),i.units,
-      i.internal?'—':i.costPerUnit.toFixed(4),i.internal?'INTERNAL':retail.toFixed(2),
-      i.internal?'—':rev.toFixed(2),i.internal?'—':profit.toFixed(2),i.internal?'—':(margin+'%'),
-      i.internal?'Internal Use':i.flagged?'Verify Count':'Active'])});
-  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`anthonys_pricing_${activeVendor.replace(/ /g,'_')}.csv`;a.click();showToast('CSV exported!')}
 
-buildCatFilter();render();
+function renderIntakeAvailability(){
+  const accepts = $('intakeAccepts');
+  if(accepts) accepts.textContent = 'PDF, JPEG, PNG or WebP · up to 10 MB';
+
+  // Uploading needs a live connection and a signed-in manager. Disable rather
+  // than let the owner fill in a form that cannot submit.
+  const live = server.status==='live';
+  for(const id of ['uploadInvoiceBtn','uploadPosBtn']){
+    const button = $(id);
+    if(button) button.disabled = !live;
+  }
+  const status = $('intakeStatus');
+  if(status && !live && !status.dataset.sticky){
+    status.textContent = 'Connect to the pricing database and sign in as a manager to upload invoices.';
+  }
+}
+
+function renderAuth(){
+  const box = $('authBox'), st = $('authStatus');
+  if(!box) return;
+  const token = localStorage.getItem('pricingToken') || '';
+  const email = localStorage.getItem('pricingEmail') || '';
+  const inp = 'padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg1);color:var(--ink-2);font-size:13px;min-width:170px';
+  if(token){
+    box.innerHTML = '<b style="font-size:13px;color:var(--ink-2)">Signed in as '+esc(email||'manager')+'</b>'
+      + '<button class="btn" id="authOut" type="button" style="margin-left:auto">Sign out</button>';
+    const out = $('authOut');
+    if(out) out.onclick = ()=>{ localStorage.removeItem('pricingToken'); localStorage.removeItem('pricingEmail'); render(); connect(); };
+    if(st) st.textContent = 'live session — edits propose, approval persists';
+    return;
+  }
+  box.innerHTML = '<input type="email" id="authEmail" placeholder="manager@email" style="'+inp+'" autocomplete="username">'
+    + '<input type="password" id="authPass" placeholder="password" style="'+inp+'" autocomplete="current-password">'
+    + '<button class="btn primary" id="authLogin" type="button">Sign in</button>'
+    + '<button class="btn" id="authLocal" type="button" title="Keep using the catalog embedded in this file">Use local data</button>';
+  const lg = $('authLogin');
+  if(lg) lg.onclick = async ()=>{
+    const em = $('authEmail').value.trim(), pw = $('authPass').value;
+    if(!em || !pw) return;
+    lg.disabled = true;
+    if(st) st.textContent = 'signing in…';
+    try{
+      const r = await api('/login', { method:'POST', body: JSON.stringify({ email: em, password: pw }) });
+      localStorage.setItem('pricingToken', r.token);
+      localStorage.setItem('pricingEmail', r.email || em);
+      if(st) st.textContent = 'signed in as '+(r.role||'manager');
+      render(); connect();
+    }catch(e){
+      if(st) st.textContent = 'sign-in failed: '+e.message;
+      lg.disabled = false;
+    }
+  };
+  const ll = $('authLocal');
+  if(ll) ll.onclick = ()=>{ setConnection('local','Using the catalog stored in this file.'); render(); };
+}
+
+function renderMasthead(){
+  const el = $('mastMeta'); if(!el) return;
+  const vendors = Object.keys(VENDORS).length;
+  const invoices = Object.values(VENDORS).reduce((sum,v)=>sum+Object.keys(v.invoices||{}).length,0);
+  el.innerHTML = '<b>'+ALL_ITEMS.length+'</b> items · <b>'+vendors+'</b> vendors · <b>'+invoices+'</b> invoices'
+    + '<br>Retail ends in .99 · markup preview at <b>'+currentMarkup+'%</b>';
+}
+
+function renderControls(){
+  const vendorSelect = $('vendorSelect');
+  if(vendorSelect && vendorSelect.dataset.built!=='1'){
+    const counts = {};
+    for(const item of ALL_ITEMS) counts[item.vendor]=(counts[item.vendor]||0)+1;
+    vendorSelect.innerHTML = '<option value="all">All vendors ('+ALL_ITEMS.length+')</option>'
+      + Object.keys(VENDORS).map(name =>
+          '<option value="'+esc(name)+'">'+esc(VENDORS[name].label||name)+' ('+(counts[name]||0)+')</option>').join('');
+    vendorSelect.dataset.built='1';
+  }
+
+  const invoiceSelect = $('invoiceSelect');
+  if(invoiceSelect){
+    const counts = {};
+    for(const item of ALL_ITEMS) counts[item.invoice]=(counts[item.invoice]||0)+1;
+    const entries = [];
+    for(const [vendorName, vendor] of Object.entries(VENDORS)){
+      if(activeVendor!=='all' && vendorName!==activeVendor) continue;
+      for(const [number, invoice] of Object.entries(vendor.invoices||{})){
+        entries.push({ number, label: invoice.label||('#'+number), n: counts[number]||0 });
+      }
+    }
+    const current = activeInvoice;
+    invoiceSelect.innerHTML = '<option value="all">All invoices</option>'
+      + entries.map(e=>'<option value="'+esc(e.number)+'">'+esc(e.label)+' ('+e.n+')</option>').join('');
+    // Drop an invoice selection that the current vendor filter has hidden.
+    invoiceSelect.value = entries.some(e=>e.number===current) ? current : 'all';
+    if(invoiceSelect.value!==current) activeInvoice='all';
+  }
+
+  const chips = $('catTabs');
+  if(chips){
+    const counts = {};
+    for(const item of ALL_ITEMS){
+      if(activeVendor!=='all' && item.vendor!==activeVendor) continue;
+      if(activeInvoice!=='all' && item.invoice!==activeInvoice) continue;
+      counts[item.cat]=(counts[item.cat]||0)+1;
+    }
+    const cats = Object.keys(counts).sort();
+    chips.innerHTML = ['all'].concat(cats).map(cat=>{
+      const label = cat==='all' ? 'All categories' : cat;
+      const n = cat==='all' ? Object.values(counts).reduce((a,b)=>a+b,0) : counts[cat];
+      return '<button class="chip" type="button" data-cat="'+esc(cat)+'" aria-pressed="'+(activeCategory===cat)+'">'
+        + esc(label)+'<span class="n">'+n+'</span></button>';
+    }).join('');
+  }
+}
+
+function renderSummary(){
+  const strip = $('summaryStrip'); if(!strip) return;
+  const rows = visibleItems();
+  const sellable = rows.filter(item=>!item.internal);
+  const invoiceCost = rows.reduce((sum,item)=>sum+item.boxes*item.boxPrice,0);
+  const revenue = sellable.reduce((sum,item)=>sum+calcBoxRev(item),0);
+  const profit = sellable.reduce((sum,item)=>sum+calcBoxProfit(item),0);
+  const margin = revenue ? (profit/revenue)*100 : 0;
+  const flagged = rows.filter(item=>item.flagged).length;
+  const edited = rows.filter(item=>customRetail[item.id]!==undefined).length;
+
+  const card = (label, value, sub, tone) =>
+    '<div class="stat"><div class="slabel">'+esc(label)+'</div>'
+    + '<div class="sval'+(tone?' '+tone:'')+'">'+esc(value)+'</div>'
+    + '<div class="ssub">'+esc(sub)+'</div></div>';
+
+  strip.innerHTML =
+      card('Items in view', String(rows.length), sellable.length+' for sale')
+    + card('Invoice cost', fmt(invoiceCost), 'What the store paid')
+    + card('Projected revenue', fmt(revenue), 'If every unit sells', 'b')
+    + card('Projected profit', fmt(profit), 'Revenue less cost', profit>=0?'g':'r')
+    + card('Gross margin', margin.toFixed(1)+'%', 'At '+currentMarkup+'% markup', margin>=0?'g':'r')
+    + card('Needs a look', String(flagged+edited), flagged+' flagged · '+edited+' edited', (flagged+edited)?'r':'');
+}
+
+function renderTable(){
+  const body = $('tableBody'); if(!body) return;
+  const rows = visibleItems();
+
+  if(!rows.length){
+    body.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="big">Nothing matches these filters</div>'
+      + '<div>Try clearing the search or choosing a different vendor.</div></div></td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map(item=>{
+    const cost = costOf(item);
+    const retail = calcRetail(item);
+    const margin = calcMargin(item);
+    const profit = calcBoxProfit(item);
+    const variance = varianceOf(item);
+    const edited = customRetail[item.id]!==undefined;
+
+    const tags = [
+      item.internal ? '<span class="pill int">Not for sale</span>' : '',
+      item.flagged ? '<span class="pill flag">Flagged</span>' : '',
+      edited ? '<span class="pill custom">Edited</span>' : '',
+      variance ? '<span class="pill '+variance.dir+'">Cost '+(variance.dir==='up'?'▲':'▼')+' '+fmt(Math.abs(variance.delta))+'</span>' : ''
+    ].join('');
+
+    const retailCell = item.internal
+      ? '<span class="money" style="color:var(--ink-4)">—</span>'
+      : '<input class="retail-edit'+(edited?' dirty':'')+'" type="number" step="0.01" min="0" '
+        + 'value="'+retail.toFixed(2)+'" data-retail="'+item.id+'" '
+        + 'aria-label="Retail price for '+esc(item.name)+'">';
+
+    const main =
+      '<tr class="row" data-id="'+item.id+'">'
+      + '<td><div class="iname">'+esc(item.name)+tags+'</div>'
+      +   '<div class="isub">'+esc(item.itemNo)+' · '+esc(item.vendor)+' · #'+esc(item.invoice)+'</div></td>'
+      + '<td><span class="pill cat">'+esc(item.cat)+'</span></td>'
+      + '<td class="num money">'+item.boxes+'</td>'
+      + '<td class="num money">'+item.units+'</td>'
+      + '<td class="num money">'+fmt(cost)+'</td>'
+      + '<td class="num">'+retailCell+'</td>'
+      + '<td class="num money'+(margin!==null&&Number(margin)>=0?' g':' r')+'">'+(margin===null?'—':margin+'%')+'</td>'
+      + '<td class="num money'+(profit>=0?' g':' r')+'">'+(item.internal?'—':fmt(profit))+'</td>'
+      + '</tr>';
+
+    return openRows.has(item.id) ? main + renderDetail(item, cost, retail, variance) : main;
+  }).join('');
+}
+
+function renderDetail(item, cost, retail, variance){
+  const cell = (label, value, tone) =>
+    '<div class="dcell"><div class="dl">'+esc(label)+'</div>'
+    + '<div class="dv'+(tone?' '+tone:'')+'">'+esc(value)+'</div></div>';
+
+  const unitProfit = item.internal ? 0 : retail-cost;
+  const suggested = item.internal ? 0 : roundRetail(cost*(1+currentMarkup/100));
+
+  let cells =
+      cell('Case price', fmt(item.boxPrice))
+    + cell('Units per case', String(item.units))
+    + cell('Cost per unit', fmt(cost))
+    + cell('Suggested at '+currentMarkup+'%', item.internal?'—':fmt(suggested))
+    + cell('Profit per unit', item.internal?'—':fmt(unitProfit), unitProfit>=0?'g':'r')
+    + cell('Case revenue', item.internal?'—':fmt(calcBoxRev(item)))
+    + cell('Source invoice', '#'+item.invoice)
+    + cell('Vendor item no.', item.itemNo);
+
+  if(variance){
+    cells += cell('Cost change', fmt(variance.was)+' → '+fmt(variance.now)
+      + (variance.pct!=null?' ('+(variance.pct>0?'+':'')+variance.pct.toFixed(1)+'%)':''),
+      variance.dir==='up'?'r':'g');
+  }
+
+  cells += '<div class="timeline"><div class="tl-title">Price history</div>'+renderTimeline(item)+'</div>';
+  return '<tr class="detail"><td colspan="8"><div class="detail-in">'+cells+'</div></td></tr>';
+}
+
+function renderTimeline(item){
+  if(server.status!=='live'){
+    return '<p class="tl-empty">Connect to the pricing database to see this item\'s price history.</p>';
+  }
+  const rows = server.history.get(item.id);
+  if(rows===undefined) return '<p class="tl-empty">Loading…</p>';
+  if(!rows.length) return '<p class="tl-empty">No recorded price changes yet.</p>';
+
+  return '<ul class="tl-list">'+rows.map(row=>{
+    const when = row.changed_at ? new Date(row.changed_at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '—';
+    const costMoved = row.previous_unit_cost!=null && Number(row.previous_unit_cost)!==Number(row.new_unit_cost);
+    const priceMoved = row.previous_retail_price!=null && Number(row.previous_retail_price)!==Number(row.new_retail_price);
+    const parts = [];
+    if(priceMoved) parts.push('Retail '+fmt(row.previous_retail_price)+' → '+fmt(row.new_retail_price));
+    if(costMoved) parts.push('Cost '+fmt(row.previous_unit_cost)+' → '+fmt(row.new_unit_cost));
+    if(!parts.length) parts.push('Retail set to '+fmt(row.new_retail_price));
+    return '<li class="tl-item"><span class="tl-when">'+esc(when)+'</span>'
+      + '<span class="tl-what">'+esc(parts.join(' · '))+'</span></li>';
+  }).join('')+'</ul>';
+}
+
+function renderQueue(){
+  const list = $('queueList'), note = $('queueNote'), badge = $('queueBadge');
+  if(!list) return;
+
+  if(server.status!=='live'){
+    note.textContent = 'The approval queue lives in the pricing database. It appears here once the hub is connected and a manager is signed in.';
+    list.innerHTML = '<div class="empty"><div class="big">Not connected</div><div>'+esc(server.detail)+'</div></div>';
+    badge.hidden = true;
+    return;
+  }
+
+  note.textContent = 'Lines an invoice scan could not resolve on its own. Nothing here has changed a shelf price yet — approving happens on the invoice, after every line is matched.';
+  badge.hidden = server.queue.length===0;
+  badge.textContent = String(server.queue.length);
+
+  if(!server.queue.length){
+    list.innerHTML = '<div class="empty"><div class="big">Nothing waiting</div><div>Every extracted line has been matched and approved.</div></div>';
+    return;
+  }
+
+  list.innerHTML = server.queue.map(line=>{
+    const invoice = line.pricing_invoices || {};
+    return '<div class="qcard">'
+      + '<div class="qhead"><span class="qtitle">'+esc(line.extracted_description||'Unreadable line')+'</span>'
+      +   '<span class="qmeta">'+esc(invoice.invoice_number?('#'+invoice.invoice_number):'unknown invoice')+' · line '+esc(line.line_number)+'</span></div>'
+      + '<div class="qmeta">'
+      +   (line.vendor_sku?('Item '+esc(line.vendor_sku)+' · '):'')
+      +   (line.case_quantity?esc(line.case_quantity)+' case(s) × '+esc(line.units_per_case||'?')+' units · ':'')
+      +   (line.line_total!=null?('Line total '+fmt(line.line_total)):'')
+      + '</div>'
+      + (line.calculated_unit_cost!=null
+          ? '<div class="qmeta">Cost per unit '+fmt(line.calculated_unit_cost)
+            + (line.proposed_retail_price!=null?(' · proposed retail '+fmt(line.proposed_retail_price)):'')+'</div>'
+          : '')
+      + (line.review_reason?'<div class="qreason">'+esc(line.review_reason)+'</div>':'')
+      + '</div>';
+  }).join('');
+}
+
+function renderVariance(){
+  const list = $('varianceList'), badge = $('varianceBadge');
+  if(!list) return;
+
+  const changed = ALL_ITEMS.map(item=>({ item, variance: varianceOf(item) })).filter(entry=>entry.variance);
+  badge.hidden = changed.length===0;
+  badge.textContent = String(changed.length);
+
+  if(server.status!=='live'){
+    list.innerHTML = '<div class="empty"><div class="big">Not connected</div>'
+      + '<div>Cost changes are detected by comparing this file against the pricing database.</div></div>';
+    return;
+  }
+  if(!changed.length){
+    list.innerHTML = '<div class="empty"><div class="big">No cost changes</div>'
+      + '<div>Every item still costs what this catalog says it costs.</div></div>';
+    return;
+  }
+
+  changed.sort((a,b)=>Math.abs(b.variance.delta)-Math.abs(a.variance.delta));
+  list.innerHTML = changed.map(({item,variance})=>
+      '<div class="qcard">'
+    + '<div class="qhead"><span class="qtitle">'+esc(item.name)+'</span>'
+    +   '<span class="pill '+variance.dir+'">'+(variance.dir==='up'?'▲':'▼')+' '+fmt(Math.abs(variance.delta))
+    +   (variance.pct!=null?(' · '+(variance.pct>0?'+':'')+variance.pct.toFixed(1)+'%'):'')+'</span></div>'
+    + '<div class="qmeta">'+esc(item.vendor)+' · item '+esc(item.itemNo)+' · '+esc(item.cat)+'</div>'
+    + '<div class="qmeta">Cost per unit '+fmt(variance.was)+' → '+fmt(variance.now)
+    +   ' · retail now '+fmt(calcRetail(item))+'</div>'
+    + '</div>').join('');
+}
+
+function renderExportCounts(){
+  const rows = visibleItems();
+  const sellable = rows.filter(item=>!item.internal);
+  const labels = $('labelCount'), csv = $('csvCount');
+  if(labels) labels.textContent = sellable.length+' sellable item'+(sellable.length===1?'':'s');
+  if(csv) csv.textContent = rows.length+' row'+(rows.length===1?'':'s');
+}
+
+// ════════ INVOICE INTAKE ════════
+// Multipart uploads bypass the JSON api() helper, which sets a Content-Type that
+// would break the form boundary.
+async function upload(path, formData){
+  const response = await fetch(API_BASE+path, { method:'POST', credentials:'same-origin', body: formData });
+  let body = null;
+  try { body = await response.json(); } catch(_){ /* non-JSON error page */ }
+  if(!response.ok){
+    const error = new Error((body && body.error) || ('HTTP '+response.status));
+    error.status = response.status; error.body = body; throw error;
+  }
+  return body;
+}
+
+function requireLive(what){
+  if(server.status==='live') return true;
+  showToast(what+' needs a connection to the pricing database.');
+  return false;
+}
+
+async function uploadInvoice(){
+  if(!requireLive('Invoice upload')) return;
+  const input = $('invoiceFile');
+  const file = input.files && input.files[0];
+  if(!file){ showToast('Choose an invoice scan first.'); return; }
+
+  const button = $('uploadInvoiceBtn');
+  button.disabled = true;
+  $('intakeStatus').textContent = 'Uploading and extracting…';
+
+  const form = new FormData();
+  form.append('invoice', file);
+  const number = $('invoiceNumberInput').value.trim();
+  const date = $('invoiceDateInput').value.trim();
+  if(number) form.append('invoice_number', number);
+  if(date) form.append('invoice_date', date);
+
+  try{
+    const result = await upload('/invoices', form);
+    if(result.duplicate){
+      $('intakeStatus').textContent = 'This exact scan was already uploaded — showing the existing invoice.';
+    }else if(result.code==='OCR_NOT_CONFIGURED'){
+      $('intakeStatus').textContent = 'Stored privately, but OCR is not configured so no lines were read.';
+    }else{
+      $('intakeStatus').textContent = 'Extracted '+(result.lines||[]).length+' line(s). Review every one before approving.';
+    }
+    renderIntakeResult(result);
+    await loadServerData();
+  }catch(error){
+    $('intakeStatus').textContent = 'Upload failed: '+error.message;
+  }finally{
+    button.disabled = false;
+  }
+}
+
+function renderIntakeResult(result){
+  const host = $('intakeResult');
+  if(!host) return;
+  const lines = result.lines || [];
+  if(!lines.length){ host.innerHTML = ''; return; }
+
+  const rec = result.reconciliation;
+  const recNote = rec
+    ? '<div class="qmeta">Invoice subtotal '+fmt(rec.invoice_subtotal)+' · lines '+fmt(rec.extracted_line_sum)
+      + ' · variance '+fmt(rec.variance)+(rec.within_tolerance?'':' — outside the $0.01 tolerance')+'</div>'
+    : '';
+
+  host.innerHTML = '<div class="qcard">'
+    + '<div class="qhead"><span class="qtitle">Extracted lines</span>'
+    +   '<span class="qmeta">'+esc(result.invoice && result.invoice.invoice_number || 'unnumbered')+'</span></div>'
+    + recNote
+    + '<div class="table-scroll" style="margin-top:12px"><table><thead><tr>'
+    +   '<th>#</th><th>Description</th><th class="num">Cases</th><th class="num">Units</th>'
+    +   '<th class="num">Line total</th><th class="num">Cost / unit</th><th class="num">Proposed</th><th>Status</th>'
+    + '</tr></thead><tbody>'
+    + lines.map(line =>
+        '<tr><td class="money">'+esc(line.line_number)+'</td>'
+        + '<td>'+esc(line.extracted_description||'—')
+        +   (line.review_reason?'<div class="isub" style="color:var(--red)">'+esc(line.review_reason)+'</div>':'')+'</td>'
+        + '<td class="num money">'+esc(line.case_quantity==null?'—':line.case_quantity)+'</td>'
+        + '<td class="num money">'+esc(line.units_per_case==null?'—':line.units_per_case)+'</td>'
+        + '<td class="num money">'+(line.line_total==null?'—':fmt(line.line_total))+'</td>'
+        + '<td class="num money">'+(line.calculated_unit_cost==null?'—':fmt(line.calculated_unit_cost))+'</td>'
+        + '<td class="num money">'+(line.proposed_retail_price==null?'—':fmt(line.proposed_retail_price))+'</td>'
+        + '<td><span class="pill '+(line.review_status==='needs_review'?'flag':'custom')+'">'+esc(line.review_status||'—')+'</span></td></tr>'
+      ).join('')
+    + '</tbody></table></div>'
+    + '<p style="font-size:12.5px;color:var(--ink-3);margin:12px 0 0">'
+    +   'Matching each line to a product and approving the invoice is done by a manager against the source scan. '
+    +   'An invoice cannot be approved while any line is unmatched.'
+    + '</p></div>';
+}
+
+async function uploadPos(){
+  if(!requireLive('Sales import')) return;
+  const input = $('posFile');
+  const file = input.files && input.files[0];
+  if(!file){ showToast('Choose an NRS sales CSV first.'); return; }
+
+  const button = $('uploadPosBtn');
+  button.disabled = true;
+  $('posStatus').textContent = 'Importing sales…';
+
+  const form = new FormData();
+  form.append('sales', file);
+  try{
+    const result = await upload('/pos/import', form);
+    if(result.duplicate){
+      $('posStatus').textContent = 'Already imported — this exact export is on file, so nothing was counted twice.';
+    }else{
+      const s = result.summary;
+      $('posStatus').textContent =
+        'Imported '+s.imported_count+' row(s) covering '+(s.period_start||'?')+' to '+(s.period_end||'?')
+        + ' · gross '+fmt(s.gross_sales)
+        + ' · matched '+result.matched+' of '+(result.matched+result.unmatched)+' to catalog products'
+        + (s.void_total?(' · voids '+fmt(s.void_total)):'')
+        + (s.refund_total?(' · refunds '+fmt(s.refund_total)):'')
+        + (result.unmatched?' — unmatched rows contribute revenue but no cost, so margin is a floor until they are matched.':'');
+    }
+    showToast('Sales import finished');
+  }catch(error){
+    $('posStatus').textContent = error.body && error.body.code==='POS_FORMAT_UNRECOGNIZED'
+      ? 'Could not read this export: '+error.message
+      : 'Import failed: '+error.message;
+  }finally{
+    button.disabled = false;
+  }
+}
+
+// ════════ FINANCIALS ════════
+let financials = null;
+
+async function loadFinancials(){
+  if(server.status!=='live'){ renderFinancials(); return; }
+  const params = new URLSearchParams();
+  const from = $('finFrom').value.trim(), to = $('finTo').value.trim();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  params.set('dimension', $('finDimension').value);
+  $('financialsBody').innerHTML = '<div class="empty"><div class="big">Loading…</div></div>';
+  try{
+    financials = await api('/financials?'+params.toString());
+  }catch(error){
+    financials = { error: error.message };
+  }
+  renderFinancials();
+}
+
+function renderFinancials(){
+  const host = $('financialsBody');
+  if(!host) return;
+
+  if(server.status!=='live'){
+    host.innerHTML = '<div class="empty"><div class="big">Not connected</div>'
+      + '<div>Financials are computed from invoices and POS sales in the pricing database.</div></div>';
+    return;
+  }
+  if(!financials){ host.innerHTML = '<div class="empty"><div class="big">Choose a period and refresh</div></div>'; return; }
+  if(financials.error){
+    host.innerHTML = '<div class="empty"><div class="big">Could not load financials</div><div>'+esc(financials.error)+'</div></div>';
+    return;
+  }
+
+  const s = financials.summary || {};
+  const num = value => Number(value||0);
+  const card = (label, value, sub, tone) =>
+    '<div class="stat"><div class="slabel">'+esc(label)+'</div>'
+    + '<div class="sval'+(tone?' '+tone:'')+'">'+esc(value)+'</div>'
+    + '<div class="ssub">'+esc(sub)+'</div></div>';
+
+  const profit = num(s.gross_profit);
+  const margin = num(s.gross_sales) ? (profit/num(s.gross_sales))*100 : 0;
+  const costedShare = s.costed_revenue_share==null ? null : num(s.costed_revenue_share);
+
+  let html = '<div class="stats">'
+    + card('Gross sales', fmt(num(s.gross_sales)), 'Excludes voids and refunds', 'b')
+    + card('Cost of goods', fmt(num(s.cost_of_goods)), 'Valued at the cost on the sale date')
+    + card('Gross profit', fmt(profit), 'Sales less cost', profit>=0?'g':'r')
+    + card('Gross margin', margin.toFixed(1)+'%', 'Of gross sales', margin>=0?'g':'r')
+    + card('Vendor spend', fmt(num(s.vendor_spend)), num(s.invoice_count)+' invoice(s) this period')
+    + card('Voids + refunds', fmt(num(s.voids)+num(s.refunds)), fmt(num(s.voids))+' voided · '+fmt(num(s.refunds))+' refunded',
+        (num(s.voids)+num(s.refunds))>0?'r':'')
+    + '</div>';
+
+  // A margin computed over a partly unmatched catalog is a floor, not a fact.
+  // Say so where the owner reads the number, not in a footnote.
+  if(costedShare!==null && costedShare < 99){
+    html += '<div class="note" style="border-left-color:var(--red)">'
+      + 'Only <b>'+costedShare.toFixed(1)+'%</b> of revenue is matched to a product with a known cost. '
+      + 'Unmatched sales contribute revenue but no cost, so the profit and margin above are a <b>floor</b> — '
+      + 'the real margin is lower until those items are matched.</div>';
+  }
+
+  const aging = financials.aging || [];
+  if(aging.length){
+    const buckets = {};
+    for(const row of aging){ buckets[row.bucket] = (buckets[row.bucket]||0) + Number(row.amount||0); }
+    const labels = { not_due:'Not yet due', due_today:'Due today', overdue_1_7:'1–7 days late',
+                     overdue_8_14:'8–14 days late', overdue_15_30:'15–30 days late', overdue_30_plus:'Over 30 days late' };
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Vendor payables (NET21)</span>'
+      + '<span class="qmeta">'+aging.length+' unpaid invoice(s)</span></div>'
+      + '<div class="chips" style="margin-bottom:12px">'
+      + Object.keys(labels).filter(key=>buckets[key]).map(key=>
+          '<span class="pill '+(key==='not_due'||key==='due_today'?'cat':'flag')+'">'
+          + esc(labels[key])+' · '+fmt(buckets[key])+'</span>').join('')
+      + '</div>'
+      + '<div class="table-scroll"><table><thead><tr><th>Vendor</th><th>Invoice</th><th>Due</th>'
+      + '<th class="num">Amount</th><th class="num">Days late</th></tr></thead><tbody>'
+      + aging.slice(0,40).map(row=>
+          '<tr><td>'+esc(row.vendor_name||'—')+'</td><td class="money">'+esc(row.invoice_number||'—')+'</td>'
+          + '<td class="money">'+esc(row.due_date||'—')+'</td>'
+          + '<td class="num money">'+fmt(row.amount)+'</td>'
+          + '<td class="num money'+(row.days_overdue>0?' r':' g')+'">'
+          +   (row.days_overdue>0?row.days_overdue:'—')+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const margins = financials.margin || [];
+  if(margins.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Margin by '+esc(financials.dimension)+'</span>'
+      + '<span class="qmeta">'+margins.length+' row(s)</span></div>'
+      + '<div class="table-scroll"><table><thead><tr><th>'+esc(financials.dimension)+'</th>'
+      + '<th class="num">Units</th><th class="num">Revenue</th><th class="num">Cost</th>'
+      + '<th class="num">Profit</th><th class="num">Margin</th><th class="num">Uncosted</th>'
+      + '</tr></thead><tbody>'
+      + margins.slice(0,60).map(row=>
+          '<tr><td>'+esc(row.label)+'</td>'
+          + '<td class="num money">'+Number(row.units_sold||0).toFixed(0)+'</td>'
+          + '<td class="num money">'+fmt(row.revenue)+'</td>'
+          + '<td class="num money">'+fmt(row.cost_of_goods)+'</td>'
+          + '<td class="num money'+(Number(row.gross_profit)>=0?' g':' r')+'">'+fmt(row.gross_profit)+'</td>'
+          + '<td class="num money">'+(row.margin_pct==null?'—':Number(row.margin_pct).toFixed(1)+'%')+'</td>'
+          + '<td class="num money'+(Number(row.unmatched_revenue)>0?' r':'')+'">'
+          +   (Number(row.unmatched_revenue)>0?fmt(row.unmatched_revenue):'—')+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const spend = financials.vendorSpend || [];
+  if(spend.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Vendor spend by month</span></div>'
+      + '<div class="table-scroll"><table><thead><tr><th>Month</th><th>Vendor</th>'
+      + '<th class="num">Invoices</th><th class="num">Spend</th></tr></thead><tbody>'
+      + spend.slice(0,40).map(row=>
+          '<tr><td class="money">'+esc(String(row.month||'').slice(0,7))+'</td>'
+          + '<td>'+esc(row.vendor_name||'—')+'</td>'
+          + '<td class="num money">'+esc(row.invoice_count)+'</td>'
+          + '<td class="num money">'+fmt(row.total_spend)+'</td></tr>').join('')
+      + '</tbody></table></div></div>';
+  }
+
+  const alerts = financials.alerts || [];
+  if(alerts.length){
+    html += '<div class="qcard"><div class="qhead"><span class="qtitle">Cost increases</span>'
+      + '<span class="qmeta">'+alerts.length+' item(s)</span></div>'
+      + alerts.slice(0,25).map(row=>
+          '<div class="qmeta" style="padding:4px 0">'+esc(row.product_name)+' — '
+          + fmt(row.previous_unit_cost)+' → '+fmt(row.new_unit_cost)
+          + ' <span class="pill up">▲ '+fmt(row.delta)
+          + (row.percent_change!=null?(' · +'+Number(row.percent_change).toFixed(1)+'%'):'')+'</span></div>').join('')
+      + '</div>';
+  }
+
+  if(!aging.length && !margins.length && !spend.length && !alerts.length){
+    html += '<div class="empty"><div class="big">No financial data for this period</div>'
+      + '<div>Import a POS sales export and approve an invoice to populate these figures.</div></div>';
+  }
+
+  host.innerHTML = html;
+}
+
+// ════════ EXPORTS ════════
+// Quote only when needed so the price-gun importer sees clean values.
+function csvCell(value){
+  const text = String(value==null?'':value);
+  return /[",\n]/.test(text) ? '"'+text.replace(/"/g,'""')+'"' : text;
+}
+function downloadCsv(filename, rows){
+  const csv = rows.map(row=>row.map(csvCell).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = filename;
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  showToast('Downloaded '+filename);
+}
+function exportLabels(){
+  // The four columns the label printer expects, sellable items only.
+  const rows = [['item_name','upc','price','department']];
+  for(const item of visibleItems()){
+    if(item.internal) continue;
+    const product = server.products.get(item.id);
+    rows.push([item.name, (product&&product.upc)||'', calcRetail(item).toFixed(2), item.cat]);
+  }
+  if(rows.length===1){ showToast('Nothing to export in this view.'); return; }
+  downloadCsv('price-gun-labels.csv', rows);
+}
+function exportCatalog(){
+  const rows = [['id','item_no','name','category','vendor','invoice','cases','units_per_case','case_price','cost_per_unit','retail','margin_pct','case_profit','for_sale','flagged']];
+  for(const item of visibleItems()){
+    rows.push([
+      item.id, item.itemNo, item.name, item.cat, item.vendor, item.invoice,
+      item.boxes, item.units, item.boxPrice.toFixed(2), costOf(item).toFixed(4),
+      item.internal?'':calcRetail(item).toFixed(2),
+      calcMargin(item)||'', item.internal?'':calcBoxProfit(item).toFixed(2),
+      item.internal?'no':'yes', item.flagged?'yes':'no'
+    ]);
+  }
+  if(rows.length===1){ showToast('Nothing to export in this view.'); return; }
+  downloadCsv('pricing-hub-catalog.csv', rows);
+}
+
+// ════════ EVENTS ════════
+let userTouchedMarkup = false;
+
+function selectTab(name){
+  activeTab = name;
+  for(const tab of document.querySelectorAll('.tab')){
+    const isActive = tab.id === 'tab-'+name;
+    tab.setAttribute('aria-selected', String(isActive));
+    const panel = $(tab.getAttribute('aria-controls'));
+    if(panel) panel.hidden = !isActive;
+  }
+  // Financials are a server round-trip, so they load when the tab is first
+  // opened rather than on every page load.
+  if(name==='financials' && !financials && server.status==='live') loadFinancials();
+  if(name==='financials') renderFinancials();
+}
+
+function bind(){
+  for(const tab of document.querySelectorAll('.tab')){
+    tab.addEventListener('click', ()=>selectTab(tab.id.replace('tab-','')));
+  }
+
+  $('searchInput').addEventListener('input', event=>{ searchTerm = event.target.value; render(); });
+  $('vendorSelect').addEventListener('change', event=>{
+    activeVendor = event.target.value; activeInvoice = 'all'; activeCategory = 'all'; render();
+  });
+  $('invoiceSelect').addEventListener('change', event=>{ activeInvoice = event.target.value; render(); });
+  $('showFilter').addEventListener('change', event=>{ activeShow = event.target.value; render(); });
+
+  $('markupSlider').addEventListener('input', event=>{
+    userTouchedMarkup = true;
+    currentMarkup = parseInt(event.target.value, 10);
+    $('markupDisplay').textContent = currentMarkup+'%';
+    render();
+  });
+  $('resetMarkupBtn').addEventListener('click', ()=>{
+    userTouchedMarkup = true;
+    currentMarkup = 70;
+    $('markupSlider').value = 70;
+    $('markupDisplay').textContent = '70%';
+    for(const key of Object.keys(customRetail)) delete customRetail[key];
+    showToast('Reset to 70% — session edits cleared');
+    render();
+  });
+
+  $('catTabs').addEventListener('click', event=>{
+    const chip = event.target.closest('[data-cat]');
+    if(!chip) return;
+    activeCategory = chip.dataset.cat;
+    render();
+  });
+
+  document.querySelector('thead').addEventListener('click', event=>{
+    const header = event.target.closest('[data-sort]');
+    if(!header) return;
+    const field = header.dataset.sort;
+    sortDir = (sortField===field) ? -sortDir : 1;
+    sortField = field;
+    render();
+  });
+
+  const body = $('tableBody');
+  // Opening a row must not fire while the price field is being used.
+  body.addEventListener('click', event=>{
+    if(event.target.closest('[data-retail]')) return;
+    const row = event.target.closest('tr.row');
+    if(!row) return;
+    const id = Number(row.dataset.id);
+    if(openRows.has(id)) openRows.delete(id);
+    else { openRows.add(id); ensureHistory(ALL_ITEMS.find(item=>item.id===id)); }
+    render();
+  });
+  body.addEventListener('change', event=>{
+    const input = event.target.closest('[data-retail]');
+    if(!input) return;
+    const item = ALL_ITEMS.find(row=>row.id===Number(input.dataset.retail));
+    const price = Math.round(parseFloat(input.value)*100)/100;
+    if(!item) return;
+    if(!Number.isFinite(price) || price < 0){ showToast('Enter a price of zero or more.'); render(); return; }
+    if(price < costOf(item)){ showToast('That is below cost ('+fmt(costOf(item))+') — not saved.'); render(); return; }
+    persistRetail(item, price);
+  });
+  // Enter commits without waiting for focus to leave the field.
+  body.addEventListener('keydown', event=>{
+    if(event.key==='Enter' && event.target.closest('[data-retail]')){
+      event.preventDefault();
+      event.target.blur();
+    }
+  });
+
+  $('connRetry').addEventListener('click', connect);
+  $('exportLabelsBtn').addEventListener('click', exportLabels);
+  $('exportCsvBtn').addEventListener('click', exportCatalog);
+
+  $('uploadInvoiceBtn').addEventListener('click', uploadInvoice);
+  $('uploadPosBtn').addEventListener('click', uploadPos);
+  $('finRefreshBtn').addEventListener('click', loadFinancials);
+  $('finDimension').addEventListener('change', loadFinancials);
+}
+
+// ════════ BOOT ════════
+// The embedded arrays render first, unconditionally. The server layer is an
+// enhancement layered on afterwards, so a slow or dead API never leaves the
+// owner looking at an empty page.
+function boot(){
+  bind();
+  // Default the financials period to the current month so the first look is
+  // useful without anyone typing a date.
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const monthStart = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-01';
+  const monthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  $('finFrom').value = monthStart;
+  $('finTo').value = monthEnd.getFullYear()+'-'+pad(monthEnd.getMonth()+1)+'-'+pad(monthEnd.getDate());
+  selectTab('catalog');
+  render();
+  connect();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
 </script>
 </body>
 </html>

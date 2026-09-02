@@ -4,6 +4,7 @@ import { createOrder } from '../lib/api.js';
 export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [tipoEntrega, setTipoEntrega] = useState('pickup');
   const [notas, setNotas] = useState('');
   const [state, setState] = useState('form'); // form | submitting | done | error
@@ -15,14 +16,30 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
       setErrorMsg('Please enter your name.');
       return;
     }
+    if (tipoEntrega === 'delivery' && !direccion.trim()) {
+      setErrorMsg('Please enter a delivery address.');
+      return;
+    }
     setState('submitting');
     setErrorMsg('');
     try {
+      // Capture Telegram session so the API can verify + get the user id,
+      // enabling the bot to DM this customer about their order.
+      let telegramInitData = '';
+      try {
+        telegramInitData = window.Telegram?.WebApp?.initData || '';
+      } catch { /* not in Telegram — anonymous order, no DM relay */ }
+
       const res = await createOrder({
         items: cart.items,
-        customer: { nombre: nombre.trim(), telefono: telefono.trim() },
+        customer: {
+          nombre: nombre.trim(),
+          telefono: telefono.trim(),
+        },
         tipoEntrega,
+        direccion: tipoEntrega === 'delivery' ? direccion.trim() : '',
         notas: notas.trim(),
+        telegramInitData,
       });
       setOrderId(res.orderId);
       setState('done');
@@ -95,6 +112,18 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
               <button className={`option-chip ${tipoEntrega === 'delivery' ? 'selected' : ''}`} onClick={() => setTipoEntrega('delivery')}>🚚 Delivery</button>
             </div>
 
+            {tipoEntrega === 'delivery' && (
+              <>
+                <label className="field-label">Delivery address *</label>
+                <input
+                  className="field-input"
+                  value={direccion}
+                  onChange={e => setDireccion(e.target.value)}
+                  placeholder="Street, apt, city, zip"
+                />
+              </>
+            )}
+
             <label className="field-label">Notes (optional)</label>
             <textarea
               className="field-input"
@@ -109,7 +138,7 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
             <div className="modal-footer">
               <div className="line-total">${cart.totals.subtotal.toFixed(2)}</div>
               <button className="btn btn-primary btn-lg" onClick={handlePlace} disabled={state === 'submitting'}>
-                {state === 'submitting' ? 'Placing…' : 'Place Order'}
+                {state === 'submitting' ? '⏳ Placing…' : 'Place Order'}
               </button>
             </div>
           </>

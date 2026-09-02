@@ -7,6 +7,9 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
+const kitchenAide = require('./kitchen-aide');
+const { createPricingRouter } = require('./pricing-router');
+const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -20,6 +23,13 @@ const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
 const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
+// Chats allowed to use the pricing calculator commands. Everything else gets no
+// pricing response at all — not an error, which would confirm the feature exists.
+const PRICING_TELEGRAM_CHAT_IDS = new Set(
+  [process.env.HERMES_CHAT_ID, ...(process.env.PRICING_TELEGRAM_CHAT_IDS || '').split(',')]
+    .map(value => String(value || '').trim())
+    .filter(Boolean)
+);
 
 // Supabase client
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -186,6 +196,23 @@ flattenMenu();
 const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.includes('*') ? true : ALLOWED_ORIGINS }));
 app.use(express.json());
+app.use('/api/pricing', createPricingRouter());
+
+// ─── Pricing Hub V2 static serving (opt-in: PRICING_SERVE_STATIC=1) ───────
+// Serves the rebuilt hub (apps/pricing-hub) on the SAME origin as /api/pricing
+// so the hub's API_BASE works. Never serves repo internals — only that folder.
+if (process.env.PRICING_SERVE_STATIC === '1') {
+  const fs = require('fs');
+  const path = require('path');
+  const HUB_DIR = path.resolve(__dirname, '..', 'apps', 'pricing-hub');
+  if (fs.existsSync(HUB_DIR)) {
+    app.use('/pricing-hub', express.static(HUB_DIR, { index: 'index.html' }));
+    app.get('/', (_req, res) => res.redirect('/pricing-hub/'));
+    console.log(`🏷️  Serving Pricing Hub v2 static at /pricing-hub/ (${HUB_DIR})`);
+  } else {
+    console.warn('⚠️  PRICING_SERVE_STATIC=1 but apps/pricing-hub not found');
+  }
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -451,6 +478,71 @@ function startBot() {
       );
     });
 
+    // ─── Invoice intake (authorized chats only) ────────────────────────────
+    // Anthony/employees send a PDF or photo of a vendor invoice directly to
+    // the bot. It is routed through the SAME /api/pricing/invoices ingestion
+    // path the hub uses: hash-dedupe → Supabase storage → OCR → 70% pricing →
+    // needs_review. No second ingestion code path.
+    const ALLOWED_INVOICE_MIME = new Set([
+      'application/pdf',
+      'image/jpeg', 'image/png', 'image/webp', 'image/heic'
+    ]);
+
+    bot.on('document', async (msg) => {
+      const chatId = msg.chat.id;
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(chatId))) {
+        return; // not an authorized sender — stay silent (don't confirm the feature)
+      }
+      const doc = msg.document;
+      if (!doc || !ALLOWED_INVOICE_MIME.has(doc.mime_type)) {
+        return bot.sendMessage(chatId, '📄 Send a PDF or photo of the vendor invoice.');
+      }
+      const sent = await bot.sendMessage(chatId, '🧾 Invoice received — processing…');
+      try {
+        const file = await bot.getFile(doc.file_id);
+        const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${file.file_path}`;
+        const res = await fetch(fileUrl);
+        if (!res.ok) throw new Error(`download failed: HTTP ${res.status}`);
+        const buf = Buffer.from(await res.arrayBuffer());
+
+        const form = new FormData();
+        form.append('invoice', new Blob([buf], { type: doc.mime_type }), doc.file_name || 'invoice.pdf');
+        const ingestRes = await fetch(`http://127.0.0.1:${PORT}/api/pricing/invoices`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.PRICING_MANAGER_TOKEN || ''}` },
+          body: form
+        });
+        const body = await ingestRes.json();
+        if (!ingestRes.ok) {
+          return bot.editMessageText(
+            `⚠️ Could not store invoice: ${body.error || 'unknown error'}`,
+            { chat_id: chatId, message_id: sent.message_id }
+          );
+        }
+        if (body.duplicate) {
+          return bot.editMessageText(
+            `♻️ Invoice #${body.invoice?.invoice_number || '?'} was already stored (duplicate). No changes made.`,
+            { chat_id: chatId, message_id: sent.message_id }
+          );
+        }
+        const lines = body.lines?.length ?? 0;
+        const variance = body.reconciliation?.variance;
+        const varianceNote = typeof variance === 'number' && Math.abs(variance) > 0.01
+          ? `\n⚠️ Variance: $${variance.toFixed(2)} (needs review)`
+          : '\n✅ Lines reconcile.';
+        return bot.editMessageText(
+          `✅ Invoice #${body.invoice?.invoice_number || '?'} stored.\n` +
+          `📄 ${lines} line(s) extracted${lines ? ' → priced at 70% rule' : ''}, status *needs_review*.${varianceNote}`,
+          { chat_id: chatId, message_id: sent.message_id, parse_mode: 'Markdown' }
+        );
+      } catch (e) {
+        console.error('Invoice intake failed:', e.message);
+        return bot.editMessageText(`❌ Processing failed: ${e.message.slice(0, 200)}`, {
+          chat_id: chatId, message_id: sent.message_id
+        });
+      }
+    });
+
     // Menu handler
     bot.onText(/\/menu/, (msg) => {
       const menu = menuData?.menus.find(m => m.slug === 'kitchen');
@@ -543,6 +635,11 @@ function startBot() {
 
       if (data.startsWith('back:')) {
         bot.emit('text', { chat: { id: chatId }, text: '/menu' });
+      }
+
+      // Kitchen Aide: status buttons in the kitchen group's order threads
+      if (data.startsWith('kitchen:status:')) {
+        return kitchenAide.handleStatusCallback(query);
       }
     });
 
@@ -674,6 +771,19 @@ function startBot() {
       }
     });
 
+    // Kitchen Aide: customer DMs (relay to kitchen thread) + kitchen thread replies (relay to customer)
+    bot.on('message', async (msg) => {
+      // Kitchen group thread reply -> relay back to customer
+      if (msg.chat && String(msg.chat.id) === String(KITCHEN_CHAT_ID || '')) {
+        return kitchenAide.handleKitchenThreadReply(msg);
+      }
+      // Private chat (customer DM) -> relay into their latest order thread
+      if (msg.chat && msg.chat.type === 'private') {
+        return kitchenAide.handleCustomerDm(msg);
+      }
+      return undefined;
+    });
+
     // Help
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(msg.chat.id,
@@ -685,9 +795,43 @@ function startBot() {
         `/checkout — Place order\n` +
         `/clear — Clear cart\n` +
         `/hours — Store hours & contact\n` +
-        `/help — This message`,
+        `/help — This message` +
+        (PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))
+          ? `\n\n*Authorized pricing:*\n/price <unit-cost>\n/caseprice <line-total> <cases> <units-per-case>`
+          : ''),
         { parse_mode: 'Markdown' }
       );
+    });
+
+    // Restricted manager/Hermes calculator. These commands CALCULATE ONLY: they
+    // never read or write a live price, and unlisted chats get no reply at all.
+    bot.onText(/\/price(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const unitCost = Number(match[1]);
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Pricing*\nUnit cost: $${unitCost.toFixed(2)}\nFormula: $${unitCost.toFixed(2)} × 1.70\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
+    });
+
+    bot.onText(/\/caseprice(?:@\w+)?\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)/i, async (msg, match) => {
+      if (!PRICING_TELEGRAM_CHAT_IDS.has(String(msg.chat.id))) return;
+      try {
+        const lineTotal = Number(match[1]);
+        const caseQuantity = Number(match[2]);
+        const unitsPerCase = Number(match[3]);
+        const unitCost = unitCostFromCase({ lineTotal, caseQuantity, unitsPerCase });
+        const retail = retailFromUnitCost(unitCost);
+        await bot.sendMessage(msg.chat.id,
+          `*Anthony Case Pricing*\nLine total: $${lineTotal.toFixed(2)}\nPack: ${caseQuantity} case(s) × ${unitsPerCase} units\nUnit cost: $${unitCost.toFixed(2)}\n*Final retail: $${retail.toFixed(2)}*\n\nReview before changing a live price.`,
+          { parse_mode: 'Markdown' });
+      } catch (error) {
+        await bot.sendMessage(msg.chat.id, `Pricing error: ${error.message}`);
+      }
     });
 
     // Hours / contact
@@ -757,6 +901,9 @@ function startBot() {
   } catch (e) {
     console.error('❌ Bot failed to start:', e.message);
   }
+
+  // 🧑‍🍳 Kitchen Aide: order threads in the kitchen group
+  kitchenAide.startKitchenAide(bot, MINIAPP_API_URL, KITCHEN_CHAT_ID);
 }
 
 // ─── Start ────────────────────────────────────────────────────────────

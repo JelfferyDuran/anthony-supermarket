@@ -4,7 +4,7 @@
 // Deployment environments can still override this value explicitly.
 const API_BASE = import.meta.env.VITE_API_URL || 'https://cbpdiiyzzmbavsymjysb.functions.supabase.co/superkitchen';
 
-export async function createOrder({ items, customer, tipoEntrega, notas }) {
+export async function createOrder({ items, customer, tipoEntrega, direccion, notas, telegramInitData }) {
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -19,7 +19,9 @@ export async function createOrder({ items, customer, tipoEntrega, notas }) {
       })),
       customer,
       tipoEntrega,
+      direccion: direccion || '',
       notas,
+      telegramInitData: telegramInitData || '',
     }),
   });
   if (!res.ok) {

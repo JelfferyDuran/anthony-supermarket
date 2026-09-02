@@ -1,8 +1,8 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-09
+Last updated: 2026-08-21
 
-This file is operational context, not a secret store. Verify live state before consequential actions.
+This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
 ## Repository
 - Canonical repo: `JelfferyDuran/anthony-supermarket`
@@ -10,106 +10,144 @@ This file is operational context, not a secret store. Verify live state before c
 - Repository root is also the shared Obsidian vault.
 - Human/agent working brain: `brain/`
 - Customer/KDS code: `apps/superkitchen`
-- Supabase code/migrations: `supabase/`
+- Pricing Hub app: `apps/pricing-hub/index.html`; root iframe copy: `pricing-hub/index.html`
+- Supabase code/migrations/functions: `supabase/`
 - Isolated Telegram bot v2 runtime: `server/bot-v2/`
+- Active Pricing Hub Phase D branch: `feat/pricing-hub-phase-d-prod-hardening`.
 
 ## Shared Obsidian brain
-- Obsidian should open the repository root directly; no second writable mirror is required.
-- Home/navigation note: `brain/00 - Anthony HQ.md`.
-- Working folders: `brain/Inbox/`, `brain/Decisions/`, `brain/Sessions/`, `brain/Attachments/`.
-- `docs/agent-context/` remains the canonical operational-state and cross-agent handoff layer.
-- GitHub provides version history, backup, PR review, collaboration, and rollback for the brain.
+- Open the repository root directly as the Obsidian vault; do not create a second writable mirror.
+- `brain/` is the human/agent working-memory layer; `docs/agent-context/` is the canonical operational handoff layer.
+- GitHub provides history, review, collaboration and rollback.
 - Local `.obsidian/` state is ignored and must not be committed.
-- Shared Brain CI enforces allowed lightweight file types, 2 MB maximum brain-file size, no tracked `.obsidian/` state, canonical entry points, and obvious-secret scanning.
-- Live infrastructure remains authoritative for runtime state when notes and deployed systems disagree.
+- If a note conflicts with live infrastructure, verify live state and correct the note.
 
-## Current Super Kitchen workstreams
-- Secure Phase 1 cutover branch: `phase1-cutover-v3`
-- UI polish branch: `phase1-ui-polish`
-- Kitchen Dashboard branch: `phase2-kitchen-dashboard`
-- Phase 2A draft PR: #21 `Phase 2A: merchant-style kitchen dashboard`
-- Obsidian brain node branch: `obsidian-brain-node-v1`
-
-## Kitchen Dashboard status
-Phase 2A currently provides:
-- authenticated staff entry via `?staff=1`
-- staff roles accepted by the backend: `kitchen`, `manager`, `admin`
-- four live lanes: New / Cooking / Ready / Done
-- authenticated order polling
-- elapsed-order timers and urgency states
-- pickup/delivery indicators
-- one-tap legal state transitions
-- connection/sync status
-- optional audible new-order alert
-- stale unresolved tickets separated into a `Needs Review` workflow instead of being silently deleted/closed
-
-First Supabase Auth staff/admin user has been provisioned and confirmed working in preview. Never record its password here.
+## Business pricing rule — binding
+- **Retail = Base Cost × 1.70 (70% markup).**
+- Multi-pack: calculate cost per sellable unit first, then retail per unit.
+- Shelf-price convention uses the existing `.99` rounding rule.
+- Server/database authority wins over browser calculations.
+- If pack size, cost, product identity or invoice math is ambiguous, stop for human review rather than guess.
 
 ## Supabase production baseline
 - Project ref: `cbpdiiyzzmbavsymjysb`
-- Customer/order Edge Function: `superkitchen`
-- Live infrastructure check on 2026-08-08 reported `superkitchen` version 27; inspect live source before assuming version equivalence with a branch.
-- Direct anonymous order-list/order-board access is blocked.
-- Server controls authoritative menu pricing.
-- Orders use an audited server-enforced state machine.
-- RLS is enabled with deny-by-default posture for direct client database access.
-- Durable order audit and rate-limit protections exist.
-- Telegram Mini App `initData` is verified server-side when a valid fresh bot secret is configured.
-- Delivery validation/address handling is part of the staged cutover contract; coordinate frontend/backend deployment together.
+- Project name: `anthony-supermarket`
+- Region: `us-east-1`
+- Live status verified 2026-08-21: `ACTIVE_HEALTHY`.
+- Customer/order Edge Function: `superkitchen`.
+- Read-only machine observer: `superkitchen-ops`, `verify_jwt=true`.
+- Direct anonymous database access remains deny-by-default through RLS/revoked grants.
+- Service-role credentials must stay only in trusted server/Edge Function environments.
 
-## Hermes / machine observer
-- Dedicated read-only Edge Function `superkitchen-ops` version 2 is deployed and ACTIVE.
-- Supabase reports `verify_jwt=true` for `superkitchen-ops`.
-- Observer roles accepted by the function: `agent_observer`, `manager`, `admin`.
-- The endpoint is GET-only and returns non-PII operational summaries: order counts, status counts, last-24h gross sales excluding cancelled orders, delivery-type counts, audit-transition counts, recent order references/timestamps, and freshness/age indicators.
-- It does not return customer names, phones, addresses, notes, or Telegram identities.
-- Dedicated Hermes Auth user `kingdom-hermes@agentmail.to` is confirmed and has protected `app_metadata.role=agent_observer`.
-- Hermes must not receive the Supabase service-role key for this workflow.
-- Hermes still needs its observer email/password plus the project publishable key configured only in its protected VPS environment before the authenticated smoke test can run.
-- VPS smoke-check client: `scripts/hermes-ops-check.mjs`.
-- Setup/security contract: `docs/agent-context/HERMES_ACCESS.md`.
+## Public website / Super Kitchen
+- Public website: `https://anthony-supermarket.vercel.app`; historically deployed manually from the repo root.
+- Customer miniapp: `https://anthony-supermarket-superkitchen.vercel.app`.
+- Customer/KDS authorization and order-state protections remain separate from Pricing Hub authority.
+- Do not infer the main-site/server deployment from the connected Vercel account: the connector available during the 2026-08-21 audit listed the `Kingdom Noel` team but no projects, so current Vercel runtime state still needs a direct deployment/smoke verification before being marked verified.
 
-## Telegram
-- Customer bot: `@Anthonysuperkitchen_bot`
-- Historical token was exposed in Git history and has been revoked. Never recover or reuse it.
-- A replacement token exists outside the repository.
-- Mini App frontend and command bot are separate runtimes.
-- Command handlers live in `server/bot-v2/`; the bot requires a persistent Node host and `TELEGRAM_TOKEN` supplied only as a server-side secret.
-- Do not run two Telegram long-polling instances for the same bot token. `409 Conflict` on `getUpdates` means another poller/webhook owns updates.
+## Pricing Hub v2 — A–C are live
+The old handoff text saying the Pricing Hub migrations are "not applied" is stale.
 
-## Frontend/deployment
-- Vercel project has been created for Super Kitchen and production from `main` has been observed working.
-- Preview deployments are used for feature branches before production.
-- GitHub Pages/tracked `dist/` has permanent source↔build consistency checks.
-- Do not point production to feature branches during testing.
+### Live production migrations verified 2026-08-21
+- `20260812013000_add_invoice_pricing_pipeline`
+- `20260819213000_reconcile_pricing_hub_dataset`
+- `20260819230000_add_pos_sales_and_financials`
+- `20260819234500_add_intake_channel_provenance`
+- `20260822002824_pricing_hub_production_security_hardening`
+- `20260822003315_phase_d_inventory_and_pos_aliases`
 
-## Public website (root `index.html`)
-- Single-file bilingual (EN/ES) storefront served on GitHub Pages: `https://jelfferyduran.github.io/anthony-supermarket/`.
-- Sections: hero, Shop by Department (photo cards: Hot Food, Deli & Meats, Grocery, Produce), Featured This Week, Menu (embedded catalog), Visit Us (location/hours/call + embedded Google Map).
-- The internal Pricing Hub iframe, public navigation link, and hero link were removed; wholesale costs and markup tools no longer appear on the customer storefront.
-- The public summary strip contains customer-safe facts only (product count, departments, bilingual service, and days open); inventory cost, retail-value, and profit projections are manager-only.
-- Featured items are computed from the embedded catalog (`SPECIALS` + `renderSpecials()`), so approved prices stay in sync with the menu data — no hardcoded deal prices and no unsupported discount claim.
-- Department cards call `goToDept(slug)` to switch the menu tab and scroll (Produce scrolls to menu; no dedicated produce tab yet).
-- Department cards support mouse, touch, Enter, and Space with visible keyboard focus.
-- Store name/logo lockups, address, phone, UPCs, and official brand tokens remain invariant. Generic product names use the catalog's curated EN/ES fields, so Spanish mode stays complete without machine-translating brands.
-- A privacy-minimized traffic signal is staged for the protected manager Insights API. It sends path, referrer domain, coarse device class, and the storefront language selected by the customer; it contains no customer/order PII and respects both Do Not Track and Global Privacy Control. The endpoint/schema must deploy before events are accepted.
-- Local images: `assets/depts/*.webp` (AI-generated, WebP ~130–215KB each, lazy-loaded).
-- 2026-08-09: added Departments + Specials sections, nav links, embedded map, and fixed a latent i18n init bug (saved-language `setLang()` ran before `filterTags` was defined, which froze the page on the loading overlay for returning visitors).
-- 2026-08-09: separated the public storefront from internal pricing, made brand/product identity translation-safe, renamed non-discounted specials to Featured This Week, added department keyboard activation, and staged the traffic signal behind its protected API rollout.
+### Live Pricing Hub data snapshot observed 2026-08-21
+- Embedded Hub ledger: **294 rows**.
+- Canonical active Supabase catalog: **283 products**. Repeated vendor SKU purchases collapse into one product rather than becoming duplicate products.
+- Pricing vendors: **10**.
+- Pricing invoices: **21**.
+- Invoice lines: **331**.
+- Immutable price-history transitions: **11**.
+- Invoice statuses observed: **17 backfilled · 3 needs_review · 1 uploaded**.
+- Active products carrying UPCs: **93 / 283**.
 
-## Phase 2 roadmap
-- #17: Merchant Operations Platform epic
-- #18: Kitchen Dashboard MVP
-- #19: Admin / Manager Dashboard MVP
-- #20: Customer tracking, realtime operations, reliability
+### Pricing Hub behavior
+- Hub reads live approved data through the server when authenticated, with embedded arrays retained as the offline/first-render fallback and Kingdom OS compatibility mirror.
+- Retail edits remain server-authoritative and attributable to a manager/admin identity.
+- Invoice uploads are evidence, never approval. OCR/extraction and manager approval remain separate gates.
+- Invoice scans remain in the private `pricing-invoices` Storage bucket and are exposed to the review UI only through short-lived signed URLs.
+- Hub/Telegram/WhatsApp intake uses one controlled pipeline and per-channel authorization; chat identities cannot approve prices.
 
-Recommended sequence:
-1. Finish/test Kitchen Dashboard with one controlled real order.
-2. Verify DB status transitions and audit log.
-3. Finish secure production cutover.
-4. Build Admin/Manager Dashboard.
-5. Add customer status tracking/Telegram notifications.
-6. Add payment/delivery/POS/inventory integrations only after the order lifecycle is stable.
+## POS sales + financials — live but match coverage is limited
+- Real NRS-derived POS data is now present in production, so the older note saying the parser has only seen fixtures is stale.
+- Observed 2026-08-21: **36 import batches**, periods 2026-07-15 through 2026-08-19; `pos_sales` contains **11,222 stored rows** dated 2026-07-17 through 2026-08-19.
+- Current linked rows before Phase D alias enrichment: **525 / 11,222 = 4.68%**.
+- A deterministic re-check found **0 additional historical rows** eligible for an exact unique UPC or exact unique product-name backfill. The existing matcher had already consumed all such evidence.
+- Highest-value unmatched rows include generic POS departments/buttons such as `GENERAL FOOD`, `PRODUCE`, `MEAT/FISH`, and `BISTEC/STEAK`; these must NOT be forced onto a single catalog product.
+- Other unmatched rows are real UPC products (for example formula/dairy/grocery SKUs) whose UPC/product identity is not yet represented in the Pricing Hub catalog. Resolve those by enriching the catalog or by manager-approved aliases.
+- `costed_revenue_share` must remain visible beside margin figures. Until match coverage improves, gross-profit/margin is a floor/partial-cost view, not a fully costed fact.
+
+## Phase D — integration foundation live
+Phase D started 2026-08-21 after verifying A–C production state.
+
+### Safe catalog API
+- Edge Function: `pricing-catalog` version 1, `ACTIVE`, `verify_jwt=true`.
+- Source tracked at `supabase/functions/pricing-catalog/index.ts`.
+- GET-only output intentionally exposes only approved sellable identity/retail fields: `id`, `upc`, `name`, `category`, `department`, `retailPrice`, `updatedAt`.
+- It does **not** expose unit cost, vendor invoice data, internal flags, service-role credentials, or pricing mutations.
+- This is the Phase D catalog surface intended for customer/SuperApp consumers after client integration is tested.
+
+### Manager integration API
+- Edge Function: `pricing-integrations` version 1, `ACTIVE`, `verify_jwt=true`.
+- Source tracked at `supabase/functions/pricing-integrations/index.ts`.
+- Human authorization is re-checked from protected `app_metadata`; only `manager` and `admin` may use it.
+- GET resources: inventory balances, count sessions, safe product lookup, approved POS aliases, unmatched POS summary.
+- POST actions: start/save/complete/cancel inventory counts and register an exact POS alias.
+- Service-role access stays inside the Edge Function; clients receive no service-role credential.
+
+### Inventory data model
+- `inventory_count_sessions`: draft/completed/cancelled count sessions with human attribution.
+- `inventory_count_lines`: one non-negative count per product/session.
+- `inventory_balances`: current on-hand balance derived from a completed count session.
+- `inventory_complete_count(...)`: atomic server-only completion RPC; refuses empty/non-draft sessions.
+
+### POS alias model
+- `pos_product_aliases`: manager-approved exact UPC and/or normalized-name mappings to canonical products.
+- `pricing_register_pos_alias(...)`: refuses missing approvers, inactive products, empty evidence and aliases already owned by another product; backfills only exact previously-unmatched rows.
+- `pricing_apply_pos_alias_to_sale()` trigger applies approved aliases to future imports. If UPC evidence and name evidence conflict, the row stays unmatched rather than choosing arbitrarily.
+- A rollback-only production smoke test on 2026-08-21 verified inventory completion, alias registration and future-sale trigger mapping, then rolled all test data back.
+
+## NRS integration boundary
+- Current verified ingestion path remains NRS CSV exports.
+- As of the 2026-08-21 check, NRS publicly advertises real-time POS/inventory integrations with its ecommerce/delivery partners, but no documented public merchant/developer API was verified for direct Anthony's ingestion.
+- Do not invent or screen-scrape a private NRS API. Keep the CSV pipeline until NRS provides a supported API/credential path.
+
+## Bank-feed boundary
+- Plaid/bank feeds are still **not activated**. They introduce external financial credentials, consent and a new data boundary, so they require an explicit provider/account connection and a scoped implementation before any production bank data is ingested.
+- Invoice/POS financial reporting remains usable without bank feeds.
+
+## Kingdom OS boundary
+- The embedded `VENDORS` + `ALL_ITEMS` file shape remains a compatibility contract because Kingdom OS historically parses and writes back the Pricing Hub file.
+- Phase D has created the safe new data/API layer, but the Kingdom OS consumer has **not yet been ported in this branch**.
+- Do not remove the embedded arrays or write-back compatibility until the OS consumer is migrated and smoke-tested against the new read-only/API path.
+
+## Security posture verified 2026-08-21
+- Production scratch table `public._hermes_test` was removed; it contained one integer test row and no production records.
+- `pricing_block_history_mutation()` now has an explicit `search_path=pg_catalog, public`.
+- Phase D inventory/alias tables have RLS enabled with zero client policies and direct public/anon/authenticated privileges revoked — intentional deny-by-default.
+- Supabase security advisor no longer reports the previous exposed-test-table error or mutable-search-path warning.
+- Remaining notable advisor warning: Supabase Auth leaked-password protection is disabled. Enabling it is recommended; do not weaken any current auth policy to do so.
+
+## Telegram / machine observer
+- Customer bot: `@Anthonysuperkitchen_bot`.
+- Never reuse historically exposed bot credentials; replacement secrets live outside Git.
+- `agent_observer` remains read-only and must not receive service-role credentials, human admin credentials or customer PII.
+- Pricing calculator/intake machine identities remain distinct from human pricing approval identities.
+
+## Active next actions
+1. Review/merge Phase D branch after CI/review; preserve the production migration versions already applied.
+2. Add manager UI in the Pricing Hub/Admin surface for inventory counts and POS alias review rather than editing mappings in SQL.
+3. Enrich UPC/product coverage, prioritizing high-revenue unmatched real SKUs; leave broad department buttons unmatched unless the POS workflow is redesigned to capture item-level identity.
+4. Wire the customer SuperApp to `pricing-catalog` and run an authenticated read-only smoke test before replacing any existing catalog source.
+5. Port Kingdom OS from file parsing to the new read-only data/API path, then retire the file mirror only after verified parity.
+6. Verify the actual production web/server deployment path and `/api/pricing` manager flow directly; the connected Vercel listing was insufficient to prove it.
+7. Consider enabling Supabase leaked-password protection.
+8. Plaid/bank feeds remain a later explicit connection task, not an implicit Phase D permission expansion.
 
 ## Data caution
-Production contains older unresolved orders from earlier testing/usage. Do not bulk-complete or delete them automatically. Review explicitly and preserve audit history.
+Production contains historical operational/order/POS data. Do not bulk-delete, mass-remap, or rewrite it to make dashboards look complete. Exact evidence and human attribution take priority over coverage percentage.

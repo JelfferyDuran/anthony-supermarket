@@ -2,7 +2,7 @@
 
 Standalone Telegram Mini App for browsing the menu, customizing items (meat /
 side / premium add-ons), reviewing a cart, and handing off the order to the
-existing SuperAnthbot via a deep link.
+existing @Anthonysuperkitchen_bot via a deep link.
 
 ## Stack
 
@@ -10,7 +10,7 @@ existing SuperAnthbot via a deep link.
 - **Backend:** Node/Express — order creation, order lookup, admin image-gen
 - **Data:** `src/data/menu.json` — products, meats, sides, prices (no code
   changes needed to add products)
-- **Bot handoff:** `https://t.me/SuperAnthbot?start=ORDER_<orderId>`
+- **Bot handoff:** `https://t.me/Anthonysuperkitchen_bot?start=ORDER_<orderId>`
 
 ## Run
 

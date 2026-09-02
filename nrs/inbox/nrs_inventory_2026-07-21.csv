@@ -1,0 +1,64 @@
+"Reorder Now"
+UPC,Name,Department,"In Stock","Predicted Days","Count Threshold","Days Threshold"
+000856006003,"Hongo Killer Spray",Misc.,6,,10,7
+000856105508,"Hongo Killer Nail Formula",Household,6,,10,7
+028000184292,"Nescafe colombia","General Food",5,38,10,7
+028000210106,"Toll House:Premier White Morsels","General Food",6,,10,7
+029243050085,"Allegra Spaghetti 8","Grocery Non-Taxable",5,8,10,7
+029243050092,"Allegra Thin Spaghetti","Grocery Non-Taxable",2,10,10,7
+029243050177,"Allegra Linguine No. 17","General Food",0,,10,7
+030772175019,"Tide oxi boost",Cleaning,6,,10,7
+030772175057,"Tide downey",Cleaning,6,,10,7
+030772247617,"Gain moonlight breeze",Cleaning,6,,10,7
+037000858638,"Tide Ultra",Household,5,,10,7
+041387613582,4C:Itm-Sugar-Lemon,"General Food",4,17,10,7
+042279376080,"La Dra.Muller SupNat","Grocery Non-Taxable",6,,10,7
+049200007228,"Domino:Pure Cane Granulated w/Spout","General Food",9,19,10,7
+050000159918,"Nestle Carnation:Evaporated Lowfat 2% Milk","Grocery Non-Taxable",8,7,10,7
+050700012346,"Life Tomato Ketchup",Condiments,10,85,10,7
+055500017263,Clorox,Cleaning,6,,10,7
+059631789242,"Lysol Action Gel",Alcohol,9,,10,7
+074471000500,"Cafe Bustelo","General Food",10,36,10,7
+074471017218,"Bustelo 4-pack","General Food",6,,10,7
+080046143688,"Mineiro feijao carioca","General Food",10,,10,7
+080878194995,"Pantene Clean","Hygiene Feminine",6,,10,7
+081864000511,"Hampton Farms Creamu Peanut Butter","General Food",9,,10,7
+196005169481,"Crisco Canola Oil","General Food",4,,10,7
+196005706594,"Crisco corn","General Food",4,,10,7
+312547493833,"Visine-Red Eye Coating","General Food",6,,10,7
+5601043111019,"Branca de Neve Farina Fina","Grocery Non-Taxable",8,35,10,7
+633456112111,"Citrus & Berry Gel Snacks Raymundo’s",Dairy,3,,10,7
+654052911243,"Mel Rosmaninho Lavander","Grocery Non-Taxable",6,,10,7
+680105000015,"Julia:Cassava Flour, White","Grocery Non-Taxable",9,15,10,7
+680105000022,"Julia:Cassava Flour, Roasted","Grocery Non-Taxable",7,45,10,7
+761720001875,"Mazola Oil","General Food",2,,10,7
+761720058596,"Crisco Pure Corn Oil","Grocery Non-Taxable",6,,10,7
+761720059036,"Mazola Vegetable Oil Plus","General Food",6,,10,7
+761720063453,"Mazola:Blend of Vegetable & Canola Oils","General Food",6,,10,7
+769087007530,"La ricura yuca 4lb",Frozen,4,46,10,7
+7891095200467,"Yoki Fine Corn Flour","Grocery Non-Taxable",10,114,10,7
+7891095400751,"Yoki:Wheat for Kibe","Grocery Non-Taxable",10,,10,7
+7896005202074,"Dona Benta Farinha de Trigo","General Food",3,23,10,7
+7896035921334,Polvilho,"General Food",9,50,10,7
+7896035931050,"Pao de quejio","General Food",7,80,10,7
+7896116900647,"Feijao Kicaldo Preto","General Food",10,,10,7
+812828011614,"Mama Tere Frozen Cassava Yuca Congelada",Frozen,9,66,10,7
+818848020018,Spaguetl,"General Food",1,9,10,7
+818848020667,"Doria fettuccine","General Food",1,,10,7
+827854011026,"Palmolive Lavender",Cleaning,8,62,10,7
+850018711777,"Mikes Amazing Vinegar",Condiments,6,39,10,7
+871936004192,"A+ HomeWork Scissors Stainless Steel 8""",Misc.,6,,10,7
+" "
+" "
+"Reorder Soon"
+UPC,Name,Department,"In Stock","Predicted Days","Count Threshold","Days Threshold"
+000362205914,"Colador Cloth Coffee Strainer",Misc.,20,12,10,7
+013000001243,"Heinz Tomato Ketchup","General Food",12,10,10,7
+074527300035,"Mistolin Lavender",Misc.,11,18,10,7
+7891095006878,"Yoki Pre Cooked Corn Flour","Grocery Non-Taxable",11,37,10,7
+7891095911790,"Yoki Amendoim Japones","General Food",11,18,10,7
+7896071025638,"Mabel Rasquinhas Coco","General Food",14,23,10,7
+7896094910959,Zero-Cal,"General Food",11,51,10,7
+850018711753,"Mikes white vinegar","General Food",11,60,10,7
+" "
+" "
