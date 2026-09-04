@@ -61,3 +61,6 @@ nrs/inbox/*.csv
 
 /.vercel
 /apps/pricing-hub/.vercel
+
+# pipeline artifacts
+__pycache__/
