@@ -18,6 +18,7 @@ const POLL_INTERVAL_MS = Number(process.env.KITCHEN_POLL_INTERVAL_MS || 15000);
 const STAFF_EMAIL = process.env.KITCHEN_STAFF_EMAIL || '';
 const STAFF_PASSWORD = process.env.KITCHEN_STAFF_PASSWORD || '';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 let bot = null;
 let miniAppApiUrl = '';
@@ -50,7 +51,11 @@ async function ensureStaffToken() {
   }
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    },
     body: JSON.stringify({ email: STAFF_EMAIL, password: STAFF_PASSWORD }),
   });
   if (!res.ok) throw new Error(`Staff login failed HTTP ${res.status}`);

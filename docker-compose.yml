@@ -7,7 +7,7 @@ services:
       dockerfile: server/Dockerfile
     container_name: anthony-supermarket-server
     ports:
-      - "3001:3001"
+      - "3401:3001"   # host 3401 (3001 blocked by Windows excluded range 3001-3100)
     env_file:
       - server/.env
     environment:

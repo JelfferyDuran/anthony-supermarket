@@ -1,0 +1,18 @@
+ANTHONYS SUPERMARKET
+Wholesale Vendor Invoice
+Invoice #: INV-2026-0912
+Date: 09/03/2026
+Goya Black Beans 15oz
+24
+31.20
+Maduritos Plantain Chips
+12
+18.36
+Cafe Yaucono 14oz
+10
+58.50
+Rico Corn Starch
+36
+22.68
+SUBTOTAL 131.24
+TOTAL $141.94
