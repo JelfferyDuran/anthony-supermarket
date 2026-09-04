@@ -1,0 +1,64 @@
+y=    3 x=  220-  287 | Due Date
+y=    7 x=  405-  491 | PO Number
+y=    9 x=   48-  154 | Payment Terms
+y=   16 x=  589-  657 | Sales Rep
+y=   30 x=  219-  288 | 9/9/2026
+y=   39 x=   48-   92 | Net 7
+y=   40 x=  589-  681 | EMP00034
+y=   60 x=  590-  641 | Cortez
+y=   97 x=   43-   81 | Item
+y=  100 x=  597-  632 | UPC
+y=  127 x=  555-  673 | 7750243053013
+y=  142 x=   44-  184 | Mayonnaise Sauce
+y=  166 x=   40-  532 | ALA-292 ALACENA Tari Crema de Aji Amarillo 12x14.1oz (400g) -
+y=  177 x=  553-  672 | 7750243067805
+y=  188 x=   42-  238 | Tari Yellow Hot Chili Sauce
+y=  216 x=   38-  531 | ALA-293 ALACENA Huancaina Crema de Aji Amarillo con Queso
+y=  226 x=  552-  672 | 7750243042932
+y=  236 x=   39-  497 | 12x14.1oz (400g) - Huancaina Yellow Hot Chili Cheese Sauce
+y=  252 x=  570-  581 | 1
+y=  266 x=   37-  530 | CAS-822 VICTORIA Galleta Casino Vainilla 8xPack€x1 52oz
+y=  275 x=  550-  670 | 7750243082822
+y=  287 x=   37-  207 | (258g) - Vanilla Cookies
+y=  313 x=   34-  528 | CAS-815 VICTORIA Galleta Casino Fresa 8xPack6x1-52oz (258g)-
+y=  327 x=  552-  670 | 7750243082815
+y=  338 x=   37-  182 | Strawberry Cookies
+y=  367 x=   34-  521 | I-203 INCA'S FOOD Frijol Canario 24x15oz (425g) - Canary Beans
+y=  375 x=  554-  665 | 729955562035
+y=  398 x=   32-  524 | I-7450 INCA's FO0D Lentejon-Familiar 8x3Ib (1.36kg) - Lentils
+y=  407 x=  553-  665 | 729955574502
+y=  421 x=   34-  121 | Family Size
+y=  450 x=   32-  478 | I-7660 INCA'S FO0D Garbanzos 24x15oz (425g) - Chickpeas
+y=  458 x=  552-  663 | 729955576605
+y=  481 x=   31-  521 | I-160 INCA'S FO0D Harina de Chuno 12x12oz (340g) - Chuno
+y=  488 x=  550-  664 | 729955571600
+y=  501 x=   30-   78 | Flour
+y=  530 x=   29-  521 | I-7174 INCA'S FOOD Maiz Morado Familiar 8x3lb (1.36kg) - Dried
+y=  538 x=  549-  663 | 729955571747
+y=  551 x=   30-  201 | Purple Corn Family Size
+y=  580 x=   27-  521 | I-364 INCA'S FOOD Maiz Morado 15x15oz (425g) - Dried Purple
+y=  589 x=  549-  662 | 729955563643
+y=  602 x=   27-   69 | Corn
+y=  632 x=   24-  521 | I-375-F INCA'S FOOD Mote Pelado Institucional 8x3lb (1.36kg) -
+y=  641 x=  548-  662 | 729955563759
+y=  652 x=   25-  269 | Dried White Hominy Foodservice
+y=  681 x=   21-  520 | I-376-F INCA's FO0D Maiz Cancha Familiar 8x3Ib (1.36kg) -
+y=  693 x=  547-  661 | 729955563766
+y=  701 x=   22-  248 | Dried Corn Cancha Family Size
+y=  731 x=   19-  520 | I-7417 INCA'S FO0D Te Toronjil 12x25ct (25ct) - Lemon Balm Tea
+y=  743 x=  545-  660 | 729955574175
+y=  754 x=   18-   58 | bag
+y=  783 x=   15-  488 | I-7681 INCA'S FOOD Te Kion 12x25ct (25ct) - Ginger Tea Bags
+y=  796 x=  545-  659 | 729955576810
+y=  814 x=   13-  518 | -89 INCA' FOOD Te Canela y Clavo 12x25ct (25ct- Cinnmon
+y=  827 x=  542-  660 | 729955568594
+y=  837 x=   13-  156 | & Cloves Tea Bags
+y=  880 x=  541-  658 | 729955568365
+y=  888 x=   10-   90 | Tea Bags
+y=  932 x=  541-  658 | 729955572218
+y=  940 x=    9-  125 | White Vinegar
+y=  985 x=  539-  657 | 729955561908
+y=  993 x=    7-  145 | Hot Pepper Paste
+y= 1039 x=  538-  657 | 729955563018
+y= 1047 x=    6-  245 | Panca Pepper Paste Family Size
+y= 1176 x=   92-  182 | INVNJ25672
