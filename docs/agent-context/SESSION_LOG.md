@@ -166,3 +166,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Owner corrections: AMARO Rib Belly $48.82, Masita $36.81 → line sum $192.78 vs printed $192.73 (subtract $0.05). GOYA line sum $1,694.25 vs printed $1,686.28 (subtract $7.97). Owner rule: use printed total.
 - Hub: +137 items (ids 222–358) at 70% markup; 294 total; verifier updated (294) + ALL PASSED; root pricing-hub synced.
 - Vault: bundle PDF → RAW_UPLOADS; 8 processed CSVs + audits; 137 price-history baselines; register now 17 invoices / $12,851.20; 44 GOYA pack-size exceptions open.
+
+## 2026-09-04 — Triunfo integration into hub
+- Merged 49 Triunfo OCR items into `apps/pricing-hub/index.html` ALL_ITEMS (ids 359-407, invoices TRI-1/2/3).
+- Registered "Triunfo Foods" vendor in VENDORS registry.
+- Hub total now 343 items (GOYA 44, Triunfo 49, rest Super Trading/Family Food/TAINO/etc).
+- Verified JS parse with node: 343 items parsed, 9 flagged no-retail.
