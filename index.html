@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-en="Anthony's Supermarket — Kearny, NJ" data-es="Supermercado Anthony's — Kearny, NJ">Anthony's Supermarket — Kearny, NJ</title>
   <meta name="description" content="Anthony's Supermarket in Kearny, NJ — Latin grocery, hot food, deli meats, fresh produce, and pickup ordering. Call (201) 428-1745.">
   <!-- Set window.ANTHONY_API_URL to the public URL of server/index.js in production. -->
@@ -37,7 +37,7 @@
     "url": "https://jelfferyduran.github.io/anthony-supermarket/"
   }
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -245,7 +245,7 @@
     footer .social { display:flex; gap:0.75rem; justify-content:center; margin-bottom:0.75rem; }
     footer .social a { width:36px; height:36px; border-radius:50%; border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:1rem; transition:all .2s; }
     footer .social a:hover { border-color:var(--primary-light); color:var(--primary-light); }
-    .reveal { opacity:0; transform:translateY(24px); transition:opacity .5s ease,transform .5s ease; }
+    .reveal { opacity:1; transform:none; transition:opacity .5s ease,transform .5s ease; }
     .reveal.visible { opacity:1; transform:translateY(0); }
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-track { background:var(--bg-alt); }
@@ -300,7 +300,7 @@
     @media (max-width:768px) { .dept-grid,.specials-grid { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); } }
   </style>
 </head>
-<body class="loading">
+<body>
 
   <canvas id="three-canvas" aria-hidden="true"></canvas>
 
@@ -628,11 +628,13 @@ MD.menus.forEach(function(m){banners[m.slug]=m.banner});
 function t(en,es){return cl==="es"?es:en}
 function r(s){return s||""}
 
-// Three.js — lighter version
-(function(){var c=document.getElementById("three-canvas");if(!c)return;
+// Decoration must never gate menu/cart initialization or hide the storefront.
+window.addEventListener("load",function(){var c=document.getElementById("three-canvas");if(!c)return;
+try {
+if(!window.THREE){c.hidden=true;return;}
 var isMobile=innerWidth<768;
 var prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-if(prefersReduced)return;
+if(prefersReduced){c.hidden=true;return;}
 var s=new THREE.Scene(),a=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1e3),
 r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true,powerPreference:"low-power"});
 r.setSize(innerWidth,innerHeight);r.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -656,7 +658,11 @@ if(isMobile){
   anim();
 }
 addEventListener("resize",function(){a.aspect=innerWidth/innerHeight;a.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)})
-})();
+} catch(error) {
+  c.hidden=true;
+  console.warn("Decorative background unavailable; storefront remains usable.");
+}
+},{once:true});
 
 // Cart persistence
 var cart=loadCart();
