@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title data-en="Anthony's Supermarket — Kearny, NJ" data-es="Supermercado Anthony's — Kearny, NJ">Anthony's Supermarket — Kearny, NJ</title>
+  <title data-brand translate="no">Anthony's Supermarket — Kearny, NJ</title>
   <meta name="description" content="Anthony's Supermarket in Kearny, NJ — Latin grocery, hot food, deli meats, fresh produce, and pickup ordering. Call (201) 428-1745.">
   <!-- Set window.ANTHONY_API_URL to the public URL of server/index.js in production. -->
   <meta property="og:title" content="Anthony's Supermarket — Kearny, NJ">
@@ -239,7 +239,6 @@
     .store-card .hours-grid .time { color:var(--text); text-align:right; }
     .store-card .hours-grid .closed { color:var(--accent); text-align:right; font-weight:500; }
     .store-card .phone-large { font-size:1.3rem; font-weight:700; color:var(--primary-light); margin:0.5rem 0; display:block; }
-    .pricing-frame { width:100%; height:70vh; border:1px solid var(--card-border); border-radius:var(--radius); background:var(--bg-alt); }
     footer { text-align:center; padding:2rem 1.25rem; border-top:1px solid var(--card-border); color:var(--text-muted); font-size:0.78rem; content-visibility:auto; }
     footer strong { color:var(--primary-light); }
     footer .social { display:flex; gap:0.75rem; justify-content:center; margin-bottom:0.75rem; }
@@ -286,6 +285,7 @@
     .dept-card::after { content:''; position:absolute; inset:0; background:linear-gradient(to top,rgba(15,15,20,.55),transparent 40%); }
     .dept-card .dept-label { position:absolute; left:0; right:0; bottom:0; padding:0.9rem 1rem; color:#fff; font-weight:700; font-size:1rem; display:flex; align-items:center; gap:0.5rem; z-index:1; }
     .dept-card:hover { transform:translateY(-4px); border-color:var(--primary-light); box-shadow:0 10px 30px rgba(45,106,79,0.25); }
+    .dept-card:focus-visible { outline:3px solid var(--accent); outline-offset:3px; transform:translateY(-3px); }
     .specials-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1.25rem; max-width:1100px; margin:1.5rem auto 0; }
     .special-card { background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius); padding:1.1rem; display:flex; flex-direction:column; gap:0.4rem; transition:border-color .3s ease,transform .3s ease; }
     .special-card:hover { border-color:var(--accent); transform:translateY(-3px); }
@@ -305,13 +305,12 @@
   <canvas id="three-canvas" aria-hidden="true"></canvas>
 
   <nav class="navbar" id="navbar" aria-label="Main navigation">
-    <div class="brand">&#x1F981; Anthony's <span>Market</span></div>
-    <div class="links" id="navLinks">
+    <div class="brand" data-brand translate="no">&#x1F981; Anthony's <span>Market</span></div>
+<div class="links" id="navLinks">
       <a href="#home" class="active" data-en="Home" data-es="Inicio">Home</a>
       <a href="#menu" data-en="Menu" data-es="Menú">Menu</a>
       <a href="#departments" data-en="Departments" data-es="Departamentos">Departments</a>
-      <a href="#specials" data-en="Specials" data-es="Ofertas">Specials</a>
-      <a href="#pricing" data-en="Pricing" data-es="Precios">Pricing</a>
+      <a href="#specials" data-en="Featured" data-es="Destacados">Featured</a>
       <a href="#store" data-en="Contact" data-es="Contacto">Contact</a>
       <a href="https://t.me/Anthonysuperkitchen_bot" target="_blank" rel="noopener" class="order" data-en="&#x2708;&#xFE0F; Order on Telegram" data-es="&#x2708;&#xFE0F; Ordena por Telegram">&#x2708;&#xFE0F; Order on Telegram</a>
     </div>
@@ -371,17 +370,15 @@
         <line x1="71" y1="78" x2="71" y2="88" stroke="#2D6A4F" stroke-width="2"/>
         <circle cx="46" cy="90" r="4" fill="#2D6A4F"/><circle cx="74" cy="90" r="4" fill="#2D6A4F"/>
       </svg>
-      <h1 data-en="Anthony's Supermarket" data-es="Supermercado Anthony's">Anthony&#x27;s <span class="hl">Supermarket</span></h1>
+      <h1 data-brand translate="no">Anthony&#x27;s <span class="hl">Supermarket</span></h1>
       <p class="tagline" data-en="Serving the Kearny community for 9 years" data-es="Sirviendo a la comunidad de Kearny por 9 años">Serving the Kearny community for 9 years</p>
       <div class="info">
-        <span><i aria-hidden="true">&#x1F4CD;</i> <span data-en="288 Kearny Ave, Kearny NJ 07032" data-es="288 Kearny Ave, Kearny NJ 07032">288 Kearny Ave, Kearny NJ 07032</span></span>
-        <span><i aria-hidden="true">&#x1F4DE;</i> <span data-en="(201) 428-1745" data-es="(201) 428-1745">(201) 428-1745</span></span>
+        <span><i aria-hidden="true">&#x1F4CD;</i> <span data-brand translate="no">288 Kearny Ave, Kearny NJ 07032</span></span>
+        <span><i aria-hidden="true">&#x1F4DE;</i> <span data-brand translate="no">(201) 428-1745</span></span>
         <span><i aria-hidden="true">&#x1F550;</i> <span data-en="Open Daily" data-es="Abierto Todos los Días">Open Daily</span></span>
       </div>
       <div class="hero-actions">
         <button class="btn btn-primary" onclick="scrollToMenu()" data-en="&#x1F6D2; Start Ordering" data-es="&#x1F6D2; Ordenar Ahora">&#x1F6D2; Start Ordering</button>
-        <a class="btn btn-telegram" href="https://t.me/Anthonysuperkitchen_bot" target="_blank" rel="noopener" data-en="&#x2708;&#xFE0F; Order on Telegram" data-es="&#x2708;&#xFE0F; Ordena por Telegram">&#x2708;&#xFE0F; Order on Telegram</a>
-        <button class="btn btn-outline" onclick="goToPricing()" data-en="&#x1F4CA; Pricing Hub" data-es="&#x1F4CA; Lista de Precios">&#x1F4CA; Pricing Hub</button>
       </div>
     </section>
 
@@ -389,28 +386,28 @@
       <h2 class="section-title" data-en="Shop by Department" data-es="Compra por Departamento">Shop by <span>Department</span></h2>
       <p class="section-sub" data-en="Everything from hot food to fresh produce — under one roof." data-es="De la comida caliente a las frutas frescas — todo bajo un mismo techo.">Everything from hot food to fresh produce — under one roof.</p>
       <div class="dept-grid">
-        <div class="dept-card reveal" onclick="goToDept('hot-food')" role="button" tabindex="0" aria-label="Hot Food department">
+        <div class="dept-card reveal" data-dept="hot-food" onclick="goToDept('hot-food')" role="button" tabindex="0" aria-label="Hot Food department">
           <img src="assets/depts/hot-food.webp" alt="Hot Food" width="800" height="600" loading="lazy">
           <div class="dept-label"><span data-en="&#x1F372;" data-es="&#x1F372;">&#x1F372;</span> <span data-en="Hot Food" data-es="Comida Caliente">Hot Food</span></div>
         </div>
-        <div class="dept-card reveal" onclick="goToDept('deli-meats')" role="button" tabindex="0" aria-label="Deli and Meats department">
+        <div class="dept-card reveal" data-dept="deli-meats" onclick="goToDept('deli-meats')" role="button" tabindex="0" aria-label="Deli and Meats department">
           <img src="assets/depts/deli-meats.webp" alt="Deli &amp; Meats" width="800" height="600" loading="lazy">
           <div class="dept-label"><span>&#x1F969;</span> <span data-en="Deli &amp; Meats" data-es="Delicatessen y Carnes">Deli &amp; Meats</span></div>
         </div>
-        <div class="dept-card reveal" onclick="goToDept('grocery')" role="button" tabindex="0" aria-label="Grocery department">
+        <div class="dept-card reveal" data-dept="grocery" onclick="goToDept('grocery')" role="button" tabindex="0" aria-label="Grocery department">
           <img src="assets/depts/grocery.webp" alt="Grocery" width="800" height="600" loading="lazy">
           <div class="dept-label"><span>&#x1F6D2;</span> <span data-en="Grocery" data-es="Abarrotes">Grocery</span></div>
         </div>
-        <div class="dept-card reveal" onclick="goToDept('produce')" role="button" tabindex="0" aria-label="Produce department">
+        <div class="dept-card reveal" data-dept="produce" onclick="goToDept('produce')" role="button" tabindex="0" aria-label="Produce department">
           <img src="assets/depts/produce.webp" alt="Produce" width="800" height="600" loading="lazy">
           <div class="dept-label"><span>&#x1F966;</span> <span data-en="Produce" data-es="Frutas y Verduras">Produce</span></div>
         </div>
       </div>
     </section>
 
-    <section class="overlay" id="specials" aria-label="Weekly Specials">
-      <h2 class="section-title" data-en="Weekly Specials" data-es="Ofertas de la Semana">Weekly <span>Specials</span></h2>
-      <p class="section-sub" data-en="Hand-picked deals from our kitchen and aisles. Prices from the live Pricing Hub." data-es="Ofertas seleccionadas de nuestra cocina y pasillos. Precios del Pricing Hub en vivo.">Hand-picked deals from our kitchen and aisles. Prices from the live Pricing Hub.</p>
+    <section class="overlay" id="specials" aria-label="Featured this week">
+      <h2 class="section-title" data-en="Featured This Week" data-es="Destacados de la Semana">Featured <span>This Week</span></h2>
+      <p class="section-sub" data-en="A rotating selection from our kitchen and aisles. Prices reflect our approved catalog." data-es="Una selección rotativa de nuestra cocina y pasillos. Los precios reflejan nuestro catálogo aprobado.">A rotating selection from our kitchen and aisles. Prices reflect our approved catalog.</p>
       <div class="specials-grid" id="specialsGrid"></div>
     </section>
 
@@ -434,21 +431,13 @@
       <div id="menuContent"></div>
     </section>
 
-    <section class="overlay" id="pricing" aria-label="Pricing">
-      <h2 class="section-title" data-en="Pricing Hub" data-es="Lista de <span>Precios</span>">Pricing <span>Hub</span></h2>
-      <p class="section-sub" data-en="Wholesale-to-retail pricing with markup calculator for all products." data-es="Precios de mayoreo a menudeo con calculadora de margen para todos los productos.">Wholesale-to-retail pricing with markup calculator for all products.</p>
-      <div style="max-width:1400px;margin:0 auto;">
-        <iframe class="pricing-frame" src="pricing-hub/index.html" title="Pricing Hub" loading="lazy"></iframe>
-      </div>
-    </section>
-
     <section class="store-section overlay" id="store" aria-label="Store Information">
       <h2 class="section-title" data-en="Visit Us" data-es="Visítanos">Visit <span>Us</span></h2>
       <div class="store-grid">
         <div class="store-card">
           <h3 data-en="&#x1F4CD; Location" data-es="&#x1F4CD; Ubicación">&#x1F4CD; Location</h3>
           <div class="sc-row">
-            <span data-en="288 Kearny Ave, Kearny, NJ 07032" data-es="288 Kearny Ave, Kearny, NJ 07032">288 Kearny Ave, Kearny, NJ 07032</span>
+            <span data-brand translate="no">288 Kearny Ave, Kearny, NJ 07032</span>
           </div>
           <div class="sc-row" style="margin-top:0.5rem;">
             <a href="https://maps.google.com/?q=288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener" data-en="&#x1F5FA; Open in Google Maps" data-es="&#x1F5FA; Abrir en Google Maps">&#x1F5FA; Open in Google Maps</a>
@@ -483,7 +472,7 @@
       <a href="https://instagram.com/anthony_supermarket" target="_blank" rel="noopener" title="Instagram" aria-label="Instagram">&#x1F4F7;</a>
       <a href="https://anthonyssupermarket.com" target="_blank" rel="noopener" title="Website" aria-label="Website">&#x1F310;</a>
     </div>
-    <p><span data-en="&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032" data-es="&copy; 2026 <strong>Supermercado Anthony's</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032">&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032</span></p>
+    <p>&copy; 2026 <strong data-brand translate="no">Anthony's Supermarket</strong> &middot; <span data-brand translate="no">288 Kearny Ave, Kearny, NJ 07032</span></p>
     <p style="margin-top:0.3rem;" data-en="Built with &hearts; for the Kearny community" data-es="Hecho con &hearts; para la comunidad de Kearny">Built with &hearts; for the Kearny community</p>
   </footer>
 
@@ -618,7 +607,7 @@ const MD={menus:[
 ]};
 var ALL_ITEMS=[];
 MD.menus.forEach(function(m){m.categorias.forEach(function(c){c.items.forEach(function(i){ALL_ITEMS.push(Object.assign({},i,{menuSlug:m.slug,catName:c.nombre,menuName:m.nombre,catEn:c.en,catEs:c.es,menuEn:m.en,menuEs:m.es}))})})});
-function computeStats(){var t=ALL_ITEMS.length,c=ALL_ITEMS.reduce(function(s,i){return s+i.precio},0),r=c*1.65,p=r-c;return{totalItems:t,invCost:c,retail:r,profit:p}}
+function computeStats(){return{totalItems:ALL_ITEMS.length}}
 
 var cl="en";
 var banners={};
@@ -666,7 +655,7 @@ function loadCart(){try{var d=localStorage.getItem("anthony-cart");return d?JSON
 // Bilingual setLang
 function setLang(l){cl=l;
 document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.toggle("active",b.textContent.toLowerCase().includes(l));b.setAttribute("aria-checked",b.textContent.toLowerCase().includes(l))});
-document.querySelectorAll("[data-en]").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l);});
+document.querySelectorAll("[data-en]:not([data-brand])").forEach(function(el){el.innerHTML=el.getAttribute("data-"+l);});
 document.querySelectorAll("[data-es-placeholder]").forEach(function(el){el.placeholder=el.getAttribute("data-"+l+"-placeholder");});
 var si=document.getElementById("searchInput");
 if(si){var ph=si.getAttribute("data-"+l);if(ph)si.placeholder=ph;}
@@ -681,24 +670,25 @@ renderOrderHistory();}
 
 (function(){var els=document.querySelectorAll(".reveal");function showAll(){els.forEach(function(el){el.classList.add("visible")})}if(!("IntersectionObserver" in window)||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){showAll();return}var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});els.forEach(function(el){obs.observe(el)});setTimeout(showAll,2500)})();
 
-(function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","pricing","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
+(function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
 
 function scrollToMenu(){document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
-function goToPricing(){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
 function toggleNav(){var l=document.getElementById("navLinks"),b=document.getElementById("navToggle"),d=document.getElementById("navBackdrop");var open=l.classList.toggle("open");d.classList.toggle("open",open);b.setAttribute("aria-expanded",open);b.setAttribute("aria-label",open?"Close menu":"Open menu")}
 document.getElementById("navLinks").addEventListener("click",function(e){if(e.target.tagName==="A"){document.getElementById("navLinks").classList.remove("open");document.getElementById("navBackdrop").classList.remove("open");document.getElementById("navToggle").setAttribute("aria-expanded","false")}});
 
 // v5: department navigation — switch to the matching menu tab, then scroll
 function goToDept(slug){var idx=-1;MD.menus.forEach(function(m,i){if(m.slug===slug)idx=i});if(idx>=0&&idx!==activeTab)switchTab(idx);document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
+document.querySelectorAll(".dept-card[data-dept]").forEach(function(card){card.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();goToDept(card.getAttribute("data-dept"))}})});
 
 // v5: weekly specials — prices computed from the embedded catalog (no fake data)
 var SPECIALS=[{tag:"Hot Food",slug:"hot-food",name:"Whole Roasted Chicken"},{tag:"Hot Food",slug:"hot-food",name:"Pernil (per lb)"},{tag:"Hot Food",slug:"hot-food",name:"Ground Beef 80/20 (per lb)"},{tag:"Latin Sides",slug:"hot-food",name:"Plantains (per lb)"},{tag:"Deli & Meats",slug:"deli-meats",name:"Pan de Yuca"},{tag:"Deli & Meats",slug:"deli-meats",name:"Cheese Tequeño"}];
 function findCatalogItem(slug,name){var found=null;MD.menus.forEach(function(m){if(m.slug!==slug)return;m.categorias.forEach(function(c){c.items.forEach(function(i){if(i.nombre===name)found=i})})});return found}
-function renderSpecials(){var cont=document.getElementById("specialsGrid");if(!cont||typeof SPECIALS==="undefined"||!SPECIALS.length)return;var html="";SPECIALS.forEach(function(s){var item=findCatalogItem(s.slug,s.name);if(!item)return;var tagEs=s.tag==="Hot Food"?"Comida Caliente":s.tag==="Deli & Meats"?"Delicatessen y Carnes":s.tag;var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===s.slug}),cq=inCart?inCart.cantidad:0;var nm=item.nombre.replace(/'/g,"\\'");html+='<div class="special-card"><div class="sp-tag">'+t(s.tag,tagEs)+'</div><div class="sp-name">'+t(item.en,item.es)+'</div><div class="sp-desc">'+t(item.desc||"",item.desc_es||"")+'</div><div class="sp-bottom"><div class="sp-price">$'+item.precio.toFixed(2)+'</div><button class="sp-btn" onclick="quickAdd(\''+nm+'\','+item.precio+',\''+s.slug+'\',\''+item.en.replace(/'/g,"\\'")+'\',\''+item.es.replace(/'/g,"\\'")+'\')">'+(cq>0?t("In Cart","En Carrito"):t("Add","Agregar"))+'</button></div></div>'});cont.innerHTML=html}
+function renderSpecials(){var cont=document.getElementById("specialsGrid");if(!cont||typeof SPECIALS==="undefined"||!SPECIALS.length)return;var html="";SPECIALS.forEach(function(s){var item=findCatalogItem(s.slug,s.name);if(!item)return;var tagEs=s.tag==="Hot Food"?"Comida Caliente":s.tag==="Deli & Meats"?"Delicatessen y Carnes":s.tag;var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===s.slug}),cq=inCart?inCart.cantidad:0;var nm=item.nombre.replace(/'/g,"\\'");html+='<div class="special-card"><div class="sp-tag">'+t(s.tag,tagEs)+'</div><div class="sp-name">'+t(item.en||item.nombre,item.es||item.en||item.nombre)+'</div><div class="sp-desc">'+t(item.desc||"",item.desc_es||"")+'</div><div class="sp-bottom"><div class="sp-price">$'+item.precio.toFixed(2)+'</div><button class="sp-btn" onclick="quickAdd(\''+nm+'\','+item.precio+',\''+s.slug+'\',\''+item.en.replace(/'/g,"\\'")+'\',\''+item.es.replace(/'/g,"\\'")+'\')">'+(cq>0?t("In Cart","En Carrito"):t("Add","Agregar"))+'</button></div></div>'});cont.innerHTML=html}
 
 function toast(m){var c=document.getElementById("toastContainer"),el=document.createElement("div");el.className="toast";el.textContent=m;c.appendChild(el);setTimeout(function(){el.remove()},2300)}
 
-function addToCart(item,qty){qty=qty||1;var ex=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug});if(ex)ex.cantidad+=qty;else cart.push(Object.assign({},item,{cantidad:qty}));saveCart();updateCartUI();var fab=document.getElementById("cartFab");fab.classList.remove("bump");void fab.offsetWidth;fab.classList.add("bump");toast(t("Added "+item.nombre,"Agregado "+item.nombre))}
+function displayProductName(item){return cl==="es"?(item.es||item.en||item.nombre):(item.en||item.nombre)}
+function addToCart(item,qty){qty=qty||1;var ex=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug});if(ex)ex.cantidad+=qty;else cart.push(Object.assign({},item,{cantidad:qty}));saveCart();updateCartUI();var fab=document.getElementById("cartFab");fab.classList.remove("bump");void fab.offsetWidth;fab.classList.add("bump");toast(t("Added ","Agregado ")+displayProductName(item))}
 
 function changeCartQty(idx,delta){cart[idx].cantidad+=delta;if(cart[idx].cantidad<=0)cart.splice(idx,1);saveCart();updateCartUI()}
 
@@ -708,7 +698,7 @@ var lb=document.getElementById("cartCountLabel");if(lb)lb.textContent=count?"("+
 var ie=document.getElementById("cartItems"),cb=document.getElementById("checkoutBtn");
 if(!cart.length){ie.className="items empty";ie.innerHTML=t("Your cart is empty","Tu carrito está vacío");document.getElementById("cartSubtotal").textContent="$0.00";document.getElementById("cartTax").textContent="$0.00";document.getElementById("cartTotal").textContent="$0.00";cb.disabled=true;cb.innerHTML=t("Proceed to Checkout","Ir a Pagar");return}
 ie.className="items";var h="",tot=0;
-cart.forEach(function(item,idx){var lt=item.precio*item.cantidad;tot+=lt;h+='<div class="cart-item"><span class="ci-name">'+item.nombre+'</span><div class="ci-controls"><button onclick="changeCartQty('+idx+',-1)">-</button><span class="ci-qty">'+item.cantidad+'</span><button onclick="changeCartQty('+idx+',1)">+</button></div><span class="ci-price">$'+lt.toFixed(2)+'</span></div>'});
+cart.forEach(function(item,idx){var lt=item.precio*item.cantidad;tot+=lt;h+='<div class="cart-item"><span class="ci-name">'+displayProductName(item)+'</span><div class="ci-controls"><button onclick="changeCartQty('+idx+',-1)">-</button><span class="ci-qty">'+item.cantidad+'</span><button onclick="changeCartQty('+idx+',1)">+</button></div><span class="ci-price">$'+lt.toFixed(2)+'</span></div>'});
 ie.innerHTML=h;var tax=tot*0.06625;document.getElementById("cartSubtotal").textContent="$"+tot.toFixed(2);document.getElementById("cartTax").textContent="$"+tax.toFixed(2);document.getElementById("cartTotal").textContent="$"+(tot+tax).toFixed(2);cb.disabled=false;cb.innerHTML=t("Proceed to Checkout","Ir a Pagar")}
 
 function toggleCart(){document.getElementById("cartPanel").classList.toggle("open");document.getElementById("cartBackdrop").classList.toggle("open")}
@@ -725,7 +715,7 @@ function setFilter(f){activeFilter=f;renderFilterChips();renderMenuContent(docum
 function getBannerUrl(slug){return banners[slug]||MD.menus[0].banner}
 
 // Stats rendering bilingual
-function renderStats(){var st=computeStats();document.getElementById("statsBar").innerHTML='<div class="stat-card"><div class="value">'+st.totalItems+'</div><div class="label">'+t("Products","Productos")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.invCost)+'</div><div class="label">'+t("Inventory Cost","Costo Inventario")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.retail)+'</div><div class="label">'+t("Retail Value","Valor Minorista")+'</div></div><div class="stat-card"><div class="value">$'+Math.round(st.profit)+'</div><div class="label">'+t("Projected Profit","Ganancia Proyectada")+'</div></div>'}
+function renderStats(){var st=computeStats();document.getElementById("statsBar").innerHTML='<div class="stat-card"><div class="value">'+st.totalItems+'+</div><div class="label">'+t("Products","Productos")+'</div></div><div class="stat-card"><div class="value">4</div><div class="label">'+t("Departments","Departamentos")+'</div></div><div class="stat-card"><div class="value">EN / ES</div><div class="label">'+t("Bilingual service","Servicio bilingüe")+'</div></div><div class="stat-card"><div class="value">7</div><div class="label">'+t("Days open","Días abiertos")+'</div></div>'}
 
 function renderTabs(){document.getElementById("menuTabs").innerHTML=MD.menus.map(function(m,i){return '<button class="menu-tab'+(i===activeTab?" active":"")+'" onclick="switchTab('+i+')">'+t(m.en,m.es)+"</button>"}).join("")}
 
@@ -733,7 +723,7 @@ var activeTab=0;
 function switchTab(i){activeTab=i;renderTabs();renderMenuContent("");
 var img=document.getElementById("bannerImg");if(img){img.src=getBannerUrl(MD.menus[i].slug);img.alt=t(MD.menus[i].en,MD.menus[i].es)}}
 
-function renderMenuContent(filter){filter=typeof filter==="string"?filter:"";var cont=document.getElementById("menuContent"),menu=MD.menus[activeTab];if(!menu)return;var q=filter.toLowerCase().trim(),hasAny=false,html="";menu.categorias.forEach(function(cat){var items=cat.items;if(q)items=items.filter(function(i){return i.nombre.toLowerCase().includes(q)||(i.desc||"").toLowerCase().includes(q)});if(activeFilter!=="All")items=items.filter(function(i){return i.tags&&i.tags.indexOf(activeFilter)>=0});if(!items.length)return;hasAny=true;html+='<div class="cat-section"><div class="cat-header"><h3>'+t(cat.en,cat.es)+'</h3><span class="line"></span><span class="count">'+items.length+'</span></div><div class="item-grid">';items.forEach(function(item){var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug}),cq=inCart?inCart.cantidad:0;var sn=item.nombre.replace(/'/g,"\\'");var icons={"Hot Meals":"🍽","Latin Sides":"🍚","Breakfast":"🍳","Dairy & Eggs":"🥛","Bread & Bakery":"🍞","Deli Containers":"📦","Beverages":"🥤","Snacks & Candy":"🍬","Canned & Jarred":"🥫","Dry Goods":"🌾","Condiments":"🌶","Frozen Foods":"❄","Household":"🏠","Personal Care":"🧻","Paper & Foil":"📄","Tea & Coffee":"🍵"};var icon=icons[cat.nombre]||"📦";var itemName=t(item.en,item.es);var itemDesc=item.desc_es&&cl==="es"?item.desc_es:item.desc;html+='<div class="item-card"><div class="item-img">'+icon+'</div><div class="item-body"><div class="item-name">'+itemName+'</div>'+(itemDesc?'<div class="item-desc">'+itemDesc+'</div>':'')+(item.tags&&item.tags.length?'<div class="item-tags">'+item.tags.map(function(tag){return '<span>'+tag+'</span>'}).join("")+'</div>':'')+'<div class="item-bottom"><div class="item-price">$'+item.precio.toFixed(2)+'</div><div class="item-add">'+(cq>0?'<button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',-1)\">-</button><span class=\"qty-val\">"+cq+'</span><button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',1)\">+</button>":'<button class="add-btn" onclick="quickAdd(\''+sn+"',"+item.precio+",'"+item.menuSlug+"','"+item.en+"','"+item.es+"')\">+</button>")+'</div></div></div></div>'});html+="</div></div>"});if(!hasAny)html='<div class="empty-state"><div class="icon">\uD83D\uDD0D</div>'+t("No products found matching your criteria.","No se encontraron productos con esos criterios.")+'</div>';cont.innerHTML=html}
+function renderMenuContent(filter){filter=typeof filter==="string"?filter:"";var cont=document.getElementById("menuContent"),menu=MD.menus[activeTab];if(!menu)return;var q=filter.toLowerCase().trim(),hasAny=false,html="";menu.categorias.forEach(function(cat){var items=cat.items;if(q)items=items.filter(function(i){return (i.en||i.nombre).toLowerCase().includes(q)||(i.es||"").toLowerCase().includes(q)||(i.desc||"").toLowerCase().includes(q)||(i.desc_es||"").toLowerCase().includes(q)});if(activeFilter!=="All")items=items.filter(function(i){return i.tags&&i.tags.indexOf(activeFilter)>=0});if(!items.length)return;hasAny=true;html+='<div class="cat-section"><div class="cat-header"><h3>'+t(cat.en,cat.es)+'</h3><span class="line"></span><span class="count">'+items.length+'</span></div><div class="item-grid">';items.forEach(function(item){var inCart=cart.find(function(i){return i.nombre===item.nombre&&i.menuSlug===item.menuSlug}),cq=inCart?inCart.cantidad:0;var sn=item.nombre.replace(/'/g,"\\'");var icons={"Hot Meals":"🍽","Latin Sides":"🍚","Breakfast":"🍳","Dairy & Eggs":"🥛","Bread & Bakery":"🍞","Deli Containers":"📦","Beverages":"🥤","Snacks & Candy":"🍬","Canned & Jarred":"🥫","Dry Goods":"🌾","Condiments":"🌶","Frozen Foods":"❄","Household":"🏠","Personal Care":"🧻","Paper & Foil":"📄","Tea & Coffee":"🍵"};var icon=icons[cat.nombre]||"📦";var itemName=t(item.en||item.nombre,item.es||item.en||item.nombre);var itemDesc=item.desc_es&&cl==="es"?item.desc_es:item.desc;html+='<div class="item-card"><div class="item-img">'+icon+'</div><div class="item-body"><div class="item-name">'+itemName+'</div>'+(itemDesc?'<div class="item-desc">'+itemDesc+'</div>':'')+(item.tags&&item.tags.length?'<div class="item-tags">'+item.tags.map(function(tag){return '<span>'+tag+'</span>'}).join("")+'</div>':'')+'<div class="item-bottom"><div class="item-price">$'+item.precio.toFixed(2)+'</div><div class="item-add">'+(cq>0?'<button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',-1)\">-</button><span class=\"qty-val\">"+cq+'</span><button class="qty-btn" onclick="adjustItem(\''+sn+"','"+item.menuSlug+"',1)\">+</button>":'<button class="add-btn" onclick="quickAdd(\''+sn+"',"+item.precio+",'"+item.menuSlug+"','"+item.en+"','"+item.es+"')\">+</button>")+'</div></div></div></div>'});html+="</div></div>"});if(!hasAny)html='<div class="empty-state"><div class="icon">\uD83D\uDD0D</div>'+t("No products found matching your criteria.","No se encontraron productos con esos criterios.")+'</div>';cont.innerHTML=html}
 
 window.quickAdd=function(n,p,ms,en,es){addToCart({nombre:n,precio:p,menuSlug:ms,en:en,es:es,desc:"",tags:[]},1);renderMenuContent(document.getElementById("searchInput").value)};
 
@@ -743,7 +733,7 @@ window.onSearch=function(v){document.getElementById("searchClear").classList.tog
 
 window.clearSearch=function(){document.getElementById("searchInput").value="";document.getElementById("searchClear").classList.remove("visible");renderMenuContent("")};
 
-window.openCheckout=function(){if(!cart.length)return;toggleCart();var total=cart.reduce(function(s,i){return s+i.precio*i.cantidad},0),il="";cart.forEach(function(i){il+='<div class="os-line"><span>'+i.nombre+" x"+i.cantidad+'</span><span>$'+(i.precio*i.cantidad).toFixed(2)+"</span></div>"});document.getElementById("checkoutContent").innerHTML='<div class="checkout-form"><div class="order-summary"><div style="font-weight:600;margin-bottom:0.3rem;color:var(--primary-light);font-size:0.85rem;">'+t("Order Summary","Resumen del Pedido")+'</div>'+il+'<div class="os-line" style="font-weight:600;border-top:1px solid rgba(45,106,79,0.15);padding-top:0.3rem;margin-top:0.3rem;"><span>'+t("Total","Total")+'</span><span>$'+total.toFixed(2)+'</span></div></div><input type="text" id="checkoutName" '+t('placeholder="Your Name *"','placeholder="Tu Nombre *"')+'><input type="tel" id="checkoutPhone" '+t('placeholder="Phone for confirmation"','placeholder="Teléfono para confirmación"')+'><select id="checkoutType"><option value="pickup">'+t("Pickup","Recoger")+'</option><option value="delivery">'+t("Delivery","Entrega")+'</option></select><textarea id="checkoutAddress" '+t('placeholder="Delivery Address"','placeholder="Dirección de Entrega"')+' rows="2"></textarea><textarea id="checkoutNotes" '+t('placeholder="Special notes"','placeholder="Notas especiales"')+' rows="2"></textarea><button class="btn-place" onclick="placeOrder()" id="placeBtn">'+t("Place Order","Hacer Pedido")+'</button></div>';document.getElementById("checkoutModal").classList.add("open")};
+window.openCheckout=function(){if(!cart.length)return;toggleCart();var total=cart.reduce(function(s,i){return s+i.precio*i.cantidad},0),il="";cart.forEach(function(i){il+='<div class="os-line"><span>'+displayProductName(i)+" x"+i.cantidad+'</span><span>$'+(i.precio*i.cantidad).toFixed(2)+"</span></div>"});document.getElementById("checkoutContent").innerHTML='<div class="checkout-form"><div class="order-summary"><div style="font-weight:600;margin-bottom:0.3rem;color:var(--primary-light);font-size:0.85rem;">'+t("Order Summary","Resumen del Pedido")+'</div>'+il+'<div class="os-line" style="font-weight:600;border-top:1px solid rgba(45,106,79,0.15);padding-top:0.3rem;margin-top:0.3rem;"><span>'+t("Total","Total")+'</span><span>$'+total.toFixed(2)+'</span></div></div><input type="text" id="checkoutName" '+t('placeholder="Your Name *"','placeholder="Tu Nombre *"')+'><input type="tel" id="checkoutPhone" '+t('placeholder="Phone for confirmation"','placeholder="Teléfono para confirmación"')+'><select id="checkoutType"><option value="pickup">'+t("Pickup","Recoger")+'</option><option value="delivery">'+t("Delivery","Entrega")+'</option></select><textarea id="checkoutAddress" '+t('placeholder="Delivery Address"','placeholder="Dirección de Entrega"')+' rows="2"></textarea><textarea id="checkoutNotes" '+t('placeholder="Special notes"','placeholder="Notas especiales"')+' rows="2"></textarea><button class="btn-place" onclick="placeOrder()" id="placeBtn">'+t("Place Order","Hacer Pedido")+'</button></div>';document.getElementById("checkoutModal").classList.add("open")};
 
 window.closeCheckout=function(){document.getElementById("checkoutModal").classList.remove("open");document.getElementById("checkoutContent").innerHTML=""};
 
@@ -767,7 +757,8 @@ renderSpecials();
 updateCartUI();
 renderOrderHistory();
 var sl=localStorage.getItem("anthony-lang");if(sl)setLang(sl);
-console.log("Anthony's Supermarket v4 — Full Bilingual EN/ES");
+(function sendTrafficSignal(){if(navigator.doNotTrack==="1"||navigator.globalPrivacyControl===true)return;var source="direct";try{source=document.referrer?new URL(document.referrer).hostname:"direct"}catch(e){}fetch("https://cbpdiiyzzmbavsymjysb.supabase.co/functions/v1/superkitchen/api/traffic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:location.pathname,source:source,language:cl}),keepalive:true}).catch(function(){})})();
+console.log("Anthony's Supermarket v6 — brand-safe bilingual storefront");
 setTimeout(function(){document.body.classList.remove("loading")},200);
   </script>
 </body>
