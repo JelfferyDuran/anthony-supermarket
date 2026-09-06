@@ -172,3 +172,15 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Registered "Triunfo Foods" vendor in VENDORS registry.
 - Hub total now 343 items (GOYA 44, Triunfo 49, rest Super Trading/Family Food/TAINO/etc).
 - Verified JS parse with node: 343 items parsed, 9 flagged no-retail.
+
+## 2026-09-05 — ChatGPT Astra ran out of free usage; PR #47 located
+- Goal: find where Astra left off after "ran out of free work usage".
+- Found: **PR #47** "Growth plan: conversion research, bilingual concept, and storefront resilience" (branch `agent/growth-conversion-plan-2026-09-05`, created 07:27 UTC = 3:27 AM local — BEFORE the 18:11 UTC handoff zip, so from a PREVIOUS Astra run). Includes `docs/growth/CONVERSION_PLAN.md` (iteration-2 thinking: conversion research, bilingual concept, WebGL resilience fix).
+- Post-handoff Astra run left NO trace: no commits/branches after 2026-09-05T17:00Z, no checkpoint, no WSL checkout, no working-tree changes. `b865613` on main = user's own commit (BOD-1 TikTok video), not Astra.
+- Handoff zip delivered: `ASTRA_HANDOFF_2026-09-05.zip` (5 files / 23.6 KB) + `docs/checkpoints/checkpoint-01.md` (first command: `docker exec anthony-supermarket-server printenv SUPABASE_URL`).
+- Blocker unchanged: `storeConfigured:false` → upload box disabled. Iteration 1 still open.
+
+## 2026-09-06 — Continuity pack for Astra (checkpoint-02 + branch push)
+- Goal: make everything resume-able for Astra's next run.
+- Changed: `docs/checkpoints/checkpoint-02.md` (records PR #47 footprint + unchanged iteration-1 blocker + exact next commands), updated `docs/ASTRA_PROMPT.md` + `docs/ASTRA_UPGRADE_PLAN.md` (PR #47 pointer), updated CURRENT_STATE.md, regenerated handoff zip with checkpoint-02.
+- Verified: zip regenerated; branch pushed to GitHub so Astra can pick it up via its connector.

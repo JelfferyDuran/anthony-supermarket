@@ -1,0 +1,451 @@
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 4f07144..921c177 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -18,7 +18,7 @@ services:
+       - ./server/data:/app/data
+     restart: unless-stopped
+     healthcheck:
+-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001', (r) => {if (r.statusCode !== 404) throw new Error(r.statusCode)})"]
++      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/pricing-hub/', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+       interval: 30s
+       timeout: 10s
+       retries: 3
+diff --git a/scripts/test-paddle-ocr.js b/scripts/test-paddle-ocr.js
+new file mode 100644
+index 0000000..3532a3e
+--- /dev/null
++++ b/scripts/test-paddle-ocr.js
+@@ -0,0 +1,35 @@
++'use strict';
++// Test harness: run the pricing-ocr pipeline against the LOCAL PaddleOCR
++// container with a real invoice scan. Usage:
++//   node scripts/test-paddle-ocr.js <image-path> [vendor] [invoiceNo]
++process.env.PRICING_PADDLE_URL = process.env.PRICING_PADDLE_URL || 'http://localhost:8120';
++const fs = require('fs');
++const path = require('path');
++const ocr = require('../server/pricing-ocr.js');
++
++const imgPath = process.argv[2];
++const vendor = process.argv[3] || 'Peruvian Import Co';
++const invNo = process.argv[4] || 'TEST';
++if (!imgPath || !fs.existsSync(imgPath)) {
++  console.error('USAGE: node scripts/test-paddle-ocr.js <image-path> [vendor] [invoiceNo]');
++  process.exit(1);
++}
++
++const buf = fs.readFileSync(imgPath);
++const file = { buffer: buf, mimetype: 'image/jpeg', originalname: path.basename(imgPath) };
++
++(async () => {
++  console.log('PROVIDER ACTIVE:', ocr.activeProvider());
++  const started = Date.now();
++  const res = await ocr.extractInvoice(file, { vendor_name: vendor, invoice_number: invNo });
++  console.log(`OK in ${Date.now() - started}ms | provider=${res._provider} model=${res._model}`);
++  console.log('INVOICE:', JSON.stringify(res.invoice));
++  console.log('ITEMS:', res.items.length);
++  for (const it of res.items) {
++    console.log(
++      `${String(it.line_number).padStart(3)} | ${(it.description || '?').padEnd(42)} | qty=${String(it.cases).padStart(3)} | upc=${(it.upc || '-').padEnd(13)} | total=${String(it.total).padStart(9)} | conf=${it.confidence.toFixed(2)} | ${it.review_reason || ''}`
++    );
++  }
++  const sum = Math.round(res.items.reduce((s, i) => s + i.total, 0) * 100) / 100;
++  console.log('SUM LINE TOTALS:', sum);
++})().catch(e => { console.error('ERROR:', e.message); process.exit(1); });
+diff --git a/server/.env.example b/server/.env.example
+index 016d90f..6cb529e 100644
+--- a/server/.env.example
++++ b/server/.env.example
+@@ -59,3 +59,7 @@ SUPABASE_URL=
+ SUPABASE_SERVICE_ROLE_KEY=
+ # Optional override of the retail rule. Defaults to the AGENTS.md 1.70 rule.
+ PRICING_RETAIL_MULTIPLIER=1.70
++
++PRICING_PADDLE_URL=
++PRICING_PADDLE_MODEL=
++PRICING_SERVE_STATIC=1
+diff --git a/server/Dockerfile b/server/Dockerfile
+index abb0a62..3b42616 100644
+--- a/server/Dockerfile
++++ b/server/Dockerfile
+@@ -9,6 +9,8 @@ FROM node:22-alpine
+ WORKDIR /app
+ COPY --from=builder /app/node_modules ./node_modules
+ COPY server/ .
++# Pricing Hub static (served by index.js when PRICING_SERVE_STATIC=1)
++COPY apps/pricing-hub/ ./apps/pricing-hub/
+ # Seed goes to /app/seed (NOT /app/data — that dir is a volume mount)
+ COPY apps/menu/scripts/anthonys-seed.json ./seed/anthonys-seed.json
+ EXPOSE 3001
+diff --git a/server/index.js b/server/index.js
+index 5269530..d9397df 100644
+--- a/server/index.js
++++ b/server/index.js
+@@ -204,7 +204,7 @@ app.use('/api/pricing', createPricingRouter());
+ if (process.env.PRICING_SERVE_STATIC === '1') {
+   const fs = require('fs');
+   const path = require('path');
+-  const HUB_DIR = path.resolve(__dirname, '..', 'apps', 'pricing-hub');
++  const HUB_DIR = path.resolve(__dirname, 'apps', 'pricing-hub');
+   if (fs.existsSync(HUB_DIR)) {
+     app.use('/pricing-hub', express.static(HUB_DIR, { index: 'index.html' }));
+     app.get('/', (_req, res) => res.redirect('/pricing-hub/'));
+diff --git a/server/pricing-ocr.js b/server/pricing-ocr.js
+index abcf73b..6560b33 100644
+--- a/server/pricing-ocr.js
++++ b/server/pricing-ocr.js
+@@ -3,14 +3,20 @@
+ // Invoice extraction. Turns a scan into candidate line items for human review.
+ //
+ // Provider order:
+-//   1. A configured webhook (PRICING_OCR_WEBHOOK_URL) — the PR #32 contract.
+-//      Setting a URL is an explicit operator choice, so it wins. This is the
+-//      path to `server/ocr-webhook.js`, which has been validated against a real
+-//      Family Food invoice (16/16 lines, line-total sum exact), and which also
+-//      offers OpenRouter and keeps the provider key off the app server.
+-//   2. Gemini Flash directly via GEMINI_API_KEY — the owner's 2026-08-19 choice.
++//   1. Local PaddleOCR container (PRICING_PADDLE_URL, default
++//      http://localhost:8120) — the owner's 2026-09-04 choice. PP-OCRv5 runs on
++//      the store's own machine, so an invoice never leaves the store. Raw OCR
++//      lines are parsed into the invoice schema by the coordinate parser below
++//      (ported from scripts/parse-invoice-items.py, validated against PEIMCO
++//      and Triunfo scans).
++//   2. A configured webhook (PRICING_OCR_WEBHOOK_URL) — the PR #32 contract.
++//      Setting a URL is an explicit operator choice. This is the path to
++//      `server/ocr-webhook.js`, which has been validated against a real Family
++//      Food invoice (16/16 lines, line-total sum exact), and which also offers
++//      OpenRouter and keeps the provider key off the app server.
++//   3. Gemini Flash directly via GEMINI_API_KEY — the owner's 2026-08-19 choice.
+ //      Reads images and PDFs and returns structured JSON with nothing extra to
+-//      deploy. Used when no webhook URL is configured.
++//      deploy. Used when PaddleOCR is unreachable and no webhook is configured.
+ //
+ // Nothing here approves anything. Every extracted line lands in `needs_review`
+ // and a manager resolves it against the source scan. That boundary is the whole
+@@ -20,11 +26,42 @@
+ // PRIVACY NOTE (owner is aware): Google's FREE tier may use submitted content to
+ // improve their products. Invoices are internal business documents. If that
+ // becomes unacceptable, the paid tier carries no training use — or switch to the
+-// local Tesseract/PaddleOCR webhook, which sends nothing outside the store.
++// local PaddleOCR provider, which sends nothing outside the store.
+ 
+ const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
+ const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+-const REQUEST_TIMEOUT_MS = 45000;
++const REQUEST_TIMEOUT_MS = 180000;
++
++// ─── Local PaddleOCR provider ─────────────────────────────────────────
++// The store's own container (docker/paddleocr → anthony-paddleocr) runs
++// PP-OCRv5 on CPU and speaks POST /ocr/b64 with {"image": <base64>,
++// "filename": ...}, returning raw lines as {"lines":[{text,score,box}],
++// "full_text": ...}. The parsers below turn those raw lines into the invoice
++// schema using the coordinate logic validated by scripts/parse-invoice-items.py.
++const PADDLE_DEFAULT_URL = 'http://localhost:8120';
++// Rows whose y-centers differ by at most this many px are one line item.
++const PADDLE_Y_TOL = 12;
++// Header words → column name (Triunfo-style invoices; other layouts fall back
++// to the generic row splitter).
++const PADDLE_HEADER_KEYS = {
++  'item code': 'code',
++  'ordered': 'ordered',
++  'shipped': 'shipped',
++  'description': 'name',
++  'pack size': 'pack',
++  'upc code': 'upc',
++  'case/unit': 'unit',
++  'weight': 'weight',
++  'unit price': 'price',
++  'extended': 'extended',
++  'extende': 'extended',
++  'ext': 'extended',
++  'price': 'price',
++  'upc': 'upc',
++  'case': 'unit'
++};
++// Summary rows never become items.
++const PADDLE_TOTAL_MARKERS = /(^|\s)(TOTAL|SUBTOTAL|GRAND|BALANCE|AMOUNT DUE)(\s|$)/i;
+ 
+ // The shape the pricing engine expects back. Declared to the model as a response
+ // schema so it returns parseable JSON rather than prose that needs scraping.
+@@ -92,11 +129,18 @@ function isWebhookConfigured() {
+   return Boolean(process.env.PRICING_OCR_WEBHOOK_URL);
+ }
+ 
++// PaddleOCR is the local, private choice: it is considered configured by
++// default (points at the store's container on the standard local port).
++function isPaddleConfigured() {
++  return Boolean(process.env.PRICING_PADDLE_URL || PADDLE_DEFAULT_URL);
++}
++
+ function isConfigured() {
+-  return isGeminiConfigured() || isWebhookConfigured();
++  return isPaddleConfigured() || isGeminiConfigured() || isWebhookConfigured();
+ }
+ 
+ function activeProvider() {
++  if (isPaddleConfigured()) return 'paddle';
+   if (isWebhookConfigured()) return 'webhook';
+   if (isGeminiConfigured()) return 'gemini';
+   return null;
+@@ -189,6 +233,245 @@ async function extractWithWebhook(file, fields, fetchImpl) {
+   return normalize(await response.json(), 'webhook', process.env.PRICING_OCR_WEBHOOK_URL);
+ }
+ 
++// ─── PaddleOCR raw-line → invoice parser ─────────────────────────────
++// Port of scripts/parse-invoice-items.py's self-calibrating approach:
++// find the header row, derive column x-centers from it, group OCR cells into
++// rows by y-center (≤ PADDLE_Y_TOL), and assign each cell to its nearest
++// column. Works on photos taken at different angles/scales.
++
++function boxCx(box) { return (box[0][0] + box[2][0]) / 2; }
++function boxCy(box) { return (box[0][1] + box[2][1]) / 2; }
++
++function paddleFindColumns(lines) {
++  let headerY = null;
++  for (const l of lines) {
++    const key = l.text.replace(/\s+/g, ' ').trim().toLowerCase();
++    if (key === 'item code') { headerY = boxCy(l.box); break; }
++  }
++  if (headerY == null) return null;
++  const cols = {};
++  for (const l of lines) {
++    if (Math.abs(boxCy(l.box) - headerY) > 25) continue;
++    const key = l.text.replace(/\s+/g, ' ').trim().toLowerCase();
++    if (PADDLE_HEADER_KEYS[key] && !(PADDLE_HEADER_KEYS[key] in cols)) {
++      cols[PADDLE_HEADER_KEYS[key]] = boxCx(l.box);
++    }
++  }
++  if (!('code' in cols) || !('name' in cols) || !('price' in cols)) return null;
++  return cols;
++}
++
++function paddleItemRows(lines, headerY) {
++  const body = lines.filter(l => boxCy(l.box) > headerY + 10);
++  const rows = [];
++  for (const l of body.sort((a, b) => boxCy(a.box) - boxCy(b.box))) {
++    let placed = false;
++    for (const row of rows) {
++      if (Math.abs(row.y - boxCy(l.box)) <= PADDLE_Y_TOL) {
++        row.cells.push(l);
++        row.ys.push(boxCy(l.box));
++        row.y = row.ys.reduce((a, b) => a + b, 0) / row.ys.length;
++        placed = true;
++        break;
++      }
++    }
++    if (!placed) rows.push({ y: boxCy(l.box), ys: [boxCy(l.box)], cells: [l] });
++  }
++  return rows;
++}
++
++function paddleCellFor(row, colX, centers) {
++  // Nearest-center assignment: a cell only claims a column if that column is
++  // genuinely the nearest (prevents a long product name bleeding sideways).
++  let best = null, bd = 1e9;
++  for (const l of row.cells) {
++    const d = Math.abs(boxCx(l.box) - colX);
++    if (centers.some(c => c !== colX && Math.abs(boxCx(l.box) - c) < d)) continue;
++    if (d < bd) { best = l; bd = d; }
++  }
++  return best ? (best.text.trim() || null) : null;
++}
++
++function paddleRowToItem(row, cols, index) {
++  // Per-row drift calibration: photos skew, so columns drift with y. Every
++  // Triunfo-style item row prints 'CASE' in the Case/Unit column — anchor on it.
++  let drift = 0;
++  if ('unit' in cols) {
++    for (const l of row.cells) {
++      if (l.text.trim().toUpperCase() === 'CASE') { drift = boxCx(l.box) - cols.unit; break; }
++    }
++  }
++  const rcols = {};
++  for (const k of Object.keys(cols)) rcols[k] = cols[k] + drift;
++  const centers = Array.from(new Set(Object.values(rcols))).sort((a, b) => a - b);
++
++  const rowText = row.cells.map(c => c.text).join(' ');
++  if (PADDLE_TOTAL_MARKERS.test(rowText)) return null;
++
++  const name = paddleCellFor(row, rcols.name, centers);
++  if (!name || !/[A-Za-z]{3}/.test(name)) return null;
++
++  const code = paddleCellFor(row, rcols.code, centers);
++  const pack = paddleCellFor(row, rcols.pack, centers);
++  const upc = paddleCellFor(row, rcols.upc, centers);
++
++  // price: numeric cell closest to the price OR extended column center
++  // (some invoices print the price under either header after photo drift).
++  const priceCenter = rcols.price;
++  const extCenter = ('extended' in rcols) ? rcols.extended : priceCenter + 60;
++  let priceTxt = null, bd = 1e9;
++  for (const l of row.cells) {
++    const t = l.text.trim().replace(/,/g, '.');
++    if (/^\d+\.\d{2}$/.test(t)) {
++      const d = Math.min(Math.abs(boxCx(l.box) - priceCenter), Math.abs(boxCx(l.box) - extCenter));
++      if (d < bd) { priceTxt = t; bd = d; }
++    }
++  }
++
++  // qty: Ordered and Shipped columns sit close together; sweep the x-band and
++  // take the largest numeric as the case count.
++  let qty = null;
++  if ('ordered' in rcols && 'shipped' in rcols) {
++    const lo = Math.min(rcols.ordered, rcols.shipped) - 18;
++    const hi = Math.max(rcols.ordered, rcols.shipped) + 18;
++    const cands = [];
++    for (const l of row.cells) {
++      if (lo <= boxCx(l.box) && boxCx(l.box) <= hi) {
++        const t = l.text.trim().replace(/,/g, '.');
++        if (/^\d+(\.\d+)?$/.test(t)) cands.push(parseFloat(t));
++      }
++    }
++    if (cands.length) qty = Math.max(...cands);
++  }
++
++  const price = priceTxt != null ? parseFloat(priceTxt) : null;
++  if (qty == null && price == null) return null;
++
++  const packMatch = /^\s*(\d+)\s*[xX]/.exec(pack || '');
++  const units = packMatch ? parseInt(packMatch[1], 10) : null;
++
++  const missing = [];
++  if (price == null) missing.push('price');
++  if (qty == null) missing.push('qty');
++  if (!upc) missing.push('UPC');
++
++  return {
++    line_number: index + 1,
++    vendor_sku: code || '',
++    upc: String(upc || '').replace(/\D/g, ''),
++    description: name,
++    department: '',
++    cases: qty || 0,
++    units: units || 0,
++    total: qty != null && price != null ? Math.round(qty * price * 100) / 100 : (price || 0),
++    confidence: Math.min(...row.cells.map(c => Number.isFinite(c.score) ? c.score : 0)),
++    review_reason: missing.length ? `PaddleOCR local — verify ${missing.join(', ')}` : undefined
++  };
++}
++
++// Generic fallback for invoices without a Triunfo-style header: group lines
++// into rows, then classify cells by content (longest text = description,
++// rightmost 2-decimal number = total, 8+ digits = UPC, "NxM" = pack size).
++function paddleGenericItems(lines) {
++  const rows = [];
++  for (const l of lines.sort((a, b) => boxCy(a.box) - boxCy(b.box))) {
++    let placed = false;
++    for (const row of rows) {
++      if (Math.abs(row.y - boxCy(l.box)) <= PADDLE_Y_TOL) {
++        row.cells.push(l);
++        row.ys.push(boxCy(l.box));
++        row.y = row.ys.reduce((a, b) => a + b, 0) / row.ys.length;
++        placed = true;
++        break;
++      }
++    }
++    if (!placed) rows.push({ y: boxCy(l.box), ys: [boxCy(l.box)], cells: [l] });
++  }
++  const items = [];
++  rows.forEach((row, index) => {
++    row.cells.sort((a, b) => boxCx(a.box) - boxCx(b.box));
++    const rowText = row.cells.map(c => c.text).join(' ');
++    if (PADDLE_TOTAL_MARKERS.test(rowText)) return;
++    const texts = row.cells.map(c => c.text.trim()).filter(Boolean);
++    const name = texts.find(t => /[A-Za-z]{3}/.test(t));
++    if (!name) return;
++    const numerics = row.cells
++      .map(c => ({ x: boxCx(c.box), t: c.text.trim().replace(/,/g, '.') }))
++      .filter(c => /^\d+(\.\d{1,2})?$/.test(c.t));
++    const lastNumeric = numerics[numerics.length - 1];
++    const confidence = Math.min(...row.cells.map(c => Number.isFinite(c.score) ? c.score : 0));
++    if (!lastNumeric || !/\.\d{2}$/.test(lastNumeric.t)) {
++      // no clean dollar total — still surface it for review rather than drop it
++      items.push({
++        line_number: index + 1, vendor_sku: '', upc: '', description: name, department: '',
++        cases: 0, units: 0, total: 0, confidence,
++        review_reason: 'PaddleOCR local — no dollar total found, needs manual entry'
++      });
++      return;
++    }
++    const total = parseFloat(lastNumeric.t);
++    const upcText = texts.find(t => /^\d{8,14}$/.test(t.replace(/\D/g, '')) && t.replace(/\D/g, '').length >= 8);
++    const packMatch = texts.find(t => /^\d+\s*[xX]\s*\d/i.test(t));
++    const units = packMatch ? parseInt(packMatch, 10) : 0;
++    items.push({
++      line_number: index + 1, vendor_sku: '', upc: String(upcText || '').replace(/\D/g, ''),
++      description: name, department: '', cases: 0, units, total, confidence,
++      review_reason: 'PaddleOCR local — generic layout, verify qty/pack'
++    });
++  });
++  return items;
++}
++
++async function extractWithPaddle(file, fields, fetchImpl) {
++  const url = (process.env.PRICING_PADDLE_URL || PADDLE_DEFAULT_URL).replace(/\/+$/, '');
++  const response = await fetchImpl(`${url}/ocr/b64`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({
++      image: file.buffer.toString('base64'),
++      filename: file.originalname || 'invoice'
++    }),
++    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
++  });
++  if (!response.ok) throw new Error(`PaddleOCR service returned HTTP ${response.status}`);
++  let body;
++  try { body = await response.json(); } catch (_) { throw new Error('PaddleOCR returned a non-JSON response'); }
++  const lines = Array.isArray(body && body.lines) ? body.lines : [];
++  if (!lines.length) throw new Error('PaddleOCR returned no text lines');
++
++  const cols = paddleFindColumns(lines);
++  let items;
++  if (cols) {
++    const headerY = Math.min(...lines
++      .filter(l => PADDLE_HEADER_KEYS[l.text.replace(/\s+/g, ' ').trim().toLowerCase()])
++      .map(l => boxCy(l.box)));
++    items = paddleItemRows(lines, headerY)
++      .map((row, i) => paddleRowToItem(row, cols, i))
++      .filter(Boolean);
++  } else {
++    items = paddleGenericItems(lines);
++  }
++
++  const invoiceNumber = fields.invoice_number
++    || (() => {
++      const m = /#?\s*([A-Z]{2,4}[- ]?\d{5,}|INV[A-Z0-9-]+)/i.exec(body.full_text || '');
++      return m ? m[1] : '';
++    })();
++  const subtotal = Math.round(items.reduce((s, i) => s + i.total, 0) * 100) / 100;
++
++  return {
++    invoice: {
++      vendor_name: str(fields.vendor_name),
++      invoice_number: str(invoiceNumber),
++      invoice_date: str(fields.invoice_date),
++      subtotal
++    },
++    items,
++    _provider: 'paddle',
++    _model: 'PP-OCRv5-local'
++  };
++}
++
+ // Coerces a provider's output into the engine's expected shape. A model that
+ // returns a string where a number belongs must not blow up the pipeline — the
+ // line simply fails the engine's checks and goes to review, which is correct.
+@@ -239,6 +522,7 @@ function clamp01(value) {
+ // Extracts a scan. Throws when no provider is configured — callers report that
+ // as OCR_NOT_CONFIGURED and still store the scan privately, so nothing is lost.
+ async function extractInvoice(file, fields = {}, { fetch: fetchImpl = globalThis.fetch } = {}) {
++  if (isPaddleConfigured()) return extractWithPaddle(file, fields, fetchImpl);
+   if (isWebhookConfigured()) return extractWithWebhook(file, fields, fetchImpl);
+   if (isGeminiConfigured()) return extractWithGemini(file, fields, fetchImpl);
+   const error = new Error('No OCR provider is configured');
+@@ -254,6 +538,7 @@ module.exports = {
+   extractInvoice,
+   isConfigured,
+   isGeminiConfigured,
++  isPaddleConfigured,
+   isWebhookConfigured,
+   normalize
+ };

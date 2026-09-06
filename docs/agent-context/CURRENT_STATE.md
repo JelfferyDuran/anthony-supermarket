@@ -1,6 +1,8 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-21
+Last updated: 2026-09-06
+
+> **AGENT HANDOFF (2026-09-06):** resume from `docs/checkpoints/checkpoint-02.md` (newest). A previous ChatGPT Astra run left **PR #47** (branch `agent/growth-conversion-plan-2026-09-05`, `docs/growth/CONVERSION_PLAN.md`) — iteration-2 conversion thinking; iteration-1 blocker (`storeConfigured:false`) is UNCHANGED. Handoff zip: `ASTRA_HANDOFF_2026-09-05.zip` (now includes checkpoint-02).
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
