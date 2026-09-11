@@ -53,6 +53,7 @@ const PADDLE_HEADER_KEYS = {
   'case/unit': 'unit',
   'weight': 'weight',
   'unit price': 'price',
+  'extended amount': 'extended',
   'extended': 'extended',
   'extende': 'extended',
   'ext': 'extended',
@@ -62,6 +63,25 @@ const PADDLE_HEADER_KEYS = {
 };
 // Summary rows never become items.
 const PADDLE_TOTAL_MARKERS = /(^|\s)(TOTAL|SUBTOTAL|GRAND|BALANCE|AMOUNT DUE)(\s|$)/i;
+// OCR truncates long header cells ('Extended Amount' → 'Extended Amoun'), so
+// alias the observed truncations back to canonical column keys.
+const PADDLE_HEADER_ALIASES = {
+  'extended amoun': 'extended',
+  'extended amoun.': 'extended',
+  'extend': 'extended',
+  'unit price': 'price',
+  'unit pri': 'price',
+  'pack siz': 'pack',
+  'upc cod': 'upc'
+};
+function paddleHeaderKey(text) {
+  const k = text.replace(/\s+/g, ' ').trim().toLowerCase();
+  // Return the CANONICAL column key ('item code' → 'code'), not the raw
+  // header text — callers index cols.code/cols.name/cols.price.
+  if (PADDLE_HEADER_KEYS[k]) return PADDLE_HEADER_KEYS[k];
+  if (PADDLE_HEADER_ALIASES[k]) return PADDLE_HEADER_ALIASES[k];
+  return null;
+}
 
 // The shape the pricing engine expects back. Declared to the model as a response
 // schema so it returns parseable JSON rather than prose that needs scraping.
@@ -266,42 +286,137 @@ async function extractWithWebhook(file, fields, fetchImpl) {
 function boxCx(box) { return (box[0][0] + box[2][0]) / 2; }
 function boxCy(box) { return (box[0][1] + box[2][1]) / 2; }
 
-function paddleFindColumns(lines) {
-  let headerY = null;
+const PADDLE_FURNITURE = /^(signature|date|bill\s*to|ship\s*to|remit\s*to|sold\s*to|terms?|page\s*\d+|item\s*code|ordered|shipped|description|pack\s*size|upc\s*code|case|case\s*\/\s*unit|weight|unit\s*price|extended|ite|sub-?total|total)[:\s]*$/i;
+// Footer/body furniture that must never become a line item, matched anywhere
+// in a row (the anchored PADDLE_FURNITURE above misses 'Total Weight:').
+const PADDLE_FOOTER = /(signature|total\s*weight|total\s*pieces|customer\s*#|fuel\s*charge|grand\s*total|amount\s*due)/i;
+
+// The printed number sits in its own box next to an 'Invoice #:' label, so no
+// text-line regex can see it; read it geometrically, right of the label.
+function paddleInvoiceNumber(lines) {
+  const norm = l => l.text.replace(/\s+/g, ' ').trim().toLowerCase();
   for (const l of lines) {
-    const key = l.text.replace(/\s+/g, ' ').trim().toLowerCase();
-    if (key === 'item code') { headerY = boxCy(l.box); break; }
-  }
-  if (headerY == null) return null;
-  const cols = {};
-  for (const l of lines) {
-    if (Math.abs(boxCy(l.box) - headerY) > 25) continue;
-    const key = l.text.replace(/\s+/g, ' ').trim().toLowerCase();
-    if (PADDLE_HEADER_KEYS[key] && !(PADDLE_HEADER_KEYS[key] in cols)) {
-      cols[PADDLE_HEADER_KEYS[key]] = boxCx(l.box);
+    if (!/^(invoice|inv|order|bill)\b[^]*?(#|no\b|number)/.test(norm(l))) continue;
+    const y = boxCy(l.box), x = boxCx(l.box);
+    const near = lines
+      .filter(o => o !== l && Math.abs(boxCy(o.box) - y) <= PADDLE_Y_TOL * 2 && boxCx(o.box) > x)
+      .sort((a, b) => boxCx(a.box) - boxCx(b.box));
+    for (const o of near) {
+      const m = /\d{4,}/.exec(o.text);
+      if (m) return m[0];
     }
   }
-  if (!('code' in cols) || !('name' in cols) || !('price' in cols)) return null;
-  return cols;
+  return '';
 }
 
-function paddleItemRows(lines, headerY) {
-  const body = lines.filter(l => boxCy(l.box) > headerY + 10);
+function paddleFindColumns(lines) {
+  const norm = l => l.text.replace(/\s+/g, ' ').trim().toLowerCase();
+  let anchor = null;
+  for (const l of lines) if (norm(l) === 'item code') { anchor = l; break; }
+  if (!anchor) return null;
+  // Photos of these invoices are tilted ~1.3-1.8 deg. That moves a header
+  // label ~29px vertically across the 946px-wide header, which is wider than
+  // the old fixed +/-25px window, so 'unit price' was dropped and the whole
+  // page fell through to the generic splitter. Measure the tilt from the
+  // header cells themselves and window along the printed row instead.
+  const slope = paddleHeaderSlope(lines, norm, anchor);
+  // Try the measured tilt first; if the window still comes up short (tilt
+  // estimate off, or a scan with no tilt) fall back to an axis-aligned window
+  // — the behaviour that parsed two of these three pages before.
+  for (const s of (slope ? [slope, 0] : [0])) {
+    const skewY = l => boxCy(l.box) - s * boxCx(l.box);
+    const anchorY = skewY(anchor);
+    const tol = Math.max(25, Math.min(70, paddleRowPitch(lines) * 3));
+    const cands = [];
+    for (const l of lines) {
+      const col = paddleHeaderKey(norm(l));
+      if (!col) continue;
+      cands.push({ col, x: boxCx(l.box), d: Math.abs(skewY(l) - anchorY) });
+    }
+    // Nearest label wins, so a data-row 'CASE' cell can never outrank the real
+    // 'Case/Unit' header when both land inside the window.
+    cands.sort((a, b) => a.d - b.d);
+    const cols = {};
+    for (const c of cands) {
+      if (c.d > tol) continue;
+      if (!(c.col in cols)) cols[c.col] = c.x;
+    }
+    if ('code' in cols && 'name' in cols && 'price' in cols) {
+      return { cols, slope: s, headerY: anchorY, tol };
+    }
+  }
+  return null;
+}
+
+// Median pairwise tilt of the header labels (px of y per px of x). The median
+// ignores one or two labels that sit off-baseline on a wrapped header.
+function paddleHeaderSlope(lines, norm, anchor) {
+  // Only cells near the anchor's own y can be header labels. Data rows carry a
+  // 'CASE' cell that also matches a header key; letting those in poisoned the
+  // tilt estimate and pushed the price column out of the window on pages that
+  // used to parse fine.
+  const ay = boxCy(anchor.box);
+  const cells = lines
+    .filter(l => paddleHeaderKey(norm(l)) && Math.abs(boxCy(l.box) - ay) <= 40)
+    .map(l => ({ x: boxCx(l.box), y: boxCy(l.box) }));
+  const slopes = [];
+  for (let i = 0; i < cells.length; i++) {
+    for (let j = i + 1; j < cells.length; j++) {
+      const dx = cells[j].x - cells[i].x;
+      if (Math.abs(dx) < 200) continue;
+      slopes.push((cells[j].y - cells[i].y) / dx);
+    }
+  }
+  if (!slopes.length) return 0;
+  slopes.sort((a, b) => a - b);
+  const m = slopes[Math.floor(slopes.length / 2)];
+  return Math.abs(m) > 0.15 ? 0 : m;
+}
+
+// Typical vertical gap between text lines, used to size the header window.
+function paddleRowPitch(lines) {
+  const ys = lines.map(l => boxCy(l.box)).sort((a, b) => a - b);
+  const gaps = [];
+  for (let i = 1; i < ys.length; i++) { const g = ys[i] - ys[i - 1]; if (g > 2) gaps.push(g); }
+  if (!gaps.length) return 14;
+  gaps.sort((a, b) => a - b);
+  return gaps[Math.floor(gaps.length / 2)];
+}
+
+function paddleItemRows(lines, found) {
+  const { slope, headerY, tol } = found;
+  const norm = l => l.text.replace(/\s+/g, ' ').trim().toLowerCase();
+  const skewY = l => boxCy(l.box) - slope * boxCx(l.box);
+  // Drop the header's own cells (they are not items) but keep a data-row 'CASE'
+  // cell, which lives far below the header window and drives drift calibration.
+  const inHeaderWindow = l => paddleHeaderKey(norm(l)) && Math.abs(skewY(l) - headerY) <= tol;
+  const body = lines.filter(l => !inHeaderWindow(l) && skewY(l) > headerY + Math.max(10, tol * 0.4));
   const rows = [];
-  for (const l of body.sort((a, b) => boxCy(a.box) - boxCy(b.box))) {
+  for (const l of body.sort((a, b) => skewY(a) - skewY(b))) {
     let placed = false;
     for (const row of rows) {
-      if (Math.abs(row.y - boxCy(l.box)) <= PADDLE_Y_TOL) {
+      if (Math.abs(row.y - skewY(l)) <= PADDLE_Y_TOL) {
         row.cells.push(l);
-        row.ys.push(boxCy(l.box));
+        row.ys.push(skewY(l));
         row.y = row.ys.reduce((a, b) => a + b, 0) / row.ys.length;
         placed = true;
         break;
       }
     }
-    if (!placed) rows.push({ y: boxCy(l.box), ys: [boxCy(l.box)], cells: [l] });
+    if (!placed) rows.push({ y: skewY(l), ys: [skewY(l)], cells: [l] });
   }
-  return rows;
+  // Drop label rows: the leftmost cell of a real line item is its code, so a
+  // row that starts with 'Signature:' / 'Date:' is footer furniture even when
+  // address text rides along on the same visual line.
+  return rows.filter(row => {
+    const cells = row.cells.slice().sort((a, b) => boxCx(a.box) - boxCx(b.box));
+    if (cells.some(c => PADDLE_FOOTER.test(c.text))) return false;
+    if (cells.length && PADDLE_FURNITURE.test(cells[0].text.trim())) return false;
+    return cells.some(c => {
+      const t = c.text.trim();
+      return /[A-Za-z]{3}/.test(t) && !PADDLE_FURNITURE.test(t);
+    });
+  });
 }
 
 function paddleCellFor(row, colX, centers) {
@@ -343,12 +458,19 @@ function paddleRowToItem(row, cols, index) {
   // (some invoices print the price under either header after photo drift).
   const priceCenter = rcols.price;
   const extCenter = ('extended' in rcols) ? rcols.extended : priceCenter + 60;
+  // Unit price and line total live in separate columns; when the Extended
+  // column is detected, read each from its own column center instead of
+  // sweeping both (a 0.00 extended cell must stay 0.00, not fall back to
+  // qty × unit price).
   let priceTxt = null, bd = 1e9;
+  let extTxt = null, xd = 1e9;
   for (const l of row.cells) {
     const t = l.text.trim().replace(/,/g, '.');
     if (/^\d+\.\d{2}$/.test(t)) {
-      const d = Math.min(Math.abs(boxCx(l.box) - priceCenter), Math.abs(boxCx(l.box) - extCenter));
-      if (d < bd) { priceTxt = t; bd = d; }
+      const dPrice = Math.abs(boxCx(l.box) - priceCenter);
+      const dExt = Math.abs(boxCx(l.box) - extCenter);
+      if (dPrice < bd) { priceTxt = t; bd = dPrice; }
+      if (dExt < xd) { extTxt = t; xd = dExt; }
     }
   }
 
@@ -369,7 +491,8 @@ function paddleRowToItem(row, cols, index) {
   }
 
   const price = priceTxt != null ? parseFloat(priceTxt) : null;
-  if (qty == null && price == null) return null;
+  const extNum = extTxt != null ? parseFloat(extTxt) : null;
+  if (qty == null && price == null && extNum == null) return null;
 
   const packMatch = /^\s*(\d+)\s*[xX]/.exec(pack || '');
   const units = packMatch ? parseInt(packMatch[1], 10) : null;
@@ -387,7 +510,7 @@ function paddleRowToItem(row, cols, index) {
     department: '',
     cases: qty || 0,
     units: units || 0,
-    total: qty != null && price != null ? Math.round(qty * price * 100) / 100 : (price || 0),
+    total: ('extended' in rcols) && extNum != null ? extNum : (qty != null && price != null ? Math.round(qty * price * 100) / 100 : (price || 0)),
     confidence: Math.min(...row.cells.map(c => Number.isFinite(c.score) ? c.score : 0)),
     review_reason: missing.length ? `PaddleOCR local — verify ${missing.join(', ')}` : undefined
   };
@@ -416,6 +539,9 @@ function paddleGenericItems(lines) {
     row.cells.sort((a, b) => boxCx(a.box) - boxCx(b.box));
     const rowText = row.cells.map(c => c.text).join(' ');
     if (PADDLE_TOTAL_MARKERS.test(rowText)) return;
+    // Column labels and page furniture ('CASE', 'Signature:', 'Date:') are not
+    // products, even when a stray number lands on the same row.
+    if (PADDLE_FURNITURE.test((rowText || '').trim()) || PADDLE_FOOTER.test(rowText || '')) return;
     const texts = row.cells.map(c => c.text.trim()).filter(Boolean);
     const name = texts.find(t => /[A-Za-z]{3}/.test(t));
     if (!name) return;
@@ -425,12 +551,10 @@ function paddleGenericItems(lines) {
     const lastNumeric = numerics[numerics.length - 1];
     const confidence = Math.min(...row.cells.map(c => Number.isFinite(c.score) ? c.score : 0));
     if (!lastNumeric || !/\.\d{2}$/.test(lastNumeric.t)) {
-      // no clean dollar total — still surface it for review rather than drop it
-      items.push({
-        line_number: index + 1, vendor_sku: '', upc: '', description: name, department: '',
-        cases: 0, units: 0, total: 0, confidence,
-        review_reason: 'PaddleOCR local — no dollar total found, needs manual entry'
-      });
+      // No money token on this row: it is page furniture (bill-to, address,
+      // terms, column labels), not a line item. Emitting it as a zero-value
+      // 'needs manual entry' product is what put 'Bill To:' and '288 Kearny
+      // Ave' in the review queue. Abstain instead of inventing a product.
       return;
     }
     const total = parseFloat(lastNumeric.t);
@@ -463,22 +587,22 @@ async function extractWithPaddle(file, fields, fetchImpl) {
   const lines = Array.isArray(body && body.lines) ? body.lines : [];
   if (!lines.length) throw new Error('PaddleOCR returned no text lines');
 
-  const cols = paddleFindColumns(lines);
+  const found = paddleFindColumns(lines);
   let items;
-  if (cols) {
-    const headerY = Math.min(...lines
-      .filter(l => PADDLE_HEADER_KEYS[l.text.replace(/\s+/g, ' ').trim().toLowerCase()])
-      .map(l => boxCy(l.box)));
-    items = paddleItemRows(lines, headerY)
-      .map((row, i) => paddleRowToItem(row, cols, i))
+  if (found) {
+    items = paddleItemRows(lines, found)
+      .map((row, i) => paddleRowToItem(row, found.cols, i))
       .filter(Boolean);
   } else {
     items = paddleGenericItems(lines);
   }
 
   const invoiceNumber = fields.invoice_number
+    || paddleInvoiceNumber(lines)
     || (() => {
-      const m = /#?\s*([A-Z]{2,4}[- ]?\d{5,}|INV[A-Z0-9-]+)/i.exec(body.full_text || '');
+      // Digits only, and only after a '#'. The looser pattern matched header
+      // words and produced 'NJ 07032' / 'Invoice' for #20060979.
+      const m = /#\s*(\d{5,})/.exec(body.full_text || '');
       return m ? m[1] : '';
     })();
   const subtotal = Math.round(items.reduce((s, i) => s + i.total, 0) * 100) / 100;
