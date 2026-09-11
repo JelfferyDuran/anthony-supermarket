@@ -1,0 +1,38 @@
+# Build context hygiene. The image only ever needs server/, apps/pricing-hub/
+# and apps/menu/scripts/anthonys-seed.json (see server/Dockerfile), but the
+# context defaults to the whole repo (~1.4 GB, 40k files). Two of those files
+# are actively dangerous if they reach the builder:
+#
+#   server/node_modules - `COPY server/ .` runs AFTER the builder stage installs
+#     Linux modules, so a local (e.g. Windows) tree would overwrite them and the
+#     container would fail at runtime.
+#   server/.env - runtime secrets belong in env_file on the host, never in an
+#     image layer.
+#
+# Patterns are anchored with a leading slash where they must not match at depth:
+# a bare `pricing-hub` would also exclude apps/pricing-hub and break the build.
+
+# --- never ship local dependencies or secrets ---
+**/node_modules
+server/.env
+server/.env.*
+server/data
+*.log
+/direct-run.log
+
+# --- repo scaffolding and knowledge base the runtime never reads ---
+/.git
+/.github
+/brain
+/docs
+/invoices
+/nrs
+/supabase
+/pricing-hub
+/assets
+/BOD-1.mp4
+
+# --- apps/ is ~980 MB; only pricing-hub + the menu seed are copied ---
+apps/delivery
+apps/inventory
+apps/superkitchen
