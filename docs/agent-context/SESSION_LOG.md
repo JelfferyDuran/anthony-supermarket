@@ -172,3 +172,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Registered "Triunfo Foods" vendor in VENDORS registry.
 - Hub total now 343 items (GOYA 44, Triunfo 49, rest Super Trading/Family Food/TAINO/etc).
 - Verified JS parse with node: 343 items parsed, 9 flagged no-retail.
+
+## 2026-09-05 — Codex growth/conversion review
+- Goal: Research a conversion-focused modern storefront and document the architecture before deployment.
+- Changed: Added research plan/evidence, bilingual self-contained CSS-depth concept, scoped root WebGL resilience/zoom patch, regression tests and CI, HQ/decision/current-state handoff.
+- Verified: Current main and open PR metadata through connector; both Vercel URLs HTTP 200; live browser reproduced WebGL/loading failure and conflicting hours; four resilience/syntax tests pass; concept dictionary, internal links, IDs and JavaScript syntax checked.
+- Not verified / blockers: Prototype visual/mobile browser testing blocked for local/data URLs; current commercial hosting project, Cloudflare ownership/DNS, actual hours, authenticated backend state, controlled order, financial baseline. No real conversion improvement measured.
+- Security or rollback notes: No production deployment, DNS/database change, order creation, or invoice upload. Public-only packaging and internal UI removal remain release gates. Revert isolated root patch to roll back code; no data rollback is required.
+- PR/issue/commit: Feature branch agent/growth-conversion-plan-2026-09-05, based on dfb38b633f8116270d833997f3eaee882dfe363c; reconciles context for #28/#29/#30/#33/#41/#46.
+- Next safe action: Review plan/concept and resilience patch, confirm domain/hours, implement public-only build boundary, then validate an authorized preview and ordering lifecycle before production.

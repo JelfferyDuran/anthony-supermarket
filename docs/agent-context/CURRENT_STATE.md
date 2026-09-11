@@ -1,8 +1,21 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-08-21
+Last updated: 2026-09-05 (growth audit added; prior backend observations retain their original dates)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-09-05 storefront growth review — not deployed
+- Owner requested research, documented conversion architecture, modern accessible depth, and planning before production deployment.
+- Review pack: `docs/growth/CONVERSION_PLAN.md`; bilingual concept: `docs/growth/concept.html`; evidence/verification: `docs/growth/README.md` and `EVIDENCE.md`.
+- Current main was inspected at `dfb38b633f8116270d833997f3eaee882dfe363c` through the authenticated GitHub connector. Historical local worktrees and earlier #28/#29 handoffs are not current architecture authority.
+- Live `anthony-supermarket.vercel.app` and the Super Kitchen URL returned HTTP 200. In the browser, the root site failed WebGL initialization and remained on its loading overlay with an empty menu. A scoped patch removes the blocking overlay, defers/isolate-catches decoration, preserves readable sections, and restores zoom. This is proposed code, not a live fix.
+- The legacy `www.anthonyssupermarket.com` visibly lists all seven days Closed. Vercel says Open Daily but also Sunday CLOSED. Correct store/kitchen/holiday hours and canonical domain ownership require owner verification; none were guessed or changed.
+- Current root source still exposes the Pricing Hub/cost-profit UI. Root Vercel output and Pages artifact settings use the repository root. Public-only packaging and selective reconciliation of #28 remain P0 release gates; no claim that all source/data paths were tested publicly.
+- GitHub metadata currently reports a private repository and Pages disabled. Connected Vercel team reports Hobby and no projects; actual production project settings, billing owner, rollout/rollback ID, and Cloudflare DNS remain unverified.
+- #28 is open/non-draft; #29 remains draft on the older kitchen branch. #33 offers CSS 3D sales work; #30 readiness remediation, #41 pricing integration, and #46 continuity also need reconciliation. Do not merge old stacks over newer Pricing Hub/manager code blindly.
+- Research recommends HTML-first isolated storefront output, retained React/Vite kitchen and Supabase authority, browser/guest ordering with optional Telegram, approved retail-only data, and Insights that distinguish clicks, accepted/fulfilled orders, and settled sales.
+- No database migration, production order, DNS change, hosting purchase, or production promotion occurred. Test invoices were not used or published.
+- Next safe action: review the draft growth pack and resilience patch; verify canonical hours/domain and public build boundary before promoting any new storefront. Continue the existing order lifecycle validation separately.
 
 ## Repository
 - Canonical repo: `JelfferyDuran/anthony-supermarket`

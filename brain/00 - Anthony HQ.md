@@ -19,6 +19,7 @@ This page is the human + agent navigation hub for the Anthony's Supermarket Obsi
 - [[brain/Attachments/README|Attachments]] — small supporting files only
 
 ## Active build roadmap
+- [[docs/growth/CONVERSION_PLAN|Digital growth and conversion plan — September 2026 review]]
 - Kitchen Dashboard — Phase 2A
 - Admin / Manager Dashboard — Phase 2B
 - Customer tracking + reliability — Phase 2C
