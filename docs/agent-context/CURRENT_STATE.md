@@ -1,8 +1,15 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-09-11 (PaddleOCR PR #50 merged + deployed locally; container menu path defect recorded)
+Last updated: 2026-09-11 (PaddleOCR PR #50 merged + deployed locally; container menu path defect recorded; Pages disabled, CI green, decision recorded)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-09-11 — GitHub Pages disabled; Vercel stays the public site (CI green)
+- Decision recorded (accepted): `brain/Decisions/2026-09-11-pages-private-repo.md`.
+- Root cause of chronic red CI since 2026-09-05: repo is private (Free plan), so Pages cannot be enabled — every push's "Deploy to GitHub Pages" run failed at `actions/configure-pages` ("Get Pages site failed"; Pages API 404/422). No code defect.
+- Fix: `.github/workflows/deploy.yml` now stages only the public surface (root html, `assets/`, `pricing-hub/`); workflow is `disabled_manually` so no further failing runs. Re-enable only if the repo goes public.
+- Verified live: repo `private: true`; Pages API 404; workflow state `disabled_manually`; last Pages run (34562817299) failed pre-disable and was triggered by the very push that disabled it — no Pages runs since.
+- Main CI green: Shared Brain CI + Super Kitchen CI latest runs success; Storefront resilience is PR-only.
 
 ## 2026-09-11 — PaddleOCR merged and deployed; container menu path is broken
 - PR #50 merged as `498d21b`; the local Docker `server` image was rebuilt and the container recreated on it. `/pricing-hub/` returns **200** (host port **3401** → container 3001) and the container is healthy.
@@ -20,7 +27,7 @@ This file is operational context, not a secret store. **Live infrastructure is a
 - Live `anthony-supermarket.vercel.app` and the Super Kitchen URL returned HTTP 200. In the browser, the root site failed WebGL initialization and remained on its loading overlay with an empty menu. A scoped patch removes the blocking overlay, defers/isolate-catches decoration, preserves readable sections, and restores zoom. This is proposed code, not a live fix.
 - The legacy `www.anthonyssupermarket.com` visibly lists all seven days Closed. Vercel says Open Daily but also Sunday CLOSED. Correct store/kitchen/holiday hours and canonical domain ownership require owner verification; none were guessed or changed.
 - Current root source still exposes the Pricing Hub/cost-profit UI. Root Vercel output and Pages artifact settings use the repository root. Public-only packaging and selective reconciliation of #28 remain P0 release gates; no claim that all source/data paths were tested publicly.
-- GitHub metadata currently reports a private repository and Pages disabled. Connected Vercel team reports Hobby and no projects; actual production project settings, billing owner, rollout/rollback ID, and Cloudflare DNS remain unverified.
+- GitHub metadata currently reports a private repository and Pages disabled — Pages is now disabled by decision (see `brain/Decisions/2026-09-11-pages-private-repo.md`). Connected Vercel team reports Hobby and no projects; actual production project settings, billing owner, rollout/rollback ID, and Cloudflare DNS remain unverified.
 - #28 is open/non-draft; #29 remains draft on the older kitchen branch. #33 offers CSS 3D sales work; #30 readiness remediation, #41 pricing integration, and #46 continuity also need reconciliation. Do not merge old stacks over newer Pricing Hub/manager code blindly.
 - Research recommends HTML-first isolated storefront output, retained React/Vite kitchen and Supabase authority, browser/guest ordering with optional Telegram, approved retail-only data, and Insights that distinguish clicks, accepted/fulfilled orders, and settled sales.
 - No database migration, production order, DNS change, hosting purchase, or production promotion occurred. Test invoices were not used or published.
