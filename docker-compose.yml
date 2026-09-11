@@ -18,7 +18,11 @@ services:
       - ./server/data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/pricing-hub/', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      # Smoke guard: healthy means the menu loaded WITH items. /api/health
+      # returns 503 when 0 items are loaded, so an empty-menu regression
+      # (e.g. a host-only MENU_DATA_PATH shadowing the image seed) flips the
+      # container to unhealthy instead of silently serving {menus: []}.
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (r) => { if (r.statusCode !== 200) { process.exit(1) } })"]
       interval: 30s
       timeout: 10s
       retries: 3

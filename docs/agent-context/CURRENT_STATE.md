@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-09-11 (PaddleOCR PR #50 merged + deployed locally; container menu path defect recorded; Pages disabled, CI green, decision recorded)
+Last updated: 2026-09-11 (menu smoke guard deployed; empty-menu defect closed; PaddleOCR PR #50 merged locally; Pages disabled, CI green)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
@@ -11,14 +11,15 @@ This file is operational context, not a secret store. **Live infrastructure is a
 - Verified live: repo `private: true`; Pages API 404; workflow state `disabled_manually`; last Pages run (34562817299) failed pre-disable and was triggered by the very push that disabled it — no Pages runs since.
 - Main CI green: Shared Brain CI + Super Kitchen CI latest runs success; Storefront resilience is PR-only.
 
-## 2026-09-11 — PaddleOCR merged and deployed; container menu path is broken
-- PR #50 merged as `498d21b`; the local Docker `server` image was rebuilt and the container recreated on it. `/pricing-hub/` returns **200** (host port **3401** → container 3001) and the container is healthy.
-- **Open defect — the container serves an empty menu.** `server/.env:9` sets `MENU_DATA_PATH=C:\Users\Jayto\anthony-supermarket\apps\menu\scripts\anthonys-seed.json`. That Windows path is valid for a host-side `node server/index.js` run but cannot exist inside the container, so startup logs `❌ Failed to load menu: ENOENT` and falls back to `{menus: []}`. `/api/menu` returns `{"slug":"anthonys","nombre":"Anthony's","menus":[]}`.
-  - The populated seed **is** already in the image at `/app/seed/anthonys-seed.json` (17,421 bytes; 1 menu, categories with items — e.g. Mangu 3 Golpes 9.95, Cheesesteak 8.95). The code's fallback default in `server/index.js:24` (`../apps/menu/scripts/…`) is likewise wrong for the image, which copies to `./seed/`.
-  - **Pre-existing, not introduced by #50:** the `rollback-pre-pr50` image has the identical layout and the same path mismatch. #50's only compose change was the healthcheck.
-  - Suggested fix is container-scoped — an explicit `MENU_DATA_PATH: /app/seed/anthonys-seed.json` in `docker-compose.yml` — rather than editing `server/.env`, which must stay host-valid for local development.
+## 2026-09-11 — Menu smoke guard deployed; empty-menu defect CLOSED
+- **Defect fixed + guarded.** The container once served `/api/menu` as `{menus: []}` because `server/.env:9` sets a Windows-only `MENU_DATA_PATH` that cannot exist inside the container. Seed resolution now probes layouts (`08baf39`, `server/menu-seed.js`) instead of trusting env precedence, and a new smoke guard makes a zero-item menu impossible to serve:
+  - `server/index.js` `loadMenu()` exits(1) on missing/empty/malformed seed — no silent `{menus: []}` fallback.
+  - `GET /api/menu` returns **503** (not 200-empty) if 0 items are loaded at runtime.
+  - `GET /api/health` returns **503** when 0 items are loaded, and the Docker healthcheck now probes `/api/health` (was `/pricing-hub/`), so an empty-menu regression flips the container unhealthy.
+  - `server/menu-smoke.test.js` (wired into `npm test`) boots the real server and asserts: real seed resolves with items, `/api/menu` serves > 0 items, repo-checkout seed is the served one, empty/malformed seeds refuse to boot, and a host-only `MENU_DATA_PATH` falls back to the populated seed.
+- Verified live: container rebuilt + recreated on the new image; `docker ps` = healthy; `GET /api/health` = **200**; `GET /api/menu` = **200 with 132 items** (host port **3401** → container 3001). Full test suite: **112/112 pass** (106 pre-existing + 6 smoke guard).
+- The healthcheck no longer requires `PRICING_SERVE_STATIC=1`; it asserts menu health instead.
 - **Build-context defect fixed:** the repo had no `.dockerignore`, so the build context was the whole repo (~1.4 GB / 40k files) and a local rebuild would have overwritten the container's Linux `node_modules` with Windows binaries (`COPY server/ .` runs after the builder stage) and baked `server/.env` into an image layer. Fixed in `bf60ee7`; context now 697 kB.
-- The healthcheck requires `PRICING_SERVE_STATIC=1` so `/pricing-hub/` returns 200. It is set in `server/.env` here; any environment lacking it will now report the container unhealthy.
 
 ## 2026-09-05 storefront growth review — not deployed
 - Owner requested research, documented conversion architecture, modern accessible depth, and planning before production deployment.

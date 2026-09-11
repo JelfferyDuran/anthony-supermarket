@@ -165,19 +165,23 @@ function loadMenu(sourcePath = MENU_DATA_PATH) {
   if (!sourcePath) {
     console.error('❌ Failed to load menu: no seed file found.');
     console.error('   Probed:', menuSeedCandidates().join(' | '));
-    menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
-    return;
+    // Smoke guard: never boot into an empty menu. Crash loudly so the
+    // container healthcheck/restart surfaces it instead of serving {menus: []}.
+    process.exit(1);
   }
   try {
     menuData = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
     const itemCount = countMenuItems(menuData);
     console.log(`✅ Menu loaded: ${menuData.nombre} (${itemCount} items) from ${sourcePath}`);
     if (itemCount === 0) {
-      console.error('⚠️  Menu seed parsed but contains 0 items — the order flow will show no products.');
+      console.error(`❌ Menu seed parsed but contains 0 items — refusing to serve an empty /api/menu. Source: ${sourcePath}`);
+      process.exit(1);
     }
   } catch (e) {
     console.error('❌ Failed to load menu:', e.message, '— source:', sourcePath);
-    menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
+    // Smoke guard: a missing/unreadable/broken seed must never become an
+    // empty menu. Exit so the failure is visible in healthcheck/restart.
+    process.exit(1);
   }
 }
 
@@ -234,15 +238,28 @@ if (process.env.PRICING_SERVE_STATIC === '1') {
   }
 }
 
-// Health check
+// Health check — smoke guard: a healthy server must have a non-empty menu.
 app.get('/api/health', (req, res) => {
+  const itemCount = countMenuItems(menuData);
+  if (itemCount === 0) {
+    return res.status(503).json({ status: 'unhealthy', restaurant: menuData?.nombre, items: 0, supabase: !!supabase });
+  }
   res.json({ status: 'ok', restaurant: menuData?.nombre, items: flatItems.length, supabase: !!supabase });
 });
 
 // Get full menu
 app.get('/api/config', (req, res) => res.json({ restaurant: menuData?.nombre || "Anthony's Supermarket", phone: '(201) 428-1745', telegramBotUrl: TELEGRAM_BOT_URL }));
 
-app.get('/api/menu', (req, res) => res.json(menuData));
+app.get('/api/menu', (req, res) => {
+  // Smoke guard: never serve a zero-item menu. The loader refuses to boot
+  // on an empty seed; this is the runtime backstop in case menuData is ever
+  // emptied after startup (e.g. a future reload path).
+  const itemCount = countMenuItems(menuData);
+  if (!menuData || itemCount === 0) {
+    return res.status(503).json({ error: 'Menu unavailable: 0 items loaded' });
+  }
+  res.json(menuData);
+});
 
 // Get menu by slug
 app.get('/api/menu/:slug', (req, res) => {

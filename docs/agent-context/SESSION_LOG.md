@@ -198,3 +198,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: workflow stages only public files; a future re-enable cannot publish `server/`, `docs/`, `invoices/`, `nrs/`, `data/`. Re-enable via `gh workflow enable deploy.yml` only if the repo goes public. No secrets touched.
 - PR/issue/commit: `e1ba4b7` (Pages disable); decision `brain/Decisions/2026-09-11-pages-private-repo.md`.
 - Next safe action: none required for CI; keep Pages disabled while the repo is private. Continue the container menu path fix (`/app/seed/anthonys-seed.json`) as the open defect.
+
+## 2026-09-11 — Menu loader smoke guard: assert /api/menu never returns 0 items (CLOSED)
+- Goal: make a zero-item /api/menu impossible to serve after the container once returned {menus: []} because server/.env's Windows-only MENU_DATA_PATH shadowed the image seed (08baf39 fixed resolution; this closes the remaining silent-fallback gap).
+- Changed: `server/index.js` (loadMenu exits(1) on missing/empty/malformed seed — no silent {menus: []} fallback; GET /api/menu returns 503 when 0 items loaded; GET /api/health returns 503 when 0 items loaded), `docker-compose.yml` (healthcheck now probes /api/health instead of /pricing-hub/), new `server/menu-smoke.test.js` (6 tests, wired into npm test), `server/package.json` (test script), docs CURRENT_STATE + SESSION_LOG.
+- Verified: `node --test menu-smoke.test.js` 6/6 pass — real seed resolves with items; booted server /api/menu returns items > 0; repo-checkout seed is the served one; empty seed refuses to boot (exit 1); malformed seed refuses to boot (exit 1); host-only MENU_DATA_PATH falls back to a populated seed. Full suite 112/112 pass. Container rebuilt + recreated: docker ps healthy; /api/health 200; /api/menu 200 with 132 items on host port 3401.
+- Security or rollback notes: no secrets touched; rollback = checkout pre-change server/index.js + docker-compose.yml. Healthcheck no longer requires PRICING_SERVE_STATIC=1.
+- PR/issue/commit: uncommitted on main (next commit).
+- Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); monitor that the recreated container stays healthy.
