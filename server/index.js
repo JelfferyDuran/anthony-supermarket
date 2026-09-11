@@ -10,6 +10,7 @@ const { createClient } = require('@supabase/supabase-js');
 const kitchenAide = require('./kitchen-aide');
 const { createPricingRouter } = require('./pricing-router');
 const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
+const { resolveMenuDataPath, menuSeedCandidates, countMenuItems } = require('./menu-seed');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -21,7 +22,10 @@ const MINIAPP_API_URL = process.env.MINIAPP_API_URL || '';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(origin => origin.trim()).filter(Boolean);
 const TAX_RATE = Number(process.env.TAX_RATE || 0);
 const WHATSAPP_WEBHOOK = process.env.WHATSAPP_WEBHOOK || '';
-const MENU_DATA_PATH = process.env.MENU_DATA_PATH || path.join(__dirname, '..', 'apps', 'menu', 'scripts', 'anthonys-seed.json');
+// Resolved at startup by probing both the image and repo seed layouts, so a
+// host-only MENU_DATA_PATH (e.g. a Windows absolute path) cannot shadow the
+// copy that exists inside the container. null when nothing is found.
+const MENU_DATA_PATH = resolveMenuDataPath();
 const ORDERS_PATH = path.join(__dirname, 'data', 'orders.json');
 // Chats allowed to use the pricing calculator commands. Everything else gets no
 // pricing response at all — not an error, which would confirm the feature exists.
@@ -157,12 +161,22 @@ async function updateOrderStatus(orderId, estado) {
 // ─── Data Store ───────────────────────────────────────────────────────
 
 let menuData = null;
-function loadMenu() {
+function loadMenu(sourcePath = MENU_DATA_PATH) {
+  if (!sourcePath) {
+    console.error('❌ Failed to load menu: no seed file found.');
+    console.error('   Probed:', menuSeedCandidates().join(' | '));
+    menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
+    return;
+  }
   try {
-    menuData = JSON.parse(fs.readFileSync(MENU_DATA_PATH, 'utf8'));
-    console.log(`✅ Menu loaded: ${menuData.nombre}`);
+    menuData = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    const itemCount = countMenuItems(menuData);
+    console.log(`✅ Menu loaded: ${menuData.nombre} (${itemCount} items) from ${sourcePath}`);
+    if (itemCount === 0) {
+      console.error('⚠️  Menu seed parsed but contains 0 items — the order flow will show no products.');
+    }
   } catch (e) {
-    console.error('❌ Failed to load menu:', e.message);
+    console.error('❌ Failed to load menu:', e.message, '— source:', sourcePath);
     menuData = { slug: 'anthonys', nombre: 'Anthony\'s', menus: [] };
   }
 }
