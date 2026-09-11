@@ -204,8 +204,14 @@ app.use('/api/pricing', createPricingRouter());
 if (process.env.PRICING_SERVE_STATIC === '1') {
   const fs = require('fs');
   const path = require('path');
-  const HUB_DIR = path.resolve(__dirname, '..', 'apps', 'pricing-hub');
-  if (fs.existsSync(HUB_DIR)) {
+  // Two layouts must both work: the container copies the hub next to the server
+  // code (/app/apps/pricing-hub), while a checkout of this repo keeps it at the
+  // repo root (server/../apps/pricing-hub). Probe rather than assume.
+  const HUB_DIR = [
+    path.resolve(__dirname, 'apps', 'pricing-hub'),
+    path.resolve(__dirname, '..', 'apps', 'pricing-hub')
+  ].find(candidate => fs.existsSync(candidate));
+  if (HUB_DIR) {
     app.use('/pricing-hub', express.static(HUB_DIR, { index: 'index.html' }));
     app.get('/', (_req, res) => res.redirect('/pricing-hub/'));
     console.log(`🏷️  Serving Pricing Hub v2 static at /pricing-hub/ (${HUB_DIR})`);
