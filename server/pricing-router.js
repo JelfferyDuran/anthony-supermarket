@@ -181,8 +181,10 @@ function createPricingRouter(options = {}) {
     const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ error: 'email and password required' });
     try {
-      const { getClient } = require('./pricing-store');
-      const { data, error } = await getClient().auth.signInWithPassword({ email, password });
+      const { createAuthClient } = require('./pricing-store');
+      const authClient = createAuthClient();
+      if (!authClient) return res.status(503).json({ error: 'Pricing authentication is not configured' });
+      const { data, error } = await authClient.auth.signInWithPassword({ email, password });
       if (error || !data.session) return res.status(401).json({ error: 'invalid credentials' });
       return res.json({
         token: data.session.access_token,
@@ -630,8 +632,10 @@ function csvCell(value) {
 // and must never be trusted for authorization.
 async function defaultVerifyUser(token) {
   if (!isConfigured()) return null;
-  const { getClient } = require('./pricing-store');
-  const { data, error } = await getClient().auth.getUser(token);
+  const { createAuthClient } = require('./pricing-store');
+  const authClient = createAuthClient();
+  if (!authClient) return null;
+  const { data, error } = await authClient.auth.getUser(token);
   if (error || !data || !data.user) return null;
   return {
     id: data.user.id,

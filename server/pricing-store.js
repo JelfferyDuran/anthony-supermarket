@@ -29,6 +29,20 @@ function getClient() {
   return cachedClient;
 }
 
+// Auth calls get their own throwaway client. supabase-js keeps the signed-in
+// session on the client instance and then sends it as the Authorization header
+// on every later PostgREST request — so signing in on the cached data client
+// silently downgrades this process from service_role to `authenticated`, the
+// role the pricing migrations revoke. Symptom: one successful login makes every
+// later store query fail with "permission denied for table ..." until restart.
+function createAuthClient() {
+  const key = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!process.env.SUPABASE_URL || !key) return null;
+  return createClient(process.env.SUPABASE_URL, key, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+
 function sha256(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
@@ -248,4 +262,4 @@ function createPricingStore(client = getClient()) {
   };
 }
 
-module.exports = { INVOICE_BUCKET, createPricingStore, getClient, isConfigured, sha256 };
+module.exports = { INVOICE_BUCKET, createAuthClient, createPricingStore, getClient, isConfigured, sha256 };
