@@ -7,7 +7,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const ENV_KEYS = ['GEMINI_API_KEY', 'GEMINI_MODEL', 'PRICING_OCR_WEBHOOK_URL', 'PRICING_OCR_WEBHOOK_TOKEN'];
+const ENV_KEYS = ['GEMINI_API_KEY', 'GEMINI_MODEL', 'PRICING_OCR_WEBHOOK_URL', 'PRICING_OCR_WEBHOOK_TOKEN', 'PRICING_PADDLE_URL'];
 
 // Loads the adapter under a specific environment and restores it afterwards.
 // Awaits the body before restoring: an async test would otherwise run against a
@@ -68,6 +68,88 @@ test('a configured webhook wins over the in-process Gemini path', () => withEnv(
 
 test('extraction refuses with a recognisable code when unconfigured', () => withEnv({}, async ocr => {
   await assert.rejects(() => ocr.extractInvoice(FILE), error => error.code === 'OCR_NOT_CONFIGURED');
+}));
+
+// ── PaddleOCR (local, opt-in) ────────────────────────────────────────────────
+
+// The container on :8120 is the private choice, but it is a choice: an unset
+// URL must not make every deployment advertise a reader it is not running.
+test('PaddleOCR is opt-in, not assumed from a default URL', () => withEnv({}, ocr => {
+  assert.equal(ocr.isPaddleConfigured(), false);
+  assert.equal(ocr.isConfigured(), false);
+  assert.equal(ocr.activeProvider(), null);
+}));
+
+test('configuring the local container makes PaddleOCR the preferred reader', () => withEnv({ PRICING_PADDLE_URL: 'http://localhost:8120/' }, ocr => {
+  assert.equal(ocr.isConfigured(), true);
+  assert.equal(ocr.activeProvider(), 'paddle', 'and it outranks Gemini');
+}));
+
+test('a bare flag resolves to the container on its standard port', () => withEnv({ PRICING_PADDLE_URL: '1' }, async ocr => {
+  let calledUrl = null;
+  await ocr.extractInvoice(FILE, {}, {
+    fetch: async (url) => {
+      calledUrl = url;
+      return { ok: true, status: 200, json: async () => ({ lines: [{ text: 'Widget 3.99', score: 0.99, box: [[0, 0], [10, 0], [10, 10], [0, 10]] }] }) };
+    }
+  });
+  assert.equal(calledUrl, 'http://localhost:8120/ocr/b64');
+}));
+
+// The bug this guards: with no trailer, a stopped container used to fail the
+// whole scan even though a working key was configured.
+test('a dead PaddleOCR container falls through to Gemini instead of failing the scan', () => withEnv(
+  { PRICING_PADDLE_URL: 'http://localhost:8120', GEMINI_API_KEY: 'k' },
+  async ocr => {
+    const result = await ocr.extractInvoice(FILE, {}, {
+      fetch: async (url) => {
+        if (String(url).includes('8120')) throw new Error('connect ECONNREFUSED 127.0.0.1:8120');
+        return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"invoice":{},"items":[]}' }] } }] }) };
+      }
+    });
+    assert.equal(result._provider, 'gemini', 'the scan was still read');
+    assert.equal(result._fallback_from, 'paddle');
+    assert.match(result._fallback_reason, /ECONNREFUSED/);
+  }
+));
+
+test('a PaddleOCR HTTP error is reported, not swallowed, when it is the only reader', () => withEnv(
+  { PRICING_PADDLE_URL: 'http://localhost:8120' },
+  async ocr => {
+    await assert.rejects(
+      () => ocr.extractInvoice(FILE, {}, {
+        fetch: async () => ({ ok: false, status: 500, json: async () => ({}) })
+      }),
+      error => error.code === 'OCR_PROVIDER_FAILED' && error.provider === 'paddle' && /HTTP 500/.test(error.message)
+    );
+  }
+));
+
+test('when every configured reader fails, the error names each one', () => withEnv(
+  { PRICING_PADDLE_URL: 'http://localhost:8120', GEMINI_API_KEY: 'k' },
+  async ocr => {
+    await assert.rejects(
+      () => ocr.extractInvoice(FILE, {}, { fetch: async () => { throw new Error('offline'); } }),
+      error => error.code === 'OCR_ALL_PROVIDERS_FAILED'
+        && /paddle: offline/.test(error.message)
+        && /gemini: offline/.test(error.message)
+        && error.failures.length === 2
+    );
+  }
+));
+
+test('the probe reports reachability without throwing', () => withEnv({ PRICING_PADDLE_URL: 'http://localhost:8120' }, async ocr => {
+  const down = await ocr.probePaddle(async () => { throw new Error('ECONNREFUSED'); });
+  assert.equal(down.ok, false);
+  assert.match(down.reason, /ECONNREFUSED/);
+  // The service has no guaranteed root route, so any answer proves it is up.
+  const up = await ocr.probePaddle(async () => ({ ok: true, status: 404 }));
+  assert.equal(up.ok, true);
+}));
+
+test('the probe says so plainly when PaddleOCR was never chosen', () => withEnv({}, async ocr => {
+  const result = await ocr.probePaddle(async () => ({ ok: true }));
+  assert.deepEqual(result, { ok: false, reason: 'not configured' });
 }));
 
 // ── Gemini request shape ─────────────────────────────────────────────────────
