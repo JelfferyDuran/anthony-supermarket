@@ -1,8 +1,17 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-09-05 (growth audit added; prior backend observations retain their original dates)
+Last updated: 2026-09-11 (PaddleOCR PR #50 merged + deployed locally; container menu path defect recorded)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-09-11 — PaddleOCR merged and deployed; container menu path is broken
+- PR #50 merged as `498d21b`; the local Docker `server` image was rebuilt and the container recreated on it. `/pricing-hub/` returns **200** (host port **3401** → container 3001) and the container is healthy.
+- **Open defect — the container serves an empty menu.** `server/.env:9` sets `MENU_DATA_PATH=C:\Users\Jayto\anthony-supermarket\apps\menu\scripts\anthonys-seed.json`. That Windows path is valid for a host-side `node server/index.js` run but cannot exist inside the container, so startup logs `❌ Failed to load menu: ENOENT` and falls back to `{menus: []}`. `/api/menu` returns `{"slug":"anthonys","nombre":"Anthony's","menus":[]}`.
+  - The populated seed **is** already in the image at `/app/seed/anthonys-seed.json` (17,421 bytes; 1 menu, categories with items — e.g. Mangu 3 Golpes 9.95, Cheesesteak 8.95). The code's fallback default in `server/index.js:24` (`../apps/menu/scripts/…`) is likewise wrong for the image, which copies to `./seed/`.
+  - **Pre-existing, not introduced by #50:** the `rollback-pre-pr50` image has the identical layout and the same path mismatch. #50's only compose change was the healthcheck.
+  - Suggested fix is container-scoped — an explicit `MENU_DATA_PATH: /app/seed/anthonys-seed.json` in `docker-compose.yml` — rather than editing `server/.env`, which must stay host-valid for local development.
+- **Build-context defect fixed:** the repo had no `.dockerignore`, so the build context was the whole repo (~1.4 GB / 40k files) and a local rebuild would have overwritten the container's Linux `node_modules` with Windows binaries (`COPY server/ .` runs after the builder stage) and baked `server/.env` into an image layer. Fixed in `bf60ee7`; context now 697 kB.
+- The healthcheck requires `PRICING_SERVE_STATIC=1` so `/pricing-hub/` returns 200. It is set in `server/.env` here; any environment lacking it will now report the container unhealthy.
 
 ## 2026-09-05 storefront growth review — not deployed
 - Owner requested research, documented conversion architecture, modern accessible depth, and planning before production deployment.
