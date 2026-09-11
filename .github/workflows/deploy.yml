@@ -24,13 +24,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Stage public site files
+        shell: bash
+        run: |
+          set -e
+          mkdir -p _site
+          cp index.html links.html privacy.html terms.html sales.html _site/ 2>/dev/null || true
+          cp -r assets pricing-hub _site/ 2>/dev/null || true
+          ls -la _site/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
