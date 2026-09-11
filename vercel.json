@@ -1,6 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "buildCommand": null,
-  "outputDirectory": "."
+  "framework": "vite",
+  "buildCommand": "npm run build --workspace=apps/superkitchen",
+  "outputDirectory": "apps/superkitchen/dist",
+  "devCommand": "npm run dev --workspace=apps/superkitchen",
+  "installCommand": "npm ci",
+  "frameworkDetection": {
+    "include": ["vite.config.*", "apps/superkitchen/vite.config.*"]
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/apps/superkitchen/server/index.js" }
+  ]
 }

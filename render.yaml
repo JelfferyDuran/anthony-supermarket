@@ -14,7 +14,7 @@ services:
       - key: TELEGRAM_BOT_URL
         value: https://t.me/Anthonysuperkitchen_bot
       - key: ALLOWED_ORIGINS
-        value: https://jelfferyduran.github.io
+        value: https://<your-vercel-app>.vercel.app,https://<your-menu-app>.vercel.app
       - key: TAX_RATE
         value: "0"
 
@@ -32,3 +32,5 @@ services:
         sync: false
       - key: ADMIN_TOKEN
         sync: false
+      - key: VITE_API_URL
+        value: https://<your-vercel-app>.vercel.app/api

@@ -1,11 +1,10 @@
-name: Super Kitchen CI
+name: Super Kitchen Vercel CI
 
 on:
   pull_request:
     paths:
       - 'apps/superkitchen/src/**'
       - 'apps/superkitchen/index.html'
-      - 'apps/superkitchen/dist/**'
       - 'apps/superkitchen/vercel.json'
       - 'apps/superkitchen/package.json'
       - 'apps/superkitchen/package-lock.json'
@@ -17,14 +16,12 @@ on:
       - 'scripts/hermes-ops-check.mjs'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
-      - 'render.yaml'
       - '.github/workflows/superkitchen-ci.yml'
   push:
     branches: [main]
     paths:
       - 'apps/superkitchen/src/**'
       - 'apps/superkitchen/index.html'
-      - 'apps/superkitchen/dist/**'
       - 'apps/superkitchen/vercel.json'
       - 'apps/superkitchen/package.json'
       - 'apps/superkitchen/package-lock.json'
@@ -36,7 +33,6 @@ on:
       - 'scripts/hermes-ops-check.mjs'
       - 'server/superkitchen-bot-v2.js'
       - 'server/.env.v2.example'
-      - 'render.yaml'
       - '.github/workflows/superkitchen-ci.yml'
 
 permissions:
@@ -64,13 +60,22 @@ jobs:
           fi
       - run: npm ci --workspaces=false
       - run: npm run build --workspaces=false
-      - name: Verify tracked Pages build matches source
+      - name: Verify Vite build output exists
         shell: bash
         run: |
           set -euo pipefail
-          git add -A -f dist
-          if ! git diff --cached --exit-code -- dist; then
-            echo 'apps/superkitchen/dist is stale. Rebuild and commit the generated Pages artifact.'
+          if [[ ! -d dist ]]; then
+            echo 'dist/ directory missing — Vite build did not produce output.'
+            exit 1
+          fi
+          echo "Build artifacts:"
+          ls -la dist/
+      - name: Verify vercel.json is present for deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f vercel.json ]]; then
+            echo 'vercel.json missing — Vercel deployment needs this config file.'
             exit 1
           fi
 
