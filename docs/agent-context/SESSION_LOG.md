@@ -206,3 +206,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets touched; rollback = checkout pre-change server/index.js + docker-compose.yml. Healthcheck no longer requires PRICING_SERVE_STATIC=1.
 - PR/issue/commit: uncommitted on main (next commit).
 - Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); monitor that the recreated container stays healthy.
+
+## 2026-09-12 — Hermes DevOps — menu slug mismatch fixed (kanban t_d200935c)
+- Goal: fix the 404 on the menu endpoint — the Telegram bot `/menu` handler and `/api/menu/:slug` looked up slug `'kitchen'` while the seed carries `'anthonys'` (renamed in 485331a), so the bot answered "Menu not found".
+- Changed: `server/menu-seed.js` (new `resolveMenuBySlug(data, slug)`; exact match wins, single-menu seed falls back to its one menu for any unknown slug, multi-menu seeds still 404), `server/index.js` (bot `/menu` requests canonical `'anthonys'`; `/api/menu/:slug`, `cat:` and `add:` callbacks use the resolver; category buttons emit `cat:<real slug>:` instead of hardcoded `cat:kitchen:`), `server/menu-seed.test.js` (+4 unit tests), `server/menu-smoke.test.js` (+1 booted-server regression test), docs CURRENT_STATE + SESSION_LOG.
+- Verified: full server suite 117/117 pass (112 pre-existing + 5 new). Container `anthony-supermarket-server` rebuilt + recreated, healthy in 19s. Live on host port 3401: `/api/health` 200 (132 items); `/api/menu` 200; `/api/menu/anthonys` 200; `/api/menu/kitchen` 200 (was 404).
+- Security or rollback notes: no secrets touched; rollback = checkout pre-change `server/index.js` + `server/menu-seed.js` and recreate the container.
+- PR/issue/commit: uncommitted on main (next commit); board card t_7c3667b4 unblocked.
+- Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); spot-check bot `/menu` in Telegram.

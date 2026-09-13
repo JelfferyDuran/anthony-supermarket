@@ -6,6 +6,7 @@ const {
   menuSeedCandidates,
   resolveMenuDataPath,
   countMenuItems,
+  resolveMenuBySlug,
 } = require('./menu-seed');
 
 const DOCKER_SEED = path.join('X:', 'app', 'seed', 'anthonys-seed.json');
@@ -66,4 +67,43 @@ test('countMenuItems is 0 for the empty fallback and for malformed shapes', () =
   assert.strictEqual(countMenuItems({}), 0);
   assert.strictEqual(countMenuItems(null), 0);
   assert.strictEqual(countMenuItems({ menus: [{}] }), 0);
+});
+
+// ─── resolveMenuBySlug (slug mismatch regression) ────────────────────────
+// The bot /menu handler and the /api/menu/:slug endpoint used to look up
+// slug === 'kitchen' while the seed carries slug 'anthonys' (renamed in
+// 485331a), so the menu 404'd. Exact match wins; a single-menu seed also
+// answers unknown slugs so stale references keep working.
+
+const singleMenuData = {
+  slug: 'anthonys',
+  menus: [{ slug: 'anthonys', nombre: 'Anthony\'s SuperKitchen', categorias: [{ items: [{}] }] }],
+};
+
+const multiMenuData = {
+  menus: [
+    { slug: 'anthonys', categorias: [] },
+    { slug: 'catering', categorias: [] },
+  ],
+};
+
+test('resolveMenuBySlug: exact slug match wins', () => {
+  const menu = resolveMenuBySlug(singleMenuData, 'anthonys');
+  assert.equal(menu.slug, 'anthonys');
+});
+
+test('resolveMenuBySlug: stale unknown slug falls back to the single menu', () => {
+  const menu = resolveMenuBySlug(singleMenuData, 'kitchen');
+  assert.ok(menu, 'stale slug must resolve on a single-menu seed');
+  assert.equal(menu.slug, 'anthonys');
+});
+
+test('resolveMenuBySlug: unknown slug on a multi-menu seed still misses', () => {
+  assert.equal(resolveMenuBySlug(multiMenuData, 'kitchen'), undefined);
+});
+
+test('resolveMenuBySlug: malformed data yields undefined', () => {
+  assert.equal(resolveMenuBySlug(null, 'anthonys'), undefined);
+  assert.equal(resolveMenuBySlug({ menus: [] }, 'anthonys'), undefined);
+  assert.equal(resolveMenuBySlug({}, 'anthonys'), undefined);
 });

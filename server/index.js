@@ -10,7 +10,7 @@ const { createClient } = require('@supabase/supabase-js');
 const kitchenAide = require('./kitchen-aide');
 const { createPricingRouter } = require('./pricing-router');
 const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
-const { resolveMenuDataPath, menuSeedCandidates, countMenuItems } = require('./menu-seed');
+const { resolveMenuDataPath, menuSeedCandidates, countMenuItems, resolveMenuBySlug } = require('./menu-seed');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -262,8 +262,11 @@ app.get('/api/menu', (req, res) => {
 });
 
 // Get menu by slug
+// Slug normalization: exact match first, then the single-menu fallback (see
+// resolveMenuBySlug). A stale slug like the pre-rename 'kitchen' must not 404
+// while the seed carries exactly one menu.
 app.get('/api/menu/:slug', (req, res) => {
-  const menu = menuData?.menus.find(m => m.slug === req.params.slug);
+  const menu = resolveMenuBySlug(menuData, req.params.slug);
   if (!menu) return res.status(404).json({ error: 'Menu not found' });
   res.json(menu);
 });
@@ -582,7 +585,7 @@ function startBot() {
 
     // Menu handler
     bot.onText(/\/menu/, (msg) => {
-      const menu = menuData?.menus.find(m => m.slug === 'kitchen');
+      const menu = resolveMenuBySlug(menuData, 'anthonys');
       if (!menu) return bot.sendMessage(msg.chat.id, 'Menu not found');
 
       let text = `*🍳 Anthony's SuperKitchen — Full Menu*\n${menu.subtitulo || ''}\n\n`;
@@ -595,7 +598,7 @@ function startBot() {
         });
         if (cat.items.length > 3) text += `  _+${cat.items.length - 3} more_\n`;
         text += '\n';
-        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:kitchen:${cat.nombre}` }]);
+        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:${menu.slug}:${cat.nombre}` }]);
       });
 
       text += `\nTap a category or use /search <item> to find something.`;
@@ -613,7 +616,7 @@ function startBot() {
 
       if (data.startsWith('cat:')) {
         const [, slug, catName] = data.split(':');
-        const menu = menuData?.menus.find(m => m.slug === slug);
+        const menu = resolveMenuBySlug(menuData, slug);
         const cat = menu?.categorias.find(c => c.nombre === catName);
         if (!cat) return bot.answerCallbackQuery(query.id, { text: 'Category not found' });
 
@@ -641,7 +644,7 @@ function startBot() {
       if (data.startsWith('add:')) {
         const [, slug, catName, ...nameParts] = data.split(':');
         const name = nameParts.join(':');
-        const menu = menuData?.menus.find(m => m.slug === slug);
+        const menu = resolveMenuBySlug(menuData, slug);
         const cat = menu?.categorias.find(c => c.nombre === catName);
         const item = cat?.items.find(i => i.nombre === name);
         if (!item) return bot.answerCallbackQuery(query.id, { text: 'Item not found' });

@@ -1,8 +1,16 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-09-11 (menu smoke guard deployed; empty-menu defect closed; PaddleOCR PR #50 merged locally; Pages disabled, CI green)
+Last updated: 2026-09-12 (menu slug mismatch fixed — stale 'kitchen' resolves; container rebuilt + healthy)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-09-12 — Menu slug mismatch FIXED: stale 'kitchen' no longer 404s (kanban t_d200935c)
+- **Defect fixed + regression-guarded.** The Telegram bot `/menu` handler and `/api/menu/:slug` looked up slug `'kitchen'`, but the seed carries slug `'anthonys'` (renamed in 485331a), so the bot answered "Menu not found" and `/api/menu/kitchen` 404'd.
+- Changed: `server/menu-seed.js` (new `resolveMenuBySlug(data, slug)` — exact match wins; a single-menu seed also answers unknown slugs so stale references keep working; multi-menu seeds still 404), `server/index.js` (bot `/menu` requests canonical `'anthonys'`; `/api/menu/:slug`, `cat:` and `add:` callbacks use the resolver; category buttons now emit `cat:<real slug>:` instead of hardcoded `cat:kitchen:`), `server/menu-seed.test.js` (+4 unit tests), `server/menu-smoke.test.js` (+1 booted-server regression test).
+- Verified: full server suite **117/117 pass** (112 pre-existing + 5 new). Container rebuilt + recreated (`anthony-supermarket-server` healthy in 19s). Live on host port 3401: `/api/health` 200 with 132 items; `/api/menu` 200 (13,403 bytes); `/api/menu/anthonys` 200; **`/api/menu/kitchen` now 200** (was 404).
+- Security or rollback notes: no secrets touched; rollback = checkout pre-change `server/index.js` + `server/menu-seed.js` and recreate the container.
+- PR/issue/commit: uncommitted on main (kanban t_d200935c; board card t_7c3667b4 unblocked).
+- Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); spot-check the bot `/menu` command in Telegram.
 
 ## 2026-09-11 — GitHub Pages disabled; Vercel stays the public site (CI green)
 - Decision recorded (accepted): `brain/Decisions/2026-09-11-pages-private-repo.md`.

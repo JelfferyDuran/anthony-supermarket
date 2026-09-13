@@ -59,4 +59,18 @@ function countMenuItems(data) {
   }, 0);
 }
 
-module.exports = { menuSeedCandidates, resolveMenuDataPath, countMenuItems, fileExists };
+// Slug lookup with a single-menu fallback. Exact match wins; when the seed
+// holds exactly one menu (the common case for this restaurant), any unknown
+// slug — including stale references such as the pre-rename 'kitchen' — still
+// resolves to it instead of 404ing. Unknown slugs on a multi-menu seed miss,
+// so 404 semantics stay intact if more menus are added later.
+function resolveMenuBySlug(data, slug) {
+  if (!data || !Array.isArray(data.menus)) return undefined;
+  if (slug) {
+    const exact = data.menus.find(m => m && m.slug === slug);
+    if (exact) return exact;
+  }
+  return data.menus.length === 1 ? data.menus[0] : undefined;
+}
+
+module.exports = { menuSeedCandidates, resolveMenuDataPath, countMenuItems, resolveMenuBySlug, fileExists };

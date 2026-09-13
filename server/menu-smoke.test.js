@@ -106,6 +106,27 @@ test('booted server: repo checkout seed is the one served', async (t) => {
   assert.equal(body.nombre, servedFromDisk.nombre);
 });
 
+test('booted server: /api/menu/:slug serves the menu for a stale slug', async (t) => {
+  // Regression for the slug mismatch: the bot used to look up slug 'kitchen'
+  // while the seed carries 'anthonys' (renamed in 485331a), so /menu 404'd.
+  // On a single-menu seed, an unknown slug must resolve to the one menu.
+  const { child, base } = bootServer();
+  t.after(() => child.kill());
+
+  await waitForHttp(base);
+
+  const canonical = await fetch(`${base}/api/menu/anthonys`);
+  assert.equal(canonical.status, 200);
+  const canonicalBody = await canonical.json();
+
+  const stale = await fetch(`${base}/api/menu/kitchen`);
+  assert.equal(stale.status, 200, 'stale slug must not 404 on a single-menu seed');
+  const staleBody = await stale.json();
+
+  assert.equal(staleBody.slug, canonicalBody.slug);
+  assert.equal(countMenuItems(staleBody), countMenuItems(canonicalBody));
+});
+
 test('empty seed makes the server refuse to boot (exit != 0)', async (t) => {
   const seed = writeTempSeed({ slug: 'anthonys', nombre: 'Anthony\'s', menus: [] });
   t.after(() => { try { fs.unlinkSync(seed); } catch {} });
