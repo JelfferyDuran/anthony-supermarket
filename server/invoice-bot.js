@@ -22,7 +22,7 @@
 //   ANTHONY_INVOICE_BOT_TOKEN  (the BotFather token for @Anthonysinvoicebot)
 //   PRICING_TELEGRAM_CHAT_IDS  (allowlist; also HERMES_CHAT_ID is added)
 //   PRICING_MANAGER_TOKEN      (to call /api/pricing/invoices)
-//   HUB_API                    (default http://127.0.0.1:8810)
+//   HUB_API                    (default http://127.0.0.1:3401 — VPS host port of anthony-supermarket-server)
 //   INVOICE_VAULT_DIR          (RAW_UPLOADS dir; default the Obsidian vault)
 //   TELEGRAM_BOT_TOKEN         (KFS bot — used to sync to the home channel)
 //   TELEGRAM_HOME_CHANNEL      (where Hermes sync messages are delivered)
@@ -46,7 +46,7 @@ loadEnv(path.join(__dirname, '.env'));
 loadEnv('/opt/data/.env');
 
 const TOKEN = process.env.ANTHONY_INVOICE_BOT_TOKEN || process.env.TELEGRAM_TOKEN || '';
-const HUB_API = process.env.HUB_API || 'http://127.0.0.1:8810';
+const HUB_API = process.env.HUB_API || 'http://127.0.0.1:3401';
 const MANAGER_TOKEN = process.env.PRICING_MANAGER_TOKEN || '';
 const HOME_CHANNEL = process.env.TELEGRAM_HOME_CHANNEL || '';
 const KFS_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''; // for Hermes sync
