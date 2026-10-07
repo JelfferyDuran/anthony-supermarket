@@ -7,7 +7,7 @@
  "invoice_date": "2026-10-07",
  "invoice_total": 1925.03,
  "status": "needs_review",
- "note": "31 lines extracted from pages 1-2 of 3; line sum $1,925.03 vs invoice total $2,077.23 = $152.20 variance; page 3 not yet photographed. DO NOT approve until reconciled.",
+ "note": "31 lines extracted from pages 1-2 of 3; line sum $1,925.03 vs invoice total $2,077.23 = $152.20 variance. Owner confirmed 2026-10-07 these photos are all pages received. Beacon re-read both pages 2026-10-07: extraction matches photos; cases reconcile exactly (35). Variance is in the vendor's total or an unphotographed page 3 \u2014 DO NOT approve until resolved against paper copy or vendor.",
  "vendors": [
   "Family Food"
  ],
