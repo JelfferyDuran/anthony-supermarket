@@ -21,7 +21,8 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
 // Same mount path the hub client expects (API_BASE = '/api/pricing').
 app.use('/api/pricing', createPricingRouter());
-// Deployment health check (no auth, no store).
-app.get('/api/pricing-health', (_req, res) => res.json({ ok: true, service: 'pricing-hub-api' }));
+// Deployment health check (no auth, no store). Lives under /api/pricing/*
+// because that is the path prefix Vercel routes to this function.
+app.get('/api/pricing/health', (_req, res) => res.json({ ok: true, service: 'pricing-hub-api' }));
 
 module.exports = app;
