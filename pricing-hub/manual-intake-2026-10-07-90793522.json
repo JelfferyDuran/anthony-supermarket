@@ -6,8 +6,8 @@
  "formula": "retail = round99(unitCost x 1.70)",
  "invoice_date": "2026-10-07",
  "invoice_total": 2077.23,
- "status": "needs_review",
- "note": "CORRECTED 2026-10-08: re-read from clear photos. The Oct 7 extraction had dropped the Mama Tere Plantain Chips line ($187.95) and double-counted the $35.75 Sazon line ($187.95 - $35.75 = $152.20 = the entire \"variance\"). 31 lines, $2,077.23 = printed total to the penny; 35 cases = page-3 total. No vendor error. Names/UPCs for items 1049/1092/3265/9095/07718/8714 and three tea lines also corrected. Status: reconciled, awaiting manager approval. The Spanish dispute report is VOID and was withdrawn.",
+ "status": "verified",
+ "note": "CORRECTED 2026-10-08: re-read from clear photos. The Oct 7 extraction had dropped the Mama Tere Plantain Chips line ($187.95) and double-counted the $35.75 Sazon line ($187.95 - $35.75 = $152.20 = the entire \"variance\"). 31 lines, $2,077.23 = printed total to the penny; 35 cases = page-3 total. No vendor error. Names/UPCs for items 1049/1092/3265/9095/07718/8714 and three tea lines also corrected. Status: reconciled, awaiting manager approval. The Spanish dispute report is VOID and was withdrawn. Approved 2026-10-08 by Noel: corrected extraction reconciles $2,077.23 to the penny, 35 cases. No vendor dispute.",
  "vendors": [
   "Family Food"
  ],
@@ -27,7 +27,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -45,7 +45,7 @@
    "retail": 1.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -63,7 +63,7 @@
    "retail": 10.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -81,7 +81,7 @@
    "retail": 9.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -99,7 +99,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -117,7 +117,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": true,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -135,7 +135,7 @@
    "retail": 1.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -153,7 +153,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -171,7 +171,7 @@
    "retail": 8.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -189,7 +189,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -207,7 +207,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -225,7 +225,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -243,7 +243,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -261,7 +261,7 @@
    "retail": 8.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -279,7 +279,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -297,7 +297,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -315,7 +315,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -333,7 +333,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -351,7 +351,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -369,7 +369,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -387,7 +387,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -405,7 +405,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -423,7 +423,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -441,7 +441,7 @@
    "retail": 1.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -459,7 +459,7 @@
    "retail": 1.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -477,7 +477,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -495,7 +495,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -513,7 +513,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -531,7 +531,7 @@
    "retail": 1.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -549,7 +549,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -567,7 +567,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   }
  ]
