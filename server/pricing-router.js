@@ -186,10 +186,15 @@ function createPricingRouter(options = {}) {
       if (!authClient) return res.status(503).json({ error: 'Pricing authentication is not configured' });
       const { data, error } = await authClient.auth.signInWithPassword({ email, password });
       if (error || !data.session) return res.status(401).json({ error: 'invalid credentials' });
+      const loginRole = (data.user.app_metadata && data.user.app_metadata.role) || '';
+      // Mint a long-lived server session so managers are not forced to sign in
+      // every hour when the Supabase access token expires. Response shape is
+      // unchanged, so the hub client needs no updates.
+      const sessionToken = mintSessionToken({ id: data.user.id, email: data.user.email, role: loginRole });
       return res.json({
-        token: data.session.access_token,
+        token: sessionToken,
         email: data.user.email,
-        role: (data.user.app_metadata && data.user.app_metadata.role) || ''
+        role: loginRole
       });
     } catch (e) {
       return res.status(500).json({ error: e.message });
@@ -627,10 +632,58 @@ function csvCell(value) {
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
+// ── Long-lived manager sessions ─────────────────────────────────────────────────
+// Supabase access tokens expire after an hour, forcing managers to sign in over
+// and over. After Supabase verifies the password + role at login, the server
+// mints its own signed session token (30 days). The browser stores it exactly
+// like before, so no client changes are needed.
+function sessionSecret() {
+  return process.env.PRICING_SESSION_SECRET || process.env.PRICING_MANAGER_TOKEN || '';
+}
+
+function mintSessionToken(user) {
+  const secret = sessionSecret();
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const payload = Buffer.from(JSON.stringify({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    iat: now,
+    exp: now + 30 * 24 * 3600
+  })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(header + '.' + payload).digest('base64url');
+  return header + '.' + payload + '.' + sig;
+}
+
+function verifySessionToken(token) {
+  const secret = sessionSecret();
+  if (!secret || !token) return null;
+  const parts = String(token).split('.');
+  if (parts.length !== 3) return null;
+  const [header, payloadB64, sig] = parts;
+  let expect;
+  try {
+    expect = crypto.createHmac('sha256', secret).update(header + '.' + payloadB64).digest('base64url');
+  } catch (_) { return null; }
+  const a = Buffer.from(sig, 'utf8'), b = Buffer.from(expect, 'utf8');
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  let payload;
+  try { payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')); }
+  catch (_) { return null; }
+  if (!payload || typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return null;
+  if (payload.role !== 'manager' && payload.role !== 'admin') return null;
+  return { id: payload.sub, email: payload.email, role: payload.role };
+}
+
 // Verifies a Supabase session JWT and extracts the caller's role. Roles live in
 // app_metadata, which only the server can set — user_metadata is user-writable
 // and must never be trusted for authorization.
 async function defaultVerifyUser(token) {
+  // Server-minted session tokens verify locally (no network round-trip).
+  const session = verifySessionToken(token);
+  if (session) return session;
+  // Legacy path: raw Supabase access tokens verify against the Auth API.
   if (!isConfigured()) return null;
   const { createAuthClient } = require('./pricing-store');
   const authClient = createAuthClient();
