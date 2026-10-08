@@ -1,0 +1,34 @@
+{
+ "generated": "2026-10-08",
+ "customer": "ANTHONY SHOP & SAVE SUPERM",
+ "customer_no": "A164",
+ "source": "chat-upload",
+ "formula": "retail = unit cost x 1.70, .99 rounding",
+ "invoice_date": "2026-10-08",
+ "invoice_total": 19.92,
+ "status": "needs_review",
+ "vendors": [
+  "Fisher Foods of Queens"
+ ],
+ "items": [
+  {
+   "id": 1,
+   "itemNo": "",
+   "upc": "4470000674",
+   "name": "O M TURK AMER LUNCH 8/8.9oz",
+   "cat": "Deli",
+   "vendor": "Fisher Foods of Queens",
+   "invoice": "804807.1",
+   "boxes": 1,
+   "boxPrice": 19.92,
+   "units": 8,
+   "costPerUnit": 2.49,
+   "retail": 3.99,
+   "internal": false,
+   "flagged": false,
+   "status": "needs_review",
+   "markupPct": 70.0
+  }
+ ],
+ "note": "1 line; invoice total $19.92 reconciles; 1 case. Same delivery/account as J&J #804807."
+}
