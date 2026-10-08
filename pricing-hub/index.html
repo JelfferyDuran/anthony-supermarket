@@ -932,7 +932,15 @@ function setConnection(status, detail){
   banner.className = 'conn ' + (status==='live'?'live':status==='error'?'err':'local');
   text.textContent = detail;
   retry.hidden = (status==='live'||status==='checking');
-}
+  // When the banner asks for sign-in, the action button jumps to the Manager
+  // sign-in card (top of the Invoice Intake tab) instead of just retrying.
+  if(status==='local' && /sign in/i.test(detail||'')){
+    retry.textContent = 'Sign in';
+    retry.onclick = ()=>{ selectTab('intake'); const box = $('authBox'); if(box) box.scrollIntoView({block:'start'}); };
+  }else{
+    retry.textContent = 'Retry';
+    retry.onclick = connect;
+  }
 
 // Loads the price history for one item, once, when its row is opened.
 async function ensureHistory(item){
@@ -1752,7 +1760,7 @@ function bind(){
     }
   });
 
-  $('connRetry').addEventListener('click', connect);
+  /* connRetry click is assigned by setConnection (Retry vs Sign in) */
   $('exportLabelsBtn').addEventListener('click', exportLabels);
   $('exportCsvBtn').addEventListener('click', exportCatalog);
 
