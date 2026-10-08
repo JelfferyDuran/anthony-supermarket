@@ -1363,7 +1363,7 @@ function renderExportCounts(){
 // Multipart uploads bypass the JSON api() helper, which sets a Content-Type that
 // would break the form boundary.
 async function upload(path, formData){
-  const response = await fetch(API_BASE+path, { method:'POST', credentials:'same-origin', body: formData });
+  const token = localStorage.getItem('pricingToken') || ''; const response = await fetch(API_BASE+path, { method:'POST', credentials:'same-origin', headers: token ? { Authorization:'Bearer '+token } : {}, body: formData });
   let body = null;
   try { body = await response.json(); } catch(_){ /* non-JSON error page */ }
   if(!response.ok){
