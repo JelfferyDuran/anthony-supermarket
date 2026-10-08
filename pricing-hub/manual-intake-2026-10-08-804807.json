@@ -6,7 +6,7 @@
  "formula": "retail = unit cost x 1.70, .99 rounding",
  "invoice_date": "2026-10-08",
  "invoice_total": 773.68,
- "status": "needs_review",
+ "status": "verified",
  "vendors": [
   "J&J Farms Creamery"
  ],
@@ -26,7 +26,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -44,7 +44,7 @@
    "retail": 12.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -62,7 +62,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -80,7 +80,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -98,7 +98,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -116,7 +116,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -134,7 +134,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -152,7 +152,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -170,7 +170,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -188,7 +188,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -206,7 +206,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -224,7 +224,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -242,7 +242,7 @@
    "retail": 7.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -260,7 +260,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -278,7 +278,7 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -296,7 +296,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -314,7 +314,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -332,7 +332,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -350,7 +350,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -368,7 +368,7 @@
    "retail": 7.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -386,7 +386,7 @@
    "retail": 6.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -404,7 +404,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -422,7 +422,7 @@
    "retail": 2.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -440,7 +440,7 @@
    "retail": 5.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -458,7 +458,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -476,7 +476,7 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -494,7 +494,7 @@
    "retail": 6.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   },
   {
@@ -512,9 +512,9 @@
    "retail": 4.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   }
  ],
- "note": "28 lines from page 1; invoice total $773.68 reconciles to the penny; 29 cases. Net prices used (after promo). Amount to collect $1,028.51 includes prior balance (bill-to-bill)."
+ "note": "28 lines from page 1; invoice total $773.68 reconciles to the penny; 29 cases. Net prices used (after promo). Amount to collect $1,028.51 includes prior balance (bill-to-bill). Approved 2026-10-08 by Noel."
 }

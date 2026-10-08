@@ -6,7 +6,7 @@
  "formula": "retail = unit cost x 1.70, .99 rounding",
  "invoice_date": "2026-10-08",
  "invoice_total": 19.92,
- "status": "needs_review",
+ "status": "verified",
  "vendors": [
   "Fisher Foods of Queens"
  ],
@@ -26,9 +26,9 @@
    "retail": 3.99,
    "internal": false,
    "flagged": false,
-   "status": "needs_review",
+   "status": "verified",
    "markupPct": 70.0
   }
  ],
- "note": "1 line; invoice total $19.92 reconciles; 1 case. Same delivery/account as J&J #804807."
+ "note": "1 line; invoice total $19.92 reconciles; 1 case. Same delivery/account as J&J #804807. Approved 2026-10-08 by Noel."
 }
