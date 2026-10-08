@@ -22,6 +22,9 @@
 <!-- 3D canvas -->
 <canvas id="scene" aria-label="3D loading dock"></canvas>
 
+<!-- floating 3D-anchored HTML labels (projected each frame) -->
+<div id="labels" aria-hidden="true"></div>
+
 <!-- Boot / loading overlay -->
 <div id="loader" class="overlay-center">
   <div class="loader-box">
@@ -85,43 +88,44 @@
       <b id="clearedCount">0</b>
     </span>
     <span id="userEmail" class="tb-user"></span>
-    <button id="signoutBtn" class="btn ghost small">Sign out</button>
+    <button id="signoutBtn" class="btn ghost small"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h8"/><path d="M10 12h11"/><path d="M18 8.5L21.5 12 18 15.5"/></svg><span>Sign out</span></button>
   </div>
 </header>
 
 <nav id="zonenav" aria-label="Zones">
   <button data-zone="dock" class="znav active">
-    <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
     <span>DOCK</span>
   </button>
   <button data-zone="intake" class="znav">
-    <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><path d="M12 8.5v5"/><path d="M9.75 11L12 13.25l2.25-2.25"/></svg>
     <span>INTAKE</span>
   </button>
   <button data-zone="review" class="znav">
-    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9.5 13.5l2.25 2.25 4-4.75"/></svg>
     <span>REVIEW</span>
     <b id="reviewBadge" class="count-badge hidden">0</b>
   </button>
   <button data-zone="aisles" class="znav">
-    <svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 9h16"/><path d="M4 15h16"/></svg>
     <span>AISLES</span>
   </button>
   <button data-zone="vault" class="znav">
-    <svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 8V6a4 4 0 018 0v2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="14" r="2" fill="currentColor"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="3.5"/><path d="M12 10.4V12l1.8 1.2"/></svg>
     <span>VAULT</span>
   </button>
 </nav>
 
 <!-- The unmissable upload button -->
 <button id="fab" aria-label="Upload an invoice">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 <input type="file" id="filePicker" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
 
 <!-- Upload progress HUD -->
 <div id="uploadHud" class="hidden">
   <div class="upload-card">
+    <svg class="upload-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4.2 7.6L12 12l7.8-4.4"/><path d="M12 12v8.7"/></svg>
     <div class="upload-ring" id="uploadRing"><span id="uploadPct">0%</span></div>
     <div class="upload-text">
       <div id="uploadTitle" class="upload-title">Uploading…</div>

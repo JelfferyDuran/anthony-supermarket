@@ -115,8 +115,7 @@ export function createHud(world, zones, nav) {
   searchBar.id = 'aisleSearch';
   searchBar.className = 'hidden';
   searchBar.innerHTML =
-    '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>' +
-    '<path d="M16 16l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>' +
     '<input id="aisleSearchInput" type="search" placeholder="Search products…" autocomplete="off">';
   document.body.appendChild(searchBar);
   searchBar.querySelector('input').addEventListener('input', (e) => {

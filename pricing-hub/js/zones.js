@@ -25,6 +25,9 @@ export function createZones(world, hooks) {
   const reviewPkgs = new Map();   // invoiceId -> group
   const productBoxes = new Map(); // productId -> mesh
   const floaters = [];           // {obj, baseY, phase, amp}
+  const hitGeoBox = new THREE.BoxGeometry(2.8, 2.8, 2.8);
+  const hitGeoSmall = new THREE.BoxGeometry(2.4, 2.4, 2.4);
+  const hitMat = new THREE.MeshBasicMaterial({ visible: false }); // raycastable, invisible
 
   world.onFrame((_, t) => {
     for (const f of floaters) {
@@ -45,18 +48,21 @@ export function createZones(world, hooks) {
         g = world.spawnPackage();
         const slot = world.anchors.reviewSlots[i % world.anchors.reviewSlots.length];
         g.position.copy(slot);
-        const tag = world.labelPlane('#' + String(inv.number).slice(0, 14), { size: 40, color: '#ffb020', height: 0.85 });
-        tag.position.y = 1.15;
-        g.add(tag);
-        const n = world.labelPlane(String(inv.lines.length) + ' lines', { size: 34, color: '#9aa7b8', height: 0.7 });
-        n.position.y = -1.05;
-        g.add(n);
-        g.userData.pick = { type: 'reviewPkg', invoiceId: inv.id };
-        g.traverse((o) => { o.userData.pick = g.userData.pick; });
+        // crisp HTML invoice tag (anchored, follows the package)
+        const tag = world.addLabel(
+          '#' + String(inv.number).slice(0, 14) + ' · ' + inv.lines.length + ' LINES',
+          { cls: 'fl-tag', at: g, dy: 1.5, maxDist: 60 }
+        );
+        g.userData.tag = tag;
+        // generous invisible tap target
+        const proxy = new THREE.Mesh(hitGeoBox, hitMat);
+        proxy.userData.pick = { type: 'reviewPkg', invoiceId: inv.id };
+        g.add(proxy);
+        g.userData.proxy = proxy;
         reviewGroup.add(g);
         reviewPkgs.set(inv.id, g);
         floaters.push({ obj: g, baseY: slot.y, phase: Math.random() * 6.28, amp: 0.18 });
-        world.pickables.review.push(g.children[0]);
+        world.pickables.review.push(proxy);
       } else {
         const slot = world.anchors.reviewSlots[i % world.anchors.reviewSlots.length];
         g.position.set(slot.x, g.position.y, slot.z);
@@ -69,10 +75,11 @@ export function createZones(world, hooks) {
     for (const [id, g] of [...reviewPkgs]) {
       if (!seen.has(id)) {
         reviewGroup.remove(g);
+        if (g.userData.tag) g.userData.tag.remove();
         reviewPkgs.delete(id);
         const fi = floaters.findIndex((x) => x.obj === g);
         if (fi >= 0) floaters.splice(fi, 1);
-        world.pickables.review = world.pickables.review.filter((m) => m !== g.children[0]);
+        world.pickables.review = world.pickables.review.filter((m) => m !== g.userData.proxy);
       }
     }
 
@@ -88,7 +95,7 @@ export function createZones(world, hooks) {
     reviewPkgs.delete(invoiceId);
     const fi = floaters.findIndex((x) => x.obj === g);
     if (fi >= 0) floaters.splice(fi, 1);
-    world.pickables.review = world.pickables.review.filter((m) => m !== g.children[0]);
+    world.pickables.review = world.pickables.review.filter((m) => m !== g.userData.proxy);
 
     const from = g.position.clone();
     const to = new THREE.Vector3(0, 5, 42); // vault door
@@ -101,6 +108,7 @@ export function createZones(world, hooks) {
       if (t >= 1) {
         reviewGroup.remove(g);
         world.scene.remove(g);
+        if (g.userData.tag) g.userData.tag.remove();
         world.burst(to, PALETTE.green, 60, 7);
         world.burst(to, PALETTE.amber, 30, 5);
         if (stop) stop();
@@ -128,7 +136,10 @@ export function createZones(world, hooks) {
 
   function refreshAisles() {
     // clear
-    for (const [, m] of [...productBoxes]) aisleGroup.remove(m);
+    for (const [, m] of [...productBoxes]) {
+      aisleGroup.remove(m);
+      if (m.userData.hit) aisleGroup.remove(m.userData.hit);
+    }
     productBoxes.clear();
     world.pickables.aisles.length = 0;
 
@@ -146,11 +157,16 @@ export function createZones(world, hooks) {
       const m = new THREE.Mesh(geo, mat);
       m.position.set(x, board + 0.48, row.z);
       m.castShadow = true;
-      m.userData.pick = { type: 'product', productId: p.id };
       m.userData.baseEmissive = 0;
       aisleGroup.add(m);
+      // invisible, generous tap target (well over 48px on phones)
+      const hit = new THREE.Mesh(hitGeoSmall, hitMat);
+      hit.position.copy(m.position);
+      hit.userData.pick = { type: 'product', productId: p.id };
+      aisleGroup.add(hit);
+      m.userData.hit = hit;
       productBoxes.set(p.id, m);
-      world.pickables.aisles.push(m);
+      world.pickables.aisles.push(hit);
     });
     return items.length;
   }
