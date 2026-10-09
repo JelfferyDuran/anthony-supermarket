@@ -13,14 +13,18 @@ This file is operational context, not a secret store. **Live infrastructure is a
   - the `/api/pricing` function bundle is byte-identical (314 files);
   - on a smoke server, `/pricing-hub/`, `/pricing-hub/js/*`, `/sales.html`, `/data/sale.json`, `/api/pricing/health`, `/api/pricing/config` and `POST /api/pricing/login` behave exactly as on `main`, and every formerly exposed path now returns the homepage instead of the file.
   - The secret-pattern scan of all tracked files found no committed credentials.
-- **Not verified:** the Vercel preview. This container's network policy blocks `*.vercel.app` here, and the session's Vercel connector sees no projects in `kingdom-noel`.
+- **Not verified:** the Vercel preview. This container's network policy blocks `*.vercel.app`, and the session's Vercel connector is not authorized for the `kingdom-noel` projects (403 on preview access).
+- **Deploy topology (from the Vercel bot on PR #54):**
+  - `anthony-pricing-hub` is **not** Git-connected; deploys are created manually from a SHA, so it gets no automatic preview.
+  - `kingdom-os` (`prj_XvYLZQwKGGyEkLYoSRtXvwvWHbYu`) **is** Git-connected with root directory = repo root, so the root `vercel.json` governs it too. **Merging to `main` auto-deploys it to production.** Its production presumably exposes the same files today (unverified).
+  - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
 - **Production still exposes the files** until the owner promotes the fix. Old deployments keep their own URLs and still serve the files unless Deployment Protection covers them.
 - **Pre-existing, unchanged by this fix:** paths outside the static output fall back to the homepage (200, not 404). In the emulated routing, multi-segment API paths (`/invoices/:id/approve`, `/invoices/:id/lines`, `/products/:id/history`, `/products/:id/retail`) hit Vercel's `/api` 404 route on both `main` and the branch. Confirm on a real deployment before acting.
-- Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
+- PR: **#54** (draft). Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
 - Next safe action:
-  1. Owner reviews the PR and creates a **preview** deployment from the branch SHA.
-  2. Check the URLs in the PR checklist.
-  3. Only on the owner's explicit go, promote to production.
+  1. Owner runs the PR #54 URL checklist on the `kingdom-os` branch preview (already built from this commit) and/or a manual `anthony-pricing-hub` preview from the branch SHA.
+  2. Confirm nothing consumes repo files from `kingdom-os`'s deployment. Kingdom OS historically parses the Pricing Hub file; if it fetches `/apps/pricing-hub/index.html` over HTTP, the merge breaks it.
+  3. Merge and promote only on the owner's explicit go.
   4. Then check one old deployment URL for exposure.
 
 ## 2026-09-12 — Menu slug mismatch FIXED: stale 'kitchen' no longer 404s (kanban t_d200935c)

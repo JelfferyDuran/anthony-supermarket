@@ -242,5 +242,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - No secrets touched; no data deleted.
   - Treat everything served before promotion as disclosed: vendor costs, the vendor account number, POS exports, server source.
   - Rollback = revert `vercel.json` (re-exposes everything, so prefer fixing forward) or redeploy the previous deployment.
-- PR/issue/commit: branch `fix/vercel-public-allowlist`; draft PR (see PR thread).
-- Next safe action: owner creates a preview deployment from the branch SHA and runs the PR URL checklist. Production only on the owner's explicit go.
+- PR/issue/commit: draft PR #54, branch `fix/vercel-public-allowlist`.
+- Deploy topology learned from the Vercel bot on #54:
+  - `anthony-pricing-hub` is not Git-connected (no auto-preview).
+  - `kingdom-os` is Git-connected at the repo root, so merging auto-deploys it to production.
+  - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
+- Next safe action: owner runs the #54 URL checklist on the `kingdom-os` branch preview or a manual pricing-hub preview, and confirms no consumer fetches repo files from `kingdom-os`. Merge/promote only on the owner's explicit go.

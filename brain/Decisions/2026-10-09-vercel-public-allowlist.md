@@ -46,6 +46,7 @@ Status: accepted (owner requested the fix; production promotion pending owner go
 
 ## Related PRs / issues
 
-- Branch `fix/vercel-public-allowlist` (draft PR; production promotion only on owner go)
+- PR #54, branch `fix/vercel-public-allowlist` (draft; production promotion only on owner go)
+- The root `vercel.json` also governs Vercel project `kingdom-os` (Git-connected, root directory = repo root). Merging to `main` deploys it to production.
 - 2026-09-05 CURRENT_STATE P0 gate "public-only packaging"; issue #28
 - `brain/Decisions/2026-09-11-pages-private-repo.md` (the Pages-side counterpart)
