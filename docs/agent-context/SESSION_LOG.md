@@ -214,3 +214,33 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets touched; rollback = checkout pre-change `server/index.js` + `server/menu-seed.js` and recreate the container.
 - PR/issue/commit: uncommitted on main (next commit); board card t_7c3667b4 unblocked.
 - Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); spot-check bot `/menu` in Telegram.
+
+## 2026-10-09 19:55 ET — Claude Code — Vercel public output allowlist (cost data + server source were public)
+- Goal: stop the `anthony-pricing-hub` deployment publishing the whole repo root. The owner confirmed the cost files and server source were publicly downloadable. Move the records, don't delete them. Keep `/api/pricing/*` and `/pricing-hub/` working.
+- Changed:
+  - `vercel.json`: `buildCommand: node scripts/build-public-site.js`, `outputDirectory: public-build`.
+  - New `scripts/build-public-site.js` (allowlist copy).
+  - New `scripts/test-public-site.cjs` (guard).
+  - New `.github/workflows/public-site-guard.yml`.
+  - `git mv` of 5 `manual-intake-*.json` and 2 `goya-2026-08-31-items.*` from `pricing-hub/` to `invoices/pricing-hub-records/` (+ README).
+  - `scripts/build-pricing-store.py` `GOYA_DIR` follows the move.
+  - `.gitignore` `/public-build/`.
+  - `pricing-hub/LOADING_DOCK.md` deploy + endpoint sections.
+  - CURRENT_STATE; decision note.
+- Verified:
+  - Guard 6/6 pass. Mutation checks fail as intended: `vercel.json` back to `.`; `invoices/` allowlisted; missing page asset; missing hub module; cost field in the promo feed.
+  - The store script loads 39 Goya rows from the new path.
+  - `vercel build` (CLI 63.1.2) of `main` vs branch: 380 → 50 static files; the 50 are byte-identical to `main`'s; routes identical; the API function bundle is byte-identical (314 files).
+  - Local smoke server built from the emitted routes: public pages and `/api/pricing/{health,config,login}` match `main`; leaked paths now return the homepage.
+  - The secret-pattern scan of all tracked files found no committed credentials.
+- Not verified / blockers:
+  - Real Vercel preview: this container's network policy denies `*.vercel.app`, and the session's Vercel connector lists 0 projects in team `kingdom-noel`.
+  - Production still serves the files until promoted.
+  - Old deployment URLs are not checked.
+  - Multi-segment `/api/pricing/*` routes 404 in the emulated routing on `main` too. Pre-existing; needs a real-deployment check.
+- Security or rollback notes:
+  - No secrets touched; no data deleted.
+  - Treat everything served before promotion as disclosed: vendor costs, the vendor account number, POS exports, server source.
+  - Rollback = revert `vercel.json` (re-exposes everything, so prefer fixing forward) or redeploy the previous deployment.
+- PR/issue/commit: branch `fix/vercel-public-allowlist`; draft PR (see PR thread).
+- Next safe action: owner creates a preview deployment from the branch SHA and runs the PR URL checklist. Production only on the owner's explicit go.

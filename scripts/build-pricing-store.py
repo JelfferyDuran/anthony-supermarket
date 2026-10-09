@@ -4,7 +4,7 @@
 Merges ALL invoice sources into one catalog:
   1. invoices/pricing/*_items.csv          (Triunfo OCR pipeline; fallback:
      invoices/pricing-local-backup/ when the Drive symlink is dead)
-  2. pricing-hub/*-items.csv               (Goya-style: itemId,itemNo,name,cat,
+  2. invoices/pricing-hub-records/*-items.csv (Goya-style: itemId,itemNo,name,cat,
      vendor,invoiceNo,boxes,boxPrice,units,costPerUnit,retail,markupPct,status)
 
 Generates apps/pricing-store/index.html — a single self-contained file
@@ -21,7 +21,7 @@ TRIUNFO_DIRS = [
     os.path.join(ROOT, "invoices", "pricing"),              # symlink to Drive (primary)
     os.path.join(ROOT, "invoices", "pricing-local-backup"), # local fallback
 ]
-GOYA_DIR = os.path.join(ROOT, "pricing-hub")
+GOYA_DIR = os.path.join(ROOT, "invoices", "pricing-hub-records")  # not pricing-hub/: that folder is published
 
 
 def to_f(v):

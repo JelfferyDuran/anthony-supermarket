@@ -76,9 +76,11 @@ pricing-hub/
                  review/product/vault panels, search
 ```
 
-- **Backend**: unchanged. Base `/api/pricing`. Endpoints used: `POST /login`,
-  `GET /config`, `GET /products`, `GET /products/:id/history`,
-  `PATCH /products/:id/retail`, `GET /queue`, `POST /invoices` (multipart),
+- **Backend**: `api/pricing/[...path].js` (Vercel function) mounts
+  `server/pricing-router.js` + `server/pricing-store.js`. Base `/api/pricing`.
+  Endpoints used: `POST /login`, `GET /config`, `GET /products`,
+  `GET /products/:id/history`, `PATCH /products/:id/retail`, `GET /queue`,
+  `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
   `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
 - **Auth**: Supabase verifies credentials + role at login; server mints a
   30-day HS256 session token. Same `localStorage` key as the old client, so
@@ -91,11 +93,32 @@ pricing-hub/
 
 Static files + serverless API on Vercel (`anthony-pricing-hub`, production).
 Ship via GitHub push to `main`, then create a production deployment from the
-commit SHA. No build step. All files must stay under ~100KB each (connector
-push limit).
+commit SHA. All files must stay under ~100KB each (connector push limit).
+
+**Only an allowlist is published.** `vercel.json` runs
+`node scripts/build-public-site.js`, which copies the public pages, `assets/`
+media, `data/sale.json` and this client (`pricing-hub/index.html`, `game.css`,
+`js/*.js`) into `public-build/`, the only directory Vercel serves. Nothing
+else in the repo is reachable. Before 2026-10-09 the whole repo root was, server
+source and cost records included.
+
+- Adding a file the client loads (a new `js/` module is picked up
+  automatically; a new image, font or top-level file is not)? Add it to the
+  allowlist in `scripts/build-public-site.js`. The **Public site guard** CI check
+  fails if a published page references a file the allowlist leaves out.
+- Never put invoice records, intake JSON/CSV or other data in `pricing-hub/`.
+  They live in `invoices/pricing-hub-records/`.
+- Check locally: `node --test scripts/test-public-site.cjs`.
+- Paths outside the allowlist return the storefront homepage (Vercel's
+  catch-all route), not a 404. When checking a URL, look at the content, not
+  just the status code.
 
 ## Changelog
 
 - **2026-10-08** — "The Loading Dock" replaces the 2D client (full 3D, five zones).
 - **2026-10-08** — Mobile polish pass: portrait framing, floating labels,
   defined zone objects, redrawn 24px icon set, mobile perf cuts.
+- **2026-10-09** — Review line exceptions (short / wrong line, qty + cost edits,
+  reconciliation strip).
+- **2026-10-09** — Deploy publishes an allowlist only (`public-build/`); intake
+  records moved to `invoices/pricing-hub-records/`.

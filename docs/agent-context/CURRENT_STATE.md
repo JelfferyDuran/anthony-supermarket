@@ -1,8 +1,27 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-09-12 (menu slug mismatch fixed — stale 'kitchen' resolves; container rebuilt + healthy)
+Last updated: 2026-10-09 (Vercel deploy limited to a public allowlist; cost records moved out of `pricing-hub/`; fix NOT yet in production)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-10-09 — Pricing Hub deploy published the whole repo; fixed on branch, NOT yet in production
+- **Exposure (owner-confirmed live 2026-10-09):** `vercel.json` had `outputDirectory: "."`, so the `anthony-pricing-hub` production deployment served every tracked file. That included server source, `invoices/` (54 files), `nrs/` POS exports (76), `apps/pricing-hub/index.html` (embedded cost ledger), `apps/pricing-store/index.html`, the `manual-intake-*` / `goya-*` cost records in `pricing-hub/` (vendor costs, case prices, vendor account number), and internal docs. A local `vercel build` of `main` emits **380** static files.
+- **Fix (branch `fix/vercel-public-allowlist`):** `vercel.json` now runs `node scripts/build-public-site.js` and serves only `public-build/`. That is an allowlist of the public pages, `assets/` media, `data/sale.json` and the Loading Dock client: **50** files, each byte-identical to what `main` serves today. The 7 records were moved (not deleted) to `invoices/pricing-hub-records/`, and `scripts/build-pricing-store.py` follows them. New CI check **Public site guard** (`scripts/test-public-site.cjs`, every PR and every push to `main`) fails if internals ship, if `vercel.json` reverts, or if a published page references an unpublished file.
+- **Verified locally (Vercel CLI 63.1.2 `vercel build`, branch vs `main`):**
+  - the static output has no internal paths;
+  - the routing config is identical;
+  - the `/api/pricing` function bundle is byte-identical (314 files);
+  - on a smoke server, `/pricing-hub/`, `/pricing-hub/js/*`, `/sales.html`, `/data/sale.json`, `/api/pricing/health`, `/api/pricing/config` and `POST /api/pricing/login` behave exactly as on `main`, and every formerly exposed path now returns the homepage instead of the file.
+  - The secret-pattern scan of all tracked files found no committed credentials.
+- **Not verified:** the Vercel preview. This container's network policy blocks `*.vercel.app` here, and the session's Vercel connector sees no projects in `kingdom-noel`.
+- **Production still exposes the files** until the owner promotes the fix. Old deployments keep their own URLs and still serve the files unless Deployment Protection covers them.
+- **Pre-existing, unchanged by this fix:** paths outside the static output fall back to the homepage (200, not 404). In the emulated routing, multi-segment API paths (`/invoices/:id/approve`, `/invoices/:id/lines`, `/products/:id/history`, `/products/:id/retail`) hit Vercel's `/api` 404 route on both `main` and the branch. Confirm on a real deployment before acting.
+- Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
+- Next safe action:
+  1. Owner reviews the PR and creates a **preview** deployment from the branch SHA.
+  2. Check the URLs in the PR checklist.
+  3. Only on the owner's explicit go, promote to production.
+  4. Then check one old deployment URL for exposure.
 
 ## 2026-09-12 — Menu slug mismatch FIXED: stale 'kitchen' no longer 404s (kanban t_d200935c)
 - **Defect fixed + regression-guarded.** The Telegram bot `/menu` handler and `/api/menu/:slug` looked up slug `'kitchen'`, but the seed carries slug `'anthonys'` (renamed in 485331a), so the bot answered "Menu not found" and `/api/menu/kitchen` 404'd.

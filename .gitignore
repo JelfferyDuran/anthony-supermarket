@@ -12,6 +12,7 @@ build/
 dist/
 .next/
 out/
+/public-build/
 
 # Environment
 .env

@@ -1,0 +1,22 @@
+name: Public site guard
+
+# Runs on every PR and every push to main: any change can touch vercel.json or
+# an allowlisted folder, and a leak only needs one file.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  public-output:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the public output and assert nothing internal ships
+        run: node --test scripts/test-public-site.cjs

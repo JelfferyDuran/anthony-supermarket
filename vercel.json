@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": null,
-  "outputDirectory": ".",
+  "buildCommand": "node scripts/build-public-site.js",
+  "outputDirectory": "public-build",
   "functions": {
     "api/pricing/[...path].js": {
       "memory": 1024
