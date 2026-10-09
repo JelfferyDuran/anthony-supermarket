@@ -45,3 +45,16 @@ Advance the Pricing Hub front end substantially before touching the backend cont
 ## Next Step to Build
 
 Create an authenticated preview deployment for this branch and run a short five-zone visual/accessibility smoke pass before merging.
+
+
+## 2026-10-09 preview authentication diagnosis
+
+- Preview API health responds 200 at `/api/pricing/health`.
+- Preview capability probe responds 200 but reports `storeConfigured:false`, `localDemo:false`, and `ocrConfigured:false`.
+- This means the preview is missing the Supabase/service-role-backed pricing configuration required by `server/pricing-router.js`; real manager credentials are not being evaluated there.
+- The front end now checks this capability before presenting a misleading credential failure and explains that the preview must use the production hub or receive the correct preview environment configuration.
+- No credentials were requested, copied, exposed, or changed.
+
+## Updated Next Step to Build
+
+Configure the intended Vercel preview environment with the server-only pricing variables, then run an authenticated five-zone smoke test. Keep service-role values server-only; never add them to `VITE_*` or browser code.
