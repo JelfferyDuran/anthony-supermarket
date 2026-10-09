@@ -257,18 +257,71 @@ export function createHud(world, zones, nav) {
   /* ================= invoice review card ================= */
   const matchState = new Map(); // lineId -> product
 
+  // Review working state. review_status persists to the DB immediately via
+  // PATCH /invoices/:id/lines so work survives a closed phone; _excKind,
+  // _editCases and _editCost are the card's working copy for this session.
+  function lineExcluded(l) { return l.review_status === 'rejected'; }
+  function excKind(l) { return l._excKind || 'rejected'; }
+  function excLabel(l) {
+    return excKind(l) === 'short' ? 'SHORT — box did not arrive' : 'REJECTED — wrong line';
+  }
+  function effCases(l) {
+    if (l._editCases != null) return l._editCases;
+    const v = Number(l.case_quantity);
+    return Number.isFinite(v) ? v : 0;
+  }
+  function effCost(l) {
+    if (l._editCost != null) return l._editCost;
+    return lineUnitCost(l); // may be null; the server guards a null cost
+  }
+  function effTotal(l) {
+    const c = effCost(l);
+    if ((l._editCases != null || l._editCost != null) && c != null) {
+      const upc = Number(l.units_per_case) || 0;
+      if (upc > 0) return Math.round(effCases(l) * upc * c * 100) / 100;
+    }
+    return lineTotal(l) || 0;
+  }
+  function effRetail(l) {
+    if (l._editCost != null) return retailFromCost(l._editCost);
+    return lineProposedRetail(l);
+  }
+
   function showInvoice(invoiceId) {
     const inv = queueInvoices().find((x) => String(x.id) === String(invoiceId));
     if (!inv) { toast('That invoice is no longer in the review queue.'); return; }
 
-    const lineSum = inv.lines.reduce((s, l) => s + (lineTotal(l) || 0), 0);
+    const active = inv.lines.filter((l) => !lineExcluded(l));
+    const excluded = inv.lines.filter(lineExcluded);
+    const approvedTotal = active.reduce((s, l) => s + effTotal(l), 0);
+    const excludedTotal = excluded.reduce((s, l) => s + effTotal(l), 0);
+    const matchedCount = active.filter((l) => l.matched_product_id || matchState.get(l.id)).length;
+    const printed = inv.subtotal;
+    const variance = printed != null ? Math.round((printed - approvedTotal) * 100) / 100 : null;
+    const reconciles = variance != null && Math.abs(variance) <= 0.01;
+
     const rows = inv.lines.map((l, idx) => {
+      const out = lineExcluded(l);
       const matched = l.matched_product_id || (matchState.get(l.id) || {}).id;
-      const cost = lineUnitCost(l);
-      const total = lineTotal(l);
-      const proposed = lineProposedRetail(l);
-      const qty = [l.case_quantity ? l.case_quantity + ' case(s)' : null,
+      const cost = effCost(l);
+      const total = effTotal(l);
+      const proposed = effRetail(l);
+      const qty = [effCases(l) ? effCases(l) + ' case(s)' : null,
                    l.units_per_case ? '× ' + l.units_per_case + ' units' : null].filter(Boolean).join(' ');
+
+      if (out) {
+        return '<div class="line-row excluded" data-line="' + idx + '">' +
+          '<div class="lr-top"><span class="lr-name">' + esc(lineDesc(l)) + '</span>' +
+          '<span class="lr-total">' + fmtMoney(total) + '</span></div>' +
+          '<div class="lr-meta">' + esc(['line ' + (l.line_number != null ? l.line_number : idx + 1), qty,
+              cost != null ? 'unit cost ' + fmtMoney(cost) : null,
+              l.vendor_sku ? 'SKU ' + l.vendor_sku : null].filter(Boolean).join(' · ')) + '</div>' +
+          '<div><span class="exc-badge' + (excKind(l) === 'short' ? ' short' : '') + '">' + esc(excLabel(l)) + '</span></div>' +
+          (l.review_reason ? '<div class="lr-meta">' + esc(l.review_reason) + '</div>' : '') +
+          '<div class="lr-actions"><button class="btn ghost small" data-undo="' + idx + '">Undo — put back in review</button></div>' +
+        '</div>';
+      }
+
       return '<div class="line-row' + (matched ? '' : ' unmatched') + '" data-line="' + idx + '">' +
         '<div class="lr-top"><span class="lr-name">' + esc(lineDesc(l)) + '</span>' +
         '<span class="lr-total">' + fmtMoney(total) + '</span></div>' +
@@ -283,20 +336,39 @@ export function createHud(world, zones, nav) {
           '<div data-matchresults="' + idx + '"></div>') +
         '<div class="lr-meta" style="margin-top:6px">Retail $ <input data-retail="' + idx + '" type="number" step="0.01" min="0" value="' +
           (proposed != null ? proposed.toFixed(2) : '') + '" style="width:90px;background:var(--bg);border:1px solid #2a3446;border-radius:6px;color:var(--ink);padding:5px 7px;font-family:var(--mono)"></div>' +
+        '<div class="lr-edit"><label>Cases <input data-cases="' + idx + '" type="number" step="any" min="0" value="' + effCases(l) + '"></label>' +
+        '<label>Unit cost $ <input data-cost="' + idx + '" type="number" step="0.01" min="0" value="' + (cost != null ? cost : '') + '" placeholder="—"></label></div>' +
+        '<div class="lr-actions">' +
+          '<button class="btn ghost small warn" data-short="' + idx + '">Didn\'t arrive</button>' +
+          '<button class="btn ghost small" data-reject="' + idx + '">Wrong line</button>' +
+        '</div>' +
       '</div>';
     }).join('');
+
+    const approveLabel = active.length
+      ? 'Approve ' + active.length + ' line' + (active.length === 1 ? '' : 's') + ' · ' + fmtMoney(approvedTotal)
+      : 'Close invoice — nothing received';
 
     openPanel(
       '<div class="card-title">Invoice #' + esc(inv.number) + '</div>' +
       '<div class="card-sub">' + esc([fmtDate(inv.date), inv.status].filter(Boolean).join(' · ')) + '</div>' +
       '<div class="stat-grid">' +
         '<div class="stat"><div class="v">' + inv.lines.length + '</div><div class="k">lines</div></div>' +
-        '<div class="stat"><div class="v cy">' + fmtMoney(lineSum) + '</div><div class="k">line sum</div></div>' +
-        '<div class="stat"><div class="v grn">' + inv.lines.filter((l) => l.matched_product_id || matchState.get(l.id)).length + '</div><div class="k">matched</div></div>' +
+        '<div class="stat"><div class="v cy">' + fmtMoney(approvedTotal) + '</div><div class="k">to approve</div></div>' +
+        '<div class="stat"><div class="v grn">' + matchedCount + '</div><div class="k">matched</div></div>' +
       '</div>' +
+      (printed != null
+        ? '<div class="recon-strip">Printed total <b>' + fmtMoney(printed) + '</b>' +
+          (excluded.length ? ' · Excluded <b>' + fmtMoney(excludedTotal) + '</b>' : '') +
+          ' · ' + (reconciles
+            ? '<b style="color:var(--green)">Reconciles</b>'
+            : '<b style="color:var(--red)">Variance ' + fmtMoney(variance) + '</b>') +
+          '</div>'
+        : '') +
       '<div id="approveBlockers"></div>' +
       rows +
-      '<div class="approve-row"><button class="btn primary" id="approveBtn">Approve invoice</button></div>' +
+      '<div class="approve-row"><button class="btn primary" id="approveBtn">' + esc(approveLabel) + '</button></div>' +
+      (excluded.length ? '<div class="lr-meta" style="margin-top:8px">' + excluded.length + ' line(s) excluded — they stay on the record but won\'t be priced.</div>' : '') +
       '<div class="rule-plaque">Pricing rule · retail = <b>unit cost × 1.70</b>, shelf-rounded to .99</div>'
     );
 
@@ -327,22 +399,91 @@ export function createHud(world, zones, nav) {
       });
     });
 
+    // qty / cost corrections — 'change' (not 'input') so re-render doesn't steal focus
+    $('panelBody').querySelectorAll('[data-cases]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const idx = Number(input.dataset.cases);
+        const v = num(input.value);
+        inv.lines[idx]._editCases = (v != null && v >= 0) ? v : null;
+        showInvoice(invoiceId);
+      });
+    });
+    $('panelBody').querySelectorAll('[data-cost]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const idx = Number(input.dataset.cost);
+        const v = num(input.value);
+        inv.lines[idx]._editCost = (v != null && v >= 0) ? v : null;
+        showInvoice(invoiceId);
+      });
+    });
+
+    // line exceptions — persisted immediately so nothing is lost mid-review
+    async function setExcluded(idx, kind, note) {
+      const line = inv.lines[idx];
+      try {
+        await api.updateLineReviews(inv.id, [{ id: line.id, review_status: 'rejected', review_note: note }]);
+        line.review_status = 'rejected';
+        line._excKind = kind;
+        line.review_reason = note;
+        showInvoice(invoiceId);
+      } catch (e) { toast('Could not update line: ' + e.message, 'err'); }
+    }
+    $('panelBody').querySelectorAll('[data-short]').forEach((btn) => {
+      btn.addEventListener('click', () => setExcluded(Number(btn.dataset.short), 'short', 'Short — box did not arrive'));
+    });
+    $('panelBody').querySelectorAll('[data-reject]').forEach((btn) => {
+      btn.addEventListener('click', () => setExcluded(Number(btn.dataset.reject), 'rejected', 'Rejected by manager — wrong/duplicate line'));
+    });
+    $('panelBody').querySelectorAll('[data-undo]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const idx = Number(btn.dataset.undo);
+        const line = inv.lines[idx];
+        try {
+          await api.updateLineReviews(inv.id, [{ id: line.id, review_status: 'needs_review' }]);
+          line.review_status = 'needs_review';
+          line._excKind = null;
+          line.review_reason = null;
+          showInvoice(invoiceId);
+        } catch (e) { toast('Could not reopen line: ' + e.message, 'err'); }
+      });
+    });
+
     $('approveBtn').addEventListener('click', async () => {
       const btn = $('approveBtn');
       btn.disabled = true;
+
+      // Every line excluded: close the invoice instead of approving nothing.
+      if (!active.length) {
+        btn.textContent = 'Closing…';
+        try {
+          await api.updateLineReviews(inv.id, [], true);
+          for (const l of inv.lines) matchState.delete(l.id);
+          closePanel();
+          await nav.refreshAll();
+          toast('<b>Invoice closed</b> — every line was excluded, nothing was priced.', 'ok');
+        } catch (e) {
+          toast(e.message, 'err');
+          btn.disabled = false;
+          btn.textContent = approveLabel;
+        }
+        return;
+      }
+
       btn.textContent = 'Approving…';
-      const lines = inv.lines.map((l, idx) => {
+      const lines = [];
+      inv.lines.forEach((l, idx) => {
+        if (lineExcluded(l)) return; // excluded lines stay on the record, out of the approval
         const retailInput = $('panelBody').querySelector('[data-retail="' + idx + '"]');
         const retailVal = retailInput ? num(retailInput.value) : null;
-        return {
+        lines.push({
           id: l.id,
           line_number: l.line_number,
           product_id: l.matched_product_id || (matchState.get(l.id) || {}).id || null,
-          unit_cost: lineUnitCost(l),
-          line_total: lineTotal(l),
-          retail_price: retailVal != null ? retailVal : lineProposedRetail(l),
+          unit_cost: effCost(l),
+          line_total: effTotal(l),
+          retail_price: retailVal != null ? retailVal : effRetail(l),
           internal: !!l.internal,
-        };
+        });
       });
       try {
         await api.approveInvoice(inv.id, lines);
@@ -358,11 +499,10 @@ export function createHud(world, zones, nav) {
           (blockers ? blockers.map((b) => '<li>' + esc(b) + '</li>').join('') : '<li>' + esc(e.message) + '</li>') +
           '</ul></div>';
         btn.disabled = false;
-        btn.textContent = 'Approve invoice';
+        btn.textContent = approveLabel;
       }
     });
   }
-
   /* ================= product card ================= */
   async function showProduct(productId) {
     const p = state.products.find((x) => String(x.id) === String(productId));

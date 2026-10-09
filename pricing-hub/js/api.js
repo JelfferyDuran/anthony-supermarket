@@ -141,6 +141,16 @@ export const api = {
     });
   },
 
+  async updateLineReviews(invoiceId, lines, closeInvoice = false) {
+    // Marks lines rejected (short/wrong) or reopens them; optionally closes an
+    // invoice whose lines were all rejected. Persists immediately so review
+    // work is never lost if the phone is closed mid-review.
+    return request('/invoices/' + encodeURIComponent(invoiceId) + '/lines', {
+      method: 'PATCH',
+      body: { lines, close_invoice: closeInvoice },
+    });
+  },
+
   async getFinancials() {
     state.financials = await request('/financials');
     return state.financials;
@@ -202,6 +212,8 @@ export function queueInvoices() {
         number: inv.invoice_number || line.invoice_number || '—',
         date: inv.invoice_date || line.invoice_date || '',
         status: inv.status || 'needs_review',
+        subtotal: inv.invoice_subtotal != null && Number.isFinite(Number(inv.invoice_subtotal))
+          ? Number(inv.invoice_subtotal) : null,
         lines: [],
       });
     }

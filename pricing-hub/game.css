@@ -273,6 +273,17 @@ html, body {
 
 .blockers { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.4); border-radius: 10px; padding: 10px 12px; margin: 10px 0; font-size: 13px; color: var(--red); }
 .blockers li { margin: 3px 0 3px 16px; }
+/* ---- review line exceptions ---- */
+.line-row.excluded { opacity: 0.6; border-style: dashed; border-color: rgba(248,113,113,0.4); }
+.exc-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: var(--red); background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.4); border-radius: 6px; padding: 4px 9px; margin-top: 8px; }
+.exc-badge.short { color: var(--amber); background: rgba(255,176,32,0.1); border-color: rgba(255,176,32,0.4); }
+.lr-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn.ghost.small.warn { color: var(--amber); border-color: rgba(255,176,32,0.45); }
+.lr-edit { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-dim); font-family: var(--mono); }
+.lr-edit label { display: inline-flex; align-items: center; gap: 6px; }
+.lr-edit input { width: 84px; background: var(--bg); border: 1px solid #2a3446; border-radius: 6px; color: var(--ink); padding: 10px 8px; font-family: var(--mono); font-size: 14px; min-height: 44px; }
+.recon-strip { font-size: 13px; font-family: var(--mono); color: var(--ink-dim); background: var(--panel-2); border: 1px solid #20293a; border-radius: 10px; padding: 10px 12px; margin: 10px 0; line-height: 1.7; }
+.recon-strip b { color: var(--ink); }
 .approve-row { display: flex; gap: 10px; margin-top: 14px; }
 .approve-row .btn { flex: 1; padding: 14px; font-size: 15px; }
 .rule-plaque {
