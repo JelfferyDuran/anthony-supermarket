@@ -34,6 +34,19 @@ camera) name every zone, portal, category board, and package.
 4. Package appears on the Review Line → tap → review lines → Approve.
 5. Approval imports the invoice: products are created/updated in the catalog.
 
+**Review line exceptions (Oct 9, 2026):** a line that didn't arrive (short
+delivery) or is wrong/duplicate can be marked **Didn't arrive** or **Wrong
+line** right on the review card. Excluded lines stay on the record (with who
+marked them and when) but are left out of the approval — the approved total
+reconciles against the printed invoice subtotal without them. Each line also
+accepts corrected case quantity / unit cost (totals and proposed retail
+recalculate live). The card shows a reconciliation strip: printed total vs
+approved total vs excluded total, with the variance. If every line is
+excluded, the invoice closes as rejected instead of approving nothing.
+Backend: `PATCH /invoices/:id/lines` (approver gate), `store.updateLineReviews`
++ `store.closeInvoiceAsRejected`. Reuses the existing `rejected` line status —
+no DB migration was needed; the approval RPC is untouched.
+
 **Duplicate uploads** are recognized by SHA-256 — re-uploading the same file
 returns the existing invoice instead of double-counting.
 
