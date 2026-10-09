@@ -131,12 +131,78 @@ function createPricingStore(client = getClient()) {
       );
     },
 
+    // Line exceptions: a manager marks lines rejected (short delivery, damaged,
+    // wrong/duplicate line) or reopens them for review. Rejected lines stay on
+    // the record but are excluded from approval — the approval RPC's bulk
+    // sweep and pending-line check only touch needs_review, so the approved
+    // total reconciles against the printed subtotal without them. Reopening
+    // clears the manager's note; the OCR flag is not restored (it no longer
+    // matters once a human has dispositioned the line).
+    async updateLineReviews({ invoiceId, lines, reviewedBy }) {
+      const out = [];
+      for (const line of lines || []) {
+        const status = String(line.review_status || '');
+        if (!line.id) throw new Error('line id is required');
+        if (!['rejected', 'needs_review'].includes(status)) {
+          throw new Error(`line ${line.id}: status must be rejected or needs_review`);
+        }
+        const note = line.review_note != null ? String(line.review_note).slice(0, 500) : null;
+        const patch = status === 'rejected'
+          ? {
+              review_status: 'rejected',
+              review_reason: note || 'Rejected by manager',
+              approved_by: reviewedBy || null,
+              approved_at: new Date().toISOString()
+            }
+          : { review_status: 'needs_review', review_reason: null, approved_by: null, approved_at: null };
+        const rows = unwrap(
+          await client.from('pricing_invoice_lines')
+            .update(patch)
+            .eq('invoice_id', invoiceId)
+            .eq('id', line.id)
+            .in('review_status', ['needs_review', 'rejected'])
+            .select('id, review_status, review_reason'),
+          'line review update'
+        );
+        if (!rows.length) throw new Error(`line ${line.id}: not found or already approved`);
+        out.push(rows[0]);
+      }
+      return out;
+    },
+
+    // Closes an invoice whose lines were all rejected (e.g. the delivery never
+    // arrived at all). Refuses when anything is still pending or approved, so
+    // a half-reviewed invoice cannot be closed by accident.
+    async closeInvoiceAsRejected({ invoiceId, closedBy }) {
+      const lines = unwrap(
+        await client.from('pricing_invoice_lines').select('id, review_status').eq('invoice_id', invoiceId),
+        'line status check'
+      );
+      if (!lines.length) throw new Error('invoice has no lines to close');
+      if (lines.some(l => l.review_status === 'needs_review')) {
+        throw new Error('invoice still has lines awaiting review');
+      }
+      if (lines.some(l => l.review_status === 'approved')) {
+        throw new Error('invoice already has approved lines');
+      }
+      const rows = unwrap(
+        await client.from('pricing_invoices')
+          .update({ status: 'rejected', approved_by: closedBy || null, approved_at: new Date().toISOString() })
+          .eq('id', invoiceId)
+          .in('status', ['uploaded', 'extracting', 'needs_review'])
+          .select('id, status'),
+        'invoice close'
+      );
+      if (!rows.length) throw new Error('invoice not found or already closed');
+      return rows[0];
+    },
+
     // Everything that needs a human decision, newest invoice first.
     async listReviewQueue(limit = 200) {
       return unwrap(
         await client
           .from('pricing_invoice_lines')
-          .select('*, pricing_invoices(invoice_number, invoice_date, vendor_id, status)')
+          .select('*, pricing_invoices(invoice_number, invoice_date, vendor_id, status, invoice_subtotal)')
           .eq('review_status', 'needs_review')
           .order('invoice_id')
           .order('line_number')

@@ -424,6 +424,44 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // ── Review line exceptions ─────────────────────────────────────────────
+  // A manager marks individual lines rejected (short delivery, damaged goods,
+  // wrong/duplicate line) or reopens them, and may close an invoice whose
+  // lines were all rejected. Rejected lines stay on the record but are
+  // excluded from approval: the approval RPC only sweeps needs_review lines,
+  // so the approved total reconciles against the printed subtotal without
+  // them. Uses the approver gate — deciding what gets priced is pricing.
+  router.patch('/invoices/:id/lines', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    const lines = Array.isArray(req.body.lines) ? req.body.lines : [];
+    const closeInvoice = req.body.close_invoice === true;
+    if (!lines.length && !closeInvoice) return res.status(400).json({ error: 'No lines provided' });
+    try {
+      const invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+      if (invoice.status === 'imported') {
+        return res.status(422).json({ error: 'Invoice is already imported' });
+      }
+      const updated = lines.length
+        ? await store.updateLineReviews({
+            invoiceId: req.params.id,
+            lines,
+            reviewedBy: req.pricingIdentity.userId
+          })
+        : [];
+      let closed = null;
+      if (closeInvoice) {
+        closed = await store.closeInvoiceAsRejected({
+          invoiceId: req.params.id,
+          closedBy: req.pricingIdentity.userId
+        });
+      }
+      return res.json({ updated, closed });
+    } catch (error) {
+      return fail(res, error, 'line review update');
+    }
+  });
+
   // ── Price-gun / label export ───────────────────────────────────────────────
   router.get('/export/labels', authorize('manager'), async (req, res) => {
     if (!requireStore(res)) return;
