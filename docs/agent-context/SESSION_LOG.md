@@ -316,3 +316,16 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Full game regression driver: 0 errors.
 - Noted, not changed (owner/Noel decision): `setProductUpc` writes `pricing_products.upc` with no record of who set it. A UPC-assignment audit trail would also let the game award XP for barcodes (see `brain/Decisions/2026-10-10-pricing-hub-game-layer.md` follow-ups).
 - Next safe action: unchanged. Owner previews #54; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 14:05 ET — Claude Code — Merge `main`'s manual UPC entry; fix typed-digits save
+- Goal: keep #54 and #55 current with `main` (`c8b0ea2`, Noel: manual UPC entry plus the red-kidney-beans size split in `docs/upc-lookup-2026-10-10.json`).
+- Found a bug on `main`: the "type barcode digits" fallback was rendered in both lookup branches, but `wireManualUpc` ran only when the lookup returned candidates. When the public database had no match, the exact case the fallback exists for (for example the 46oz cans), "Save digits" did nothing.
+- Changed:
+  - #54: merged `main`, unchanged otherwise.
+  - #55: merged #54. `wireManualUpc` now runs after the if/else on both the review line and the product card. A manual save calls `nav.refreshGame()`, like the other UPC saves.
+- Verified (headless Chromium, harness store, public-database stub returning no products):
+  - With `main`'s `hud.js`: 0 `PATCH /products/:id/upc`, nothing saved. Reproduced.
+  - With this branch: 1 PATCH, "UPC saved" toast, barcode stored, game refreshed, 0 page errors.
+  - Candidate path re-run on desktop and mobile: 0 errors.
+  - Server suite: only the pre-existing Gemini failure. Guard 6/6.
+- Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
