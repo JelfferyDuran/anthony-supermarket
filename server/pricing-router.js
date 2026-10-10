@@ -298,6 +298,20 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // ── Catalog UPC assignment ─────────────────────────────────────────────
+  // Stores a verified barcode on a product (from the /upc/lookup candidates
+  // or a phone-camera scan). Powers label printing and product matching.
+  // Approver gate: the catalog is trusted data, not a casual edit.
+  router.patch('/products/:id/upc', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const product = await store.setProductUpc({ productId: req.params.id, upc: req.body.upc });
+      return res.json({ product });
+    } catch (error) {
+      return fail(res, error, 'UPC update');
+    }
+  });
+
   // ── Review queue ───────────────────────────────────────────────────────────
   router.get('/queue', authorize('manager'), async (_req, res) => {
     if (!requireStore(res)) return;

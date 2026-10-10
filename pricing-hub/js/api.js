@@ -191,6 +191,22 @@ export const api = {
     });
   },
 
+  // Barcode lookup against the public Open Food Facts database (no POS needed).
+  // Returns [{ code, name, brands }] — the manager picks the right variant.
+  async lookupUpc(name) {
+    const data = await request('/upc/lookup?name=' + encodeURIComponent(name));
+    return Array.isArray(data.candidates) ? data.candidates : [];
+  },
+
+  // Stores a verified barcode on a product (from lookup or a package scan).
+  async setProductUpc(productId, upc) {
+    const data = await request('/products/' + encodeURIComponent(productId) + '/upc', {
+      method: 'PATCH',
+      body: { upc },
+    });
+    return data.product;
+  },
+
   async getHistory(productId) {
     const data = await request('/products/' + encodeURIComponent(productId) + '/history');
     return Array.isArray(data.history) ? data.history : (Array.isArray(data) ? data : []);

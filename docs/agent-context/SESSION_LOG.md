@@ -304,3 +304,15 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Server suite: only the pre-existing Gemini assertion fails.
 - Not verified: a real Vercel deployment of either branch.
 - Next safe action: owner previews #54 and runs the URL checklist; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 13:15 ET — Claude Code — Bring Noel's UPC pipeline into #54 and #55
+- Goal: keep both open PRs current with `main` (`6452188`, `3180f54`, `f2e4d9c`: `PATCH /products/:id/upc`, "Find UPC" on review lines and product cards, bulk lookup results in `docs/upc-lookup-2026-10-10.json`).
+- Changed:
+  - #54: merged `main`; the `LOADING_DOCK.md` endpoint list now combines both sides.
+  - #55: merged #54. The product card keeps both the Rule Guard button and Find UPC. A saved UPC now calls `nav.refreshGame()`, because UPC coverage is 10% of Dock Integrity.
+- Verified:
+  - Server suite: only the pre-existing Gemini assertion fails. Guard 6/6.
+  - Headless Chromium (harness store with a UPC stub), desktop and mobile, 0 errors: product card shows "Fix to rule" and "Find UPC" together; picking a candidate saves it, hides the button, refreshes game state, and integrity goes 26 → 27.
+  - Full game regression driver: 0 errors.
+- Noted, not changed (owner/Noel decision): `setProductUpc` writes `pricing_products.upc` with no record of who set it. A UPC-assignment audit trail would also let the game award XP for barcodes (see `brain/Decisions/2026-10-10-pricing-hub-game-layer.md` follow-ups).
+- Next safe action: unchanged. Owner previews #54; merge/promote only on the owner's explicit go.

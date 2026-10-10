@@ -247,6 +247,23 @@ function createPricingStore(client = getClient()) {
       return Array.isArray(rows) ? rows[0] : rows;
     },
 
+    // Catalog UPC assignment. Normalized to digits; EAN-13 with a leading zero
+    // collapses to the 12-digit UPC-A. Written by a signed-in approver so the
+    // label printer and product matching can trust it.
+    async setProductUpc({ productId, upc }) {
+      let clean = String(upc || '').replace(/\D/g, '');
+      if (clean.length === 13 && clean.startsWith('0')) clean = clean.slice(1);
+      if (!/^[0-9]{8}$|^[0-9]{12,14}$/.test(clean)) {
+        throw new Error('a valid numeric UPC/EAN/GTIN is required');
+      }
+      const rows = unwrap(
+        await client.from('pricing_products').update({ upc: clean }).eq('id', productId).select('id, upc'),
+        'UPC update'
+      );
+      if (!rows.length) throw new Error('product not found');
+      return rows[0];
+    },
+
     // Approval transaction: reviewed lines -> products + immutable history +
     // label batch + invoice marked imported, all or nothing.
     async approveInvoice({ invoiceId, approvedBy, lines }) {

@@ -1,0 +1,237 @@
+{
+ "generated": "2026-10-10",
+ "source": "Open Food Facts (world.openfoodfacts.org) via site search \u2014 community-contributed data",
+ "warning": "Verify each UPC against the physical package before printing shelf labels. Items flagged 'verify' need a human check on brand/size.",
+ "resolved": [
+  {
+   "product": "Goya VEGETABLE OIL 24 OZ",
+   "upc": "041331012379",
+   "raw_barcode": "0041331012379",
+   "matched_name": "Vegetable oil \u2013 Goya",
+   "note": "brand+name match; package size not shown in database"
+  },
+  {
+   "product": "Goya COCONUT MILK 25.5 OZ",
+   "upc": "413312021647",
+   "raw_barcode": "0413312021647",
+   "matched_name": "Coconut Milk \u2013 Goya",
+   "note": "generic brand match; no 25.5 oz variant in database \u2014 verify size"
+  },
+  {
+   "product": "Goya RED KIDNEY BEANS 46 OZ",
+   "upc": "041331124027",
+   "raw_barcode": "0041331124027",
+   "matched_name": "Red Kidney Beans \u2013 Goya \u2013 15.5oz",
+   "note": "brand match but size differs (db has 15.5oz, need 46oz) \u2014 verify"
+  },
+  {
+   "product": "Goya ROMAN BEANS 15.5 OZ",
+   "upc": "041331124164",
+   "raw_barcode": "0041331124164",
+   "matched_name": "Roman Beans \u2013 Goya \u2013 439g",
+   "note": "exact: 439g = 15.5 oz"
+  },
+  {
+   "product": "Goya SMALL WHITE BEANS 29 OZ",
+   "upc": "041331024136",
+   "raw_barcode": "0041331024136",
+   "matched_name": "Small White Beans \u2013 Goya \u2013 122g",
+   "note": "brand match; db entry is 122g, need 29oz \u2014 verify"
+  },
+  {
+   "product": "Goya LENTILS 1 LB",
+   "upc": "041331023061",
+   "raw_barcode": "0041331023061",
+   "matched_name": "Lentils \u2013 Goya \u2013 397g",
+   "note": "brand match; db entry is 397g, need 1lb \u2014 verify"
+  },
+  {
+   "product": "Goya MAIZ TRILLADO / GOLD HOMINY 1 LB",
+   "upc": "041331024983",
+   "raw_barcode": "0041331024983",
+   "matched_name": "Goya golden hominy corn \u2013 16oz",
+   "note": "exact: 16oz = 1 LB"
+  },
+  {
+   "product": "Nestle NESTUM OAT AND PRUNE 12.07 OZ",
+   "upc": "7613031230389",
+   "raw_barcode": "7613031230389",
+   "matched_name": "Nestum Oat, Rice & Prune \u2013 Nestl\u00e9",
+   "note": "only matching entry; name differs slightly \u2014 verify against package"
+  },
+  {
+   "product": "MAGGI SEAFOOD SOUP 2.26 OZ",
+   "upc": "028000517311",
+   "raw_barcode": "0028000517311",
+   "matched_name": "Maggi creamy seafood soup mix",
+   "note": "brand+name match; size not shown"
+  },
+  {
+   "product": "GOYA CARNAVAL STRAWBERRY 14.2 OZ",
+   "upc": "041331064323",
+   "raw_barcode": "0041331064323",
+   "matched_name": "goyacarnaval strawberry \u2013 GOYA",
+   "note": "exact product match"
+  },
+  {
+   "product": "Goya VEGETABLE OIL 48 OZ",
+   "upc": "041331012355",
+   "raw_barcode": "0041331012355",
+   "matched_name": "Vegetable Oil \u2013 Goya",
+   "note": "brand+name match; size not shown \u2014 verify"
+  },
+  {
+   "product": "Goya ROMAN BEANS 46 OZ",
+   "upc": "041331024150",
+   "raw_barcode": "0041331024150",
+   "matched_name": "Premium Roman Beans \u2013 Goya \u2013 124g",
+   "note": "brand match; db entry is 124g \u2014 verify size"
+  },
+  {
+   "product": "Goya FRIJOL DE SEDA 15.5 OZ",
+   "upc": "1560467699326",
+   "raw_barcode": "1560467699326",
+   "matched_name": "frijol rojo de seda \u2013 goya",
+   "note": "only result; unusual barcode format \u2014 verify against package"
+  },
+  {
+   "product": "FRESCAVENA VANILLA 9.5 OZ",
+   "upc": "038527109005",
+   "raw_barcode": "0038527109005",
+   "matched_name": "Quaker frescavena vanilla oat beverage mix",
+   "note": "only result; brand Quaker"
+  },
+  {
+   "product": "ALPINA ORIGINAL OAT SMOOTHIE 2.82 OZ",
+   "upc": "7702001163083",
+   "raw_barcode": "7702001163083",
+   "matched_name": "avena oat smoothie \u2013 Alpina",
+   "note": "only result; brand Alpina"
+  },
+  {
+   "product": "FAJITA FLOUR TORTILLAS 8.65 OZ",
+   "upc": "073731008300",
+   "raw_barcode": "0073731008300",
+   "matched_name": "Flour Tortillas Fajita \u2013 Mission",
+   "note": "top name match (Mission brand); size not shown \u2014 verify"
+  },
+  {
+   "product": "Goya GREAT NORTHERN BEANS 15.5 OZ",
+   "upc": "041331124300",
+   "raw_barcode": "0041331124300",
+   "matched_name": "Great Northern Beans \u2013 Goya \u2013 15.5oz",
+   "note": "exact brand + size match"
+  },
+  {
+   "product": "Nestle NIDO 1+KINDER CRECIMIENTO 12.69 OZ",
+   "upc": "028000216283",
+   "raw_barcode": "0028000216283",
+   "matched_name": "Nido Kinder 1+ \u2013 Nestl\u00e9",
+   "note": "brand+name match; US version"
+  },
+  {
+   "product": "FRESCAVENA STRAWBERRY 11.1 OZ",
+   "upc": "038527109500",
+   "raw_barcode": "0038527109500",
+   "matched_name": "Frescavena fresa strawberry \u2013 Quaker",
+   "note": "only result; photo-confirmed"
+  },
+  {
+   "product": "Goya CHICK PEAS LOW SODIUM",
+   "upc": "004133112333",
+   "raw_barcode": "0004133112333",
+   "matched_name": "Low sodium chick peas garbanzos \u2013 Goya",
+   "note": "exact: low-sodium variant"
+  },
+  {
+   "product": "Goya BLACK BEANS 15.5 OZ",
+   "upc": "041331124669",
+   "raw_barcode": "0041331124669",
+   "matched_name": "Black Beans \u2013 Goya \u2013 15.5oz",
+   "note": "exact brand + size match"
+  },
+  {
+   "product": "Goya GREEN SPLIT PEAS 1 LB",
+   "upc": "041331024877",
+   "raw_barcode": "0041331024877",
+   "matched_name": "Green Split Peas \u2013 Goya",
+   "note": "only entry; db quantity field looks mis-entered \u2014 verify"
+  },
+  {
+   "product": "Nestle NESTUM WHEAT AND HONEY 10.5 OZ",
+   "upc": "028000001650",
+   "raw_barcode": "0028000001650",
+   "matched_name": "Nestle nestum cereal wheat and honey",
+   "note": "brand+name match"
+  },
+  {
+   "product": "ORGANIC PINTO BEANS",
+   "upc": "041331023412",
+   "raw_barcode": "0041331023412",
+   "matched_name": "Pinto Beans",
+   "note": "low confidence match (0.40) \u2014 verify against package"
+  }
+ ],
+ "unresolved": [
+  {
+   "product": "Goya RED KIDNEY BEANS LOW SODIUM",
+   "note": "no low-sodium variant in database"
+  },
+  {
+   "product": "Goya CHICK PEAS 29 OZ",
+   "note": "no 29oz entry; db has smaller sizes only"
+  },
+  {
+   "product": "Goya BLACK BEANS 1 LB",
+   "note": "no 1lb dry-beans entry"
+  },
+  {
+   "product": "Goya LENTILS 4 LB",
+   "note": "no 4lb entry"
+  },
+  {
+   "product": "Goya GREEN PIGEON PEAS 15 OZ",
+   "note": "no 15oz retail can entry"
+  },
+  {
+   "product": "Goya BLACK BEANS LOW SODIUM",
+   "note": "no low-sodium black beans in database"
+  },
+  {
+   "product": "Goya RED KIDNEY 29 OZ",
+   "note": "no 29oz entry"
+  },
+  {
+   "product": "Goya BLACK BEANS 29 OZ",
+   "note": "no 29oz plain black beans entry"
+  },
+  {
+   "product": "Goya ROMAN BEANS 1 LB",
+   "note": "db has 15.5oz canned only, not 1lb dry"
+  },
+  {
+   "product": "GOYA SIDRA 6.7 OZ",
+   "note": "no Goya Sidra product in database"
+  },
+  {
+   "product": "Goya GREEN PIGEON PEAS LOW SODIUM",
+   "note": "no low-sodium variant in database"
+  },
+  {
+   "product": "Goya ROMAN BEANS 29 OZ",
+   "note": "no 29oz entry"
+  },
+  {
+   "product": "Goya CANNELLINI 29 OZ",
+   "note": "no 29oz entry"
+  },
+  {
+   "product": "MAGGI CREAM OF CHICKEN SOUP 11.1 OZ",
+   "note": "only Egypt/Jordan versions in database"
+  },
+  {
+   "product": "GOYA SIDRA 25.4 OZ",
+   "note": "no Goya Sidra product in database"
+  }
+ ]
+}
