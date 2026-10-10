@@ -1,1 +1,261 @@
-J3VzZSBzdHJpY3QnOwoKLy8gU2VydmVyLWF1dGhvcml0YXRpdmUgcHJpY2luZyBtYXRoIGZvciB0aGUgaW52b2ljZSBwaXBlbGluZS4KLy8KLy8gT25lIG1hcmt1cCBydWxlLCBsb2NrZWQgYnkgdGhlIG93bmVyIG9uIDIwMjYtMDgtMTk6IHJldGFpbCBpcyBjb3N0IHggMS43MC4KLy8KLy8gVGhlc2UgdHdvIGNvbnN0YW50cyBhcmUgdGhlIHNhbWUgcnVsZSBleHByZXNzZWQgdHdvIHdheXMg4oCUIGEgbXVsdGlwbGllciBmb3IKLy8gZGVyaXZpbmcgYW4gYXBwcm92ZWQgcHJpY2UsIGFuZCBhIHBlcmNlbnRhZ2UgZm9yIHRoZSBodWIncyBzbGlkZXIg4oCUIGFuZCB0aGV5Ci8vIG11c3Qgc3RheSBpbiBhZ3JlZW1lbnQuIFRoZXkgdXNlZCB0byBkaXNhZ3JlZSAoMS43MCBpbiB0aGUgdmF1bHQsIDY1JSBpbiB0aGUKLy8gaHViKSwgd2hpY2ggbWVhbnQgdGhlIGJyb3dzZXIgcHJldmlld2VkIG9uZSBwcmljZSB3aGlsZSB0aGUgc2VydmVyIGFwcHJvdmVkCi8vIGFub3RoZXI7IGNsb3NpbmcgdGhhdCBnYXAgaXMgd2hhdCB0aGUgMjAyNi0wOC0xOSBkZWNpc2lvbiBkaWQuCmNvbnN0IFJFVEFJTF9NVUxUSVBMSUVSID0gbm9ybWFsaXplTXVsdGlwbGllcihwcm9jZXNzLmVudi5QUklDSU5HX1JFVEFJTF9NVUxUSVBMSUVSLCAxLjcwKTsKY29uc3QgSFVCX1BSRVZJRVdfTUFSS1VQX1BDVCA9IE1hdGgucm91bmQoKFJFVEFJTF9NVUxUSVBMSUVSIC0gMSkgKiAxMDApOwoKLy8gUmVjb25jaWxpYXRpb24gdG9sZXJhbmNlIGJldHdlZW4gYW4gaW52b2ljZSdzIHN0YXRlZCBzdWJ0b3RhbCBhbmQgdGhlIHN1bSBvZgovLyBpdHMgZXh0cmFjdGVkIGxpbmVzLiBBbnl0aGluZyB3aWRlciBibG9ja3MgYXBwcm92YWwuCmNvbnN0IE1BWF9SRUNPTkNJTElBVElPTl9WQVJJQU5DRSA9IDAuMDE7Cgpjb25zdCBNSU5fT0NSX0NPTkZJREVOQ0UgPSAwLjkwOwoKZnVuY3Rpb24gbm9ybWFsaXplTXVsdGlwbGllcihyYXcsIGZhbGxiYWNrKSB7CiAgY29uc3QgdmFsdWUgPSBOdW1iZXIocmF3KTsKICBpZiAoIU51bWJlci5pc0Zpbml0ZSh2YWx1ZSkgfHwgdmFsdWUgPD0gMCkgcmV0dXJuIGZhbGxiYWNrOwogIHJldHVybiB2YWx1ZTsKfQoKZnVuY3Rpb24gZmluaXRlTnVtYmVyKHZhbHVlLCBmaWVsZCkgewogIGNvbnN0IG51bWJlciA9IE51bWJlcih2YWx1ZSk7CiAgaWYgKCFOdW1iZXIuaXNGaW5pdGUobnVtYmVyKSkgdGhyb3cgbmV3IEVycm9yKGAke2ZpZWxkfSBtdXN0IGJlIGEgbnVtYmVyYCk7CiAgcmV0dXJuIG51bWJlcjsKfQoKLy8gQ3VycmVuY3kgcm91bmRpbmcuIFNjYWxlcyB0byBpbnRlZ2VyIGNlbnRzIGJlZm9yZSByb3VuZGluZyBzbyB2YWx1ZXMgdGhhdCBsYW5kCi8vIG9uIGEgZmxvYXQgYm91bmRhcnkgKDIuNjc1IC0+IDIuNjcgdW5kZXIgbmFpdmUgTWF0aC5yb3VuZCkgc2V0dGxlIGNvcnJlY3RseS4KZnVuY3Rpb24gcm91bmRNb25leSh2YWx1ZSkgewogIGNvbnN0IGNlbnRzID0gZmluaXRlTnVtYmVyKHZhbHVlLCAndmFsdWUnKSAqIDEwMDsKICByZXR1cm4gTWF0aC5yb3VuZChjZW50cyArIChjZW50cyA+PSAwID8gTnVtYmVyLkVQU0lMT04gKiAxMDAgOiAtTnVtYmVyLkVQU0lMT04gKiAxMDApKSAvIDEwMDsKfQoKLy8gQ29zdC1wZXItdW5pdCBrZWVwcyBmb3VyIGRlY2ltYWxzOiBmcmFjdGlvbmFsIGNlbnRzIGFyZSByZWFsIGF0IGNhc2Ugc2NhbGUgYW5kCi8vIG11c3Qgbm90IGJlIHJvdW5kZWQgYXdheSBiZWZvcmUgdGhlIHJldGFpbCBtdWx0aXBsaWVyIGlzIGFwcGxpZWQuCmZ1bmN0aW9uIHJvdW5kQ29zdCh2YWx1ZSkgewogIHJldHVybiBNYXRoLnJvdW5kKChmaW5pdGVOdW1iZXIodmFsdWUsICd1bml0IGNvc3QnKSArIE51bWJlci5FUFNJTE9OKSAqIDEwMDAwKSAvIDEwMDAwOwp9CgovLyBVUENzIGFyZSB0ZXh0IGV2ZXJ5d2hlcmUuIFRoaXMgc3RyaXBzIHNlcGFyYXRvcnMgZm9yIGNvbXBhcmlzb24gYnV0IG5ldmVyCi8vIHRyaW1zIGxlYWRpbmcgemVyb3MsIHdoaWNoIGFyZSBzaWduaWZpY2FudC4KZnVuY3Rpb24gbm9ybWFsaXplVXBjKHZhbHVlKSB7CiAgcmV0dXJuIFN0cmluZyh2YWx1ZSA9PSBudWxsID8gJycgOiB2YWx1ZSkucmVwbGFjZSgvXEQvZywgJycpOwp9CgovLyBUaGUgc3RvcmUncyBzaGVsZiBjb252ZW50aW9uOiBldmVyeSByZXRhaWwgcHJpY2UgZW5kcyBpbiAuOTkuCi8vIE1pcnJvcnMgdGhlIFByaWNpbmcgSHViJ3Mgcm91bmRSZXRhaWwoKSBleGFjdGx5IHNvIHRoZSBicm93c2VyIHByZXZpZXcgYW5kIHRoZQovLyBzZXJ2ZXIgbmV2ZXIgZGlzYWdyZWUgYWJvdXQgd2hhdCBhIHN1Z2dlc3RlZCBwcmljZSBpcy4KZnVuY3Rpb24gcm91bmRSZXRhaWwocHJpY2UpIHsKICBjb25zdCB2YWx1ZSA9IGZpbml0ZU51bWJlcihwcmljZSwgJ3ByaWNlJyk7CiAgY29uc3QgYmFzZSA9IE1hdGguZmxvb3IodmFsdWUpOwogIHJldHVybiB2YWx1ZSAtIGJhc2UgPj0gMC41ID8gYmFzZSArIDAuOTkgOiBNYXRoLm1heCgwLjk5LCBiYXNlIC0gMSArIDAuOTkpOwp9CgpmdW5jdGlvbiByZXRhaWxGcm9tVW5pdENvc3QodW5pdENvc3QsIG11bHRpcGxpZXIgPSBSRVRBSUxfTVVMVElQTElFUikgewogIGNvbnN0IGNvc3QgPSBmaW5pdGVOdW1iZXIodW5pdENvc3QsICd1bml0IGNvc3QnKTsKICBpZiAoY29zdCA8IDApIHRocm93IG5ldyBFcnJvcigndW5pdCBjb3N0IGNhbm5vdCBiZSBuZWdhdGl2ZScpOwogIHJldHVybiByb3VuZE1vbmV5KGNvc3QgKiBub3JtYWxpemVNdWx0aXBsaWVyKG11bHRpcGxpZXIsIFJFVEFJTF9NVUxUSVBMSUVSKSk7Cn0KCi8vIFRoZSBzaGVsZi1yZWFkeSBzdWdnZXN0aW9uIHRoZSBodWIgc2hvd3M6IGNvc3QgbWFya2VkIHVwLCB0aGVuIHNuYXBwZWQgdG8gLjk5LgpmdW5jdGlvbiBzdWdnZXN0ZWRSZXRhaWwodW5pdENvc3QsIG1hcmt1cFBjdCA9IEhVQl9QUkVWSUVXX01BUktVUF9QQ1QpIHsKICBjb25zdCBjb3N0ID0gZmluaXRlTnVtYmVyKHVuaXRDb3N0LCAndW5pdCBjb3N0Jyk7CiAgaWYgKGNvc3QgPCAwKSB0aHJvdyBuZXcgRXJyb3IoJ3VuaXQgY29zdCBjYW5ub3QgYmUgbmVnYXRpdmUnKTsKICBpZiAoY29zdCA9PT0gMCkgcmV0dXJuIDA7CiAgcmV0dXJuIHJvdW5kUmV0YWlsKGNvc3QgKiAoMSArIGZpbml0ZU51bWJlcihtYXJrdXBQY3QsICdtYXJrdXAnKSAvIDEwMCkpOwp9CgpmdW5jdGlvbiB1bml0Q29zdEZyb21DYXNlKHsgbGluZVRvdGFsLCBjYXNlUXVhbnRpdHksIHVuaXRzUGVyQ2FzZSwgbGluZURpc2NvdW50ID0gMCwgYWxsb2NhdGVkQ2hhcmdlcyA9IDAgfSkgewogIGNvbnN0IHRvdGFsID0gZmluaXRlTnVtYmVyKGxpbmVUb3RhbCwgJ2xpbmUgdG90YWwnKTsKICBjb25zdCBjYXNlcyA9IGZpbml0ZU51bWJlcihjYXNlUXVhbnRpdHksICdjYXNlIHF1YW50aXR5Jyk7CiAgY29uc3QgdW5pdHMgPSBmaW5pdGVOdW1iZXIodW5pdHNQZXJDYXNlLCAndW5pdHMgcGVyIGNhc2UnKTsKICBjb25zdCBkaXNjb3VudCA9IGZpbml0ZU51bWJlcihsaW5lRGlzY291bnQsICdsaW5lIGRpc2NvdW50Jyk7CiAgY29uc3QgY2hhcmdlcyA9IGZpbml0ZU51bWJlcihhbGxvY2F0ZWRDaGFyZ2VzLCAnYWxsb2NhdGVkIGNoYXJnZXMnKTsKICBpZiAoY2FzZXMgPD0gMCB8fCB1bml0cyA8PSAwKSB0aHJvdyBuZXcgRXJyb3IoJ2Nhc2UgcXVhbnRpdHkgYW5kIHVuaXRzIHBlciBjYXNlIG11c3QgYmUgcG9zaXRpdmUnKTsKICBpZiAodG90YWwgPCAwIHx8IGRpc2NvdW50IDwgMCB8fCBjaGFyZ2VzIDwgMCkgdGhyb3cgbmV3IEVycm9yKCdpbnZvaWNlIGFtb3VudHMgY2Fubm90IGJlIG5lZ2F0aXZlJyk7CiAgcmV0dXJuIHJvdW5kQ29zdCgodG90YWwgLSBkaXNjb3VudCArIGNoYXJnZXMpIC8gKGNhc2VzICogdW5pdHMpKTsKfQoKLy8gVmFyaWFuY2Ugb2YgYSBuZXcgY29zdCBhZ2FpbnN0IHRoZSBsYXN0IGtub3duIGNvc3QgZm9yIHRoZSBzYW1lIHByb2R1Y3QuCi8vIFJldHVybnMgbnVsbCB3aGVuIHRoZXJlIGlzIG5vIHByaW9yIGNvc3QgdG8gY29tcGFyZSBhZ2FpbnN0IOKAlCBhIGZpcnN0IHNpZ2h0aW5nCi8vIGlzIG5vdCBhIHByaWNlIGNoYW5nZS4KZnVuY3Rpb24gY29zdFZhcmlhbmNlKHByZXZpb3VzVW5pdENvc3QsIG5ld1VuaXRDb3N0KSB7CiAgaWYgKHByZXZpb3VzVW5pdENvc3QgPT0gbnVsbCB8fCBwcmV2aW91c1VuaXRDb3N0ID09PSAnJykgcmV0dXJuIG51bGw7CiAgY29uc3QgcHJldmlvdXMgPSBmaW5pdGVOdW1iZXIocHJldmlvdXNVbml0Q29zdCwgJ3ByZXZpb3VzIHVuaXQgY29zdCcpOwogIGNvbnN0IG5leHQgPSBmaW5pdGVOdW1iZXIobmV3VW5pdENvc3QsICduZXcgdW5pdCBjb3N0Jyk7CiAgY29uc3QgZGVsdGEgPSByb3VuZENvc3QobmV4dCAtIHByZXZpb3VzKTsKICByZXR1cm4gewogICAgcHJldmlvdXNfdW5pdF9jb3N0OiByb3VuZENvc3QocHJldmlvdXMpLAogICAgbmV3X3VuaXRfY29zdDogcm91bmRDb3N0KG5leHQpLAogICAgZGVsdGEsCiAgICBwZXJjZW50OiBwcmV2aW91cyA9PT0gMCA/IG51bGwgOiBNYXRoLnJvdW5kKChkZWx0YSAvIHByZXZpb3VzKSAqIDEwMDAwKSAvIDEwMCwKICAgIGRpcmVjdGlvbjogZGVsdGEgPiAwID8gJ2luY3JlYXNlJyA6IGRlbHRhIDwgMCA/ICdkZWNyZWFzZScgOiAnZmxhdCcKICB9Owp9CgpmdW5jdGlvbiBwcmljZUludm9pY2VMaW5lKGl0ZW0sIHBvc2l0aW9uID0gMCkgewogIGNvbnN0IHJlYXNvbnMgPSBbXTsKICBjb25zdCB1cGMgPSBub3JtYWxpemVVcGMoaXRlbS51cGMgfHwgaXRlbS5leHRyYWN0ZWRfdXBjKTsKICBjb25zdCBjb25maWRlbmNlID0gZmluaXRlTnVtYmVyKGl0ZW0ub2NyX2NvbmZpZGVuY2UgPz8gaXRlbS5jb25maWRlbmNlID8/IDAsICdPQ1IgY29uZmlkZW5jZScpOwogIGlmICghdXBjKSByZWFzb25zLnB1c2goJ21pc3NpbmcgVVBDJyk7CiAgaWYgKGNvbmZpZGVuY2UgPCBNSU5fT0NSX0NPTkZJREVOQ0UpIHJlYXNvbnMucHVzaChgT0NSIGNvbmZpZGVuY2UgYmVsb3cgJHtNSU5fT0NSX0NPTkZJREVOQ0UudG9GaXhlZCgyKX1gKTsKCiAgbGV0IHVuaXRDb3N0ID0gMDsKICB0cnkgewogICAgdW5pdENvc3QgPSBpdGVtLmV4cGxpY2l0X3VuaXRfY29zdCAhPSBudWxsCiAgICAgID8gcm91bmRDb3N0KGZpbml0ZU51bWJlcihpdGVtLmV4cGxpY2l0X3VuaXRfY29zdCwgJ2V4cGxpY2l0IHVuaXQgY29zdCcpKQogICAgICA6IHVuaXRDb3N0RnJvbUNhc2UoewogICAgICAgIGxpbmVUb3RhbDogaXRlbS5saW5lX3RvdGFsID8/IGl0ZW0udG90YWwsCiAgICAgICAgY2FzZVF1YW50aXR5OiBpdGVtLmNhc2VfcXVhbnRpdHkgPz8gaXRlbS5jYXNlcywKICAgICAgICB1bml0c1BlckNhc2U6IGl0ZW0udW5pdHNfcGVyX2Nhc2UgPz8gaXRlbS51bml0cywKICAgICAgICBsaW5lRGlzY291bnQ6IGl0ZW0ubGluZV9kaXNjb3VudCwKICAgICAgICBhbGxvY2F0ZWRDaGFyZ2VzOiBpdGVtLmFsbG9jYXRlZF9jaGFyZ2VzCiAgICAgIH0pOwogIH0gY2F0Y2ggKGVycm9yKSB7CiAgICByZWFzb25zLnB1c2goZXJyb3IubWVzc2FnZSk7CiAgfQoKICBjb25zdCB2YXJpYW5jZSA9IGNvc3RWYXJpYW5jZShpdGVtLnByZXZpb3VzX3VuaXRfY29zdCwgdW5pdENvc3QpOwogIGlmICh2YXJpYW5jZSAmJiBNYXRoLmFicyh2YXJpYW5jZS5kZWx0YSkgPiAwKSByZWFzb25zLnB1c2goYGNvc3QgJHt2YXJpYW5jZS5kaXJlY3Rpb259IHZzIGxhc3QgaW52b2ljZWApOwoKICAvLyBPQ1IgYW5kIGZ1enp5IG1hdGNoaW5nIGNhbiBzdWdnZXN0IGJ1dCBuZXZlciBhcHByb3ZlLiBBIGxpbmUgb25seSBzdGF5cwogIC8vICdhcHByb3ZlZCcgaWYgdGhlIGNhbGxlciBhc2tlZCBmb3IgaXQgQU5EIG5vdGhpbmcgbmVlZHMgYSBodW1hbi4KICBjb25zdCByZXF1ZXN0ZWRTdGF0dXMgPSBpdGVtLnN0YXR1cyB8fCBpdGVtLnJldmlld19zdGF0dXMgfHwgJ25lZWRzX3Jldmlldyc7CiAgcmV0dXJuIHsKICAgIGxpbmVfbnVtYmVyOiBpdGVtLmxpbmVfbnVtYmVyIHx8IHBvc2l0aW9uICsgMSwKICAgIHZlbmRvcl9za3U6IGl0ZW0udmVuZG9yX3NrdSB8fCAnJywKICAgIHVwYywKICAgIGRlc2NyaXB0aW9uOiBpdGVtLmRlc2NyaXB0aW9uIHx8IGl0ZW0uZXh0cmFjdGVkX2Rlc2NyaXB0aW9uIHx8ICcnLAogICAgZGVwYXJ0bWVudDogaXRlbS5kZXBhcnRtZW50IHx8ICcnLAogICAgY2FzZV9xdWFudGl0eTogTnVtYmVyKGl0ZW0uY2FzZV9xdWFudGl0eSA/PyBpdGVtLmNhc2VzID8/IDApLAogICAgdW5pdHNfcGVyX2Nhc2U6IE51bWJlcihpdGVtLnVuaXRzX3Blcl9jYXNlID8/IGl0ZW0udW5pdHMgPz8gMCksCiAgICBsaW5lX3RvdGFsOiByb3VuZE1vbmV5KE51bWJlcihpdGVtLmxpbmVfdG90YWwgPz8gaXRlbS50b3RhbCA/PyAwKSksCiAgICB1bml0X2Nvc3Q6IHVuaXRDb3N0LAogICAgLy8gVGhlIGJpbmRpbmcgc2hlbGYgcnVsZTogY29zdCB4IDEuNzAsIHNuYXBwZWQgdG8gLjk5LiBUaGlzIGlzIHRoZSBwcmljZQogICAgLy8gdGhlIGh1YiBwcm9wb3NlcyBhbmQgYXBwcm92YWwgd3JpdGVzIOKAlCBhbiB1bnJvdW5kZWQgeDEuNzAgaGVyZSB3b3VsZCBwdXQKICAgIC8vIG5vbi0uOTkgcHJpY2VzIG9uIHRoZSBzaGVsZiBhZ2FpbnN0IHRoZSBzdG9yZSdzIG93biBjb252ZW50aW9uLgogICAgZmluYWxfcmV0YWlsX3ByaWNlOiBzdWdnZXN0ZWRSZXRhaWwodW5pdENvc3QpLAogICAgc3VnZ2VzdGVkX3NoZWxmX3ByaWNlOiBzdWdnZXN0ZWRSZXRhaWwodW5pdENvc3QpLAogICAgcmV0YWlsX211bHRpcGxpZXI6IFJFVEFJTF9NVUxUSVBMSUVSLAogICAgb2NyX2NvbmZpZGVuY2U6IGNvbmZpZGVuY2UsCiAgICB2YXJpYW5jZSwKICAgIHN0YXR1czogcmVhc29ucy5sZW5ndGggfHwgcmVxdWVzdGVkU3RhdHVzICE9PSAnYXBwcm92ZWQnID8gJ25lZWRzX3JldmlldycgOiAnYXBwcm92ZWQnLAogICAgcmV2aWV3X3JlYXNvbjogWy4uLnJlYXNvbnMsIGl0ZW0ucmV2aWV3X3JlYXNvbl0uZmlsdGVyKEJvb2xlYW4pLmpvaW4oJzsgJykKICB9Owp9CgpmdW5jdGlvbiBwcmljZUludm9pY2UocGF5bG9hZCkgewogIGNvbnN0IGludm9pY2UgPSBwYXlsb2FkLmludm9pY2UgfHwge307CiAgY29uc3QgaXRlbXMgPSAocGF5bG9hZC5pdGVtcyB8fCBbXSkubWFwKHByaWNlSW52b2ljZUxpbmUpOwogIGNvbnN0IGV4dHJhY3RlZExpbmVTdW0gPSByb3VuZE1vbmV5KGl0ZW1zLnJlZHVjZSgoc3VtLCBpdGVtKSA9PiBzdW0gKyBpdGVtLmxpbmVfdG90YWwsIDApKTsKICBjb25zdCBpbnZvaWNlU3VidG90YWwgPSByb3VuZE1vbmV5KE51bWJlcihpbnZvaWNlLnN1YnRvdGFsID8/IGludm9pY2UuaW52b2ljZV9zdWJ0b3RhbCA/PyBleHRyYWN0ZWRMaW5lU3VtKSk7CiAgY29uc3QgdmFyaWFuY2UgPSByb3VuZE1vbmV5KGludm9pY2VTdWJ0b3RhbCAtIGV4dHJhY3RlZExpbmVTdW0pOwogIHJldHVybiB7CiAgICBpbnZvaWNlOiB7IC4uLmludm9pY2UsIGludm9pY2Vfc3VidG90YWw6IGludm9pY2VTdWJ0b3RhbCB9LAogICAgaXRlbXMsCiAgICByZWNvbmNpbGlhdGlvbjogewogICAgICBpbnZvaWNlX3N1YnRvdGFsOiBpbnZvaWNlU3VidG90YWwsCiAgICAgIGV4dHJhY3RlZF9saW5lX3N1bTogZXh0cmFjdGVkTGluZVN1bSwKICAgICAgdmFyaWFuY2UsCiAgICAgIHdpdGhpbl90b2xlcmFuY2U6IE1hdGguYWJzKHZhcmlhbmNlKSA8PSBNQVhfUkVDT05DSUxJQVRJT05fVkFSSUFOQ0UsCiAgICAgIHRvbGVyYW5jZTogTUFYX1JFQ09OQ0lMSUFUSU9OX1ZBUklBTkNFCiAgICB9CiAgfTsKfQoKLy8gR2F0ZSBhcHBsaWVkIGltbWVkaWF0ZWx5IGJlZm9yZSBhbiBhcHByb3ZhbCB0cmFuc2FjdGlvbiBpcyBhbGxvd2VkIHRvIHJ1bi4KLy8KLy8gVGhpcyBpcyBkZWxpYmVyYXRlbHkgTk9UIHRoZSBleHRyYWN0aW9uIGdhdGUuIEF0IGV4dHJhY3Rpb24gdGhlIHF1ZXN0aW9uIGlzCi8vICJjYW4gdGhpcyBPQ1Igb3V0cHV0IGJlIHRydXN0ZWQ/IiDigJQgaGVuY2UgdGhlIFVQQyBhbmQgY29uZmlkZW5jZSBjaGVja3MuIEJ5Ci8vIGFwcHJvdmFsIHRpbWUgYSBtYW5hZ2VyIGhhcyBhbHJlYWR5IHJlc29sdmVkIGlkZW50aXR5IGJ5IG1hdGNoaW5nIGEgcHJvZHVjdCwKLy8gc28gdGhlIHF1ZXN0aW9ucyBhcmUgb25seTogaXMgZXZlcnkgbGluZSBtYXRjaGVkLCBpcyB0aGUgbW9uZXkgc2FuZSwgYW5kIGRvCi8vIHRoZSBsaW5lcyBhZGQgdXAgdG8gdGhlIGludm9pY2U/IFJldXNpbmcgdGhlIGV4dHJhY3Rpb24gZ2F0ZSBoZXJlIHdvdWxkIHJlamVjdAovLyBhIGNvcnJlY3RseSByZXZpZXdlZCBsaW5lIGp1c3QgYmVjYXVzZSB0aGUgdmVuZG9yIG5ldmVyIHByaW50ZWQgYSBVUEMsIHdoaWNoCi8vIGlzIHRoZSBub3JtYWwgY2FzZSBmb3IgNDIgb2YgdGhlIHN0b3JlJ3MgY3VycmVudCBpdGVtcy4KLy8KLy8gVGhlIGRhdGFiYXNlIGVuZm9yY2VzIHRoZSBzYW1lIHJ1bGVzIGluc2lkZSB0aGUgdHJhbnNhY3Rpb24uIFRoaXMgcnVucyBmaXJzdAovLyBvbmx5IHNvIHRoZSByZXZpZXdlciBnZXRzIGEgcmVhZGFibGUgbGlzdCBpbnN0ZWFkIG9mIGEgcmF3IFNRTCBlcnJvci4KZnVuY3Rpb24gYXBwcm92YWxSZWFkaW5lc3MoeyBpbnZvaWNlU3VidG90YWwsIGxpbmVzIH0pIHsKICBjb25zdCBibG9ja2VycyA9IFtdOwogIGNvbnN0IHJvd3MgPSBBcnJheS5pc0FycmF5KGxpbmVzKSA/IGxpbmVzIDogW107CgogIGlmICghcm93cy5sZW5ndGgpIHsKICAgIGJsb2NrZXJzLnB1c2goJ25vIHJldmlld2VkIGxpbmVzIHdlcmUgc3VibWl0dGVkJyk7CiAgICByZXR1cm4geyBibG9ja2VycywgbGluZVN1bTogMCwgdmFyaWFuY2U6IDAgfTsKICB9CgogIGNvbnN0IHVubWF0Y2hlZCA9IHJvd3MuZmlsdGVyKGxpbmUgPT4gIWxpbmUucHJvZHVjdF9pZCk7CiAgaWYgKHVubWF0Y2hlZC5sZW5ndGgpIHsKICAgIGJsb2NrZXJzLnB1c2goYCR7dW5tYXRjaGVkLmxlbmd0aH0gbGluZShzKSBzdGlsbCBuZWVkIHJldmlldzogbm8gcHJvZHVjdCBtYXRjaGVkYCk7CiAgfQoKICBmb3IgKGNvbnN0IGxpbmUgb2Ygcm93cykgewogICAgY29uc3QgbGFiZWwgPSBsaW5lLmxpbmVfbnVtYmVyID09IG51bGwgPyAnYSBsaW5lJyA6IGBsaW5lICR7bGluZS5saW5lX251bWJlcn1gOwogICAgY29uc3QgdW5pdENvc3QgPSBOdW1iZXIobGluZS51bml0X2Nvc3QpOwogICAgaWYgKCFOdW1iZXIuaXNGaW5pdGUodW5pdENvc3QpIHx8IHVuaXRDb3N0IDwgMCkgewogICAgICBibG9ja2Vycy5wdXNoKGAke2xhYmVsfSBoYXMgYW4gaW52YWxpZCB1bml0IGNvc3RgKTsKICAgICAgY29udGludWU7CiAgICB9CiAgICAvLyBJbnRlcm5hbCBzdXBwbGllcyBhcmUgbm90IHNvbGQsIHNvIHRoZXkgY2Fycnkgbm8gcmV0YWlsIHRvIGNvbXBhcmUuCiAgICBpZiAobGluZS5pbnRlcm5hbCkgY29udGludWU7CiAgICBjb25zdCByZXRhaWwgPSBOdW1iZXIobGluZS5yZXRhaWxfcHJpY2UpOwogICAgaWYgKCFOdW1iZXIuaXNGaW5pdGUocmV0YWlsKSkgewogICAgICBibG9ja2Vycy5wdXNoKGAke2xhYmVsfSBoYXMgbm8gcmV0YWlsIHByaWNlYCk7CiAgICB9IGVsc2UgaWYgKHJldGFpbCA8IHVuaXRDb3N0KSB7CiAgICAgIGJsb2NrZXJzLnB1c2goYCR7bGFiZWx9IGlzIHByaWNlZCBiZWxvdyBjb3N0YCk7CiAgICB9CiAgfQoKICBjb25zdCBsaW5lU3VtID0gcm91bmRNb25leShyb3dzLnJlZHVjZSgoc3VtLCBsaW5lKSA9PiBzdW0gKyBOdW1iZXIobGluZS5saW5lX3RvdGFsIHx8IDApLCAwKSk7CiAgY29uc3Qgc3VidG90YWwgPSBpbnZvaWNlU3VidG90YWwgPT0gbnVsbCA/IGxpbmVTdW0gOiByb3VuZE1vbmV5KE51bWJlcihpbnZvaWNlU3VidG90YWwpKTsKICBjb25zdCB2YXJpYW5jZSA9IHJvdW5kTW9uZXkoc3VidG90YWwgLSBsaW5lU3VtKTsKICBpZiAoTWF0aC5hYnModmFyaWFuY2UpID4gTUFYX1JFQ09OQ0lMSUFUSU9OX1ZBUklBTkNFKSB7CiAgICBibG9ja2Vycy5wdXNoKGByZWNvbmNpbGlhdGlvbiB2YXJpYW5jZSAkJHt2YXJpYW5jZS50b0ZpeGVkKDIpfSBleGNlZWRzICQke01BWF9SRUNPTkNJTElBVElPTl9WQVJJQU5DRS50b0ZpeGVkKDIpfWApOwogIH0KCiAgcmV0dXJuIHsgYmxvY2tlcnMsIGxpbmVTdW0sIHZhcmlhbmNlIH07Cn0KCi8vIEdhdGUgYXBwbGllZCB0byBhIGZyZXNobHkgRVhUUkFDVEVEIGludm9pY2UsIGJlZm9yZSBhIGh1bWFuIGhhcyByZXZpZXdlZCBpdC4KLy8gUmV0dXJucyBhIGxpc3Qgb2YgYmxvY2tpbmcgcmVhc29uczsgZW1wdHkgbWVhbnMgdGhlIGludm9pY2UgbWF5IGJlIGFwcHJvdmVkLgpmdW5jdGlvbiBhcHByb3ZhbEJsb2NrZXJzKHByaWNlZCkgewogIGNvbnN0IGJsb2NrZXJzID0gW107CiAgaWYgKCFwcmljZWQucmVjb25jaWxpYXRpb24ud2l0aGluX3RvbGVyYW5jZSkgewogICAgYmxvY2tlcnMucHVzaChgcmVjb25jaWxpYXRpb24gdmFyaWFuY2UgJCR7cHJpY2VkLnJlY29uY2lsaWF0aW9uLnZhcmlhbmNlLnRvRml4ZWQoMil9IGV4Y2VlZHMgJCR7TUFYX1JFQ09OQ0lMSUFUSU9OX1ZBUklBTkNFLnRvRml4ZWQoMil9YCk7CiAgfQogIGNvbnN0IHVucmVzb2x2ZWQgPSBwcmljZWQuaXRlbXMuZmlsdGVyKGl0ZW0gPT4gaXRlbS5zdGF0dXMgIT09ICdhcHByb3ZlZCcpOwogIGlmICh1bnJlc29sdmVkLmxlbmd0aCkgewogICAgYmxvY2tlcnMucHVzaChgJHt1bnJlc29sdmVkLmxlbmd0aH0gbGluZShzKSBzdGlsbCBuZWVkIHJldmlld2ApOwogIH0KICBjb25zdCBiZWxvd0Nvc3QgPSBwcmljZWQuaXRlbXMuZmlsdGVyKGl0ZW0gPT4gaXRlbS5zdGF0dXMgPT09ICdhcHByb3ZlZCcgJiYgaXRlbS5maW5hbF9yZXRhaWxfcHJpY2UgPCBpdGVtLnVuaXRfY29zdCk7CiAgaWYgKGJlbG93Q29zdC5sZW5ndGgpIHsKICAgIGJsb2NrZXJzLnB1c2goYCR7YmVsb3dDb3N0Lmxlbmd0aH0gbGluZShzKSBwcmljZWQgYmVsb3cgY29zdGApOwogIH0KICByZXR1cm4gYmxvY2tlcnM7Cn0KCm1vZHVsZS5leHBvcnRzID0gewogIEhVQl9QUkVWSUVXX01BUktVUF9QQ1QsCiAgTUFYX1JFQ09OQ0lMSUFUSU9OX1ZBUklBTkNFLAogIE1JTl9PQ1JfQ09ORklERU5DRSwKICBSRVRBSUxfTVVMVElQTElFUiwKICBhcHByb3ZhbEJsb2NrZXJzLAogIGFwcHJvdmFsUmVhZGluZXNzLAogIGNvc3RWYXJpYW5jZSwKICBub3JtYWxpemVVcGMsCiAgcHJpY2VJbnZvaWNlLAogIHByaWNlSW52b2ljZUxpbmUsCiAgcmV0YWlsRnJvbVVuaXRDb3N0LAogIHJvdW5kQ29zdCwKICByb3VuZE1vbmV5LAogIHJvdW5kUmV0YWlsLAogIHN1Z2dlc3RlZFJldGFpbCwKICB1bml0Q29zdEZyb21DYXNlCn07Cg==
+'use strict';
+
+// Server-authoritative pricing math for the invoice pipeline.
+//
+// One markup rule, locked by the owner on 2026-08-19: retail is cost x 1.70.
+//
+// These two constants are the same rule expressed two ways — a multiplier for
+// deriving an approved price, and a percentage for the hub's slider — and they
+// must stay in agreement. They used to disagree (1.70 in the vault, 65% in the
+// hub), which meant the browser previewed one price while the server approved
+// another; closing that gap is what the 2026-08-19 decision did.
+const RETAIL_MULTIPLIER = normalizeMultiplier(process.env.PRICING_RETAIL_MULTIPLIER, 1.70);
+const HUB_PREVIEW_MARKUP_PCT = Math.round((RETAIL_MULTIPLIER - 1) * 100);
+
+// Reconciliation tolerance between an invoice's stated subtotal and the sum of
+// its extracted lines. Anything wider blocks approval.
+const MAX_RECONCILIATION_VARIANCE = 0.01;
+
+const MIN_OCR_CONFIDENCE = 0.90;
+
+function normalizeMultiplier(raw, fallback) {
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value <= 0) return fallback;
+  return value;
+}
+
+function finiteNumber(value, field) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new Error(`${field} must be a number`);
+  return number;
+}
+
+// Currency rounding. Scales to integer cents before rounding so values that land
+// on a float boundary (2.675 -> 2.67 under naive Math.round) settle correctly.
+function roundMoney(value) {
+  const cents = finiteNumber(value, 'value') * 100;
+  return Math.round(cents + (cents >= 0 ? Number.EPSILON * 100 : -Number.EPSILON * 100)) / 100;
+}
+
+// Cost-per-unit keeps four decimals: fractional cents are real at case scale and
+// must not be rounded away before the retail multiplier is applied.
+function roundCost(value) {
+  return Math.round((finiteNumber(value, 'unit cost') + Number.EPSILON) * 10000) / 10000;
+}
+
+// UPCs are text everywhere. This strips separators for comparison but never
+// trims leading zeros, which are significant.
+function normalizeUpc(value) {
+  return String(value == null ? '' : value).replace(/\D/g, '');
+}
+
+// The store's shelf convention: every retail price ends in .99.
+// Mirrors the Pricing Hub's roundRetail() exactly so the browser preview and the
+// server never disagree about what a suggested price is.
+function roundRetail(price) {
+  const value = finiteNumber(price, 'price');
+  const base = Math.floor(value);
+  return value - base >= 0.5 ? base + 0.99 : Math.max(0.99, base - 1 + 0.99);
+}
+
+function retailFromUnitCost(unitCost, multiplier = RETAIL_MULTIPLIER) {
+  const cost = finiteNumber(unitCost, 'unit cost');
+  if (cost < 0) throw new Error('unit cost cannot be negative');
+  return roundMoney(cost * normalizeMultiplier(multiplier, RETAIL_MULTIPLIER));
+}
+
+// The shelf-ready suggestion the hub shows: cost marked up, then snapped to .99.
+function suggestedRetail(unitCost, markupPct = HUB_PREVIEW_MARKUP_PCT) {
+  const cost = finiteNumber(unitCost, 'unit cost');
+  if (cost < 0) throw new Error('unit cost cannot be negative');
+  if (cost === 0) return 0;
+  return roundRetail(cost * (1 + finiteNumber(markupPct, 'markup') / 100));
+}
+
+function unitCostFromCase({ lineTotal, caseQuantity, unitsPerCase, lineDiscount = 0, allocatedCharges = 0 }) {
+  const total = finiteNumber(lineTotal, 'line total');
+  const cases = finiteNumber(caseQuantity, 'case quantity');
+  const units = finiteNumber(unitsPerCase, 'units per case');
+  const discount = finiteNumber(lineDiscount, 'line discount');
+  const charges = finiteNumber(allocatedCharges, 'allocated charges');
+  if (cases <= 0 || units <= 0) throw new Error('case quantity and units per case must be positive');
+  if (total < 0 || discount < 0 || charges < 0) throw new Error('invoice amounts cannot be negative');
+  return roundCost((total - discount + charges) / (cases * units));
+}
+
+// Variance of a new cost against the last known cost for the same product.
+// Returns null when there is no prior cost to compare against — a first sighting
+// is not a price change.
+function costVariance(previousUnitCost, newUnitCost) {
+  if (previousUnitCost == null || previousUnitCost === '') return null;
+  const previous = finiteNumber(previousUnitCost, 'previous unit cost');
+  const next = finiteNumber(newUnitCost, 'new unit cost');
+  const delta = roundCost(next - previous);
+  return {
+    previous_unit_cost: roundCost(previous),
+    new_unit_cost: roundCost(next),
+    delta,
+    percent: previous === 0 ? null : Math.round((delta / previous) * 10000) / 100,
+    direction: delta > 0 ? 'increase' : delta < 0 ? 'decrease' : 'flat'
+  };
+}
+
+function priceInvoiceLine(item, position = 0) {
+  const reasons = [];
+  const upc = normalizeUpc(item.upc || item.extracted_upc);
+  const confidence = finiteNumber(item.ocr_confidence ?? item.confidence ?? 0, 'OCR confidence');
+  if (!upc) reasons.push('missing UPC');
+  if (confidence < MIN_OCR_CONFIDENCE) reasons.push(`OCR confidence below ${MIN_OCR_CONFIDENCE.toFixed(2)}`);
+
+  let unitCost = 0;
+  try {
+    unitCost = item.explicit_unit_cost != null
+      ? roundCost(finiteNumber(item.explicit_unit_cost, 'explicit unit cost'))
+      : unitCostFromCase({
+        lineTotal: item.line_total ?? item.total,
+        caseQuantity: item.case_quantity ?? item.cases,
+        unitsPerCase: item.units_per_case ?? item.units,
+        lineDiscount: item.line_discount,
+        allocatedCharges: item.allocated_charges
+      });
+  } catch (error) {
+    reasons.push(error.message);
+  }
+
+  const variance = costVariance(item.previous_unit_cost, unitCost);
+  if (variance && Math.abs(variance.delta) > 0) reasons.push(`cost ${variance.direction} vs last invoice`);
+
+  // OCR and fuzzy matching can suggest but never approve. A line only stays
+  // 'approved' if the caller asked for it AND nothing needs a human.
+  const requestedStatus = item.status || item.review_status || 'needs_review';
+  return {
+    line_number: item.line_number || position + 1,
+    vendor_sku: item.vendor_sku || '',
+    upc,
+    description: item.description || item.extracted_description || '',
+    department: item.department || '',
+    case_quantity: Number(item.case_quantity ?? item.cases ?? 0),
+    units_per_case: Number(item.units_per_case ?? item.units ?? 0),
+    line_total: roundMoney(Number(item.line_total ?? item.total ?? 0)),
+    unit_cost: unitCost,
+    // The binding shelf rule: cost x 1.70, snapped to .99. This is the price
+    // the hub proposes and approval writes — an unrounded x1.70 here would put
+    // non-.99 prices on the shelf against the store's own convention.
+    final_retail_price: suggestedRetail(unitCost),
+    suggested_shelf_price: suggestedRetail(unitCost),
+    retail_multiplier: RETAIL_MULTIPLIER,
+    ocr_confidence: confidence,
+    variance,
+    status: reasons.length || requestedStatus !== 'approved' ? 'needs_review' : 'approved',
+    review_reason: [...reasons, item.review_reason].filter(Boolean).join('; ')
+  };
+}
+
+function priceInvoice(payload) {
+  const invoice = payload.invoice || {};
+  const items = (payload.items || []).map(priceInvoiceLine);
+  const extractedLineSum = roundMoney(items.reduce((sum, item) => sum + item.line_total, 0));
+  const invoiceSubtotal = roundMoney(Number(invoice.subtotal ?? invoice.invoice_subtotal ?? extractedLineSum));
+  const variance = roundMoney(invoiceSubtotal - extractedLineSum);
+  return {
+    invoice: { ...invoice, invoice_subtotal: invoiceSubtotal },
+    items,
+    reconciliation: {
+      invoice_subtotal: invoiceSubtotal,
+      extracted_line_sum: extractedLineSum,
+      variance,
+      within_tolerance: Math.abs(variance) <= MAX_RECONCILIATION_VARIANCE,
+      tolerance: MAX_RECONCILIATION_VARIANCE
+    }
+  };
+}
+
+// Gate applied immediately before an approval transaction is allowed to run.
+//
+// This is deliberately NOT the extraction gate. At extraction the question is
+// "can this OCR output be trusted?" — hence the UPC and confidence checks. By
+// approval time a manager has already resolved identity by matching a product,
+// so the questions are only: is every line matched, is the money sane, and do
+// the lines add up to the invoice? Reusing the extraction gate here would reject
+// a correctly reviewed line just because the vendor never printed a UPC, which
+// is the normal case for 42 of the store's current items.
+//
+// The database enforces the same rules inside the transaction. This runs first
+// only so the reviewer gets a readable list instead of a raw SQL error.
+function approvalReadiness({ invoiceSubtotal, lines }) {
+  const blockers = [];
+  const rows = Array.isArray(lines) ? lines : [];
+
+  if (!rows.length) {
+    blockers.push('no reviewed lines were submitted');
+    return { blockers, lineSum: 0, variance: 0 };
+  }
+
+  const unmatched = rows.filter(line => !line.product_id);
+  if (unmatched.length) {
+    blockers.push(`${unmatched.length} line(s) still need review: no product matched`);
+  }
+
+  for (const line of rows) {
+    const label = line.line_number == null ? 'a line' : `line ${line.line_number}`;
+    const unitCost = Number(line.unit_cost);
+    if (!Number.isFinite(unitCost) || unitCost < 0) {
+      blockers.push(`${label} has an invalid unit cost`);
+      continue;
+    }
+    // Internal supplies are not sold, so they carry no retail to compare.
+    if (line.internal) continue;
+    const retail = Number(line.retail_price);
+    if (!Number.isFinite(retail)) {
+      blockers.push(`${label} has no retail price`);
+    } else if (retail < unitCost) {
+      blockers.push(`${label} is priced below cost`);
+    }
+  }
+
+  const lineSum = roundMoney(rows.reduce((sum, line) => sum + Number(line.line_total || 0), 0));
+  const subtotal = invoiceSubtotal == null ? lineSum : roundMoney(Number(invoiceSubtotal));
+  const variance = roundMoney(subtotal - lineSum);
+  if (Math.abs(variance) > MAX_RECONCILIATION_VARIANCE) {
+    blockers.push(`reconciliation variance $${variance.toFixed(2)} exceeds $${MAX_RECONCILIATION_VARIANCE.toFixed(2)}`);
+  }
+
+  return { blockers, lineSum, variance };
+}
+
+// Gate applied to a freshly EXTRACTED invoice, before a human has reviewed it.
+// Returns a list of blocking reasons; empty means the invoice may be approved.
+function approvalBlockers(priced) {
+  const blockers = [];
+  if (!priced.reconciliation.within_tolerance) {
+    blockers.push(`reconciliation variance $${priced.reconciliation.variance.toFixed(2)} exceeds $${MAX_RECONCILIATION_VARIANCE.toFixed(2)}`);
+  }
+  const unresolved = priced.items.filter(item => item.status !== 'approved');
+  if (unresolved.length) {
+    blockers.push(`${unresolved.length} line(s) still need review`);
+  }
+  const belowCost = priced.items.filter(item => item.status === 'approved' && item.final_retail_price < item.unit_cost);
+  if (belowCost.length) {
+    blockers.push(`${belowCost.length} line(s) priced below cost`);
+  }
+  return blockers;
+}
+
+module.exports = {
+  HUB_PREVIEW_MARKUP_PCT,
+  MAX_RECONCILIATION_VARIANCE,
+  MIN_OCR_CONFIDENCE,
+  RETAIL_MULTIPLIER,
+  approvalBlockers,
+  approvalReadiness,
+  costVariance,
+  normalizeUpc,
+  priceInvoice,
+  priceInvoiceLine,
+  retailFromUnitCost,
+  roundCost,
+  roundMoney,
+  roundRetail,
+  suggestedRetail,
+  unitCostFromCase
+};
