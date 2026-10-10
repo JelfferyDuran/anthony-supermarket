@@ -218,6 +218,41 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // ── UPC lookup (no writes, no database) ──────────────────────────────────
+  // Resolves a product name to candidate barcodes via Open Food Facts (free,
+  // no key, no POS access needed). The hub offers this as a "Find UPC" action
+  // on review lines and product cards; anything the database misses gets
+  // scanned with the phone camera instead. Server-side so the user-agent and
+  // throttling stay in one place and the browser avoids CORS issues.
+  const OFF_USER_AGENT = 'AnthonysPricingHub/1.0 (pricing-hub UPC lookup)';
+  router.get('/upc/lookup', authorize('manager'), async (req, res) => {
+    const name = String(req.query.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'name is required' });
+    if (name.length > 120) return res.status(400).json({ error: 'name is too long' });
+    try {
+      const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process&json=1&page_size=5&search_terms='
+        + encodeURIComponent(name);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+      let r;
+      try {
+        r = await fetchImpl(url, { headers: { 'User-Agent': OFF_USER_AGENT }, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+      if (!r.ok) return res.status(502).json({ error: 'UPC database unavailable', detail: 'HTTP ' + r.status });
+      const data = await r.json();
+      const candidates = (data.products || []).slice(0, 5).map(p => ({
+        code: String(p.code || ''),
+        name: p.product_name || '',
+        brands: p.brands || ''
+      })).filter(c => c.code);
+      return res.json({ query: name, candidates });
+    } catch (error) {
+      return res.status(502).json({ error: 'UPC lookup failed', detail: String(error.message || error).slice(0, 200) });
+    }
+  });
+
   // ── Catalog reads for the hub ──────────────────────────────────────────────
   router.get('/products', authorize('manager'), async (_req, res) => {
     if (!requireStore(res)) return;
