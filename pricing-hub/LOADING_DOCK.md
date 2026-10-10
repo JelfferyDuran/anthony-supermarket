@@ -78,8 +78,12 @@ pricing-hub/
 
 - **Backend**: unchanged. Base `/api/pricing`. Endpoints used: `POST /login`,
   `GET /config`, `GET /products`, `GET /products/:id/history`,
-  `PATCH /products/:id/retail`, `GET /queue`, `POST /invoices` (multipart),
-  `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
+  `PATCH /products/:id/retail`, `PATCH /products/:id/upc` (approver gate —
+  stores a verified barcode), `GET /upc/lookup?name=` (manager — public
+  Open Food Facts candidates, no POS needed), `GET /queue`, `POST /invoices`
+  (multipart), `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
+  Review lines and product cards show a "Find UPC" button when the matched
+  product has no barcode (lookup → tap a candidate → saved).
 - **Auth**: Supabase verifies credentials + role at login; server mints a
   30-day HS256 session token. Same `localStorage` key as the old client, so
   existing sessions carry over. Unauthenticated users see only the sign-in gate.
@@ -96,6 +100,12 @@ push limit).
 
 ## Changelog
 
+- **2026-10-10** — "Find UPC" button on review lines + product cards: public-database
+  barcode lookup (no POS needed), manager picks a candidate, saved via
+  `PATCH /products/:id/upc`. Bulk results for 24/39 missing UPCs in
+  `docs/upc-lookup-2026-10-10.json`. Also fixed Vercel routing: multi-segment
+  API paths (approvals, retail edits, history) were 404ing at the edge; now
+  rewritten through `api/pricing-fn.js`.
 - **2026-10-08** — "The Loading Dock" replaces the 2D client (full 3D, five zones).
 - **2026-10-08** — Mobile polish pass: portrait framing, floating labels,
   defined zone objects, redrawn 24px icon set, mobile perf cuts.
