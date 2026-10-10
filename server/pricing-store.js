@@ -94,6 +94,15 @@ function createPricingStore(client = getClient()) {
       return data.signedUrl;
     },
 
+    // Downloads the stored scan bytes (for re-extraction of a stuck invoice).
+    // The bucket stays private — this runs server-side with the service key.
+    async getInvoiceObjectBuffer(objectPath) {
+      const { data, error } = await client.storage.from(INVOICE_BUCKET).download(objectPath);
+      if (error || !data) throw new Error('could not read the stored scan: ' + (error && error.message));
+      const ab = await data.arrayBuffer();
+      return Buffer.from(ab);
+    },
+
     async createInvoice(record) {
       const rows = unwrap(await client.from('pricing_invoices').insert(record).select(), 'invoice insert');
       return rows[0];

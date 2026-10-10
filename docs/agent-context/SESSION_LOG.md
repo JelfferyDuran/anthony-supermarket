@@ -329,3 +329,17 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Candidate path re-run on desktop and mobile: 0 errors.
   - Server suite: only the pre-existing Gemini failure. Guard 6/6.
 - Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 15:35 ET — Claude Code — Merge main's retry-extract into #54/#55
+- `main` gained `4b7a8f5` (Noel):
+  - `POST /invoices/:id/retry-extract`;
+  - `GET /products/coverage`;
+  - a shared `runExtraction()`.
+- #54 merged `main` cleanly.
+- #55 conflicted where both sides had split the extraction step out of intake. Resolution:
+  - Noel's `runExtraction` is the core step;
+  - #55's `extractIntoInvoice` wraps it, so a failed read resets the invoice to `uploaded`;
+  - every read path (intake, `/extract`, `/retry-extract`) goes through the wrapper. Noel's route previously left a failed retry in `extracting`; his own comment says both paths should agree.
+- Test added: `retry-extract` failure resets to `uploaded`, success lands lines, reviewed work is refused (409), the operator token is refused (403). Mutation-checked against the old call.
+- Follow-up for the owner: `/extract` (#55, manager, refuses in-flight reads) and `/retry-extract` (main, approver, also re-reads untouched `needs_review` invoices) overlap. Consolidate into one route after these PRs land.
+- Still on `main`: the manual-UPC "Save digits" wiring bug (fixed in #55 only).

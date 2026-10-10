@@ -140,6 +140,10 @@ while the camera is there. Before, far zones' titles bled into the dock view.
   needed), `GET /queue`, `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
   `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`,
   `GET /game/state`, `POST /products/:id/apply-rule`, `POST /invoices/:id/extract`.
+  On `main` (Noel): `POST /invoices/:id/retry-extract` (approver; also re-reads
+  an untouched `needs_review` invoice) and `GET /products/coverage`. Every
+  read, first or repeat, goes through `extractIntoInvoice`, so a failed read
+  resets the invoice to `uploaded`.
   Review lines and product cards show a "Find UPC" button when the matched
   product has no barcode (lookup → tap a candidate → saved; Dock Integrity
   refreshes, since UPC coverage is part of the score).

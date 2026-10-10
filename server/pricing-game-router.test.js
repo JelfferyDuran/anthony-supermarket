@@ -58,6 +58,10 @@ function createFakeStore() {
       if (!objects.has(objectPath)) throw new Error('object not found');
       return { buffer: objects.get(objectPath), contentType: 'application/octet-stream' };
     },
+    async getInvoiceObjectBuffer(objectPath) {
+      if (!objects.has(objectPath)) throw new Error('object not found');
+      return objects.get(objectPath);
+    },
     async createInvoice(record) {
       const inv = { id: crypto.randomUUID(), created_at: new Date().toISOString(), ...record };
       invoices.set(inv.id, inv);
@@ -278,4 +282,33 @@ test('approval links history only to lines of the invoice being approved', async
   assert.equal(res.status, 200, JSON.stringify(res.body));
   const sent = store._state.approvals[0].lines.map(l => l.invoice_line_id);
   assert.deepEqual(sent, [own, null], "another invoice's line is never named");
+});
+
+test('retry-extract: a failed re-read resets to uploaded, and it refuses reviewed work', async t => {
+  const store = createFakeStore();
+  store.seedInvoice({ id: 'stuck', status: 'uploaded', created_at: '2026-08-20T12:00:00Z', source_object_path: 'cc/stuck' });
+  store.seedObject('cc/stuck', SCAN);
+  store.seedInvoice({ id: 'worked', status: 'needs_review', created_at: '2026-08-20T12:00:00Z', source_object_path: 'cc/worked' }, [
+    { id: 'w1', review_status: 'rejected', review_reason: 'Short — box did not arrive' }
+  ]);
+  store.seedObject('cc/worked', SCAN);
+  const { server, base, ocr } = await startServer(store);
+  t.after(() => server.close());
+
+  ocr.mode = 'fail';
+  const failed = await call(base, 'POST', '/invoices/stuck/retry-extract', { token: MANAGER_JWT });
+  assert.ok(failed.status >= 400, 'a failed read is reported');
+  assert.equal(store._state.invoices.get('stuck').status, 'uploaded', 'and does not strand the invoice in extracting');
+
+  ocr.mode = 'ok';
+  const ok = await call(base, 'POST', '/invoices/stuck/retry-extract', { token: MANAGER_JWT });
+  assert.equal(ok.status, 200);
+  assert.equal(ok.body.retried, true);
+  assert.equal(store._state.invoices.get('stuck').status, 'needs_review');
+  assert.ok(store._state.linesByInvoice.get('stuck').length > 0);
+
+  assert.equal((await call(base, 'POST', '/invoices/worked/retry-extract', { token: MANAGER_JWT })).status, 409,
+    'a re-read would discard the reviewer\'s line decisions');
+  assert.equal((await call(base, 'POST', '/invoices/stuck/retry-extract', { token: MANAGER_TOKEN })).status, 403,
+    'the operator token names no approver');
 });
