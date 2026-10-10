@@ -12,7 +12,7 @@ This file is operational context, not a secret store. **Live infrastructure is a
   - **Sales feed:** stops at 2026-08-19.
   - **Catalog:** all 279 priced items sit exactly on ×1.70/.99; 190 of 283 have no UPC; 45 are flagged for owner review.
 - **Root causes found and fixed:**
-  1. **Vercel routed only ONE path segment** to `api/pricing/[...path].js`, so approve, line edits, price history and retail edits 404'd in production. Fix: a `vercel.json` rewrite, `/api/pricing/:path*` → the function (now guarded in CI).
+  1. **Vercel routed only ONE path segment** to `api/pricing/[...path].js`, so approve, line edits, price history and retail edits 404'd in production. Fixed on `main` by Noel (`0df4412`): `vercel.json` rewrites `/api/pricing/:path*` → `api/pricing-fn.js`, which restores the path from `__path`. This branch adopts it (its own rewrite was dropped), adds a JSON 404 there, and CI now fails if the rewrite or its target goes.
   2. **A failed or killed OCR read left invoices `extracting` forever,** and re-uploads deduped onto them. Fix: failures reset to `uploaded`, and `POST /invoices/:id/extract` rescues stuck scans (`uploaded`, or `extracting` > 10 min).
   3. **Client bugs:**
      - POS upload sent field `file`, but the server reads `sales`, so every import failed;

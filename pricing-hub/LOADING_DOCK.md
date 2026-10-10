@@ -131,17 +131,20 @@ pricing-hub/
 3D labels can be scoped to a zone (`addLabel(..., { zone })`) and show only
 while the camera is there. Before, far zones' titles bled into the dock view.
 
-- **Backend**: `api/pricing/[...path].js` (Vercel function) mounts
+- **Backend**: `api/pricing-fn.js` (Vercel function) mounts
   `server/pricing-router.js` + `server/pricing-store.js`. Base `/api/pricing`.
   Endpoints used: `POST /login`, `GET /config`, `GET /products`,
   `GET /products/:id/history`, `PATCH /products/:id/retail`, `GET /queue`,
   `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
   `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`,
   `GET /game/state`, `POST /products/:id/apply-rule`, `POST /invoices/:id/extract`.
-- **Routing**: `vercel.json` rewrites `/api/pricing/:path*` to the function.
-  Without it Vercel only routed ONE segment, so `/invoices/:id/approve`,
-  `/invoices/:id/lines`, `/products/:id/history` and `/products/:id/retail` hit
-  Vercel's 404. Unknown paths now get a JSON 404.
+- **Routing**: `vercel.json` rewrites `/api/pricing/:path*` to
+  `/api/pricing-fn?__path=:path*`, and `api/pricing-fn.js` restores the
+  original path before the router sees it. Without the rewrite Vercel only
+  routed ONE segment (to `api/pricing/[...path].js`, kept as a fallback), so
+  `/invoices/:id/approve`, `/invoices/:id/lines`, `/products/:id/history` and
+  `/products/:id/retail` hit Vercel's 404. Unknown paths get a JSON 404. CI
+  (`scripts/test-public-site.cjs`) fails if the rewrite or its target goes.
 - **Auth**: Supabase verifies credentials + role at login; server mints a
   30-day HS256 session token. Same `localStorage` key as the old client, so
   existing sessions carry over. Unauthenticated users see only the sign-in gate.
@@ -185,7 +188,7 @@ source and cost records included.
 - **2026-10-10** — Game layer: missions, XP, levels, streaks, badges,
   leaderboard and dock integrity, all derived server-side from the audit trail.
   Also:
-  - multi-segment `/api/pricing` routing fixed;
+  - multi-segment `/api/pricing` routing fixed (rewrite to `api/pricing-fn.js`, from `main`);
   - stuck-scan rescue;
   - server-priced Apply rule;
   - client fixes: POS upload field `sales`, price-history field, vault revenue

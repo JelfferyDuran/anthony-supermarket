@@ -21,11 +21,17 @@ test('vercel.json publishes the allowlisted build, never the repo root', () => {
   const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
   assert.equal(cfg.outputDirectory, 'public-build');
   assert.match(cfg.buildCommand || '', /node scripts\/build-public-site\.js/);
-  assert.ok(cfg.functions && cfg.functions['api/pricing/[...path].js'], 'the /api/pricing function must stay configured');
-  // Without this rewrite Vercel routes only ONE segment after /api/pricing to
-  // the function: /invoices/:id/approve, /products/:id/history and friends 404.
-  assert.ok((cfg.rewrites || []).some(r => r.source === '/api/pricing/:path*' && r.destination === '/api/pricing/[...path]'),
-    'the /api/pricing/:path* rewrite must stay configured');
+  // Without a rewrite Vercel routes only ONE segment after /api/pricing to a
+  // function: /invoices/:id/approve, /products/:id/history and friends 404.
+  // The rewrite must carry the full path to a function that exists and is
+  // configured (today api/pricing-fn.js, which restores it from __path).
+  const rewrite = (cfg.rewrites || []).find(r => r.source === '/api/pricing/:path*');
+  assert.ok(rewrite, 'the /api/pricing/:path* rewrite must stay configured');
+  const target = rewrite.destination.split('?')[0].replace(/^\//, '') + '.js';
+  assert.ok(fs.existsSync(path.join(ROOT, target)), `rewrite target ${target} must exist`);
+  assert.ok(cfg.functions && cfg.functions[target], `rewrite target ${target} must stay configured`);
+  assert.ok(rewrite.destination.includes(':path*') || target === 'api/pricing/[...path].js',
+    'the rewrite must pass the full /api/pricing path on');
 });
 
 test('the build refuses to clean the repository itself', () => {

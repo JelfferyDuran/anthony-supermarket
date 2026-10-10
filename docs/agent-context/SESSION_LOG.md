@@ -252,8 +252,7 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 ## 2026-10-10 11:05 ET — Claude Code — Pricing Hub operational game layer + deep API routing fix
 - Goal: owner asked for significant backend and frontend work: "develop the pricing hub as a full blown game but operational".
 - Changed (branch `feat/pricing-hub-ops-game`, stacked on #54):
-  - `vercel.json` rewrite `/api/pricing/:path*` (deep routes reach the function) + guard assertion.
-  - `api/pricing/[...path].js` JSON 404.
+  - Deep `/api/pricing/*` routing: superseded by `main`'s `0df4412` (rewrite → `api/pricing-fn.js`); see the 12:05 entry.
   - New `server/pricing-game.js`.
   - `server/pricing-store.js`: game reads, `getProduct`, `downloadInvoiceObject`, `resolveUserNames`.
   - `server/pricing-router.js`:
@@ -288,6 +287,20 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - No DB writes, no migration; all game reads are server-side under the existing manager gate.
   - Leaderboard exposes only email local parts, never ids or full emails.
   - Apply-rule ignores client prices.
-  - Rollback = revert the branch commits; the API stays backward compatible (only additions, plus the routing fix).
+  - Rollback = revert the branch commits; the API stays backward compatible (only additions).
 - PR/issue/commit: draft PR (see PR thread), base `fix/vercel-public-allowlist` (#54).
 - Next safe action: merge #54 on owner go, preview this branch, approve one real invoice in the preview to confirm the deep routes, then promote on owner go.
+
+## 2026-10-10 12:05 ET — Claude Code — Adopt main's deep-routing fix in #54 and #55
+- Goal: bring both open PRs up to date with `main` (`58ca046` UPC lookup, `0df4412` routing fix by Noel) without two competing routing fixes.
+- Changed:
+  - #54 (`fix/vercel-public-allowlist`): merged `main`. `vercel.json` now holds the allowlist build plus main's `api/pricing-fn.js` functions entry and rewrite.
+  - #55 (`feat/pricing-hub-ops-game`): merged #54, kept main's rewrite, and dropped this branch's own `/api/pricing/:path*` → `[...path]` rewrite.
+  - The JSON 404 moved from `api/pricing/[...path].js` (reverted to main) into `api/pricing-fn.js`.
+  - The guard in `scripts/test-public-site.cjs` no longer pins one routing approach. It requires a `/api/pricing/:path*` rewrite whose target function exists, is configured, and receives the full path. Mutation-checked: dropping `__path`, or naming a missing function, fails it.
+- Verified:
+  - `vercel build` emulation of #54 after the merge: deep paths (`/products/:id/history`) reach the router through `pricing-fn`, both when the function sees the original URL and when it sees the destination URL.
+  - No internal file is served.
+  - Server suite: only the pre-existing Gemini assertion fails.
+- Not verified: a real Vercel deployment of either branch.
+- Next safe action: owner previews #54 and runs the URL checklist; merge/promote only on the owner's explicit go.

@@ -43,7 +43,7 @@ Status: accepted (owner requested the game; production promotion pending owner g
 - **Leaderboards show email local parts only;** teammate ids and full emails never leave the server, and tests assert it.
 - **Apply-rule ignores any client-supplied price,** and lowering a price needs an explicit confirm.
 - **Rescue refuses anything not stuck,** so it cannot overwrite lines under review.
-- **Rollback:** revert the branch. API changes are additive except the routing rewrite, which only makes documented routes reachable.
+- **Rollback:** revert the branch. API changes are additive. (Deep routing comes from `main`'s `0df4412` rewrite, not this branch.)
 - **Follow-ups that WOULD need a migration (owner decision):**
   - persistent "keep this price" exceptions for Rule Guard;
   - an audited unflag and UPC-assignment RPC, so the 45 flagged items and 190 missing UPCs can become missions instead of health metrics.
