@@ -305,7 +305,7 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Not verified: a real Vercel deployment of either branch.
 - Next safe action: owner previews #54 and runs the URL checklist; merge/promote only on the owner's explicit go.
 
-## 2026-10-10 13:15 ET — Claude Code — Bring Noel's UPC pipeline into #54 and #55
+## 2026-10-10 13:05 ET — Claude Code — Bring Noel's UPC pipeline into #54 and #55
 - Goal: keep both open PRs current with `main` (`6452188`, `3180f54`, `f2e4d9c`: `PATCH /products/:id/upc`, "Find UPC" on review lines and product cards, bulk lookup results in `docs/upc-lookup-2026-10-10.json`).
 - Changed:
   - #54: merged `main`; the `LOADING_DOCK.md` endpoint list now combines both sides.
