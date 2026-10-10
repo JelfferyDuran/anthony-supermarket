@@ -308,6 +308,10 @@ export function createHud(world, zones, nav) {
       const proposed = effRetail(l);
       const qty = [effCases(l) ? effCases(l) + ' case(s)' : null,
                    l.units_per_case ? '× ' + l.units_per_case + ' units' : null].filter(Boolean).join(' ');
+      // A matched product without a barcode gets a "Find UPC" action — the
+      // lookup runs against the public database, no POS access needed.
+      const prodForUpc = matched ? state.products.find((p) => String(p.id) === String(matched)) : null;
+      const needsUpc = matched && !(prodForUpc && prodForUpc.upc);
 
       if (out) {
         return '<div class="line-row excluded" data-line="' + idx + '">' +
@@ -341,7 +345,9 @@ export function createHud(world, zones, nav) {
         '<div class="lr-actions">' +
           '<button class="btn ghost small warn" data-short="' + idx + '">Didn\'t arrive</button>' +
           '<button class="btn ghost small" data-reject="' + idx + '">Wrong line</button>' +
+          (needsUpc ? '<button class="btn ghost small cy" data-findupc="' + idx + '">Find UPC</button>' : '') +
         '</div>' +
+        (needsUpc ? '<div data-upcresults="' + idx + '" style="margin-top:6px"></div>' : '') +
       '</div>';
     }).join('');
 
@@ -448,6 +454,55 @@ export function createHud(world, zones, nav) {
       });
     });
 
+    // UPC lookup — resolves the matched product's barcode from the public
+    // database (no POS access needed) and saves the manager's pick.
+    $('panelBody').querySelectorAll('[data-findupc]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const idx = Number(btn.dataset.findupc);
+        const line = inv.lines[idx];
+        const prodId = line.matched_product_id || (matchState.get(line.id) || {}).id;
+        if (!prodId) { toast('Match a product first, then find its UPC.'); return; }
+        const box = $('panelBody').querySelector('[data-upcresults="' + idx + '"]');
+        btn.disabled = true;
+        box.innerHTML = '<div class="lr-meta">Looking up barcodes…</div>';
+        try {
+          const cands = await api.lookupUpc(lineDesc(line));
+          if (!cands.length) {
+            box.innerHTML = '<div class="lr-meta">No barcodes found online — scan the package instead.</div>';
+          } else {
+            box.innerHTML = cands.map((c, ci) =>
+              '<button class="match-pick" data-upcpick="' + idx + ':' + ci + '">' +
+              '<span><b>' + esc(c.code) + '</b> — ' + esc(c.name || 'unknown product') + '</span>' +
+              (c.brands ? '<small>' + esc(c.brands) + '</small>' : '') + '</button>'
+            ).join('');
+            box.querySelectorAll('[data-upcpick]').forEach((pick) => {
+              pick.addEventListener('click', async () => {
+                const parts = pick.dataset.upcpick.split(':').map(Number);
+                const cand = cands[parts[1]];
+                const ln = inv.lines[parts[0]];
+                const pid = ln.matched_product_id || (matchState.get(ln.id) || {}).id;
+                pick.disabled = true;
+                try {
+                  await api.setProductUpc(pid, cand.code);
+                  const sp = state.products.find((p) => String(p.id) === String(pid));
+                  if (sp) sp.upc = cand.code;
+                  toast('<b>UPC saved</b> — ' + esc(cand.code), 'ok');
+                  showInvoice(invoiceId);
+                } catch (e) {
+                  toast('Could not save UPC: ' + e.message, 'err');
+                  pick.disabled = false;
+                }
+              });
+            });
+          }
+        } catch (e) {
+          box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
+        } finally {
+          if (btn.isConnected) btn.disabled = false;
+        }
+      });
+    });
+
     $('approveBtn').addEventListener('click', async () => {
       const btn = $('approveBtn');
       btn.disabled = true;
@@ -521,6 +576,9 @@ export function createHud(world, zones, nav) {
         '<div class="stat"><div class="v grn">' + fmtMoney(margin) + '</div><div class="k">margin</div></div>' +
       '</div>' +
       '<div class="lr-meta">Suggested by rule: <b style="color:var(--amber)">' + fmtMoney(suggested) + '</b></div>' +
+      (p.upc ? '' :
+        '<div class="lr-match" style="margin-top:10px"><button class="btn cy" id="upcFind" style="white-space:nowrap">Find UPC</button></div>' +
+        '<div id="upcBox" style="margin-top:6px"></div>') +
       '<div class="lr-match" style="margin-top:10px"><input id="retailEdit" type="number" step="0.01" min="0" placeholder="New retail price…" inputmode="decimal">' +
       '<button class="btn cy" id="retailSave" style="white-space:nowrap">Set retail</button></div>' +
       '<div id="retailMsg" class="lr-meta" style="margin-top:6px"></div>' +
@@ -528,6 +586,47 @@ export function createHud(world, zones, nav) {
       '<div id="histBox" class="lr-meta">Loading…</div>' +
       '<div class="rule-plaque">Pricing rule · retail = <b>unit cost × 1.70</b>, shelf-rounded to .99</div>'
     );
+
+    // UPC lookup on the product card — same public-database flow as the review line.
+    const upcFindBtn = $('upcFind');
+    if (upcFindBtn) {
+      upcFindBtn.addEventListener('click', async () => {
+        const box = $('upcBox');
+        upcFindBtn.disabled = true;
+        box.innerHTML = '<div class="lr-meta">Looking up barcodes…</div>';
+        try {
+          const cands = await api.lookupUpc(productName(p));
+          if (!cands.length) {
+            box.innerHTML = '<div class="lr-meta">No barcodes found online — scan the package instead.</div>';
+          } else {
+            box.innerHTML = cands.map((c, ci) =>
+              '<button class="match-pick" data-cardupc="' + ci + '">' +
+              '<span><b>' + esc(c.code) + '</b> — ' + esc(c.name || 'unknown product') + '</span>' +
+              (c.brands ? '<small>' + esc(c.brands) + '</small>' : '') + '</button>'
+            ).join('');
+            box.querySelectorAll('[data-cardupc]').forEach((pick) => {
+              pick.addEventListener('click', async () => {
+                const cand = cands[Number(pick.dataset.cardupc)];
+                pick.disabled = true;
+                try {
+                  await api.setProductUpc(p.id, cand.code);
+                  p.upc = cand.code;
+                  toast('<b>UPC saved</b> — ' + esc(cand.code), 'ok');
+                  showProduct(productId);
+                } catch (e) {
+                  toast('Could not save UPC: ' + e.message, 'err');
+                  pick.disabled = false;
+                }
+              });
+            });
+          }
+        } catch (e) {
+          box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
+        } finally {
+          if (upcFindBtn.isConnected) upcFindBtn.disabled = false;
+        }
+      });
+    }
 
     $('retailSave').addEventListener('click', async () => {
       const v = num($('retailEdit').value);
