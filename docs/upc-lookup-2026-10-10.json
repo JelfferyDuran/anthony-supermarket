@@ -18,13 +18,6 @@
    "note": "generic brand match; no 25.5 oz variant in database \u2014 verify size"
   },
   {
-   "product": "Goya RED KIDNEY BEANS 46 OZ",
-   "upc": "041331124027",
-   "raw_barcode": "0041331124027",
-   "matched_name": "Red Kidney Beans \u2013 Goya \u2013 15.5oz",
-   "note": "brand match but size differs (db has 15.5oz, need 46oz) \u2014 verify"
-  },
-  {
    "product": "Goya ROMAN BEANS 15.5 OZ",
    "upc": "041331124164",
    "raw_barcode": "0041331124164",
@@ -170,6 +163,13 @@
    "raw_barcode": "0041331023412",
    "matched_name": "Pinto Beans",
    "note": "low confidence match (0.40) \u2014 verify against package"
+  },
+  {
+   "product": "Goya RED KIDNEY BEANS 15.5 OZ",
+   "upc": "041331124027",
+   "raw_barcode": "0041331124027",
+   "matched_name": "Red Kidney Beans \u2013 Goya \u2013 15.5oz",
+   "note": "exact brand + size match; Noel confirmed he stocks both 15.5oz and 46oz as separate SKUs"
   }
  ],
  "unresolved": [
@@ -232,6 +232,10 @@
   {
    "product": "GOYA SIDRA 25.4 OZ",
    "note": "no Goya Sidra product in database"
+  },
+  {
+   "product": "Goya RED KIDNEY BEANS 46 OZ",
+   "note": "separate SKU from the 15.5oz (UPC 041331124027); 46oz not in any public database \u2014 type digits from the can via the hub's manual UPC entry"
   }
  ]
 }

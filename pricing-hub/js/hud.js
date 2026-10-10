@@ -257,6 +257,39 @@ export function createHud(world, zones, nav) {
   /* ================= invoice review card ================= */
   const matchState = new Map(); // lineId -> product
 
+  // Shared UPC helpers (review lines + product card). manualUpcHtml renders a
+  // "type the digits" fallback for sizes no public database carries (e.g. the
+  // 46oz cans); wireManualUpc validates and saves the typed digits.
+  function manualUpcHtml() {
+    return '<div class="lr-match" style="margin-top:8px">' +
+      '<input data-manualupc inputmode="numeric" placeholder="…or type barcode digits" autocomplete="off" ' +
+      'style="background:var(--bg);border:1px solid #2a3446;border-radius:6px;color:var(--ink);padding:5px 7px;font-family:var(--mono);width:170px">' +
+      '<button class="btn ghost small" data-manualsave style="white-space:nowrap">Save digits</button></div>';
+  }
+  function wireManualUpc(box, prodId, onSaved) {
+    const input = box.querySelector('[data-manualupc]');
+    const save = box.querySelector('[data-manualsave]');
+    if (!input || !save) return;
+    save.addEventListener('click', async () => {
+      const digits = (input.value || '').replace(/\D/g, '');
+      if (!/^[0-9]{8}$|^[0-9]{12,14}$/.test(digits)) {
+        toast('Type the barcode digits exactly as printed on the package.', 'err');
+        return;
+      }
+      save.disabled = true;
+      try {
+        await api.setProductUpc(prodId, digits);
+        const sp = state.products.find((p) => String(p.id) === String(prodId));
+        if (sp) sp.upc = digits;
+        toast('<b>UPC saved</b> — ' + esc(digits), 'ok');
+        onSaved();
+      } catch (e) {
+        toast('Could not save UPC: ' + e.message, 'err');
+        save.disabled = false;
+      }
+    });
+  }
+
   // Review working state. review_status persists to the DB immediately via
   // PATCH /invoices/:id/lines so work survives a closed phone; _excKind,
   // _editCases and _editCost are the card's working copy for this session.
@@ -468,13 +501,14 @@ export function createHud(world, zones, nav) {
         try {
           const cands = await api.lookupUpc(lineDesc(line));
           if (!cands.length) {
-            box.innerHTML = '<div class="lr-meta">No barcodes found online — scan the package instead.</div>';
+            box.innerHTML = '<div class="lr-meta">No barcodes found online — type the digits from the package.</div>' +
+              manualUpcHtml();
           } else {
             box.innerHTML = cands.map((c, ci) =>
               '<button class="match-pick" data-upcpick="' + idx + ':' + ci + '">' +
               '<span><b>' + esc(c.code) + '</b> — ' + esc(c.name || 'unknown product') + '</span>' +
               (c.brands ? '<small>' + esc(c.brands) + '</small>' : '') + '</button>'
-            ).join('');
+            ).join('') + manualUpcHtml();
             box.querySelectorAll('[data-upcpick]').forEach((pick) => {
               pick.addEventListener('click', async () => {
                 const parts = pick.dataset.upcpick.split(':').map(Number);
@@ -494,6 +528,7 @@ export function createHud(world, zones, nav) {
                 }
               });
             });
+            wireManualUpc(box, prodId, () => showInvoice(invoiceId));
           }
         } catch (e) {
           box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
@@ -597,13 +632,14 @@ export function createHud(world, zones, nav) {
         try {
           const cands = await api.lookupUpc(productName(p));
           if (!cands.length) {
-            box.innerHTML = '<div class="lr-meta">No barcodes found online — scan the package instead.</div>';
+            box.innerHTML = '<div class="lr-meta">No barcodes found online — type the digits from the package.</div>' +
+              manualUpcHtml();
           } else {
             box.innerHTML = cands.map((c, ci) =>
               '<button class="match-pick" data-cardupc="' + ci + '">' +
               '<span><b>' + esc(c.code) + '</b> — ' + esc(c.name || 'unknown product') + '</span>' +
               (c.brands ? '<small>' + esc(c.brands) + '</small>' : '') + '</button>'
-            ).join('');
+            ).join('') + manualUpcHtml();
             box.querySelectorAll('[data-cardupc]').forEach((pick) => {
               pick.addEventListener('click', async () => {
                 const cand = cands[Number(pick.dataset.cardupc)];
@@ -619,6 +655,7 @@ export function createHud(world, zones, nav) {
                 }
               });
             });
+            wireManualUpc(box, p.id, () => showProduct(productId));
           }
         } catch (e) {
           box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
