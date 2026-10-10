@@ -330,7 +330,7 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Server suite: only the pre-existing Gemini failure. Guard 6/6.
 - Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
 
-## 2026-10-10 15:35 ET — Claude Code — Merge main's retry-extract into #54/#55
+## 2026-10-10 15:32 ET — Claude Code — Merge main's retry-extract into #54/#55
 - `main` gained `4b7a8f5` (Noel):
   - `POST /invoices/:id/retry-extract`;
   - `GET /products/coverage`;
