@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="description" content="Anthony's Supermarket staff pricing hub: invoice review, pricing and sales.">
+  <title>Pricing Hub · Anthony's</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffb020'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-size='38' font-weight='900' text-anchor='middle' fill='%231a1203'%3EA%3C/text%3E%3C/svg%3E">
+  <!-- Absolute paths: the page must work at /hub and /hub/ alike. -->
+  <link rel="stylesheet" href="/hub/hub.css">
+</head>
+<body>
+  <div id="boot" class="boot" role="status">
+    <span class="brand-mark">A</span>
+    <span class="boot-text">Opening the Pricing Hub…</span>
+  </div>
+
+  <main id="signin" class="signin hidden" aria-labelledby="signinTitle">
+    <form id="signinForm" class="signin-card" novalidate>
+      <div class="brand">
+        <span class="brand-mark">A</span>
+        <span class="brand-text"><b>Pricing Hub</b><span>Anthony's Supermarket</span></span>
+      </div>
+      <h1 id="signinTitle">Staff sign in</h1>
+      <p class="muted">Managers and admins only. You stay signed in on this device for 30 days.</p>
+      <label class="fld"><span>Email</span>
+        <input id="signinEmail" type="email" autocomplete="username" inputmode="email" required></label>
+      <label class="fld"><span>Password</span>
+        <input id="signinPassword" type="password" autocomplete="current-password" required></label>
+      <div id="signinError" class="form-err" role="alert"></div>
+      <button id="signinBtn" class="btn primary block lg" type="submit">Sign in</button>
+      <a class="back-home" href="/">← Back to Anthony's Supermarket</a>
+    </form>
+  </main>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <a class="brand" href="#/today" aria-label="Pricing Hub home">
+        <span class="brand-mark">A</span>
+        <span class="brand-text"><b>Pricing Hub</b><span>Anthony's Supermarket</span></span>
+      </a>
+      <div class="topbar-right">
+        <a id="healthChip" class="health-chip" href="#/today" aria-label="Dock integrity">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+          <span id="phHealth">–</span>
+        </a>
+        <a id="playerChip" class="player-chip" href="#/me" aria-label="Open your player card">
+          <span class="lv-badge"><span class="lv-k">LV</span><span id="phLevel">1</span></span>
+          <span class="pc-body">
+            <span class="pc-name"><span id="phName">…</span> <span id="phTitle" class="pc-title"></span></span>
+            <span class="pc-bar"><span id="phBarFill"></span></span>
+            <span id="phXp" class="pc-xp"></span>
+          </span>
+          <span class="streak" title="Work streak (days)">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 .8 1.2 1.5 1.8 2.5 2C11 7.5 11 5 12 3z"/></svg>
+            <span id="phStreak">0</span>
+          </span>
+        </a>
+      </div>
+    </header>
+    <nav id="nav" class="nav" aria-label="Main"></nav>
+    <main id="view" class="view" tabindex="-1"></main>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <div id="xpFloats" class="xp-floats" aria-hidden="true"></div>
+
+  <div id="levelUp" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="luHeading">
+    <div class="modal-card levelup">
+      <div class="lu-k">Level up</div>
+      <div class="lu-num" id="luNum">2</div>
+      <h2 id="luHeading"><span id="luTitle">Receiver</span></h2>
+      <p class="muted" id="luNext"></p>
+      <button type="button" id="luClose" class="btn primary block">Keep going</button>
+    </div>
+  </div>
+
+  <noscript><div class="noscript">The Pricing Hub needs JavaScript turned on.</div></noscript>
+  <script type="module" src="/hub/js/app.js"></script>
+</body>
+</html>

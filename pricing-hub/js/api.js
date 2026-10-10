@@ -235,6 +235,36 @@ export const api = {
   async rescueInvoice(invoiceId) {
     return request('/invoices/' + encodeURIComponent(invoiceId) + '/extract', { method: 'POST', body: {} });
   },
+
+  /* ---------- review card helpers ---------- */
+  // One invoice with every line, rejected ones included: { invoice, lines }.
+  async getInvoice(invoiceId) {
+    return request('/invoices/' + encodeURIComponent(invoiceId));
+  },
+
+  // Short-lived signed URL for the original scan: { url, expiresInSeconds }.
+  async getInvoiceSource(invoiceId) {
+    return request('/invoices/' + encodeURIComponent(invoiceId) + '/source');
+  },
+
+  // Price-gun label CSV (all labels, or one invoice's). Returns a Blob.
+  async downloadLabels(invoiceId = null) {
+    const qs = invoiceId ? '?invoiceId=' + encodeURIComponent(invoiceId) : '';
+    let res;
+    try {
+      res = await fetch(BASE + '/export/labels' + qs, {
+        headers: state.token ? { Authorization: 'Bearer ' + state.token } : {},
+      });
+    } catch (e) {
+      throw new Error('Network error: could not reach the hub (' + e.message + ')');
+    }
+    if (res.status === 401) {
+      clearSession();
+      throw new Error('Session expired — please sign in again.');
+    }
+    if (!res.ok) throw new Error('Label export failed (' + res.status + ')');
+    return res.blob();
+  },
 };
 
 /* ---------- data helpers (defensive field access; backend is source of truth) ---------- */

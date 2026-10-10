@@ -1,8 +1,40 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-10 (Pricing Hub game layer + API routing fix on a stacked branch; nothing in production)
+Last updated: 2026-10-10 (2D Pricing Hub at /hub on a third stacked branch; game layer and allowlist on #55/#54; nothing in production)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-10-10 — 2D Pricing Hub at `/hub/` becomes the default (branch, NOT in production)
+- **Branch:** `feat/pricing-hub-2d`, stacked on `feat/pricing-hub-ops-game` (#55), which is stacked on #54. Merge order: #54 → #55 → this.
+- **Why:**
+  - The owner signed in through the homepage's embedded hub (a 3D WebGL app in a 70vh iframe) and found it glitchy.
+  - The owner chose a fast 2D hub as the default, kept the game, and wanted a standalone page on the public site with only a small staff link.
+- **What:**
+  - New `hub/` (static, no external scripts) at `/hub/` (`/hub` redirects; `noindex`).
+  - It reuses `pricing-hub/js/api.js` and the same session.
+  - The 3D dock stays at `/pricing-hub/` as an optional view.
+- **Homepage:**
+  - The hub iframe section, the "Pricing" nav link and the hero "Pricing Hub" button are removed.
+  - A "Staff · Pricing Hub" footer link is added.
+  - `links.html` points to `/hub/`.
+- **API (additive):** `GET /invoices/:id` (manager) returns one invoice with every line, rejected included. Storage path, hash and user ids are stripped.
+  - It fixes a real gap: an invoice whose lines were all excluded dropped out of `GET /queue` and could not be closed.
+  - Client methods `getInvoice`, `getInvoiceSource` and `downloadLabels` were added to `api.js`.
+- **Verified locally:**
+  - Server suite 133/134 (only the pre-existing Gemini assertion fails), including a new route test. Public site guard 6/6.
+  - `vercel build` emulation: 62 static files, `/hub` → `/hub/` 307, deep route 401 without auth.
+  - Headless Chromium end to end, desktop 1440 and mobile 390, 0 page or console errors. Covered:
+    - rule fix +15 XP;
+    - UPC lookup and typed digits;
+    - below-cost retail refused;
+    - review checklist, a typed retail value surviving edits, short and undo;
+    - approve with level-up, labels download;
+    - all-excluded invoice reopened after a reload and closed;
+    - rescue, upload, duplicate;
+    - POS import +60 XP;
+    - sign out;
+    - no horizontal overflow, approve bar above the tab bar.
+- **Not verified:** a real Vercel deployment and real Supabase data (the session cannot reach `*.vercel.app`).
 
 ## 2026-10-10 — Pricing Hub becomes an operational game; deep API routes fixed (branch, NOT in production)
 - **Branch:** `feat/pricing-hub-ops-game`, stacked on `fix/vercel-public-allowlist` (PR #54). Draft PR targets #54's branch. Merge #54 first.

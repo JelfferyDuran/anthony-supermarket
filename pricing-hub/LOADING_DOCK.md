@@ -1,5 +1,9 @@
 # The Loading Dock — Pricing Hub 3D UI
 
+> **Since 2026-10-10 the default Pricing Hub is the 2D console at `/hub/`**
+> (see "The 2D hub" below). This 3D dock stays at `/pricing-hub/` as an
+> optional view. Both share the API, the session and the game layer.
+
 Full-3D, game-style interface for the Anthony's Supermarket Pricing Hub.
 Replaces the tabbed 2D client. Same backend, same auth, same API.
 
@@ -100,6 +104,60 @@ No new tables, and the browser cannot claim XP.
 - Shared operator tokens see the missions but score nothing: no person is attached to them.
 - Approvals now send `invoice_line_id`. The server keeps an id only if it is a line of the invoice being approved, so the audit trail links each price to its line. Older unlinked approval rows are not double-counted as hand reprices.
 
+## The 2D hub (`/hub/`) — the default since 2026-10-10
+
+The owner found the 3D dock glitchy in daily use, especially embedded in the
+public homepage, where it was squeezed into a 70vh iframe under customer
+content. The 2D hub is the same operation without WebGL: one flat,
+mobile-first console. It needs no external scripts and no three.js.
+
+- **Where:** `https://anthony-supermarket.vercel.app/hub/` (`/hub` redirects
+  there). It is `noindex`. The public homepage links to it only from a small
+  "Staff · Pricing Hub" footer link.
+- **Files:**
+  - `hub/index.html`, `hub/hub.css`;
+  - `hub/js/app.js`: boot, sign-in, hash router, shell, refresh, XP/level-up feedback;
+  - `hub/js/ui.js`;
+  - `hub/js/upc.js`: the shared barcode finder;
+  - `hub/js/views/{today,review,products,intake,vault,me}.js`.
+
+  It imports `pricing-hub/js/api.js`, so there is one API client and one
+  session key (`pricingToken`). Signing in on either UI signs you into both.
+- **Routes (hash):**
+  - `#/today`: integrity, missions, team feed;
+  - `#/review` and `#/review/<invoiceId>`;
+  - `#/products?f=rule|noupc|flagged` and `#/products/<id>`;
+  - `#/intake`, `#/vault`, `#/me`.
+
+  Back button and deep links work.
+- **Review card:** loads the invoice with every line via `GET /invoices/:id`.
+  - Lines marked short or wrong stay visible and can be put back.
+  - An all-excluded invoice can still be closed. Before, it vanished from the queue.
+  - A live checklist mirrors the server's approval gate (unmatched lines,
+    missing cost or retail, below cost, reconciliation variance), so blockers
+    show before Approve.
+  - Product-match suggestions come from the extracted barcode or a similar name.
+  - Typed retail, cost and cases survive re-renders.
+  - "View scan" opens the signed source scan.
+  - After approval the card offers a price-label download and the next invoice.
+- **Products:**
+  - Filters: Under rule, No UPC, Flagged.
+  - One-tap **Fix** for Rule Guard items.
+  - Product card: rule fix (confirm before lowering), set retail (below cost
+    refused), barcode lookup or typed digits, price history, cost-increase alert.
+- **Intake:** camera or file pick, drag-drop, real upload progress that
+  survives switching tabs, duplicate detection, and a stuck-scan rescue list
+  with plain-language errors.
+- **Vault:**
+  - P&L with thousands separators;
+  - POS import;
+  - margin by category, vendor spend and invoice aging;
+  - cost increases;
+  - all-labels CSV.
+- **Game:** the same `/game/state`. Player chip (level, XP bar, streak),
+  integrity chip, XP float, level-up modal, badge and mission-clear toasts.
+  The `#/me` route has badges with progress, the leaderboard and the XP guide.
+
 ## Mobile design
 
 - Portrait-first camera framing (FOV widens 55→68 on narrow screens; each zone camera pulls back with verified framing math; re-applied on rotate).
@@ -139,7 +197,9 @@ while the camera is there. Before, far zones' titles bled into the dock view.
   `GET /upc/lookup?name=` (manager — public Open Food Facts candidates, no POS
   needed), `GET /queue`, `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
   `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`,
-  `GET /game/state`, `POST /products/:id/apply-rule`, `POST /invoices/:id/extract`.
+  `GET /game/state`, `POST /products/:id/apply-rule`, `POST /invoices/:id/extract`,
+  `GET /invoices/:id` (one invoice with every line, rejected included),
+  `GET /invoices/:id/source` (signed scan link), `GET /export/labels`.
   Review lines and product cards show a "Find UPC" button when the matched
   product has no barcode (lookup → tap a candidate → saved; Dock Integrity
   refreshes, since UPC coverage is part of the score).
@@ -196,6 +256,9 @@ source and cost records included.
   reconciliation strip).
 - **2026-10-09** — Deploy publishes an allowlist only (`public-build/`); intake
   records moved to `invoices/pricing-hub-records/`.
+- **2026-10-10** — 2D hub at `/hub/` becomes the default (no WebGL).
+  - Homepage iframe replaced by a staff footer link.
+  - `GET /invoices/:id` added so excluded lines and all-excluded invoices stay workable.
 - **2026-10-10** — Game layer: missions, XP, levels, streaks, badges,
   leaderboard and dock integrity, all derived server-side from the audit trail.
   Also:

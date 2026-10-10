@@ -329,3 +329,25 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Candidate path re-run on desktop and mobile: 0 errors.
   - Server suite: only the pre-existing Gemini failure. Guard 6/6.
 - Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 14:35 ET — Claude Code — 2D Pricing Hub at /hub (default), homepage staff link
+- Goal: the owner, now signed in, found the hub UI glitchy and wanted a front-end upgrade plus a standalone page on the public site. Their answers:
+  - fast 2D hub as the default, keep the game;
+  - `/hub` with only a small staff link on the homepage;
+  - they had been using the homepage-embedded hub.
+- Changed (branch `feat/pricing-hub-2d`, stacked on #55):
+  - New `hub/`: `index.html`, `hub.css`, `js/app.js`, `js/ui.js`, `js/upc.js`, `js/views/{today,review,products,intake,vault,me}.js`. No WebGL and no external scripts; it reuses `pricing-hub/js/api.js`.
+  - `server/pricing-router.js`: `GET /invoices/:id` (manager; every line; internals stripped), plus a test in `server/pricing-game-router.test.js`.
+  - `pricing-hub/js/api.js`: `getInvoice`, `getInvoiceSource`, `downloadLabels`.
+  - `scripts/build-public-site.js` allowlists `hub/`. `scripts/test-public-site.cjs` requires its files.
+  - `vercel.json`: `/hub` → `/hub/` redirect.
+  - `index.html`: hub iframe, "Pricing" nav link and hero button removed; staff footer link added. `links.html`: hub button points to `/hub/`.
+  - Docs: `LOADING_DOCK.md`, `CURRENT_STATE.md`, decision note.
+- Verified:
+  - Server suite 133/134 (only the pre-existing Gemini failure). Guard 6/6.
+  - Emulated `vercel build` plus smoke.
+  - Headless Chromium end to end on desktop and mobile with 0 errors (details in `CURRENT_STATE.md`).
+- Security/rollback:
+  - No secrets touched. The new route is read-only, manager-only, and strips storage internals.
+  - Rollback = revert the branch; the 3D dock at `/pricing-hub/` is unchanged.
+- Next safe action: merge #54 → #55 → this on the owner's explicit go, then check `/hub/` on a preview with a real sign-in.

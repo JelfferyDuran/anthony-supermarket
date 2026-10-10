@@ -455,6 +455,23 @@ function createPricingRouter(options = {}) {
     return { invoice: reconciled || invoice, lines, reconciliation: priced.reconciliation };
   }
 
+  // One invoice with ALL of its lines, rejected ones included, for the review
+  // card. GET /queue lists only needs_review lines, so an invoice whose lines
+  // were all marked short or wrong dropped out of the hub and could not be
+  // closed. Storage paths, hashes and user ids stay on the server.
+  router.get('/invoices/:id', authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+      const lines = await store.listInvoiceLines(invoice.id);
+      const { source_object_path: objectPath, source_sha256: _hash, created_by: _c, approved_by: _a, ...rest } = invoice;
+      return res.json({ invoice: { ...rest, has_scan: Boolean(objectPath) }, lines });
+    } catch (error) {
+      return fail(res, error, 'invoice fetch');
+    }
+  });
+
   // Short-lived signed link to the source scan for the review UI.
   router.get('/invoices/:id/source', authorize('manager'), async (req, res) => {
     if (!requireStore(res)) return;
