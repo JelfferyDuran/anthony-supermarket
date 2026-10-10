@@ -6,5 +6,8 @@
     "api/pricing/[...path].js": {
       "memory": 1024
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/pricing/:path*", "destination": "/api/pricing/[...path]" }
+  ]
 }

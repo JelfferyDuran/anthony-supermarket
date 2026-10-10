@@ -248,3 +248,46 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - `kingdom-os` is Git-connected at the repo root, so merging auto-deploys it to production.
   - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
 - Next safe action: owner runs the #54 URL checklist on the `kingdom-os` branch preview or a manual pricing-hub preview, and confirms no consumer fetches repo files from `kingdom-os`. Merge/promote only on the owner's explicit go.
+
+## 2026-10-10 11:05 ET — Claude Code — Pricing Hub operational game layer + deep API routing fix
+- Goal: owner asked for significant backend and frontend work: "develop the pricing hub as a full blown game but operational".
+- Changed (branch `feat/pricing-hub-ops-game`, stacked on #54):
+  - `vercel.json` rewrite `/api/pricing/:path*` (deep routes reach the function) + guard assertion.
+  - `api/pricing/[...path].js` JSON 404.
+  - New `server/pricing-game.js`.
+  - `server/pricing-store.js`: game reads, `getProduct`, `downloadInvoiceObject`, `resolveUserNames`.
+  - `server/pricing-router.js`:
+    - `GET /game/state`;
+    - `POST /products/:id/apply-rule`;
+    - `POST /invoices/:id/extract`;
+    - failed reads reset to `uploaded`;
+    - duplicate uploads report `rescuable`;
+    - approvals link `invoice_line_id` (own lines only).
+  - New `server/pricing-game.test.js`, `server/pricing-game-router.test.js`, wired into `npm test`.
+  - Frontend:
+    - new `pricing-hub/js/game.js`;
+    - `api.js`: game calls, POS field `sales`, 401 handling;
+    - `hud.js`: rule button, rescue routing, history field, `invoice_line_id`, vault sales strip, share as %;
+    - `zones.js`: Rule Guard markers first on shelves, vault keys, integrity on hologram, pick passthrough;
+    - `world.js`: zone-scoped labels, pedestal health colour;
+    - `boot.js`: game wiring, name restore;
+    - `index.html` / `game.css`: player strip, missions button, XP floats, level-up overlay.
+  - `LOADING_DOCK.md`; decision note.
+- Verified:
+  - Server 132/133; the only failure is the pre-existing Gemini model assertion, also red on `main`.
+  - 16 new tests; mutation checks M1–M5 each fail the intended test.
+  - Guard 6/6.
+  - `vercel build` emulation: static 51 files, function bundles `pricing-game.js`, deep routes reach Express.
+  - Playwright desktop + mobile against the real router and a seeded store: 0 page or console errors; rule fix +15 XP; rescue; approve → level-up; screenshots reviewed.
+  - Read-only Supabase: schema and the approve / set-retail function bodies inspected; production counts above.
+- Not verified / blockers:
+  - Real Vercel preview (network policy + connector scope).
+  - Real OCR provider for rescues.
+  - Vercel function timeout vs a 30–90s read is unknown; if a read is killed, the scan is now rescuable after 10 min.
+- Security or rollback notes:
+  - No DB writes, no migration; all game reads are server-side under the existing manager gate.
+  - Leaderboard exposes only email local parts, never ids or full emails.
+  - Apply-rule ignores client prices.
+  - Rollback = revert the branch commits; the API stays backward compatible (only additions, plus the routing fix).
+- PR/issue/commit: draft PR (see PR thread), base `fix/vercel-public-allowlist` (#54).
+- Next safe action: merge #54 on owner go, preview this branch, approve one real invoice in the preview to confirm the deep routes, then promote on owner go.

@@ -32,6 +32,10 @@ const { createPricingStore, isConfigured, sha256 } = require('./pricing-store');
 const { matchProducts, parsePosCsv, parseDate } = require('./pos-import');
 const ocr = require('./pricing-ocr');
 const intake = require('./pricing-intake');
+const game = require('./pricing-game');
+
+const RULE_REASON = 'Pricing rule: unit cost x1.70, .99 shelf rounding';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
 const POS_TYPES = new Set(['text/csv', 'application/vnd.ms-excel', 'text/plain', 'application/csv', 'application/octet-stream']);
@@ -280,7 +284,7 @@ function createPricingRouter(options = {}) {
     try {
       const result = await ingestInvoice(req.file, req.body, { channel: 'hub' });
       if (result.duplicate) {
-        return res.json({ invoice: result.invoice, duplicate: true, lines: result.lines });
+        return res.json({ invoice: result.invoice, duplicate: true, rescuable: result.rescuable, lines: result.lines });
       }
       if (result.code === 'OCR_NOT_CONFIGURED') {
         return res.status(202).json({
@@ -303,7 +307,14 @@ function createPricingRouter(options = {}) {
     const hash = sha256(file.buffer);
     const existing = await store.findInvoiceByHash(hash);
     if (existing) {
-      return { invoice: existing, duplicate: true, lines: await store.listInvoiceLines(existing.id) };
+      // A re-upload of a scan whose first read never finished lands here. Say
+      // so, so the hub can offer to re-read it instead of showing an empty card.
+      return {
+        invoice: existing,
+        duplicate: true,
+        rescuable: game.isStuckIntake(existing),
+        lines: await store.listInvoiceLines(existing.id)
+      };
     }
 
     // The scan is stored BEFORE extraction is attempted, so a reader outage
@@ -324,6 +335,27 @@ function createPricingRouter(options = {}) {
       return { invoice, lines: [], code: 'OCR_NOT_CONFIGURED' };
     }
 
+    return extractIntoInvoice(invoice, file, fields);
+  }
+
+  // Reads a stored scan and lands its priced lines in review. Shared by first
+  // intake and by the rescue route, so a re-read follows exactly the rules a
+  // first read does.
+  //
+  // A read that fails must not leave the invoice 'extracting': nothing could
+  // tell it apart from a read still in progress, and a re-upload of the same
+  // scan dedupes onto it, so it would be stuck for good. 'uploaded' — stored,
+  // not yet read — is what is actually true, and it is rescuable.
+  async function extractIntoInvoice(invoice, file, fields = {}) {
+    try {
+      return await extractAndPersist(invoice, file, fields);
+    } catch (error) {
+      await Promise.resolve(store.updateInvoice(invoice.id, { status: 'uploaded' })).catch(() => null);
+      throw error;
+    }
+  }
+
+  async function extractAndPersist(invoice, file, fields) {
     const extracted = await callOcr(file, fields);
     const priced = priceInvoice(extracted);
     // Backfill invoice-level metadata the OCR read from the scan but the HTTP
@@ -413,10 +445,20 @@ function createPricingRouter(options = {}) {
         return res.status(422).json({ error: 'Invoice is not ready to approve', blockers });
       }
 
+      // Link each price-history row to the invoice line it came from. The
+      // approval function records invoice_line_id, but only lines that really
+      // belong to THIS invoice may be named — a client-supplied id is evidence
+      // to check, not to trust.
+      const ownLineIds = new Set((await store.listInvoiceLines(invoice.id)).map(line => String(line.id)));
+      const linked = lines.map(line => {
+        const candidate = String(line.invoice_line_id || line.id || '');
+        return { ...line, invoice_line_id: UUID_RE.test(candidate) && ownLineIds.has(candidate) ? candidate : null };
+      });
+
       const result = await store.approveInvoice({
         invoiceId: req.params.id,
         approvedBy: req.pricingIdentity.userId,
-        lines
+        lines: linked
       });
       return res.json({ result });
     } catch (error) {
@@ -629,6 +671,130 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // ── Game layer ─────────────────────────────────────────────────────────────
+  // One call for the whole HUD: the caller's level/streak/badges, the live
+  // missions, the health score and the leaderboard. Everything is derived from
+  // attributed records (see pricing-game.js) — this route writes nothing.
+  router.get('/game/state', authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const [products, openInvoices, queueLines, sources, latestPos, increaseAlerts] = await Promise.all([
+        store.listProducts(),
+        store.listOpenInvoices(),
+        store.listReviewQueue(1000),
+        store.listGameSources(),
+        store.latestPosBatch(),
+        // The alerts only enrich Rule Guard; a failure must not blank the HUD.
+        Promise.resolve(store.priceIncreaseAlerts(30)).catch(() => [])
+      ]);
+      const events = game.buildEvents(sources);
+      const userIds = [...new Set(events.map(event => event.userId))];
+      const names = userIds.length && store.resolveUserNames ? await store.resolveUserNames(userIds) : {};
+      return res.json(game.buildGameState({
+        identity: req.pricingIdentity,
+        products,
+        openInvoices,
+        queueLines,
+        events,
+        latestPos,
+        increaseAlerts,
+        names
+      }));
+    } catch (error) {
+      return fail(res, error, 'game state');
+    }
+  });
+
+  // One-tap fix for Rule Guard: the SERVER computes the rule price from the
+  // product's unit cost on file — the browser only names the product. Lowering
+  // a price that sits above the rule needs an explicit confirm, because a
+  // higher shelf price may be deliberate. The write goes through the same
+  // audited RPC as a manual edit, so it lands in price history under the
+  // signed-in manager.
+  router.post('/products/:id/apply-rule', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const product = await store.getProduct(req.params.id);
+      if (!product || product.active === false) return res.status(404).json({ error: 'Product not found' });
+      if (product.internal) {
+        return res.status(422).json({ error: 'Internal supplies are not sold and carry no retail price', code: 'INTERNAL_ITEM' });
+      }
+      const rulePrice = game.rulePriceFor(product);
+      if (rulePrice == null) {
+        return res.status(422).json({ error: 'This product has no unit cost on file, so the rule cannot price it', code: 'NO_UNIT_COST' });
+      }
+      const previous = product.current_retail_price == null ? null : Number(product.current_retail_price);
+      if (previous != null && Math.abs(previous - rulePrice) < 0.005) {
+        return res.json({ product, rulePrice, previous, unchanged: true });
+      }
+      if (previous != null && rulePrice < previous && req.body.allowDecrease !== true) {
+        return res.status(409).json({
+          error: `The rule price ${rulePrice.toFixed(2)} is below the current ${previous.toFixed(2)}. Confirm to lower it.`,
+          code: 'WOULD_LOWER_PRICE',
+          rulePrice,
+          previous
+        });
+      }
+      const updated = await store.setProductRetail({
+        productId: product.id,
+        retailPrice: rulePrice,
+        approvedBy: req.pricingIdentity.userId,
+        reason: RULE_REASON
+      });
+      return res.json({ product: updated, rulePrice, previous, unchanged: false });
+    } catch (error) {
+      return fail(res, error, 'rule repricing');
+    }
+  });
+
+  // Rescue for a scan that was stored but never read (OCR down at upload, or a
+  // read that died mid-way). Re-reads the stored object; lines land in review
+  // exactly as a first read would. Refuses anything that is not stuck, so it
+  // can never overwrite lines a manager is already reviewing.
+  router.post('/invoices/:id/extract', limitWrites, authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    if (!ocr.isConfigured()) {
+      return res.status(503).json({ error: 'OCR is not configured', code: 'OCR_NOT_CONFIGURED' });
+    }
+    let invoice;
+    let object;
+    let mimetype;
+    try {
+      invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+      if (!game.isStuckIntake(invoice)) {
+        return res.status(409).json({
+          error: `This invoice is ${invoice.status}; only a stuck scan can be re-read`,
+          code: 'NOT_STUCK'
+        });
+      }
+      if (!invoice.source_object_path) {
+        return res.status(422).json({ error: 'No scan is on file for this invoice', code: 'NO_SCAN' });
+      }
+      object = await store.downloadInvoiceObject(invoice.source_object_path);
+      mimetype = sniffMime(object.buffer) || object.contentType;
+      if (!ALLOWED_TYPES.has(mimetype)) {
+        return res.status(422).json({ error: 'The stored scan is not a PDF or image the reader accepts', code: 'UNREADABLE_SCAN' });
+      }
+      await store.updateInvoice(invoice.id, { status: 'extracting' });
+    } catch (error) {
+      return fail(res, error, 'scan rescue');
+    }
+
+    try {
+      const result = await extractIntoInvoice(invoice, {
+        buffer: object.buffer,
+        mimetype,
+        originalname: `invoice-${invoice.id}`,
+        size: object.buffer.length
+      }, { invoice_number: invoice.invoice_number || undefined });
+      return res.json({ invoice: result.invoice, lines: result.lines, reconciliation: result.reconciliation });
+    } catch (error) {
+      console.error('Pricing scan rescue failed:', error.message);
+      return res.status(502).json({ error: 'The scan could not be read', detail: error.message, code: error.code || 'OCR_FAILED' });
+    }
+  });
+
   // ── Legacy path kept for the existing Hermes integration ───────────────────
   router.post('/invoices/extract', limitWrites, authorize('manager'), upload.single('invoice'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'A supported PDF or image invoice is required' });
@@ -661,6 +827,17 @@ function createPricingRouter(options = {}) {
 function normalizeDate(value) {
   const text = String(value == null ? '' : value).trim();
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
+}
+
+// The type a stored scan really is, from its first bytes. Storage metadata is
+// what the uploader claimed; the bytes are what the reader will get.
+function sniffMime(buffer) {
+  if (!buffer || buffer.length < 12) return null;
+  if (buffer.subarray(0, 4).toString('latin1') === '%PDF') return 'application/pdf';
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buffer.subarray(0, 4).toString('latin1') === 'RIFF' && buffer.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp';
+  return null;
 }
 
 // Quotes a CSV cell only when it needs it, so the price-gun importer sees clean
@@ -735,4 +912,4 @@ async function defaultVerifyUser(token) {
   };
 }
 
-module.exports = { createPricingRouter, csvCell };
+module.exports = { createPricingRouter, csvCell, sniffMime };

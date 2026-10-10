@@ -24,5 +24,9 @@ app.use('/api/pricing', createPricingRouter());
 // Deployment health check (no auth, no store). Lives under /api/pricing/*
 // because that is the path prefix Vercel routes to this function.
 app.get('/api/pricing/health', (_req, res) => res.json({ ok: true, service: 'pricing-hub-api' }));
+// vercel.json rewrites every depth of /api/pricing/* here, so unknown paths
+// reach Express too. Answer them in JSON like every other API error, not with
+// Express's HTML page.
+app.use('/api/pricing', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
 module.exports = app;

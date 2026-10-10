@@ -324,8 +324,98 @@ function createPricingStore(client = getClient()) {
         await client.rpc('pricing_label_rows', { p_invoice_id: invoiceId || null }),
         'label export'
       );
+    },
+
+    async getProduct(productId) {
+      const rows = unwrap(
+        await client.from('pricing_products').select('*').eq('id', productId).limit(1),
+        'product fetch'
+      );
+      return rows[0] || null;
+    },
+
+    // Fetches a stored scan back out of the private bucket, for re-reading a
+    // scan whose first extraction never finished.
+    async downloadInvoiceObject(objectPath) {
+      const blob = unwrap(await client.storage.from(INVOICE_BUCKET).download(objectPath), 'invoice download');
+      return { buffer: Buffer.from(await blob.arrayBuffer()), contentType: blob.type || null };
+    },
+
+    // ── Game layer (read-only: the audit trail IS the score) ───────────────
+    async listOpenInvoices(limit = 500) {
+      return unwrap(
+        await client
+          .from('pricing_invoices')
+          .select('id, invoice_number, invoice_date, status, created_at, line_count, invoice_subtotal, source_object_path')
+          .in('status', ['uploaded', 'extracting', 'needs_review'])
+          .order('created_at', { ascending: true })
+          .limit(limit),
+        'open invoice listing'
+      );
+    },
+
+    // Every attributed action the game scores, newest window first. Approval
+    // history rows linked to an invoice line are excluded here: the invoice
+    // approval itself is what scores them.
+    async listGameSources({ sinceDays = 400 } = {}) {
+      const since = new Date(Date.now() - sinceDays * 86_400_000).toISOString();
+      const [invoices, lineExceptions, retailEdits, posImports] = await Promise.all([
+        client.from('pricing_invoices')
+          .select('id, invoice_number, status, approved_by, approved_at, line_count, reconciliation_variance')
+          .not('approved_by', 'is', null).gte('approved_at', since).limit(5000),
+        client.from('pricing_invoice_lines')
+          .select('id, invoice_id, approved_by, approved_at')
+          .eq('review_status', 'rejected').not('approved_by', 'is', null).gte('approved_at', since).limit(10000),
+        client.from('pricing_price_history')
+          .select('id, product_id, invoice_line_id, changed_by, changed_at')
+          .not('changed_by', 'is', null).is('invoice_line_id', null).gte('changed_at', since).limit(10000),
+        client.from('pos_import_batches')
+          .select('id, imported_by, created_at, imported_count, period_end')
+          .not('imported_by', 'is', null).gte('created_at', since).limit(2000)
+      ]);
+      return {
+        invoices: unwrap(invoices, 'game invoice events'),
+        lineExceptions: unwrap(lineExceptions, 'game line events'),
+        retailEdits: unwrap(retailEdits, 'game reprice events'),
+        posImports: unwrap(posImports, 'game POS events')
+      };
+    },
+
+    async latestPosBatch() {
+      const rows = unwrap(
+        await client
+          .from('pos_import_batches')
+          .select('period_start, period_end, created_at')
+          .not('period_end', 'is', null)
+          .order('period_end', { ascending: false })
+          .limit(1),
+        'latest POS batch'
+      );
+      return rows[0] || null;
+    },
+
+    // Leaderboard names: the part of the email before the @, never the full
+    // address. Resolved through the Auth admin API (service role, server only)
+    // and cached for the life of the process.
+    async resolveUserNames(userIds) {
+      const out = {};
+      for (const id of userIds || []) {
+        if (!id) continue;
+        if (userNameCache.has(id)) { out[id] = userNameCache.get(id); continue; }
+        let name = 'Teammate';
+        try {
+          const { data, error } = await client.auth.admin.getUserById(id);
+          const email = !error && data && data.user && data.user.email;
+          if (email) name = email.split('@')[0];
+        } catch (_) { /* unknown or deleted user keeps the generic name */ }
+        userNameCache.set(id, name);
+        out[id] = name;
+      }
+      return out;
     }
   };
 }
+
+const userNameCache = new Map();
 
 module.exports = { INVOICE_BUCKET, createAuthClient, createPricingStore, getClient, isConfigured, sha256 };

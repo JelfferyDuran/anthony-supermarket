@@ -1,8 +1,46 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-09 (Vercel deploy limited to a public allowlist; cost records moved out of `pricing-hub/`; fix NOT yet in production)
+Last updated: 2026-10-10 (Pricing Hub game layer + API routing fix on a stacked branch; nothing in production)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
+
+## 2026-10-10 — Pricing Hub becomes an operational game; deep API routes fixed (branch, NOT in production)
+- **Branch:** `feat/pricing-hub-ops-game`, stacked on `fix/vercel-public-allowlist` (PR #54). Draft PR targets #54's branch. Merge #54 first.
+- **Live data observed (read-only, Supabase 2026-10-10):**
+  - **Nothing has ever been approved through the hub:** 0 invoices `imported`, and 0 attributed approval, history or POS rows. The Oct 8 "approvals" exist only as repo JSON.
+  - **Open work:** 8 invoices / 98 lines in `needs_review` (oldest Aug 20); 3 scans stuck in `extracting` since Aug 28; 1 `uploaded` since Aug 20.
+  - **Sales feed:** stops at 2026-08-19.
+  - **Catalog:** all 279 priced items sit exactly on ×1.70/.99; 190 of 283 have no UPC; 45 are flagged for owner review.
+- **Root causes found and fixed:**
+  1. **Vercel routed only ONE path segment** to `api/pricing/[...path].js`, so approve, line edits, price history and retail edits 404'd in production. Fix: a `vercel.json` rewrite, `/api/pricing/:path*` → the function (now guarded in CI).
+  2. **A failed or killed OCR read left invoices `extracting` forever,** and re-uploads deduped onto them. Fix: failures reset to `uploaded`, and `POST /invoices/:id/extract` rescues stuck scans (`uploaded`, or `extracting` > 10 min).
+  3. **Client bugs:**
+     - POS upload sent field `file`, but the server reads `sales`, so every import failed;
+     - price history read `old_retail_price` instead of `previous_retail_price`;
+     - the vault read the wrong P&L keys;
+     - approvals never linked history rows to their invoice line.
+- **New:**
+  - `server/pricing-game.js`: pure engine for missions, XP, levels, streaks, badges, leaderboard and health.
+  - `GET /game/state`: manager access.
+  - `POST /products/:id/apply-rule`: approver only, server-priced, needs confirm to lower.
+  - `pricing-hub/js/game.js`: player strip, mission board, player card, health panel, 3D beacons, stuck-scan packages, XP and level-up feedback.
+  - Zone-scoped 3D labels.
+- **No new tables, no migration:** XP comes from existing `approved_by` / `changed_by` / `imported_by` columns.
+- **Verified locally:**
+  - Server suite 132/133. The only failure is the pre-existing Gemini model-name assertion, also on `main`; this includes 16 new game tests, and 5 mutation checks each fail as intended.
+  - Public-site guard 6/6.
+  - `vercel build` emulation: 51 static files and nothing internal; the function bundles `pricing-game.js`; deep routes reach Express; unknown paths get a JSON 404.
+  - Headless Chromium run against the real router plus a seeded store, desktop 1440×900 and mobile 390×844, 0 page or console errors:
+    - rule fix +15 XP;
+    - scan rescue;
+    - approve → level-up to Receiver;
+    - player card, board and health render.
+- **Not verified:** a real Vercel deployment (this container blocks `*.vercel.app`) and a real OCR provider for the rescue path.
+- **Next safe action:**
+  1. Owner merges #54 (note: merge auto-deploys `kingdom-os`).
+  2. Then review this PR and preview it from its SHA.
+  3. Click Approve on one review-line invoice in the preview.
+  4. Promote only on the owner's go.
 
 ## 2026-10-09 — Pricing Hub deploy published the whole repo; fixed on branch, NOT yet in production
 - **Exposure (owner-confirmed live 2026-10-09):** `vercel.json` had `outputDirectory: "."`, so the `anthony-pricing-hub` production deployment served every tracked file. That included server source, `invoices/` (54 files), `nrs/` POS exports (76), `apps/pricing-hub/index.html` (embedded cost ledger), `apps/pricing-store/index.html`, the `manual-intake-*` / `goya-*` cost records in `pricing-hub/` (vendor costs, case prices, vendor account number), and internal docs. A local `vercel build` of `main` emits **380** static files.

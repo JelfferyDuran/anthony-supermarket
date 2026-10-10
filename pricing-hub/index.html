@@ -92,6 +92,44 @@
   </div>
 </header>
 
+<!-- Player strip: level, XP, streak, dock integrity (all from GET /game/state) -->
+<div id="playerHud" class="hidden">
+  <button id="phLevel" class="ph-level" aria-label="Your level, badges and leaderboard"><small>LV</small><b id="phLevelNum">1</b></button>
+  <button id="phMain" class="ph-main" aria-label="Your XP progress">
+    <span class="ph-row"><span class="ph-who"><b id="phName">—</b> <span id="phTitle" class="ph-title">loading…</span></span><span id="phXp" class="ph-xp"></span></span>
+    <span class="ph-bar"><span id="phBarFill"></span></span>
+  </button>
+  <button id="phStreak" class="ph-chip streak" aria-label="Work streak">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 3.2 4.9 5.3 4.9 10a4.9 4.9 0 0 1-9.8 0c0-2.4 1.2-3.9 2.3-5.3.4 1.5 1.1 2.4 2.1 2.9.3-2.6-.4-4.9.5-7.6z"/></svg>
+    <b id="phStreakNum">0</b>
+  </button>
+  <button id="phHealth" class="ph-chip health" aria-label="Dock integrity">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+    <b id="phHealthNum">—</b>
+  </button>
+</div>
+
+<!-- Mission board button (mirrors the upload FAB on the left) -->
+<button id="missionsBtn" aria-label="Open the mission board">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>
+  <span>MISSIONS</span>
+  <b id="missionsBadge" class="count-badge hidden">0</b>
+</button>
+
+<!-- XP gains float up from the player strip -->
+<div id="xpFloats" aria-live="polite"></div>
+
+<!-- Level-up -->
+<div id="levelUp" class="overlay-center hidden" role="dialog" aria-modal="true" aria-labelledby="luTitle">
+  <div class="lu-card">
+    <div class="lu-k">LEVEL UP</div>
+    <div class="lu-num" id="luNum">2</div>
+    <div class="lu-title" id="luTitle">Receiver</div>
+    <div class="lu-next" id="luNext"></div>
+    <button class="btn primary big" id="luClose">Back to work</button>
+  </div>
+</div>
+
 <nav id="zonenav" aria-label="Zones">
   <button data-zone="dock" class="znav active">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>

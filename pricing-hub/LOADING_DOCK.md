@@ -48,7 +48,57 @@ Backend: `PATCH /invoices/:id/lines` (approver gate), `store.updateLineReviews`
 no DB migration was needed; the approval RPC is untouched.
 
 **Duplicate uploads** are recognized by SHA-256 — re-uploading the same file
-returns the existing invoice instead of double-counting.
+returns the existing invoice instead of double-counting. If that invoice was
+stored but never read, the response says `rescuable: true` and the hub sends you
+to the Rescue mission.
+
+**Failed reads no longer strand scans (Oct 10, 2026):** if extraction fails,
+the invoice drops back to `uploaded` (stored, not yet read) instead of staying
+`extracting` forever. `POST /invoices/:id/extract` re-reads a stuck scan from
+storage: one that is `uploaded`, or `extracting` for more than 10 minutes. It
+refuses anything else, so it can never overwrite lines under review.
+
+## The game layer — operational, not decorative
+
+The hub plays like a game, but every number comes from real work. The server
+(`server/pricing-game.js`, `GET /game/state`) derives everything from records
+the pricing tables already keep:
+- who approved or closed an invoice;
+- who set a line aside;
+- who repriced an item;
+- who imported POS sales.
+
+No new tables, and the browser cannot claim XP.
+
+| Piece | What it is |
+|---|---|
+| **Player strip** (top) | Level + title, XP bar, work streak (store days, America/New_York), dock-integrity score. Tap for the player card. |
+| **Missions** (left button, dock beacons) | The live work queues. They clear when the work is done. Tap a dock beacon or the MISSIONS button to open the board. |
+| **Player card** | Level ring, streak, XP today/week, badges with progress, this-week and all-time leaderboard (names = email local part only), "Dock radio" team feed, XP rules. |
+| **Dock integrity** | 0–100 health from five weighted parts: review backlog 30, intake flow 15, price rule 25, sales feed 20, UPC coverage 10. The pedestal ring turns red, amber or green with it. |
+| **Feedback** | +XP float, level-up overlay with particle burst, "Badge unlocked" and "Mission clear" toasts. Each one is a diff between two server snapshots. |
+
+**Missions**
+- **Clear the Review Line:** invoices in `needs_review`, oldest first, each with a Review button.
+- **Rescue Stuck Scans:** scans stored but never read. They also appear as red packages in the Intake Bay; tap one to re-read it.
+- **Rule Guard:** items selling under retail = cost × 1.70 (.99), below-cost first. They pulse red on the shelves. **Apply** is server-priced (`POST /products/:id/apply-rule`): the browser only names the product, and lowering a price needs an explicit confirm.
+- **Feed the Vault:** days of POS sales missing since the last import.
+
+**XP**
+
+| Action | XP |
+|---|---|
+| Approve an invoice | 100, +5 per line, +50 if it reconciles to the cent |
+| Close a delivery that never came | 40 |
+| Catch a short or wrong line | 8 |
+| Reprice an item | 15 |
+| Import POS sales | 60 |
+
+**Levels:** Dock Hand (0), Receiver (250), Line Checker (600), Price Scout (1,100), Margin Keeper (1,800), Floor Captain (2,700), Dock Boss (3,900), Pricing Chief (5,400), Vault Keeper (7,200), Kingpin of the Dock (9,500).
+
+**Notes**
+- Shared operator tokens see the missions but score nothing: no person is attached to them.
+- Approvals now send `invoice_line_id`. The server keeps an id only if it is a line of the invoice being approved, so the audit trail links each price to its line. Older unlinked approval rows are not double-counted as hand reprices.
 
 ## Mobile design
 
@@ -74,14 +124,24 @@ pricing-hub/
                  financials→bars, hologram stats
   js/hud.js    — sign-in, top bar, zone nav, FAB, upload choreography,
                  review/product/vault panels, search
+  js/game.js   — game layer: player strip, mission board, player card, health
+                 panel, dock beacons, stuck-scan packages, XP/level-up feedback
 ```
+
+3D labels can be scoped to a zone (`addLabel(..., { zone })`) and show only
+while the camera is there. Before, far zones' titles bled into the dock view.
 
 - **Backend**: `api/pricing/[...path].js` (Vercel function) mounts
   `server/pricing-router.js` + `server/pricing-store.js`. Base `/api/pricing`.
   Endpoints used: `POST /login`, `GET /config`, `GET /products`,
   `GET /products/:id/history`, `PATCH /products/:id/retail`, `GET /queue`,
   `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
-  `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
+  `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`,
+  `GET /game/state`, `POST /products/:id/apply-rule`, `POST /invoices/:id/extract`.
+- **Routing**: `vercel.json` rewrites `/api/pricing/:path*` to the function.
+  Without it Vercel only routed ONE segment, so `/invoices/:id/approve`,
+  `/invoices/:id/lines`, `/products/:id/history` and `/products/:id/retail` hit
+  Vercel's 404. Unknown paths now get a JSON 404.
 - **Auth**: Supabase verifies credentials + role at login; server mints a
   30-day HS256 session token. Same `localStorage` key as the old client, so
   existing sessions carry over. Unauthenticated users see only the sign-in gate.
@@ -122,3 +182,11 @@ source and cost records included.
   reconciliation strip).
 - **2026-10-09** — Deploy publishes an allowlist only (`public-build/`); intake
   records moved to `invoices/pricing-hub-records/`.
+- **2026-10-10** — Game layer: missions, XP, levels, streaks, badges,
+  leaderboard and dock integrity, all derived server-side from the audit trail.
+  Also:
+  - multi-segment `/api/pricing` routing fixed;
+  - stuck-scan rescue;
+  - server-priced Apply rule;
+  - client fixes: POS upload field `sales`, price-history field, vault revenue
+    and cost keys, signed-in name restored after reload.

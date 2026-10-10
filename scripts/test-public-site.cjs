@@ -22,6 +22,10 @@ test('vercel.json publishes the allowlisted build, never the repo root', () => {
   assert.equal(cfg.outputDirectory, 'public-build');
   assert.match(cfg.buildCommand || '', /node scripts\/build-public-site\.js/);
   assert.ok(cfg.functions && cfg.functions['api/pricing/[...path].js'], 'the /api/pricing function must stay configured');
+  // Without this rewrite Vercel routes only ONE segment after /api/pricing to
+  // the function: /invoices/:id/approve, /products/:id/history and friends 404.
+  assert.ok((cfg.rewrites || []).some(r => r.source === '/api/pricing/:path*' && r.destination === '/api/pricing/[...path]'),
+    'the /api/pricing/:path* rewrite must stay configured');
 });
 
 test('the build refuses to clean the repository itself', () => {
@@ -34,7 +38,7 @@ test('the Pricing Hub client and the public pages ship', () => {
     'index.html', 'links.html', 'privacy.html', 'terms.html', 'sales.html', 'data/sale.json',
     'pricing-hub/index.html', 'pricing-hub/game.css',
     'pricing-hub/js/api.js', 'pricing-hub/js/boot.js', 'pricing-hub/js/hud.js',
-    'pricing-hub/js/world.js', 'pricing-hub/js/zones.js',
+    'pricing-hub/js/world.js', 'pricing-hub/js/zones.js', 'pricing-hub/js/game.js',
   ];
   for (const rel of required) assert.ok(published.includes(rel), `${rel} must be published`);
 });
