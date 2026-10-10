@@ -373,6 +373,13 @@ function createPricingRouter(options = {}) {
       return { invoice, lines: [], code: 'OCR_NOT_CONFIGURED' };
     }
 
+    return runExtraction(invoice, file, fields);
+  }
+
+  // OCR + pricing + line storage for one invoice. Shared by fresh intake and
+  // by retry-extract: one code path so a re-run can never disagree with the
+  // first run about what gets stored.
+  async function runExtraction(invoice, file, fields = {}) {
     const extracted = await callOcr(file, fields);
     const priced = priceInvoice(extracted);
     // Backfill invoice-level metadata the OCR read from the scan but the HTTP
@@ -435,6 +442,75 @@ function createPricingRouter(options = {}) {
       return res.json({ url: await store.signInvoiceObject(invoice.source_object_path), expiresInSeconds: 300 });
     } catch (error) {
       return fail(res, error, 'source signing');
+    }
+  });
+
+  // Re-runs extraction on a stuck invoice from its stored scan. Approver gate.
+  // Refuses when the invoice already carries reviewer work or is priced —
+  // re-extraction would silently discard human decisions. A stuck invoice is
+  // one sitting in 'uploaded'/'extracting' (OCR never finished) or in
+  // 'needs_review' with untouched lines.
+  router.post('/invoices/:id/retry-extract', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'invoice not found' });
+      if (['approved', 'imported', 'rejected'].includes(invoice.status)) {
+        return res.status(409).json({ error: 'invoice is ' + invoice.status + ' — re-extraction would discard the priced result' });
+      }
+      if (!invoice.source_object_path) {
+        return res.status(409).json({ error: 'no scan on file for this invoice (it was backfilled, not uploaded)' });
+      }
+      if (!ocr.isConfigured()) {
+        return res.status(503).json({ error: 'OCR is not configured', code: 'OCR_NOT_CONFIGURED' });
+      }
+      const lines = await store.listInvoiceLines(invoice.id);
+      const touched = lines.some((l) => l.matched_product_id || (l.review_status && l.review_status !== 'needs_review'));
+      if (touched) {
+        return res.status(409).json({ error: 'this invoice already has review work — delete and re-upload instead' });
+      }
+      const buffer = await store.getInvoiceObjectBuffer(invoice.source_object_path);
+      const file = { buffer, mimetype: sniffMimetype(buffer), originalname: 'retry-' + invoice.id };
+      await store.updateInvoice(invoice.id, { status: 'extracting' });
+      const result = await runExtraction(invoice, file, {});
+      return res.json({ invoice: result.invoice, lines: result.lines, reconciliation: result.reconciliation, retried: true });
+    } catch (error) {
+      return fail(res, error, 're-extract');
+    }
+  });
+
+  // The invoice record keeps no mimetype, so sniff it from magic bytes for the
+  // OCR call. Falls back to JPEG (the phone camera's format).
+  function sniffMimetype(buffer) {
+    if (!buffer || buffer.length < 12) return 'image/jpeg';
+    if (buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) return 'application/pdf';
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+    if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+        buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return 'image/webp';
+    return 'image/jpeg';
+  }
+
+  // Catalog completeness snapshot for the UPC drive and price hygiene.
+  // Read-only: totals plus how many products lack a barcode, a retail price,
+  // or a unit cost. Powers a future "catalog health" tile; no writes.
+  router.get('/products/coverage', authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const products = await store.listProducts();
+      const total = products.length;
+      const missingUpc = products.filter((p) => !p.upc).length;
+      const missingRetail = products.filter((p) => p.current_retail_price == null).length;
+      const missingCost = products.filter((p) => p.current_unit_cost == null).length;
+      return res.json({
+        total,
+        withUpc: total - missingUpc,
+        missingUpc,
+        missingRetail,
+        missingCost,
+        generated_at: new Date().toISOString()
+      });
+    } catch (error) {
+      return fail(res, error, 'coverage');
     }
   });
 
