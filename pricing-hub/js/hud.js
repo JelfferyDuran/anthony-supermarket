@@ -327,6 +327,9 @@ export function createHud(world, zones, nav) {
     return lineTotal(l) || 0;
   }
   function effRetail(l) {
+    // A manager-typed retail survives re-renders (stored on change); without
+    // it, typing a price then touching anything else would silently lose it.
+    if (l._editRetail != null) return l._editRetail;
     if (l._editCost != null) return retailFromCost(l._editCost);
     return lineProposedRetail(l);
   }
@@ -449,7 +452,7 @@ export function createHud(world, zones, nav) {
       });
     });
 
-    // qty / cost corrections — 'change' (not 'input') so re-render doesn't steal focus
+    // qty / cost / retail corrections — 'change' (not 'input') so re-render doesn't steal focus
     $('panelBody').querySelectorAll('[data-cases]').forEach((input) => {
       input.addEventListener('change', () => {
         const idx = Number(input.dataset.cases);
@@ -463,6 +466,14 @@ export function createHud(world, zones, nav) {
         const idx = Number(input.dataset.cost);
         const v = num(input.value);
         inv.lines[idx]._editCost = (v != null && v >= 0) ? v : null;
+        showInvoice(invoiceId);
+      });
+    });
+    $('panelBody').querySelectorAll('[data-retail]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const idx = Number(input.dataset.retail);
+        const v = num(input.value);
+        inv.lines[idx]._editRetail = (v != null && v >= 0) ? v : null;
         showInvoice(invoiceId);
       });
     });
