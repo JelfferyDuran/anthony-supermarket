@@ -372,8 +372,9 @@ html, body {
 .ph-chip.health.g-c { color: var(--amber); border-color: rgba(255,176,32,0.5); }
 
 /* mission board button */
+/* Same lift as #fab in polish.css, so it clears the taller zone rail. */
 #missionsBtn {
-  position: fixed; left: 16px; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 35;
+  position: fixed; left: 16px; bottom: calc(104px + env(safe-area-inset-bottom)); z-index: 35;
   width: 68px; height: 68px; border-radius: 50%; cursor: pointer; font-family: var(--font);
   border: 1px solid rgba(34,211,238,0.6); color: var(--cyan);
   background: radial-gradient(circle at 35% 30%, rgba(34,211,238,0.35), rgba(8,30,38,0.95) 70%);
