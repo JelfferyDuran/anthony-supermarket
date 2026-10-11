@@ -239,6 +239,24 @@ function signOut() {
 const ctx = { api, state, work, go, render, refreshAll, afterAction, toast, signOut };
 
 /* ---------- sign-in ---------- */
+// A preview deployment can serve this page without the server-only pricing
+// environment. The public GET /config says so (storeConfigured: false); say
+// that instead of letting it look like a wrong password. Same check as the
+// 3D dock's boot.js.
+function signinUnavailable() {
+  return Boolean(state.config && state.config.storeConfigured === false);
+}
+
+async function probeSignin() {
+  if (!state.config) {
+    try { await api.getConfig(); } catch (_) { return; } // sign-in reports it
+  }
+  if (signinUnavailable() && !$('signin').classList.contains('hidden')) {
+    $('signinError').textContent = 'This preview is not connected to Pricing Hub authentication. ' +
+      'Use the production hub or configure the preview environment first.';
+  }
+}
+
 function showSignin(msg) {
   clearSession();
   state.game = null;
@@ -248,6 +266,7 @@ function showSignin(msg) {
   $('boot').classList.add('hidden');
   $('signinError').textContent = msg || '';
   setTimeout(() => $('signinEmail').focus(), 30);
+  probeSignin();
 }
 
 async function doSignin(e) {
@@ -256,6 +275,10 @@ async function doSignin(e) {
   const password = $('signinPassword').value;
   const err = $('signinError');
   err.textContent = '';
+  if (signinUnavailable()) {
+    err.textContent = 'This preview is not connected to Pricing Hub authentication. Your credentials were not evaluated.';
+    return;
+  }
   if (!email || !password) { err.textContent = 'Enter your email and password.'; return; }
   const btn = $('signinBtn');
   btn.disabled = true;

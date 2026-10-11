@@ -371,3 +371,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Verified: guard 6/6; storefront resilience 4/4; server suite 115/117 (both failures are `main`'s: the .99 rounding expectation in `pricing-engine.test.js` and the Gemini model assertion); `vercel build` emulation 52 static files, nothing internal; `polish.css`/`polish.js` serve as CSS/JS.
 - Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
 - Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.
+
+## 2026-10-11 05:35 ET — Claude Code — main's #52 polish merged through #55 and #56; 2D sign-in preview check
+- #55 (`feat/pricing-hub-ops-game`): merged the updated #54. The docs and the guard's required list conflicted (kept both sides). `boot.js`, `hud.js` and `index.html` auto-merged; main's preview check sits in the game layer's auth gate unchanged. The polish layer's taller zone rail overlapped the Missions button on phones, so it now uses the same 104px lift as `#fab`.
+- #56 (`feat/pricing-hub-2d`): merged #55 (allowlist conflict: kept `polish.css` and the `hub/` files). The 2D sign-in now mirrors main's check: on `storeConfigured:false` it explains the preview and never calls `/login`.
+- Verified: guard 6/6 and storefront resilience 4/4 on both; server suite 132/134 (#55) and 133/135 (#56), with only main's two known failures; 3D drive 0 errors (desktop and mobile); full 2D drive 0 errors; a no-store harness shows the 2D notice on desktop and mobile with no `/login` request.
+- Next safe action: owner's go to merge #54 → #55 → #56; the first authenticated check is production (previews lack the pricing env).

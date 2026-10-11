@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-10 (2D Pricing Hub at /hub on a third stacked branch; game layer and allowlist on #55/#54; nothing in production)
+Last updated: 2026-10-11 (main's #52 polish merged through #54 → #55 → #56; previews cannot sign in (`storeConfigured:false`); nothing in production)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
@@ -34,7 +34,10 @@ This file is operational context, not a secret store. **Live infrastructure is a
     - POS import +60 XP;
     - sign out;
     - no horizontal overflow, approve bar above the tab bar.
-- **Not verified:** a real Vercel deployment and real Supabase data (the session cannot reach `*.vercel.app`).
+- **2026-10-11:** `main`'s #52 polish is merged through #54 → #55 → #56.
+  - The 2D sign-in runs the same preview check as the 3D dock: `GET /config` → `storeConfigured:false` → explain, and never send credentials.
+  - The 3D Missions button is lifted clear of the taller polished zone rail.
+- **Not verified:** a real Vercel deployment and real Supabase data (the session cannot reach `*.vercel.app`). Previews cannot sign in at all (`storeConfigured:false`), so the first authenticated check is production after the owner's go, or a preview once its environment has the server-only pricing variables.
 
 ## 2026-10-10 — Pricing Hub becomes an operational game; deep API routes fixed (branch, NOT in production)
 - **Branch:** `feat/pricing-hub-ops-game`, stacked on `fix/vercel-public-allowlist` (PR #54). Draft PR targets #54's branch. Merge #54 first.

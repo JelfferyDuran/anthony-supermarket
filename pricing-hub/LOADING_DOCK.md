@@ -123,6 +123,8 @@ mobile-first console. It needs no external scripts and no three.js.
 
   It imports `pricing-hub/js/api.js`, so there is one API client and one
   session key (`pricingToken`). Signing in on either UI signs you into both.
+  Where the pricing environment is missing (`GET /config` → `storeConfigured:false`,
+  as on Vercel previews today), both sign-in screens say so and send nothing.
 - **Routes (hash):**
   - `#/today`: integrity, missions, team feed;
   - `#/review` and `#/review/<invoiceId>`;
