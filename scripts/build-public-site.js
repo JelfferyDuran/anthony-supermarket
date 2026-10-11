@@ -33,6 +33,7 @@ const PUBLIC_FILES = [
   'data/sale.json', // fetched by sales.html; promo copy only, no cost fields
   'pricing-hub/index.html',
   'pricing-hub/game.css',
+  'pricing-hub/polish.css', // visual layer over game.css (main's #52)
 ];
 
 // Directories, copied recursively, but only files with a listed extension.

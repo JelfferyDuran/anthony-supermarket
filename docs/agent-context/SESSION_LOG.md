@@ -248,3 +248,10 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - `kingdom-os` is Git-connected at the repo root, so merging auto-deploys it to production.
   - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
 - Next safe action: owner runs the #54 URL checklist on the `kingdom-os` branch preview or a manual pricing-hub preview, and confirms no consumer fetches repo files from `kingdom-os`. Merge/promote only on the owner's explicit go.
+
+## 2026-10-11 05:28 ET — Claude Code — main's #52 polish merged into #54; polish.css allowlisted
+- `main` moved to `43ca4d5` (#52 Pricing Hub polish: `pricing-hub/polish.css`, `js/polish.js`, and a sign-in check that reports a preview without pricing config instead of a bad password).
+- Merged into `fix/vercel-public-allowlist` cleanly. The Public site guard then failed on `pricing-hub/index.html -> polish.css` (unpublished), so `pricing-hub/polish.css` joined `PUBLIC_FILES` and both new files joined the guard's required list.
+- Verified: guard 6/6; storefront resilience 4/4; server suite 115/117 (both failures are `main`'s: the .99 rounding expectation in `pricing-engine.test.js` and the Gemini model assertion); `vercel build` emulation 52 static files, nothing internal; `polish.css`/`polish.js` serve as CSS/JS.
+- Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
+- Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.
