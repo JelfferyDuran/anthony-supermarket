@@ -343,3 +343,10 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Test added: `retry-extract` failure resets to `uploaded`, success lands lines, reviewed work is refused (409), the operator token is refused (403). Mutation-checked against the old call.
 - Follow-up for the owner: `/extract` (#55, manager, refuses in-flight reads) and `/retry-extract` (main, approver, also re-reads untouched `needs_review` invoices) overlap. Consolidate into one route after these PRs land.
 - Still on `main`: the manual-UPC "Save digits" wiring bug (fixed in #55 only).
+
+## 2026-10-11 05:28 ET — Claude Code — main's #52 polish merged into #54; polish.css allowlisted
+- `main` moved to `43ca4d5` (#52 Pricing Hub polish: `pricing-hub/polish.css`, `js/polish.js`, and a sign-in check that reports a preview without pricing config instead of a bad password).
+- Merged into `fix/vercel-public-allowlist` cleanly. The Public site guard then failed on `pricing-hub/index.html -> polish.css` (unpublished), so `pricing-hub/polish.css` joined `PUBLIC_FILES` and both new files joined the guard's required list.
+- Verified: guard 6/6; storefront resilience 4/4; server suite 115/117 (both failures are `main`'s: the .99 rounding expectation in `pricing-engine.test.js` and the Gemini model assertion); `vercel build` emulation 52 static files, nothing internal; `polish.css`/`polish.js` serve as CSS/JS.
+- Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
+- Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.

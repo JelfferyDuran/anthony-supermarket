@@ -42,9 +42,10 @@ test('the build refuses to clean the repository itself', () => {
 test('the Pricing Hub client and the public pages ship', () => {
   const required = [
     'index.html', 'links.html', 'privacy.html', 'terms.html', 'sales.html', 'data/sale.json',
-    'pricing-hub/index.html', 'pricing-hub/game.css',
+    'pricing-hub/index.html', 'pricing-hub/game.css', 'pricing-hub/polish.css',
     'pricing-hub/js/api.js', 'pricing-hub/js/boot.js', 'pricing-hub/js/hud.js',
     'pricing-hub/js/world.js', 'pricing-hub/js/zones.js', 'pricing-hub/js/game.js',
+    'pricing-hub/js/polish.js',
   ];
   for (const rel of required) assert.ok(published.includes(rel), `${rel} must be published`);
 });

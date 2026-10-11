@@ -115,6 +115,7 @@ pricing-hub/
   index.html   — shell: importmap (three@0.160.0 via jsDelivr, core only),
                  HUD divs, sign-in gate, loader, CDN-fail fallback
   game.css     — dark neon theme (charcoal + amber/cyan), bottom sheets, toasts
+  polish.css   — visual layer over game.css (#52): surfaces, focus states, motion
   js/api.js    — API client: token in localStorage `pricingToken`,
                  Authorization: Bearer on every call, XHR upload w/ progress
   js/boot.js   — init, auth gate (401 → sign-in overlay), raycast taps, main loop
@@ -126,6 +127,7 @@ pricing-hub/
                  review/product/vault panels, search
   js/game.js   — game layer: player strip, mission board, player card, health
                  panel, dock beacons, stuck-scan packages, XP/level-up feedback
+  js/polish.js — DOM-only polish (#52): zone keys 1–5, Esc closes the panel
 ```
 
 3D labels can be scoped to a zone (`addLabel(..., { zone })`) and show only
@@ -170,7 +172,7 @@ commit SHA. All files must stay under ~100KB each (connector push limit).
 **Only an allowlist is published.** `vercel.json` runs
 `node scripts/build-public-site.js`, which copies the public pages, `assets/`
 media, `data/sale.json` and this client (`pricing-hub/index.html`, `game.css`,
-`js/*.js`) into `public-build/`, the only directory Vercel serves. Nothing
+`polish.css`, `js/*.js`) into `public-build/`, the only directory Vercel serves. Nothing
 else in the repo is reachable. Before 2026-10-09 the whole repo root was, server
 source and cost records included.
 
