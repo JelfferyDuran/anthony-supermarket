@@ -119,7 +119,16 @@ async function main() {
 
   /* ---------- auth gate ---------- */
   if (!isAuthed()) {
-    hud.showSignin();
+    // Preview deployments can serve the UI without receiving the private
+    // Supabase/service-role environment required for manager authentication.
+    // Check the public capability probe so a missing preview configuration is
+    // not misreported as a bad user password.
+    try { await api.getConfig(); } catch (_) { /* sign-in will surface the API error */ }
+    if (state.config && state.config.storeConfigured === false) {
+      hud.showSignin('This preview is not connected to Pricing Hub authentication. Use the production hub or configure the preview environment first.');
+    } else {
+      hud.showSignin();
+    }
     return;
   }
   setLoader('Checking session…');

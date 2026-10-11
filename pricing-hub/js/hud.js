@@ -87,6 +87,10 @@ export function createHud(world, zones, nav) {
     const password = $('signinPassword').value;
     const errBox = $('signinError');
     errBox.textContent = '';
+    if (state.config && state.config.storeConfigured === false) {
+      errBox.textContent = 'This preview is not connected to Pricing Hub authentication. Your credentials were not evaluated.';
+      return;
+    }
     if (!email || !password) { errBox.textContent = 'Enter your email and password.'; return; }
     $('signinBtn').disabled = true;
     $('signinBtn').textContent = 'Signing in…';

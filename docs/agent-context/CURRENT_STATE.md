@@ -90,6 +90,8 @@ This file is operational context, not a secret store. **Live infrastructure is a
   - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
 - **Production still exposes the files** until the owner promotes the fix. Old deployments keep their own URLs and still serve the files unless Deployment Protection covers them.
 - **Pre-existing, unchanged by this fix:** paths outside the static output fall back to the homepage (200, not 404). In the emulated routing, multi-segment API paths (`/invoices/:id/approve`, `/invoices/:id/lines`, `/products/:id/history`, `/products/:id/retail`) hit Vercel's `/api` 404 route on both `main` and the branch. Confirm on a real deployment before acting.
+- **2026-10-11:** `main`'s #52 polish layer is allowlisted too (`pricing-hub/polish.css`; `js/polish.js` rides the `js/*.js` rule), so the output is 52 files. The guard caught `polish.css` as an unpublished reference before the fix.
+- **Previews cannot sign in.** `main`'s 2026-10-09 checkpoint (`docs/checkpoints/pricing-hub-frontend-polish-2026-10-08.md`) found `GET /api/pricing/config` → `storeConfigured:false` on previews: the Preview environment lacks the server-only pricing variables. Manager sign-in is testable only in production until those are added for Preview (server-only, never `VITE_*`).
 - PR: **#54** (draft). Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
 - Next safe action:
   1. Owner runs the PR #54 URL checklist on the `kingdom-os` branch preview (already built from this commit) and/or a manual `anthony-pricing-hub` preview from the branch SHA.
