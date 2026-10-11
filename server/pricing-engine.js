@@ -138,7 +138,10 @@ function priceInvoiceLine(item, position = 0) {
     units_per_case: Number(item.units_per_case ?? item.units ?? 0),
     line_total: roundMoney(Number(item.line_total ?? item.total ?? 0)),
     unit_cost: unitCost,
-    final_retail_price: retailFromUnitCost(unitCost),
+    // The binding shelf rule: cost x 1.70, snapped to .99. This is the price
+    // the hub proposes and approval writes — an unrounded x1.70 here would put
+    // non-.99 prices on the shelf against the store's own convention.
+    final_retail_price: suggestedRetail(unitCost),
     suggested_shelf_price: suggestedRetail(unitCost),
     retail_multiplier: RETAIL_MULTIPLIER,
     ocr_confidence: confidence,
