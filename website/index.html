@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthony's Supermarket — Bueno &amp; Barato | 288 Kearny Ave, Kearny NJ</title>
+<meta name="description" content="Anthony's Shop & Save Supermarket — abarrotes, carnicería, deli, frutas y verduras, desayunos y almuerzos calientes todos los días. 288 Kearny Ave, Kearny NJ. Tel 201-428-1745.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237ac74f'/%3E%3Cpath d='M14 20h6l5 18h19l5-12H22' stroke='white' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='27' cy='46' r='4' fill='white'/%3E%3Ccircle cx='43' cy='46' r='4' fill='white'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="dept-band" aria-hidden="true">
+  <span>GROCERY</span><i>|</i><span>MEATS</span><i>|</i><span>DELI</span><i>|</i><span>PRODUCE</span>
+</div>
+
+<header class="site-header" id="top">
+  <a class="brand" href="#top" aria-label="Anthony's Supermarket — inicio">
+    <svg class="brand-mark" viewBox="0 0 120 86" aria-hidden="true">
+      <g stroke="#4e9a1f" stroke-width="7" stroke-linecap="round" fill="none">
+        <line x1="6" y1="30" x2="34" y2="30"/>
+        <line x1="2" y1="44" x2="30" y2="44"/>
+        <line x1="8" y1="58" x2="32" y2="58"/>
+      </g>
+      <g stroke="#4e9a1f" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M40 22 h10 l6 34 h44 l8 -26 H58"/>
+        <circle cx="62" cy="70" r="6" fill="#4e9a1f" stroke="none"/>
+        <circle cx="92" cy="70" r="6" fill="#4e9a1f" stroke="none"/>
+      </g>
+    </svg>
+    <span class="brand-text"><strong>ANTHONY'S</strong><em data-i18n="brandSub">SUPERMARKET</em></span>
+  </a>
+  <nav class="site-nav" aria-label="Principal">
+    <a href="#departamentos" data-i18n="navDepts">Departamentos</a>
+    <a href="#almuerzos" data-i18n="navLunch">Almuerzos</a>
+    <a href="#catering" data-i18n="navCatering">Catering</a>
+    <a href="#visitanos" data-i18n="navVisit">Visítanos</a>
+  </nav>
+  <div class="header-actions">
+    <button class="lang-toggle" id="langToggle" aria-label="Switch language / Cambiar idioma">EN</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Modo oscuro / Light mode">☾</button>
+    <a class="btn btn-call" href="tel:+12014281745">☎ <span data-i18n="call">Llamar</span></a>
+  </div>
+</header>
+
+<section class="hero">
+  <canvas id="heroParticles" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow" data-i18n="heroEyebrow">Desde 2010 · Kearny, New Jersey</p>
+    <h1 data-i18n="heroTitle">Bueno &amp; Barato,<br>todos los días.</h1>
+    <p class="hero-sub" data-i18n="heroSub">Tu supermercado de barrio: abarrotes latinos, carnicería, deli, frutas frescas, desayunos y almuerzos calientes hechos en casa.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="tel:+12014281745">☎ 201-428-1745</a>
+      <a class="btn btn-whatsapp" href="https://wa.me/17329255201" target="_blank" rel="noopener">✉ WhatsApp</a>
+      <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&amp;query=Anthony%27s+Shop+%26+Save+Supermarket+288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener"><span data-i18n="directions">Cómo llegar</span> ↗</a>
+    </div>
+  </div>
+  <figure class="hero-photo reveal">
+    <img src="assets/storefront.jpg" alt="Anthony's Shop & Save Supermarket — 288 Kearny Ave, Kearny NJ" onerror="this.closest('figure').classList.add('no-photo')">
+    <figcaption data-i18n="heroCaption">288 Kearny Ave · Kearny, NJ 07032</figcaption>
+  </figure>
+</section>
+
+<section class="section" id="departamentos">
+  <h2 class="section-title reveal" data-i18n="deptsTitle">Todo lo que cargas, bajo un mismo techo</h2>
+  <p class="section-sub reveal" data-i18n="deptsSub">Productos internacionales, peruanos, ecuatorianos, dominicanos y más — buenos y baratos.</p>
+  <div class="card-grid">
+    <article class="card tilt reveal">
+      <div class="card-icon">🛒</div>
+      <h3 data-i18n="d1t">Abarrotes</h3>
+      <p data-i18n="d1d">Arroz, habichuelas, guandules, aceites, sazones y todo lo de la canasta básica — marcas latinas y americanas.</p>
+      <a class="card-link" href="#visitanos" data-i18n="cardVisit">Visítanos →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🥩</div>
+      <h3 data-i18n="d2t">Carnicería</h3>
+      <p data-i18n="d2d">Res, cerdo, pollo y chivo frescos, cortados a tu gusto. Pregunta por los especiales de la semana.</p>
+      <a class="card-link" href="tel:+12014281745" data-i18n="cardCall">Llamar →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🧀</div>
+      <h3 data-i18n="d3t">Deli</h3>
+      <p data-i18n="d3d">Quesos, embutidos y fiambres para tus sándwiches y picaderas de fin de semana.</p>
+      <a class="card-link" href="#visitanos" data-i18n="cardVisit">Visítanos →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🥑</div>
+      <h3 data-i18n="d4t">Frutas y Verduras</h3>
+      <p data-i18n="d4d">Produce fresco todos los días: plátanos, yuca, aguacate, ajíes y más para tu cocina.</p>
+      <a class="card-link" href="#visitanos" data-i18n="cardVisit">Visítanos →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🍲</div>
+      <h3 data-i18n="d5t">Comida Caliente</h3>
+      <p data-i18n="d5d">Almuerzos del día, frituras y especiales de lunes a sábado. La favorita del barrio.</p>
+      <a class="card-link" href="#almuerzos" data-i18n="cardMenu">Ver menú →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🍳</div>
+      <h3 data-i18n="d6t">Desayunos</h3>
+      <p data-i18n="d6d">Empieza el día con un desayuno criollo caliente, hecho en casa.</p>
+      <a class="card-link" href="https://wa.me/17329255201" target="_blank" rel="noopener" data-i18n="cardOrder">Ordenar →</a>
+    </article>
+  </div>
+</section>
+
+<section class="section section-alt" id="almuerzos">
+  <h2 class="section-title reveal" data-i18n="lunchTitle">Especiales de Almuerzo</h2>
+  <p class="section-sub reveal" data-i18n="lunchSub">Servidos con moro blanco y habichuela o arroz blanco. Precios pequeño / grande.</p>
+  <div class="day-tabs reveal" role="tablist" aria-label="Días de la semana">
+    <button role="tab" data-day="1" data-i18n="mon">Lun</button>
+    <button role="tab" data-day="2" data-i18n="tue">Mar</button>
+    <button role="tab" data-day="3" data-i18n="wed">Mié</button>
+    <button role="tab" data-day="4" data-i18n="thu">Jue</button>
+    <button role="tab" data-day="5" data-i18n="fri">Vie</button>
+    <button role="tab" data-day="6" data-i18n="sat">Sáb</button>
+  </div>
+  <div class="menu-card reveal">
+    <h3 id="menuDayTitle">Lunes / Monday</h3>
+    <ul id="menuList" class="menu-list"></ul>
+    <p class="menu-note" data-i18n="lunchNote">Los especiales de almuerzo se sirven de lunes a sábado.</p>
+  </div>
+  <div class="card-grid two">
+    <article class="card tilt reveal">
+      <div class="card-icon">🎓</div>
+      <h3 data-i18n="studentT">Student Special — $6.95</h3>
+      <p data-i18n="studentD">Tenders con papas (2pc), wings con fries (4pc), cheeseburger con papa, salchicha con papa o arroz, habichuela y carne del día. ¡Soda o agua gratis!</p>
+      <a class="card-link" href="https://wa.me/17329255201" target="_blank" rel="noopener" data-i18n="cardOrder">Ordenar →</a>
+    </article>
+    <article class="card tilt reveal">
+      <div class="card-icon">🧒</div>
+      <h3 data-i18n="kidsT">Kids Menu — $5.95</h3>
+      <p data-i18n="kidsD">Chicken tenders (2pc) con papa, quesadilla con papa o salchicha con papa. Para los más pequeños.</p>
+      <a class="card-link" href="https://wa.me/17329255201" target="_blank" rel="noopener" data-i18n="cardOrder">Ordenar →</a>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="catering">
+  <h2 class="section-title reveal" data-i18n="cateringTitle">Catering para tus fiestas</h2>
+  <p class="section-sub reveal" data-i18n="cateringSub">Bandejas en tres tamaños: pequeña, mediana y grande. Llámanos o escríbenos para ordenar.</p>
+  <div class="table-wrap reveal">
+    <table class="price-table">
+      <thead><tr><th></th><th data-i18n="szS">Peq.</th><th data-i18n="szM">Med.</th><th data-i18n="szL">Grnd.</th></tr></thead>
+      <tbody id="cateringBody"></tbody>
+    </table>
+  </div>
+  <h3 class="mini-title reveal" data-i18n="sidesTitle">Sides</h3>
+  <div class="table-wrap reveal">
+    <table class="price-table">
+      <thead><tr><th></th><th data-i18n="szS">Peq.</th><th data-i18n="szM">Med.</th><th data-i18n="szL">Grnd.</th></tr></thead>
+      <tbody id="sidesBody"></tbody>
+    </table>
+  </div>
+  <div class="center reveal">
+    <a class="btn btn-primary" href="https://wa.me/17329255201?text=Hola%20Anthony's%2C%20quiero%20ordenar%20catering" target="_blank" rel="noopener" data-i18n="cateringCta">Ordenar catering por WhatsApp</a>
+  </div>
+</section>
+
+<section class="section section-alt" id="visitanos">
+  <h2 class="section-title reveal" data-i18n="visitTitle">Visítanos</h2>
+  <div class="card-grid two">
+    <article class="card reveal">
+      <div class="card-icon">📍</div>
+      <h3 data-i18n="addrT">Dirección</h3>
+      <p>288 Kearny Ave<br>Kearny, NJ 07032</p>
+      <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&amp;query=Anthony%27s+Shop+%26+Save+Supermarket+288+Kearny+Ave+Kearny+NJ+07032" target="_blank" rel="noopener"><span data-i18n="directions">Cómo llegar</span> ↗</a>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon">🕖</div>
+      <h3 data-i18n="hoursT">Horario</h3>
+      <ul class="hours-list">
+        <li><span data-i18n="monSat">Lun – Sáb</span><strong>7:00 AM – 8:00 PM</strong></li>
+        <li><span data-i18n="sun">Domingo</span><strong>8:00 AM – 3:00 PM</strong></li>
+      </ul>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon">📞</div>
+      <h3 data-i18n="contactT">Contacto</h3>
+      <p><a href="tel:+12014281745">201-428-1745</a> <span class="muted" data-i18n="callUs">(llámanos)</span><br>
+      <a href="https://wa.me/17329255201" target="_blank" rel="noopener">732-925-5201</a> <span class="muted">WhatsApp</span></p>
+      <div class="btn-row">
+        <a class="btn btn-call" href="tel:+12014281745" data-i18n="call">Llamar</a>
+        <a class="btn btn-whatsapp" href="https://wa.me/17329255201" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon">📸</div>
+      <h3>Instagram</h3>
+      <p>@ANTHONY_SUPERMARKET</p>
+      <a class="btn btn-ghost" href="https://www.instagram.com/anthony_supermarket" target="_blank" rel="noopener"><span data-i18n="follow">Síguenos</span> ↗</a>
+    </article>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>ANTHONY'S SUPERMARKET</strong>
+      <span>288 Kearny Ave · Kearny, NJ 07032</span>
+      <span><a href="tel:+12014281745">201-428-1745</a> · <a href="https://wa.me/17329255201" target="_blank" rel="noopener">WhatsApp 732-925-5201</a></span>
+    </div>
+    <p class="footer-note" data-i18n="footerNote">Bueno &amp; barato desde 2010. Gracias por comprar local.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
