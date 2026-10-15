@@ -224,3 +224,13 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no credentials used or exposed. Do not complete a synthetic live count or register a test alias; use staging or rollback-only DB verification for mutation paths.
 - PR/issue/commit: issue #45; documentation-only branch `codex/issue-45-runtime-handoff-2026-10-15`.
 - Next safe action: identify the intended manager portal route and owner-authorized test target; run live read-only GET checks and a disposable start/save/cancel pass, then test complete/register in staging or rollback-only.
+
+
+## 2026-10-15 18:46 ET — Codex browser-session follow-up
+- Goal: continue issue #45 verification in the selected signed-in browser context.
+- Changed: appended browser observations to `CURRENT_STATE.md` and this session log on the documentation branch for PR #57.
+- Verified: browser started with no open tabs; Loading Dock shell stopped at DOCK OFFLINE because this cloud browser could not create WebGL; non-3D Pricing Hub rendered the existing staff/catalog surface but reported its legacy pricing service as HTTP 404. Neither route exposed inventory-count or alias-review controls.
+- Not verified / blockers: no authenticated manager session was confirmed, and the browser environment prevented the Loading Dock auth gate from running. No request to `pricing-integrations` was authenticated.
+- Security or rollback notes: no form submission, price change, alias write, or count mutation; no credentials read or entered.
+- PR/issue/commit: issue #45; documentation-only PR #57.
+- Next safe action: obtain a currently open manager-authenticated browser tab/identified portal route, then exercise only safe reads and approved test flows.
