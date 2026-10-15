@@ -214,3 +214,13 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no secrets touched; rollback = checkout pre-change `server/index.js` + `server/menu-seed.js` and recreate the container.
 - PR/issue/commit: uncommitted on main (next commit); board card t_7c3667b4 unblocked.
 - Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); spot-check bot `/menu` in Telegram.
+
+
+## 2026-10-15 18:45 ET — Codex
+- Goal: verify issue #45's live manager portal and authenticated `pricing-integrations` smoke-test path.
+- Changed: documented observed runtime state and safe test boundary in `docs/agent-context/CURRENT_STATE.md`; no code, prices, mappings, secrets, or production data changed.
+- Verified: `main` HEAD; both Pricing Hub URLs returned HTTP 200 with existing catalog/invoice interfaces; Vercel's latest Pricing Hub deployment reports READY/production from main; Supabase project is ACTIVE_HEALTHY and `pricing-integrations` is ACTIVE v1 with `verify_jwt=true`; deployed source enforces manager/admin protected app metadata and keeps service role server-side.
+- Not verified / blockers: owner-authenticated browser/API actions were not run; no inspected portal exposed inventory-count/POS-alias UI or calls; another route may exist. Live completion and alias registration would persist production state.
+- Security or rollback notes: no credentials used or exposed. Do not complete a synthetic live count or register a test alias; use staging or rollback-only DB verification for mutation paths.
+- PR/issue/commit: issue #45; documentation-only branch `codex/issue-45-runtime-handoff-2026-10-15`.
+- Next safe action: identify the intended manager portal route and owner-authorized test target; run live read-only GET checks and a disposable start/save/cancel pass, then test complete/register in staging or rollback-only.
