@@ -52,8 +52,9 @@ apps/menu/
 docs/invoices/*.pdf
 docs/pricing/*.csv
 
-# Runtime data
+# Runtime data (except canonical product catalog — that's a tracked artifact)
 server/data/
+!server/data/products.json
 
 # NRS pipeline
 nrs/.env
@@ -63,3 +64,5 @@ nrs/inbox/*.csv
 
 # pipeline artifacts
 __pycache__/
+.vercel
+.env*

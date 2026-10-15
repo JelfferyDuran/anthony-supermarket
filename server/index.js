@@ -11,6 +11,7 @@ const kitchenAide = require('./kitchen-aide');
 const { createPricingRouter } = require('./pricing-router');
 const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
 const { resolveMenuDataPath, menuSeedCandidates, countMenuItems, resolveMenuBySlug } = require('./menu-seed');
+const productResolver = require('./product-resolver');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -361,6 +362,49 @@ app.get('/api/orders/:id', async (req, res) => {
 app.get('/api/orders', async (req, res) => {
   const orders = await loadOrders();
   res.json(orders.slice(-50).reverse());
+});
+
+// ─── Product Truth Layer API ─────────────────────────────────────────────────
+// GET /api/products — full catalog (filters: ?category=)
+app.get('/api/products', (req, res) => {
+  const { category } = req.query;
+  const products = category
+    ? productResolver.getByCategory(category)
+    : productResolver._raw();
+  res.json({ ok: true, count: products.length, products });
+});
+
+// GET /api/products/resolve?q=<customer query>
+// Resolves Spanglish, aliases, typos → canonical product(s)
+app.get('/api/products/resolve', (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: 'Missing query parameter "q"' });
+
+  // Multi-item query (comma-separated)
+  if (q.includes(',')) {
+    const results = productResolver.resolveOrder(q);
+    return res.json({ ok: true, query: q, results });
+  }
+
+  const result = productResolver.resolve(q);
+  if (!result) {
+    const suggestions = productResolver.search(q).map(p => p.nombre);
+    return res.json({ ok: false, query: q, suggestions });
+  }
+  res.json({ ok: true, query: q, ...result });
+});
+
+// GET /api/products/categories — all distinct categories
+app.get('/api/products/categories', (req, res) => {
+  res.json({ ok: true, categories: productResolver.getCategories() });
+});
+
+// GET /api/products/search?q=<partial> — fuzzy name/alias search
+app.get('/api/products/search', (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: 'Missing query parameter "q"' });
+  const results = productResolver.search(q);
+  res.json({ ok: true, query: q, count: results.length, results });
 });
 
 async function dispatchToN8n(order) {
