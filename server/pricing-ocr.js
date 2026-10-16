@@ -29,7 +29,7 @@
 // local PaddleOCR provider, which sends nothing outside the store.
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const REQUEST_TIMEOUT_MS = 180000;
 
 // ─── Local PaddleOCR provider ─────────────────────────────────────────

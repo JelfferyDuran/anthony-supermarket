@@ -13,7 +13,7 @@
     "dev:delivery": "cd apps/delivery && npm run dev",
     "dev:menu": "cd apps/menu && npm run dev",
     "dev:command-center": "cd apps/command-center && npm run dev",
-    "dev:superkitchen": "cd apps/superkitchen && npm run dev",
+    "dev:superkitchen": "cd apps/superkitchen/server && npm start",
     "server:superkitchen": "cd apps/superkitchen/server && npm start",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
@@ -23,6 +23,11 @@
     "seed:pricing": "node scripts/seed-pricing-from-hub.js",
     "seed:pricing:check": "node scripts/seed-pricing-from-hub.js --check",
     "test:pricing": "cd server && npm test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "express": "^4.21.0",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

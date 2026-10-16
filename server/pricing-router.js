@@ -186,10 +186,15 @@ function createPricingRouter(options = {}) {
       if (!authClient) return res.status(503).json({ error: 'Pricing authentication is not configured' });
       const { data, error } = await authClient.auth.signInWithPassword({ email, password });
       if (error || !data.session) return res.status(401).json({ error: 'invalid credentials' });
+      const loginRole = (data.user.app_metadata && data.user.app_metadata.role) || '';
+      // Mint a long-lived server session so managers are not forced to sign in
+      // every hour when the Supabase access token expires. Response shape is
+      // unchanged, so the hub client needs no updates.
+      const sessionToken = mintSessionToken({ id: data.user.id, email: data.user.email, role: loginRole });
       return res.json({
-        token: data.session.access_token,
+        token: sessionToken,
         email: data.user.email,
-        role: (data.user.app_metadata && data.user.app_metadata.role) || ''
+        role: loginRole
       });
     } catch (e) {
       return res.status(500).json({ error: e.message });
@@ -210,6 +215,41 @@ function createPricingRouter(options = {}) {
       });
     } catch (error) {
       return res.status(400).json({ error: error.message });
+    }
+  });
+
+  // ── UPC lookup (no writes, no database) ──────────────────────────────────
+  // Resolves a product name to candidate barcodes via Open Food Facts (free,
+  // no key, no POS access needed). The hub offers this as a "Find UPC" action
+  // on review lines and product cards; anything the database misses gets
+  // scanned with the phone camera instead. Server-side so the user-agent and
+  // throttling stay in one place and the browser avoids CORS issues.
+  const OFF_USER_AGENT = 'AnthonysPricingHub/1.0 (pricing-hub UPC lookup)';
+  router.get('/upc/lookup', authorize('manager'), async (req, res) => {
+    const name = String(req.query.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'name is required' });
+    if (name.length > 120) return res.status(400).json({ error: 'name is too long' });
+    try {
+      const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process&json=1&page_size=5&search_terms='
+        + encodeURIComponent(name);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+      let r;
+      try {
+        r = await fetchImpl(url, { headers: { 'User-Agent': OFF_USER_AGENT }, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+      if (!r.ok) return res.status(502).json({ error: 'UPC database unavailable', detail: 'HTTP ' + r.status });
+      const data = await r.json();
+      const candidates = (data.products || []).slice(0, 5).map(p => ({
+        code: String(p.code || ''),
+        name: p.product_name || '',
+        brands: p.brands || ''
+      })).filter(c => c.code);
+      return res.json({ query: name, candidates });
+    } catch (error) {
+      return res.status(502).json({ error: 'UPC lookup failed', detail: String(error.message || error).slice(0, 200) });
     }
   });
 
@@ -251,6 +291,20 @@ function createPricingRouter(options = {}) {
       return res.json({ product });
     } catch (error) {
       return fail(res, error, 'retail update');
+    }
+  });
+
+  // ── Catalog UPC assignment ─────────────────────────────────────────────
+  // Stores a verified barcode on a product (from the /upc/lookup candidates
+  // or a phone-camera scan). Powers label printing and product matching.
+  // Approver gate: the catalog is trusted data, not a casual edit.
+  router.patch('/products/:id/upc', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const product = await store.setProductUpc({ productId: req.params.id, upc: req.body.upc });
+      return res.json({ product });
+    } catch (error) {
+      return fail(res, error, 'UPC update');
     }
   });
 
@@ -319,6 +373,13 @@ function createPricingRouter(options = {}) {
       return { invoice, lines: [], code: 'OCR_NOT_CONFIGURED' };
     }
 
+    return runExtraction(invoice, file, fields);
+  }
+
+  // OCR + pricing + line storage for one invoice. Shared by fresh intake and
+  // by retry-extract: one code path so a re-run can never disagree with the
+  // first run about what gets stored.
+  async function runExtraction(invoice, file, fields = {}) {
     const extracted = await callOcr(file, fields);
     const priced = priceInvoice(extracted);
     // Backfill invoice-level metadata the OCR read from the scan but the HTTP
@@ -384,6 +445,75 @@ function createPricingRouter(options = {}) {
     }
   });
 
+  // Re-runs extraction on a stuck invoice from its stored scan. Approver gate.
+  // Refuses when the invoice already carries reviewer work or is priced —
+  // re-extraction would silently discard human decisions. A stuck invoice is
+  // one sitting in 'uploaded'/'extracting' (OCR never finished) or in
+  // 'needs_review' with untouched lines.
+  router.post('/invoices/:id/retry-extract', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'invoice not found' });
+      if (['approved', 'imported', 'rejected'].includes(invoice.status)) {
+        return res.status(409).json({ error: 'invoice is ' + invoice.status + ' — re-extraction would discard the priced result' });
+      }
+      if (!invoice.source_object_path) {
+        return res.status(409).json({ error: 'no scan on file for this invoice (it was backfilled, not uploaded)' });
+      }
+      if (!ocr.isConfigured()) {
+        return res.status(503).json({ error: 'OCR is not configured', code: 'OCR_NOT_CONFIGURED' });
+      }
+      const lines = await store.listInvoiceLines(invoice.id);
+      const touched = lines.some((l) => l.matched_product_id || (l.review_status && l.review_status !== 'needs_review'));
+      if (touched) {
+        return res.status(409).json({ error: 'this invoice already has review work — delete and re-upload instead' });
+      }
+      const buffer = await store.getInvoiceObjectBuffer(invoice.source_object_path);
+      const file = { buffer, mimetype: sniffMimetype(buffer), originalname: 'retry-' + invoice.id };
+      await store.updateInvoice(invoice.id, { status: 'extracting' });
+      const result = await runExtraction(invoice, file, {});
+      return res.json({ invoice: result.invoice, lines: result.lines, reconciliation: result.reconciliation, retried: true });
+    } catch (error) {
+      return fail(res, error, 're-extract');
+    }
+  });
+
+  // The invoice record keeps no mimetype, so sniff it from magic bytes for the
+  // OCR call. Falls back to JPEG (the phone camera's format).
+  function sniffMimetype(buffer) {
+    if (!buffer || buffer.length < 12) return 'image/jpeg';
+    if (buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) return 'application/pdf';
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+    if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+        buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return 'image/webp';
+    return 'image/jpeg';
+  }
+
+  // Catalog completeness snapshot for the UPC drive and price hygiene.
+  // Read-only: totals plus how many products lack a barcode, a retail price,
+  // or a unit cost. Powers a future "catalog health" tile; no writes.
+  router.get('/products/coverage', authorize('manager'), async (req, res) => {
+    if (!requireStore(res)) return;
+    try {
+      const products = await store.listProducts();
+      const total = products.length;
+      const missingUpc = products.filter((p) => !p.upc).length;
+      const missingRetail = products.filter((p) => p.current_retail_price == null).length;
+      const missingCost = products.filter((p) => p.current_unit_cost == null).length;
+      return res.json({
+        total,
+        withUpc: total - missingUpc,
+        missingUpc,
+        missingRetail,
+        missingCost,
+        generated_at: new Date().toISOString()
+      });
+    } catch (error) {
+      return fail(res, error, 'coverage');
+    }
+  });
+
   // ── Approval ───────────────────────────────────────────────────────────────
   // The blocking gate runs here for a clear error message, and again inside the
   // database transaction, which is what actually enforces it.
@@ -416,6 +546,44 @@ function createPricingRouter(options = {}) {
       return res.json({ result });
     } catch (error) {
       return fail(res, error, 'invoice approval');
+    }
+  });
+
+  // ── Review line exceptions ─────────────────────────────────────────────
+  // A manager marks individual lines rejected (short delivery, damaged goods,
+  // wrong/duplicate line) or reopens them, and may close an invoice whose
+  // lines were all rejected. Rejected lines stay on the record but are
+  // excluded from approval: the approval RPC only sweeps needs_review lines,
+  // so the approved total reconciles against the printed subtotal without
+  // them. Uses the approver gate — deciding what gets priced is pricing.
+  router.patch('/invoices/:id/lines', limitWrites, authorize('approver'), async (req, res) => {
+    if (!requireStore(res)) return;
+    const lines = Array.isArray(req.body.lines) ? req.body.lines : [];
+    const closeInvoice = req.body.close_invoice === true;
+    if (!lines.length && !closeInvoice) return res.status(400).json({ error: 'No lines provided' });
+    try {
+      const invoice = await store.getInvoice(req.params.id);
+      if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+      if (invoice.status === 'imported') {
+        return res.status(422).json({ error: 'Invoice is already imported' });
+      }
+      const updated = lines.length
+        ? await store.updateLineReviews({
+            invoiceId: req.params.id,
+            lines,
+            reviewedBy: req.pricingIdentity.userId
+          })
+        : [];
+      let closed = null;
+      if (closeInvoice) {
+        closed = await store.closeInvoiceAsRejected({
+          invoiceId: req.params.id,
+          closedBy: req.pricingIdentity.userId
+        });
+      }
+      return res.json({ updated, closed });
+    } catch (error) {
+      return fail(res, error, 'line review update');
     }
   });
 
@@ -627,10 +795,58 @@ function csvCell(value) {
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
+// ── Long-lived manager sessions ─────────────────────────────────────────────────
+// Supabase access tokens expire after an hour, forcing managers to sign in over
+// and over. After Supabase verifies the password + role at login, the server
+// mints its own signed session token (30 days). The browser stores it exactly
+// like before, so no client changes are needed.
+function sessionSecret() {
+  return process.env.PRICING_SESSION_SECRET || process.env.PRICING_MANAGER_TOKEN || '';
+}
+
+function mintSessionToken(user) {
+  const secret = sessionSecret();
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const payload = Buffer.from(JSON.stringify({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    iat: now,
+    exp: now + 30 * 24 * 3600
+  })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(header + '.' + payload).digest('base64url');
+  return header + '.' + payload + '.' + sig;
+}
+
+function verifySessionToken(token) {
+  const secret = sessionSecret();
+  if (!secret || !token) return null;
+  const parts = String(token).split('.');
+  if (parts.length !== 3) return null;
+  const [header, payloadB64, sig] = parts;
+  let expect;
+  try {
+    expect = crypto.createHmac('sha256', secret).update(header + '.' + payloadB64).digest('base64url');
+  } catch (_) { return null; }
+  const a = Buffer.from(sig, 'utf8'), b = Buffer.from(expect, 'utf8');
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  let payload;
+  try { payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')); }
+  catch (_) { return null; }
+  if (!payload || typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return null;
+  if (payload.role !== 'manager' && payload.role !== 'admin') return null;
+  return { id: payload.sub, email: payload.email, role: payload.role };
+}
+
 // Verifies a Supabase session JWT and extracts the caller's role. Roles live in
 // app_metadata, which only the server can set — user_metadata is user-writable
 // and must never be trusted for authorization.
 async function defaultVerifyUser(token) {
+  // Server-minted session tokens verify locally (no network round-trip).
+  const session = verifySessionToken(token);
+  if (session) return session;
+  // Legacy path: raw Supabase access tokens verify against the Auth API.
   if (!isConfigured()) return null;
   const { createAuthClient } = require('./pricing-store');
   const authClient = createAuthClient();

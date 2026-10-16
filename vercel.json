@@ -1,6 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
   "buildCommand": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/pricing/[...path].js": {
+      "memory": 1024
+    },
+    "api/pricing-fn.js": {
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/pricing/:path*",
+      "destination": "/api/pricing-fn?__path=:path*"
+    }
+  ]
 }
