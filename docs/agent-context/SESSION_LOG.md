@@ -402,3 +402,10 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - #55: merged `main` with the `ours` strategy. Every conflict was a file #54 created and #55 later changed, and `main` held nothing beyond #54's head, which #55 already contained. The resulting tree is identical to `3463d4f`, so the diff against `main` is #55's 36 files only. Base retargeted from `fix/vercel-public-allowlist` (not deleted) to `main`, so merging #55 cannot land in the stale branch.
 - Deploy state: `kingdom-os` builds production from `main` (not verified here). The manually deployed `anthony-pricing-hub` and the project behind `anthony-supermarket.vercel.app` still serve old builds until `main` is deployed to them.
 - Next safe action: the owner merges #55 when ready, then deploys `main` to the manual Vercel projects and runs the #54/#56 checklists on production.
+
+## 2026-10-18 23:44 ET — Claude Code — #55 (game layer + 2D hub) merged to main
+- The owner squash-merged #55 to `main` (`d6d28a4`). Its tree is identical to the verified head `80726ce`: game layer, stuck-scan rescue, `GET /invoices/:id`, the 2D hub at `/hub/`, and the homepage staff link.
+- Deploy state: `kingdom-os` builds production from `main` (not checked here; this session cannot reach `*.vercel.app` and the Vercel connector lists no projects). `anthony-pricing-hub` and the project behind `anthony-supermarket.vercel.app` deploy by hand and still serve old builds.
+- Merged, now-stale branches: `fix/vercel-public-allowlist`, `feat/pricing-hub-ops-game`, `feat/pricing-hub-2d` (not deleted).
+- Still open for the owner: the .99 rounding decision (`pricing-engine.test.js` expects 3.40, the engine proposes 2.99) and the Gemini model assertion; consolidating `/extract` with `/retry-extract`.
+- Next safe action: deploy `main` to the manually deployed projects, protect or delete their old deployment URLs, then run #56's checklist on production.
