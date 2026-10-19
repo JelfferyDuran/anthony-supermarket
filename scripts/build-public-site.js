@@ -34,12 +34,15 @@ const PUBLIC_FILES = [
   'pricing-hub/index.html',
   'pricing-hub/game.css',
   'pricing-hub/polish.css', // visual layer over game.css (main's #52)
+  'hub/index.html', // the 2D Pricing Hub (staff); loads pricing-hub/js/api.js
+  'hub/hub.css',
 ];
 
 // Directories, copied recursively, but only files with a listed extension.
 // Notes, scripts, archives and data (.md .txt .py .zip .json .csv) never ship.
 const PUBLIC_DIRS = {
   'pricing-hub/js': ['.js'],
+  'hub/js': ['.js'],
   assets: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.ico', '.avif',
     '.mp4', '.webm', '.woff', '.woff2', '.pdf', '.html'],
 };

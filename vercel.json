@@ -15,5 +15,12 @@
       "source": "/api/pricing/:path*",
       "destination": "/api/pricing-fn?__path=:path*"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/hub",
+      "destination": "/hub/",
+      "permanent": false
+    }
   ]
 }

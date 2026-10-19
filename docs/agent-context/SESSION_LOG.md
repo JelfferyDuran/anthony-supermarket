@@ -330,6 +330,27 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - Server suite: only the pre-existing Gemini failure. Guard 6/6.
 - Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
 
+## 2026-10-10 14:35 ET — Claude Code — 2D Pricing Hub at /hub (default), homepage staff link
+- Goal: the owner, now signed in, found the hub UI glitchy and wanted a front-end upgrade plus a standalone page on the public site. Their answers:
+  - fast 2D hub as the default, keep the game;
+  - `/hub` with only a small staff link on the homepage;
+  - they had been using the homepage-embedded hub.
+- Changed (branch `feat/pricing-hub-2d`, stacked on #55):
+  - New `hub/`: `index.html`, `hub.css`, `js/app.js`, `js/ui.js`, `js/upc.js`, `js/views/{today,review,products,intake,vault,me}.js`. No WebGL and no external scripts; it reuses `pricing-hub/js/api.js`.
+  - `server/pricing-router.js`: `GET /invoices/:id` (manager; every line; internals stripped), plus a test in `server/pricing-game-router.test.js`.
+  - `pricing-hub/js/api.js`: `getInvoice`, `getInvoiceSource`, `downloadLabels`.
+  - `scripts/build-public-site.js` allowlists `hub/`. `scripts/test-public-site.cjs` requires its files.
+  - `vercel.json`: `/hub` → `/hub/` redirect.
+  - `index.html`: hub iframe, "Pricing" nav link and hero button removed; staff footer link added. `links.html`: hub button points to `/hub/`.
+  - Docs: `LOADING_DOCK.md`, `CURRENT_STATE.md`, decision note.
+- Verified:
+  - Server suite 133/134 (only the pre-existing Gemini failure). Guard 6/6.
+  - Emulated `vercel build` plus smoke.
+  - Headless Chromium end to end on desktop and mobile with 0 errors (details in `CURRENT_STATE.md`).
+- Security/rollback:
+  - No secrets touched. The new route is read-only, manager-only, and strips storage internals.
+  - Rollback = revert the branch; the 3D dock at `/pricing-hub/` is unchanged.
+- Next safe action: merge #54 → #55 → this on the owner's explicit go, then check `/hub/` on a preview with a real sign-in.
 ## 2026-10-10 15:32 ET — Claude Code — Merge main's retry-extract into #54/#55
 - `main` gained `4b7a8f5` (Noel):
   - `POST /invoices/:id/retry-extract`;
@@ -350,3 +371,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Verified: guard 6/6; storefront resilience 4/4; server suite 115/117 (both failures are `main`'s: the .99 rounding expectation in `pricing-engine.test.js` and the Gemini model assertion); `vercel build` emulation 52 static files, nothing internal; `polish.css`/`polish.js` serve as CSS/JS.
 - Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
 - Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.
+
+## 2026-10-11 05:35 ET — Claude Code — main's #52 polish merged through #55 and #56; 2D sign-in preview check
+- #55 (`feat/pricing-hub-ops-game`): merged the updated #54. The docs and the guard's required list conflicted (kept both sides). `boot.js`, `hud.js` and `index.html` auto-merged; main's preview check sits in the game layer's auth gate unchanged. The polish layer's taller zone rail overlapped the Missions button on phones, so it now uses the same 104px lift as `#fab`.
+- #56 (`feat/pricing-hub-2d`): merged #55 (allowlist conflict: kept `polish.css` and the `hub/` files). The 2D sign-in now mirrors main's check: on `storeConfigured:false` it explains the preview and never calls `/login`.
+- Verified: guard 6/6 and storefront resilience 4/4 on both; server suite 132/134 (#55) and 133/135 (#56), with only main's two known failures; 3D drive 0 errors (desktop and mobile); full 2D drive 0 errors; a no-store harness shows the 2D notice on desktop and mobile with no `/login` request.
+- Next safe action: owner's go to merge #54 → #55 → #56; the first authenticated check is production (previews lack the pricing env).

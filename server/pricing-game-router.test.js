@@ -284,6 +284,34 @@ test('approval links history only to lines of the invoice being approved', async
   assert.deepEqual(sent, [own, null], "another invoice's line is never named");
 });
 
+test('invoice detail: every line, rejected ones included, and no storage internals', async t => {
+  const store = createFakeStore();
+  store.seedInvoice({
+    id: 'inv-all-out', invoice_number: 'X-9', status: 'needs_review', created_at: '2026-09-01T12:00:00Z',
+    source_object_path: 'cc/z', source_sha256: 'abc123', created_by: MANAGER_USER_ID
+  }, [
+    { id: 'l1', line_number: 1, review_status: 'rejected', review_reason: 'Short — box did not arrive' },
+    { id: 'l2', line_number: 2, review_status: 'rejected', review_reason: 'Rejected by manager — wrong/duplicate line' }
+  ]);
+  const { server, base } = await startServer(store);
+  t.after(() => server.close());
+
+  const res = await call(base, 'GET', '/invoices/inv-all-out', { token: MANAGER_JWT });
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body.lines.map(l => l.id), ['l1', 'l2']);
+  assert.equal(res.body.invoice.invoice_number, 'X-9');
+  assert.equal(res.body.invoice.has_scan, true);
+  for (const key of ['source_object_path', 'source_sha256', 'created_by', 'approved_by']) {
+    assert.ok(!(key in res.body.invoice), `${key} must stay on the server`);
+  }
+  // Every line is excluded, so the queue no longer lists this invoice at all;
+  // this route is how the review card still finds it and can close it.
+  assert.equal((await call(base, 'GET', '/queue', { token: MANAGER_JWT })).body.lines.length, 0);
+  assert.equal((await call(base, 'GET', '/invoices/missing', { token: MANAGER_JWT })).status, 404);
+  assert.equal((await call(base, 'GET', '/invoices/inv-all-out', { token: CASHIER_JWT })).status, 401);
+  assert.equal((await call(base, 'GET', '/invoices/inv-all-out')).status, 401);
+});
+
 test('retry-extract: a failed re-read resets to uploaded, and it refuses reviewed work', async t => {
   const store = createFakeStore();
   store.seedInvoice({ id: 'stuck', status: 'uploaded', created_at: '2026-08-20T12:00:00Z', source_object_path: 'cc/stuck' });

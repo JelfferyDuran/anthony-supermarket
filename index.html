@@ -239,12 +239,13 @@
     .store-card .hours-grid .time { color:var(--text); text-align:right; }
     .store-card .hours-grid .closed { color:var(--accent); text-align:right; font-weight:500; }
     .store-card .phone-large { font-size:1.3rem; font-weight:700; color:var(--primary-light); margin:0.5rem 0; display:block; }
-    .pricing-frame { width:100%; height:70vh; border:1px solid var(--card-border); border-radius:var(--radius); background:var(--bg-alt); }
     footer { text-align:center; padding:2rem 1.25rem; border-top:1px solid var(--card-border); color:var(--text-muted); font-size:0.78rem; content-visibility:auto; }
     footer strong { color:var(--primary-light); }
     footer .social { display:flex; gap:0.75rem; justify-content:center; margin-bottom:0.75rem; }
     footer .social a { width:36px; height:36px; border-radius:50%; border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:1rem; transition:all .2s; }
     footer .social a:hover { border-color:var(--primary-light); color:var(--primary-light); }
+    footer .staff-link { margin-top:0.6rem; }
+    footer .staff-link a { color:var(--text-muted); text-decoration:underline; text-underline-offset:2px; }
     .reveal { opacity:1; transform:none; transition:opacity .5s ease,transform .5s ease; }
     .reveal.visible { opacity:1; transform:translateY(0); }
     ::-webkit-scrollbar { width:4px; }
@@ -270,7 +271,6 @@
       .navbar .links a { padding:0.8rem 0.9rem; font-size:0.95rem; border-radius:10px; }
       .navbar .links a.order { text-align:center; margin-top:0.5rem; }
       .hero { min-height:100dvh; padding:calc(var(--nav-h) + 1.5rem) 1rem 2.5rem; }
-      .pricing-frame { height:60vh; }
       .cart-fab { bottom:calc(16px + env(safe-area-inset-bottom)); right:calc(16px + env(safe-area-inset-right)); }
       .toast-container { bottom:calc(84px + env(safe-area-inset-bottom)); }
       .navbar .brand { font-size:0.95rem; }
@@ -311,7 +311,6 @@
       <a href="#menu" data-en="Menu" data-es="Menú">Menu</a>
       <a href="#departments" data-en="Departments" data-es="Departamentos">Departments</a>
       <a href="#specials" data-en="Specials" data-es="Ofertas">Specials</a>
-      <a href="#pricing" data-en="Pricing" data-es="Precios">Pricing</a>
       <a href="#store" data-en="Contact" data-es="Contacto">Contact</a>
       <a href="https://t.me/Anthonysuperkitchen_bot" target="_blank" rel="noopener" class="order" data-en="&#x2708;&#xFE0F; Order on Telegram" data-es="&#x2708;&#xFE0F; Ordena por Telegram">&#x2708;&#xFE0F; Order on Telegram</a>
     </div>
@@ -381,7 +380,6 @@
       <div class="hero-actions">
         <button class="btn btn-primary" onclick="scrollToMenu()" data-en="&#x1F6D2; Start Ordering" data-es="&#x1F6D2; Ordenar Ahora">&#x1F6D2; Start Ordering</button>
         <a class="btn btn-telegram" href="https://t.me/Anthonysuperkitchen_bot" target="_blank" rel="noopener" data-en="&#x2708;&#xFE0F; Order on Telegram" data-es="&#x2708;&#xFE0F; Ordena por Telegram">&#x2708;&#xFE0F; Order on Telegram</a>
-        <button class="btn btn-outline" onclick="goToPricing()" data-en="&#x1F4CA; Pricing Hub" data-es="&#x1F4CA; Lista de Precios">&#x1F4CA; Pricing Hub</button>
       </div>
     </section>
 
@@ -434,14 +432,6 @@
       <div id="menuContent"></div>
     </section>
 
-    <section class="overlay" id="pricing" aria-label="Pricing">
-      <h2 class="section-title" data-en="Pricing Hub" data-es="Lista de <span>Precios</span>">Pricing <span>Hub</span></h2>
-      <p class="section-sub" data-en="Wholesale-to-retail pricing with markup calculator for all products." data-es="Precios de mayoreo a menudeo con calculadora de margen para todos los productos.">Wholesale-to-retail pricing with markup calculator for all products.</p>
-      <div style="max-width:1400px;margin:0 auto;">
-        <iframe class="pricing-frame" src="pricing-hub/index.html" title="Pricing Hub" loading="lazy"></iframe>
-      </div>
-    </section>
-
     <section class="store-section overlay" id="store" aria-label="Store Information">
       <h2 class="section-title" data-en="Visit Us" data-es="Visítanos">Visit <span>Us</span></h2>
       <div class="store-grid">
@@ -485,6 +475,7 @@
     </div>
     <p><span data-en="&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032" data-es="&copy; 2026 <strong>Supermercado Anthony's</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032">&copy; 2026 <strong>Anthony's Supermarket</strong> &middot; 288 Kearny Ave, Kearny, NJ 07032</span></p>
     <p style="margin-top:0.3rem;" data-en="Built with &hearts; for the Kearny community" data-es="Hecho con &hearts; para la comunidad de Kearny">Built with &hearts; for the Kearny community</p>
+    <p class="staff-link"><a href="/hub/" data-en="Staff &middot; Pricing Hub" data-es="Personal &middot; Pricing Hub">Staff &middot; Pricing Hub</a></p>
   </footer>
 
   <script>
@@ -687,10 +678,9 @@ renderOrderHistory();}
 
 (function(){var els=document.querySelectorAll(".reveal");function showAll(){els.forEach(function(el){el.classList.add("visible")})}if(!("IntersectionObserver" in window)||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){showAll();return}var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("visible");obs.unobserve(e.target)}})},{threshold:0.1});els.forEach(function(el){obs.observe(el)});setTimeout(showAll,2500)})();
 
-(function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","pricing","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
+(function(){var n=document.getElementById("navbar"),ls=0;addEventListener("scroll",function(){var ns=scrollY;if(ns>80&&ns>ls)n.classList.add("hidden");else n.classList.remove("hidden");ls=ns;var secs=["home","departments","specials","menu","store"],a="home";secs.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<200)a=id});document.querySelectorAll(".navbar .links a").forEach(function(x){x.classList.toggle("active",x.getAttribute("href")==="#"+a)})})})();
 
 function scrollToMenu(){document.getElementById("menu").scrollIntoView({behavior:"smooth"})}
-function goToPricing(){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
 function toggleNav(){var l=document.getElementById("navLinks"),b=document.getElementById("navToggle"),d=document.getElementById("navBackdrop");var open=l.classList.toggle("open");d.classList.toggle("open",open);b.setAttribute("aria-expanded",open);b.setAttribute("aria-label",open?"Close menu":"Open menu")}
 document.getElementById("navLinks").addEventListener("click",function(e){if(e.target.tagName==="A"){document.getElementById("navLinks").classList.remove("open");document.getElementById("navBackdrop").classList.remove("open");document.getElementById("navToggle").setAttribute("aria-expanded","false")}});
 
