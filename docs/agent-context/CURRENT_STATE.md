@@ -1,6 +1,6 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-11 (main's #52 polish merged through #54 → #55 → #56; previews cannot sign in (`storeConfigured:false`); nothing in production)
+Last updated: 2026-10-18 (#54 allowlist merged to `main`; #56 squashed into #55, which now targets `main`; the manually deployed Vercel projects still serve old builds)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
@@ -77,7 +77,7 @@ This file is operational context, not a secret store. **Live infrastructure is a
   3. Click Approve on one review-line invoice in the preview.
   4. Promote only on the owner's go.
 
-## 2026-10-09 — Pricing Hub deploy published the whole repo; fixed on branch, NOT yet in production
+## 2026-10-09 — Pricing Hub deploy published the whole repo; fix merged to `main` 2026-10-18 (manual projects still need a deploy)
 - **Exposure (owner-confirmed live 2026-10-09):** `vercel.json` had `outputDirectory: "."`, so the `anthony-pricing-hub` production deployment served every tracked file. That included server source, `invoices/` (54 files), `nrs/` POS exports (76), `apps/pricing-hub/index.html` (embedded cost ledger), `apps/pricing-store/index.html`, the `manual-intake-*` / `goya-*` cost records in `pricing-hub/` (vendor costs, case prices, vendor account number), and internal docs. A local `vercel build` of `main` emits **380** static files.
 - **Fix (branch `fix/vercel-public-allowlist`):** `vercel.json` now runs `node scripts/build-public-site.js` and serves only `public-build/`. That is an allowlist of the public pages, `assets/` media, `data/sale.json` and the Loading Dock client: **50** files, each byte-identical to what `main` serves today. The 7 records were moved (not deleted) to `invoices/pricing-hub-records/`, and `scripts/build-pricing-store.py` follows them. New CI check **Public site guard** (`scripts/test-public-site.cjs`, every PR and every push to `main`) fails if internals ship, if `vercel.json` reverts, or if a published page references an unpublished file.
 - **Verified locally (Vercel CLI 63.1.2 `vercel build`, branch vs `main`):**
@@ -95,7 +95,11 @@ This file is operational context, not a secret store. **Live infrastructure is a
 - **Pre-existing, unchanged by this fix:** paths outside the static output fall back to the homepage (200, not 404). In the emulated routing, multi-segment API paths (`/invoices/:id/approve`, `/invoices/:id/lines`, `/products/:id/history`, `/products/:id/retail`) hit Vercel's `/api` 404 route on both `main` and the branch. Confirm on a real deployment before acting.
 - **2026-10-11:** `main`'s #52 polish layer is allowlisted too (`pricing-hub/polish.css`; `js/polish.js` rides the `js/*.js` rule), so the output is 52 files. The guard caught `polish.css` as an unpublished reference before the fix.
 - **Previews cannot sign in.** `main`'s 2026-10-09 checkpoint (`docs/checkpoints/pricing-hub-frontend-polish-2026-10-08.md`) found `GET /api/pricing/config` → `storeConfigured:false` on previews: the Preview environment lacks the server-only pricing variables. Manager sign-in is testable only in production until those are added for Preview (server-only, never `VITE_*`).
-- PR: **#54** (draft). Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
+- **2026-10-18 22:25 ET: the owner squash-merged #54 to `main` (`c57ec8c`).** Its tree is identical to the verified branch head `b085a8e`.
+  - `kingdom-os` is Git-connected, so its production builds from `main`. That deploy was not checked from this session.
+  - `anthony-pricing-hub` and the project serving `anthony-supermarket.vercel.app` deploy by hand (#57's 2026-10-15 check: `anthony-pricing-hub` on `a290e9f`; the public domain on an older hub with `/api/pricing` → 404). They keep serving their old, whole-repo builds until `main` is deployed to them.
+  - Old deployment URLs keep their files either way; protect or delete them after the redeploy.
+- PR: **#54** (merged). Decision: `brain/Decisions/2026-10-09-vercel-public-allowlist.md`.
 - Next safe action:
   1. Owner runs the PR #54 URL checklist on the `kingdom-os` branch preview (already built from this commit) and/or a manual `anthony-pricing-hub` preview from the branch SHA.
   2. Confirm nothing consumes repo files from `kingdom-os`'s deployment. Kingdom OS historically parses the Pricing Hub file; if it fetches `/apps/pricing-hub/index.html` over HTTP, the merge breaks it.

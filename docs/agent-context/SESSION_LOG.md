@@ -396,3 +396,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no form submission, price change, alias write, or count mutation; no credentials read or entered.
 - PR/issue/commit: issue #45; documentation-only PR #57.
 - Next safe action: obtain a currently open manager-authenticated browser tab/identified portal route, then exercise only safe reads and approved test flows.
+
+## 2026-10-18 22:27 ET — Claude Code — #54 merged to main; #55 brought up to date and retargeted
+- The owner squash-merged #56 into #55's branch (`52f2254`, tree identical to #56's verified `be42090`) and then #54 into `main` (`c57ec8c`, tree identical to #54's head `b085a8e`).
+- #55: merged `main` with the `ours` strategy. Every conflict was a file #54 created and #55 later changed, and `main` held nothing beyond #54's head, which #55 already contained. The resulting tree is identical to `3463d4f`, so the diff against `main` is #55's 36 files only. Base retargeted from `fix/vercel-public-allowlist` (not deleted) to `main`, so merging #55 cannot land in the stale branch.
+- Deploy state: `kingdom-os` builds production from `main` (not verified here). The manually deployed `anthony-pricing-hub` and the project behind `anthony-supermarket.vercel.app` still serve old builds until `main` is deployed to them.
+- Next safe action: the owner merges #55 when ready, then deploys `main` to the manual Vercel projects and runs the #54/#56 checklists on production.
