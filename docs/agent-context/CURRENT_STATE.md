@@ -189,3 +189,18 @@ Phase D started 2026-08-21 after verifying A–C production state.
 
 ## Data caution
 Production contains historical operational/order/POS data. Do not bulk-delete, mass-remap, or rewrite it to make dashboards look complete. Exact evidence and human attribution take priority over coverage percentage.
+
+
+## 2026-10-15 — Issue #45 live portal/runtime check
+- GitHub `main` HEAD observed at `43ca4d53a07f39af30433878d6e75ab08b086b5a` (Pricing Hub polish, Oct 11). Supabase project `cbpdiiyzzmbavsymjysb` is `ACTIVE_HEALTHY`; `pricing-integrations` is `ACTIVE`, version 1, `verify_jwt=true` (deployed Aug 21).
+- Vercel project `anthony-pricing-hub` reports a latest `READY` production deployment from `main` at `a290e9feeb94a20ed193f76d38522bb2eab9b89e` (Oct 10). Its live `/pricing-hub/` URL returned HTTP 200 and the Loading Dock shell. The separate `anthony-supermarket.vercel.app/pricing-hub/` URL also returned HTTP 200 with Catalog, Approval Queue, Price Changes, Invoice Intake, Financials, and Export tabs.
+- **Not confirmed:** the checked live page shells and tracked `pricing-hub/js/api.js` route to `/api/pricing`; no served UI or tracked source inspected here exposed `pricing-integrations`, inventory count actions, or POS alias review. Issue #45's statement that this UI is already present on `main` does not match the specific routes inspected; a different manager portal/route may exist and remains unidentified.
+- The deployed function source re-verifies bearer JWTs through Supabase Auth and accepts only protected `app_metadata.role` values `manager` or `admin`. GET resources cover inventory, count sessions, products, aliases, and unmatched POS. POST supports start/save/complete/cancel counts and exact alias registration. Service-role use remains server-side.
+- No authenticated HTTP smoke test was run: owner manager credentials/session were unavailable. Therefore manager login, each live action, and actual runtime response/data remain unverified. Completing a test count through the live HTTP endpoint would persist inventory balances; do not send a synthetic completion or register a test alias in production. Use GETs plus start/save/cancel only with an owner-authorized disposable session, and validate completion/alias registration in staging or a rollback-only database transaction.
+- **Next safe action:** identify the intended manager route and confirm the owner-authorized test identity/target. Then run read-only GET checks and a disposable start/save/cancel pass; reserve complete/register tests for staging or rollback-only verification. Keep generic NRS department buttons unmatched and do not replace Super Kitchen `menu.json` without an approved mapping.
+
+
+## 2026-10-15 browser-session follow-up
+- The selected Chrome browser initially had no open tabs. The production Loading Dock page rendered its shell but showed `DOCK OFFLINE`; the browser console reported that this sandbox could not create a WebGL context, and the app failed before its auth gate. This is a browser-environment limitation, not a production outage signal.
+- The separate non-3D `https://anthony-supermarket.vercel.app/pricing-hub/` page rendered the existing staff Pricing Hub with an embedded catalog fallback and showed `Pricing service unreachable (HTTP 404)`. Its visible tabs still omit inventory counts and POS alias review. No user login/session was confirmed, no form was submitted, and no price or catalog value was changed.
+- Therefore the authenticated `pricing-integrations` HTTP smoke test remains unrun. The first blocker is locating a valid signed-in manager browser session/portal path; the current page's legacy `/api/pricing` 404 is a separate service path and does not verify the Edge Function.
