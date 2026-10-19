@@ -377,3 +377,22 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - #56 (`feat/pricing-hub-2d`): merged #55 (allowlist conflict: kept `polish.css` and the `hub/` files). The 2D sign-in now mirrors main's check: on `storeConfigured:false` it explains the preview and never calls `/login`.
 - Verified: guard 6/6 and storefront resilience 4/4 on both; server suite 132/134 (#55) and 133/135 (#56), with only main's two known failures; 3D drive 0 errors (desktop and mobile); full 2D drive 0 errors; a no-store harness shows the 2D notice on desktop and mobile with no `/login` request.
 - Next safe action: owner's go to merge #54 → #55 → #56; the first authenticated check is production (previews lack the pricing env).
+
+## 2026-10-15 18:45 ET — Codex
+- Goal: verify issue #45's live manager portal and authenticated `pricing-integrations` smoke-test path.
+- Changed: documented observed runtime state and safe test boundary in `docs/agent-context/CURRENT_STATE.md`; no code, prices, mappings, secrets, or production data changed.
+- Verified: `main` HEAD; both Pricing Hub URLs returned HTTP 200 with existing catalog/invoice interfaces; Vercel's latest Pricing Hub deployment reports READY/production from main; Supabase project is ACTIVE_HEALTHY and `pricing-integrations` is ACTIVE v1 with `verify_jwt=true`; deployed source enforces manager/admin protected app metadata and keeps service role server-side.
+- Not verified / blockers: owner-authenticated browser/API actions were not run; no inspected portal exposed inventory-count/POS-alias UI or calls; another route may exist. Live completion and alias registration would persist production state.
+- Security or rollback notes: no credentials used or exposed. Do not complete a synthetic live count or register a test alias; use staging or rollback-only DB verification for mutation paths.
+- PR/issue/commit: issue #45; documentation-only branch `codex/issue-45-runtime-handoff-2026-10-15`.
+- Next safe action: identify the intended manager portal route and owner-authorized test target; run live read-only GET checks and a disposable start/save/cancel pass, then test complete/register in staging or rollback-only.
+
+
+## 2026-10-15 18:46 ET — Codex browser-session follow-up
+- Goal: continue issue #45 verification in the selected signed-in browser context.
+- Changed: appended browser observations to `CURRENT_STATE.md` and this session log on the documentation branch for PR #57.
+- Verified: browser started with no open tabs; Loading Dock shell stopped at DOCK OFFLINE because this cloud browser could not create WebGL; non-3D Pricing Hub rendered the existing staff/catalog surface but reported its legacy pricing service as HTTP 404. Neither route exposed inventory-count or alias-review controls.
+- Not verified / blockers: no authenticated manager session was confirmed, and the browser environment prevented the Loading Dock auth gate from running. No request to `pricing-integrations` was authenticated.
+- Security or rollback notes: no form submission, price change, alias write, or count mutation; no credentials read or entered.
+- PR/issue/commit: issue #45; documentation-only PR #57.
+- Next safe action: obtain a currently open manager-authenticated browser tab/identified portal route, then exercise only safe reads and approved test flows.
