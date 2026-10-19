@@ -1,10 +1,10 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-18 (#54 allowlist merged to `main`; #56 squashed into #55, which now targets `main`; the manually deployed Vercel projects still serve old builds)
+Last updated: 2026-10-18 (#54 allowlist and #55 game layer + 2D hub merged to `main`; `kingdom-os` builds from `main`; the manually deployed Vercel projects still need a deploy of `main`)
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
-## 2026-10-10 — 2D Pricing Hub at `/hub/` becomes the default (branch, NOT in production)
+## 2026-10-10 — 2D Pricing Hub at `/hub/` becomes the default (merged to `main` 2026-10-18)
 - **Branch:** `feat/pricing-hub-2d`, stacked on `feat/pricing-hub-ops-game` (#55), which is stacked on #54. Merge order: #54 → #55 → this.
 - **Why:**
   - The owner signed in through the homepage's embedded hub (a 3D WebGL app in a 70vh iframe) and found it glitchy.
@@ -34,12 +34,16 @@ This file is operational context, not a secret store. **Live infrastructure is a
     - POS import +60 XP;
     - sign out;
     - no horizontal overflow, approve bar above the tab bar.
+- **2026-10-18 23:43 ET: the owner squash-merged #55, with #56 inside it, to `main` (`d6d28a4`).** The tree is identical to the verified head `80726ce`.
+  - `/hub/`, the game layer and the homepage staff link are on `main`. `kingdom-os` builds production from it; that deploy was not checked from this session.
+  - The public domain `anthony-supermarket.vercel.app` and `anthony-pricing-hub` deploy by hand. `/hub/` appears there only after `main` is deployed to them.
+  - First authenticated check: #56's checklist on production (previews report `storeConfigured:false`).
 - **2026-10-11:** `main`'s #52 polish is merged through #54 → #55 → #56.
   - The 2D sign-in runs the same preview check as the 3D dock: `GET /config` → `storeConfigured:false` → explain, and never send credentials.
   - The 3D Missions button is lifted clear of the taller polished zone rail.
 - **Not verified:** a real Vercel deployment and real Supabase data (the session cannot reach `*.vercel.app`). Previews cannot sign in at all (`storeConfigured:false`), so the first authenticated check is production after the owner's go, or a preview once its environment has the server-only pricing variables.
 
-## 2026-10-10 — Pricing Hub becomes an operational game; deep API routes fixed (branch, NOT in production)
+## 2026-10-10 — Pricing Hub becomes an operational game; deep API routes fixed (merged to `main` 2026-10-18 via #55)
 - **Branch:** `feat/pricing-hub-ops-game`, stacked on `fix/vercel-public-allowlist` (PR #54). Draft PR targets #54's branch. Merge #54 first.
 - **Live data observed (read-only, Supabase 2026-10-10):**
   - **Nothing has ever been approved through the hub:** 0 invoices `imported`, and 0 attributed approval, history or POS rows. The Oct 8 "approvals" exist only as repo JSON.
