@@ -215,6 +215,47 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - PR/issue/commit: uncommitted on main (next commit); board card t_7c3667b4 unblocked.
 - Next safe action: commit + push to main (JelfferyDuran/anthony-supermarket); spot-check bot `/menu` in Telegram.
 
+## 2026-10-09 19:55 ET — Claude Code — Vercel public output allowlist (cost data + server source were public)
+- Goal: stop the `anthony-pricing-hub` deployment publishing the whole repo root. The owner confirmed the cost files and server source were publicly downloadable. Move the records, don't delete them. Keep `/api/pricing/*` and `/pricing-hub/` working.
+- Changed:
+  - `vercel.json`: `buildCommand: node scripts/build-public-site.js`, `outputDirectory: public-build`.
+  - New `scripts/build-public-site.js` (allowlist copy).
+  - New `scripts/test-public-site.cjs` (guard).
+  - New `.github/workflows/public-site-guard.yml`.
+  - `git mv` of 5 `manual-intake-*.json` and 2 `goya-2026-08-31-items.*` from `pricing-hub/` to `invoices/pricing-hub-records/` (+ README).
+  - `scripts/build-pricing-store.py` `GOYA_DIR` follows the move.
+  - `.gitignore` `/public-build/`.
+  - `pricing-hub/LOADING_DOCK.md` deploy + endpoint sections.
+  - CURRENT_STATE; decision note.
+- Verified:
+  - Guard 6/6 pass. Mutation checks fail as intended: `vercel.json` back to `.`; `invoices/` allowlisted; missing page asset; missing hub module; cost field in the promo feed.
+  - The store script loads 39 Goya rows from the new path.
+  - `vercel build` (CLI 63.1.2) of `main` vs branch: 380 → 50 static files; the 50 are byte-identical to `main`'s; routes identical; the API function bundle is byte-identical (314 files).
+  - Local smoke server built from the emitted routes: public pages and `/api/pricing/{health,config,login}` match `main`; leaked paths now return the homepage.
+  - The secret-pattern scan of all tracked files found no committed credentials.
+- Not verified / blockers:
+  - Real Vercel preview: this container's network policy denies `*.vercel.app`, and the session's Vercel connector lists 0 projects in team `kingdom-noel`.
+  - Production still serves the files until promoted.
+  - Old deployment URLs are not checked.
+  - Multi-segment `/api/pricing/*` routes 404 in the emulated routing on `main` too. Pre-existing; needs a real-deployment check.
+- Security or rollback notes:
+  - No secrets touched; no data deleted.
+  - Treat everything served before promotion as disclosed: vendor costs, the vendor account number, POS exports, server source.
+  - Rollback = revert `vercel.json` (re-exposes everything, so prefer fixing forward) or redeploy the previous deployment.
+- PR/issue/commit: draft PR #54, branch `fix/vercel-public-allowlist`.
+- Deploy topology learned from the Vercel bot on #54:
+  - `anthony-pricing-hub` is not Git-connected (no auto-preview).
+  - `kingdom-os` is Git-connected at the repo root, so merging auto-deploys it to production.
+  - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
+- Next safe action: owner runs the #54 URL checklist on the `kingdom-os` branch preview or a manual pricing-hub preview, and confirms no consumer fetches repo files from `kingdom-os`. Merge/promote only on the owner's explicit go.
+
+## 2026-10-11 05:28 ET — Claude Code — main's #52 polish merged into #54; polish.css allowlisted
+- `main` moved to `43ca4d5` (#52 Pricing Hub polish: `pricing-hub/polish.css`, `js/polish.js`, and a sign-in check that reports a preview without pricing config instead of a bad password).
+- Merged into `fix/vercel-public-allowlist` cleanly. The Public site guard then failed on `pricing-hub/index.html -> polish.css` (unpublished), so `pricing-hub/polish.css` joined `PUBLIC_FILES` and both new files joined the guard's required list.
+- Verified: guard 6/6; storefront resilience 4/4; server suite 115/117 (both failures are `main`'s: the .99 rounding expectation in `pricing-engine.test.js` and the Gemini model assertion); `vercel build` emulation 52 static files, nothing internal; `polish.css`/`polish.js` serve as CSS/JS.
+- Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
+- Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.
+
 
 ## 2026-10-15 18:45 ET — Codex
 - Goal: verify issue #45's live manager portal and authenticated `pricing-integrations` smoke-test path.

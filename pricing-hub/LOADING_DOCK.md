@@ -65,6 +65,7 @@ pricing-hub/
   index.html   — shell: importmap (three@0.160.0 via jsDelivr, core only),
                  HUD divs, sign-in gate, loader, CDN-fail fallback
   game.css     — dark neon theme (charcoal + amber/cyan), bottom sheets, toasts
+  polish.css   — visual layer over game.css (#52): surfaces, focus states, motion
   js/api.js    — API client: token in localStorage `pricingToken`,
                  Authorization: Bearer on every call, XHR upload w/ progress
   js/boot.js   — init, auth gate (401 → sign-in overlay), raycast taps, main loop
@@ -74,14 +75,17 @@ pricing-hub/
                  financials→bars, hologram stats
   js/hud.js    — sign-in, top bar, zone nav, FAB, upload choreography,
                  review/product/vault panels, search
+  js/polish.js — DOM-only polish (#52): zone keys 1–5, Esc closes the panel
 ```
 
-- **Backend**: unchanged. Base `/api/pricing`. Endpoints used: `POST /login`,
-  `GET /config`, `GET /products`, `GET /products/:id/history`,
-  `PATCH /products/:id/retail`, `PATCH /products/:id/upc` (approver gate —
-  stores a verified barcode), `GET /upc/lookup?name=` (manager — public
-  Open Food Facts candidates, no POS needed), `GET /queue`, `POST /invoices`
-  (multipart), `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
+- **Backend**: `api/pricing-fn.js` (Vercel function, rewrite target) mounts
+  `server/pricing-router.js` + `server/pricing-store.js`. Base `/api/pricing`.
+  Endpoints used: `POST /login`, `GET /config`, `GET /products`,
+  `GET /products/:id/history`, `PATCH /products/:id/retail`,
+  `PATCH /products/:id/upc` (approver gate — stores a verified barcode),
+  `GET /upc/lookup?name=` (manager — public Open Food Facts candidates, no POS
+  needed), `GET /queue`, `POST /invoices` (multipart), `PATCH /invoices/:id/lines`,
+  `POST /invoices/:id/approve`, `GET /financials`, `POST /pos/import`.
   Review lines and product cards show a "Find UPC" button when the matched
   product has no barcode (lookup → tap a candidate → saved).
 - **Auth**: Supabase verifies credentials + role at login; server mints a
@@ -95,8 +99,25 @@ pricing-hub/
 
 Static files + serverless API on Vercel (`anthony-pricing-hub`, production).
 Ship via GitHub push to `main`, then create a production deployment from the
-commit SHA. No build step. All files must stay under ~100KB each (connector
-push limit).
+commit SHA. All files must stay under ~100KB each (connector push limit).
+
+**Only an allowlist is published.** `vercel.json` runs
+`node scripts/build-public-site.js`, which copies the public pages, `assets/`
+media, `data/sale.json` and this client (`pricing-hub/index.html`, `game.css`,
+`polish.css`, `js/*.js`) into `public-build/`, the only directory Vercel serves. Nothing
+else in the repo is reachable. Before 2026-10-09 the whole repo root was, server
+source and cost records included.
+
+- Adding a file the client loads (a new `js/` module is picked up
+  automatically; a new image, font or top-level file is not)? Add it to the
+  allowlist in `scripts/build-public-site.js`. The **Public site guard** CI check
+  fails if a published page references a file the allowlist leaves out.
+- Never put invoice records, intake JSON/CSV or other data in `pricing-hub/`.
+  They live in `invoices/pricing-hub-records/`.
+- Check locally: `node --test scripts/test-public-site.cjs`.
+- Paths outside the allowlist return the storefront homepage (Vercel's
+  catch-all route), not a 404. When checking a URL, look at the content, not
+  just the status code.
 
 ## Changelog
 
@@ -109,3 +130,7 @@ push limit).
 - **2026-10-08** — "The Loading Dock" replaces the 2D client (full 3D, five zones).
 - **2026-10-08** — Mobile polish pass: portrait framing, floating labels,
   defined zone objects, redrawn 24px icon set, mobile perf cuts.
+- **2026-10-09** — Review line exceptions (short / wrong line, qty + cost edits,
+  reconciliation strip).
+- **2026-10-09** — Deploy publishes an allowlist only (`public-build/`); intake
+  records moved to `invoices/pricing-hub-records/`.
