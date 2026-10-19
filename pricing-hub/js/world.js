@@ -182,13 +182,15 @@ export function createWorld(canvas) {
     if (at.isObject3D) return (out) => { at.getWorldPosition(out); out.y += dy || 0; return out; };
     return null;
   }
-  function addLabel(html, { cls = '', at = null, dy = 0, maxDist = 70 } = {}) {
+  // `zone` scopes a label to one zone: it only shows while the camera is
+  // there (or flying there). Without it, far zones' titles bleed through.
+  function addLabel(html, { cls = '', at = null, dy = 0, maxDist = 70, zone = null } = {}) {
     const el = document.createElement('div');
     el.className = ('float-label ' + cls).trim();
     el.innerHTML = html;
     if (labelLayer) labelLayer.appendChild(el);
     const L = {
-      el, maxDist,
+      el, maxDist, zone,
       getPos: normAnchor(at, dy),
       setText(t) { el.innerHTML = t; },
       setAnchor(a, d) { L.getPos = normAnchor(a, d == null ? dy : d); },
@@ -200,7 +202,7 @@ export function createWorld(canvas) {
   function updateLabels() {
     const w = window.innerWidth, h = window.innerHeight;
     for (const L of labels) {
-      if (!L.getPos) { L.el.style.display = 'none'; continue; }
+      if (!L.getPos || (L.zone && L.zone !== lastZone)) { L.el.style.display = 'none'; continue; }
       L.getPos(projV);
       const dist = camera.position.distanceTo(projV);
       projV.project(camera);
@@ -280,23 +282,25 @@ export function createWorld(canvas) {
   dock.add(beltFrame);
   animated.push((dt) => { beltTex.offset.x -= dt * 0.55; });
 
-  addLabel("ANTHONY'S LOADING DOCK", { cls: 'fl-title', at: new THREE.Vector3(0, 12.8, -4), maxDist: 95 });
+  addLabel("ANTHONY'S LOADING DOCK", { cls: 'fl-title', at: new THREE.Vector3(0, 12.8, -4), maxDist: 95, zone: 'dock' });
 
   // central hologram pedestal: cylinder base + floating rotating stats
   const ped = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 4.1, 1.2, 28), darkMat);
   ped.position.set(0, 0.6, -4);
   ped.castShadow = true; ped.receiveShadow = true;
   dock.add(ped);
-  const pedRing = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.15, 10, 48), cyanGlowMat);
+  // Own material: the ring's colour reports dock integrity (game.js).
+  const pedRing = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.15, 10, 48), cyanGlowMat.clone());
   pedRing.rotation.x = Math.PI / 2;
   pedRing.position.set(0, 1.28, -4);
   dock.add(pedRing);
+  anchors.setPedestalColor = (hex) => { pedRing.material.emissive.setHex(hex); };
   const halo = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.09, 8, 48), amberGlowMat);
   halo.position.set(0, 7.6, -4);
   halo.rotation.x = 1.05;
   dock.add(halo);
   animated.push((dt) => { halo.rotation.z += dt * 0.8; });
-  const holoLabel = addLabel('—', { cls: 'fl-holo', at: new THREE.Vector3(0, 9.6, -4), maxDist: 95 });
+  const holoLabel = addLabel('—', { cls: 'fl-holo', at: new THREE.Vector3(0, 9.6, -4), maxDist: 95, zone: 'dock' });
   animated.push((_, t) => { halo.position.y = 7.6 + Math.sin(t * 0.9) * 0.25; });
   anchors.updateHolo = (lines) => {
     holoLabel.setText(lines.map((l) => String(l).replace(/</g, '&lt;')).join('<br>'));
@@ -364,7 +368,7 @@ export function createWorld(canvas) {
     g.rotation.y = def.rotY;
     dock.add(g);
     pickables.dock.push(hit);
-    addLabel(def.label, { cls: 'fl-portal', at: new THREE.Vector3(def.pos[0], 7.7, def.pos[2]), maxDist: 85 });
+    addLabel(def.label, { cls: 'fl-portal', at: new THREE.Vector3(def.pos[0], 6.5, def.pos[2]), maxDist: 85, zone: 'dock' });
     portalMeshes[def.zone] = { group: g, mat };
     animated.push((_, t) => {
       mat.emissiveIntensity = 1.8 + Math.sin(t * 2.2 + def.pos[0]) * 0.5;
@@ -446,8 +450,8 @@ export function createWorld(canvas) {
     dropRing.scale.set(s, s, 1);
   });
 
-  addLabel('INTAKE BAY', { cls: 'fl-title', at: new THREE.Vector3(IC.x, 11.2, IC.z), maxDist: 85 });
-  addLabel('DROP INVOICE HERE', { cls: 'fl-drop', at: new THREE.Vector3(IC.x, 5.6, IC.z), maxDist: 60 });
+  addLabel('INTAKE BAY', { cls: 'fl-title', at: new THREE.Vector3(IC.x, 11.2, IC.z), maxDist: 85, zone: 'intake' });
+  addLabel('DROP INVOICE HERE', { cls: 'fl-drop', at: new THREE.Vector3(IC.x, 5.6, IC.z), maxDist: 60, zone: 'intake' });
 
   // progress ring above the tray (spins while extracting)
   const progRing = new THREE.Mesh(
@@ -493,7 +497,7 @@ export function createWorld(canvas) {
   review.add(rFrame);
   animated.push((dt) => { beltTex2.offset.x -= dt * 0.4; });
 
-  addLabel('REVIEW LINE', { cls: 'fl-title', at: new THREE.Vector3(RC.x, 10.2, RC.z), maxDist: 85 });
+  addLabel('REVIEW LINE', { cls: 'fl-title', at: new THREE.Vector3(RC.x, 10.2, RC.z), maxDist: 85, zone: 'review' });
   anchors.reviewCenter = new THREE.Vector3(RC.x, 0, RC.z);
   // 8 package slots along the belt
   anchors.reviewSlots = [];
@@ -525,8 +529,8 @@ export function createWorld(canvas) {
   scene.add(aisles);
   const AC = ZONE_POS.aisles;
 
-  addLabel('AISLES', { cls: 'fl-title', at: new THREE.Vector3(AC.x, 12.4, AC.z + 8), maxDist: 95 });
-  addLabel('RETAIL = UNIT COST × 1.70 → SHELF .99', { cls: 'fl-sub', at: new THREE.Vector3(AC.x, 6.6, AC.z + 8), maxDist: 60 });
+  addLabel('AISLES', { cls: 'fl-title', at: new THREE.Vector3(AC.x, 12.4, AC.z + 8), maxDist: 95, zone: 'aisles' });
+  addLabel('RETAIL = UNIT COST × 1.70 → SHELF .99', { cls: 'fl-sub', at: new THREE.Vector3(AC.x, 6.6, AC.z + 8), maxDist: 60, zone: 'aisles' });
 
   // hanging category header boards
   const catDefs = [['DAIRY', -9], ['JUICE', -3], ['EGGS', 3], ['GROCERY', 9]];
@@ -540,7 +544,7 @@ export function createWorld(canvas) {
       rod.position.set(AC.x + x + dx, 10.5, AC.z + 8);
       aisles.add(rod);
     }
-    addLabel(name, { cls: 'fl-cat', at: new THREE.Vector3(AC.x + x, 8.8, AC.z + 8.35), maxDist: 75 });
+    addLabel(name, { cls: 'fl-cat', at: new THREE.Vector3(AC.x + x, 8.8, AC.z + 8.35), maxDist: 75, zone: 'aisles' });
   }
 
   // shelf rows
@@ -607,7 +611,7 @@ export function createWorld(canvas) {
     vault.add(bolt);
   }
 
-  addLabel('VAULT', { cls: 'fl-title', at: new THREE.Vector3(VC.x, 12.6, VC.z + 4), maxDist: 90 });
+  addLabel('VAULT', { cls: 'fl-title', at: new THREE.Vector3(VC.x, 12.6, VC.z + 4), maxDist: 90, zone: 'vault' });
 
   // 3D bar chart, two-tone bars (dark base + bright cap)
   const barDefs = [
@@ -627,8 +631,8 @@ export function createWorld(canvas) {
     cap.position.set(x, 0.1, VC.z - 4);
     base.castShadow = true;
     vault.add(base); vault.add(cap);
-    addLabel(def.label, { cls: 'fl-cat', at: new THREE.Vector3(x, 1.5, VC.z - 2.0), maxDist: 65 });
-    const valH = addLabel('—', { cls: 'fl-val', at: new THREE.Vector3(x, 10.8, VC.z - 4), maxDist: 75 });
+    addLabel(def.label, { cls: 'fl-cat', at: new THREE.Vector3(x, 1.5, VC.z - 2.0), maxDist: 65, zone: 'vault' });
+    const valH = addLabel('—', { cls: 'fl-val', at: new THREE.Vector3(x, 10.8, VC.z - 4), maxDist: 75, zone: 'vault' });
     bars.push({ def, base, cap, valH, targetH: 0.01 });
   });
   anchors.setVaultBars = (items) => {

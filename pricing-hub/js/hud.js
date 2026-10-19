@@ -37,6 +37,7 @@ export function createHud(world, zones, nav) {
 
   /* ---------- panel ---------- */
   function openPanel(html) {
+    delete $('panelBody').dataset.view;
     $('panelBody').innerHTML = html;
     $('panel').classList.remove('hidden');
     $('panelScrim').classList.remove('hidden');
@@ -221,6 +222,11 @@ export function createHud(world, zones, nav) {
       if (res && res.duplicate) {
         world.scene.remove(pkg);
         await nav.refreshAll();
+        if (res.rescuable) {
+          toast('<b>Already stored, but never read</b> — re-read it from the Rescue mission.', 'err');
+          nav.openMissions('rescue_intake');
+          return;
+        }
         toast('<b>Already in the system</b> — showing the existing invoice.', 'ok');
         showInvoice(res.invoice.id);
         return;
@@ -252,7 +258,11 @@ export function createHud(world, zones, nav) {
       world.anchors.progRing.visible = false;
       world.scene.remove(pkg);
       if (/cancelled/i.test(e.message)) toast('Upload cancelled.');
-      else toast('<b>Upload failed:</b> ' + esc(e.message), 'err');
+      else {
+        toast('<b>Upload failed:</b> ' + esc(e.message) +
+          ' — if the scan was stored, it waits in the Rescue mission.', 'err');
+        nav.refreshAll();
+      }
     } finally {
       $('uploadHud').classList.add('hidden');
     }
@@ -286,6 +296,7 @@ export function createHud(world, zones, nav) {
         const sp = state.products.find((p) => String(p.id) === String(prodId));
         if (sp) sp.upc = digits;
         toast('<b>UPC saved</b> — ' + esc(digits), 'ok');
+        nav.refreshGame();
         onSaved();
       } catch (e) {
         toast('Could not save UPC: ' + e.message, 'err');
@@ -536,6 +547,7 @@ export function createHud(world, zones, nav) {
                   const sp = state.products.find((p) => String(p.id) === String(pid));
                   if (sp) sp.upc = cand.code;
                   toast('<b>UPC saved</b> — ' + esc(cand.code), 'ok');
+                  nav.refreshGame();
                   showInvoice(invoiceId);
                 } catch (e) {
                   toast('Could not save UPC: ' + e.message, 'err');
@@ -543,8 +555,8 @@ export function createHud(world, zones, nav) {
                 }
               });
             });
-            wireManualUpc(box, prodId, () => showInvoice(invoiceId));
           }
+          wireManualUpc(box, prodId, () => showInvoice(invoiceId));
         } catch (e) {
           box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
         } finally {
@@ -582,6 +594,7 @@ export function createHud(world, zones, nav) {
         const retailVal = retailInput ? num(retailInput.value) : null;
         lines.push({
           id: l.id,
+          invoice_line_id: l.id,
           line_number: l.line_number,
           product_id: l.matched_product_id || (matchState.get(l.id) || {}).id || null,
           unit_cost: effCost(l),
@@ -616,6 +629,7 @@ export function createHud(world, zones, nav) {
     const retail = productRetail(p);
     const suggested = cost != null ? retailFromCost(cost) : null;
     const margin = (retail != null && cost != null) ? retail - cost : null;
+    const ruleGap = suggested != null && (retail == null || Math.abs(retail - suggested) >= 0.005);
 
     openPanel(
       '<div class="card-title">' + esc(productName(p)) + '</div>' +
@@ -625,7 +639,12 @@ export function createHud(world, zones, nav) {
         '<div class="stat"><div class="v cy">' + fmtMoney(retail) + '</div><div class="k">retail</div></div>' +
         '<div class="stat"><div class="v grn">' + fmtMoney(margin) + '</div><div class="k">margin</div></div>' +
       '</div>' +
-      '<div class="lr-meta">Suggested by rule: <b style="color:var(--amber)">' + fmtMoney(suggested) + '</b></div>' +
+      '<div class="lr-meta">Suggested by rule: <b style="color:var(--amber)">' + fmtMoney(suggested) + '</b>' +
+        (ruleGap ? ' · <b style="color:' + (retail < suggested ? 'var(--red)">under the rule' : 'var(--ink-dim)">above the rule') + '</b>' : ' · <b style="color:var(--green)">on rule</b>') + '</div>' +
+      (ruleGap && !p.internal
+        ? '<div class="approve-row"><button class="btn ' + (retail < suggested ? 'primary' : 'ghost') + '" id="ruleApply">' +
+            (retail < suggested ? 'Fix to rule · ' + fmtMoney(suggested) : 'Lower to rule · ' + fmtMoney(suggested)) + '</button></div>'
+        : '') +
       (p.upc ? '' :
         '<div class="lr-match" style="margin-top:10px"><button class="btn cy" id="upcFind" style="white-space:nowrap">Find UPC</button></div>' +
         '<div id="upcBox" style="margin-top:6px"></div>') +
@@ -663,6 +682,7 @@ export function createHud(world, zones, nav) {
                   await api.setProductUpc(p.id, cand.code);
                   p.upc = cand.code;
                   toast('<b>UPC saved</b> — ' + esc(cand.code), 'ok');
+                  nav.refreshGame();
                   showProduct(productId);
                 } catch (e) {
                   toast('Could not save UPC: ' + e.message, 'err');
@@ -670,8 +690,8 @@ export function createHud(world, zones, nav) {
                 }
               });
             });
-            wireManualUpc(box, p.id, () => showProduct(productId));
           }
+          wireManualUpc(box, p.id, () => showProduct(productId));
         } catch (e) {
           box.innerHTML = '<div class="lr-meta">Lookup failed: ' + esc(e.message) + '</div>';
         } finally {
@@ -689,6 +709,7 @@ export function createHud(world, zones, nav) {
         $('retailMsg').innerHTML = '<b style="color:var(--green)">Retail updated to ' + fmtMoney(v) + '.</b>';
         await api.getProducts();
         zones.refreshAisles();
+        nav.refreshGame();
       } catch (e) {
         $('retailMsg').textContent = e.message;
       } finally {
@@ -696,11 +717,38 @@ export function createHud(world, zones, nav) {
       }
     });
 
+    const ruleBtn = $('ruleApply');
+    if (ruleBtn) {
+      let confirmLower = false;
+      ruleBtn.addEventListener('click', async () => {
+        ruleBtn.disabled = true;
+        try {
+          // The server prices it from the cost on file; we only name the product.
+          const res = await api.applyRule(p.id, { allowDecrease: confirmLower });
+          $('retailMsg').innerHTML = '<b style="color:var(--green)">' +
+            (res.unchanged ? 'Already on the rule price.' : 'Repriced to ' + fmtMoney(res.rulePrice) + ' by the ×1.70 rule.') + '</b>';
+          await api.getProducts();
+          zones.refreshAisles();
+          await nav.refreshGame();
+          ruleBtn.remove();
+        } catch (e) {
+          if (e.data && e.data.code === 'WOULD_LOWER_PRICE' && !confirmLower) {
+            confirmLower = true;
+            ruleBtn.textContent = 'Confirm: lower to ' + fmtMoney(e.data.rulePrice);
+            $('retailMsg').textContent = e.message;
+          } else {
+            $('retailMsg').textContent = e.message;
+          }
+          ruleBtn.disabled = false;
+        }
+      });
+    }
+
     try {
       const hist = await api.getHistory(p.id);
       $('histBox').innerHTML = hist.length
         ? hist.slice(0, 6).map((h) =>
-            '<div>· ' + fmtMoney(h.old_retail_price != null ? h.old_retail_price : h.old_price) +
+            '<div>· ' + fmtMoney(h.previous_retail_price != null ? h.previous_retail_price : h.old_retail_price) +
             ' → <b>' + fmtMoney(h.new_retail_price != null ? h.new_retail_price : h.new_price) + '</b>' +
             ' <span style="color:var(--ink-faint)">' + esc(fmtDate(h.changed_at || h.created_at)) + '</span></div>'
           ).join('')
@@ -713,6 +761,7 @@ export function createHud(world, zones, nav) {
   /* ================= vault panel ================= */
   async function showVaultPanel() {
     const { revenue, cost, profit, raw } = zones.refreshVault();
+    const salesMission = state.game && state.game.missions ? state.game.missions.find((m) => m.key === 'sales_feed') : null;
     const keys = Object.keys(raw || {}).filter((k) => typeof raw[k] === 'number').slice(0, 8);
     openPanel(
       '<div class="card-title">Vault — financials</div>' +
@@ -722,8 +771,10 @@ export function createHud(world, zones, nav) {
         '<div class="stat"><div class="v">' + fmtMoney(cost) + '</div><div class="k">cost</div></div>' +
         '<div class="stat"><div class="v grn">' + fmtMoney(profit) + '</div><div class="k">profit</div></div>' +
       '</div>' +
-      (keys.length ? '<div class="lr-meta">' + keys.map((k) => esc(k) + ': <b>' + fmtMoney(raw[k]) + '</b>').join('<br>') + '</div>' : '') +
+      (keys.length ? '<div class="lr-meta">' + keys.map((k) => esc(k.replace(/_/g, ' ')) + ': <b>' +
+        (/_share$/.test(k) ? esc(Number(raw[k]).toFixed(1)) + '%' : fmtMoney(raw[k])) + '</b>').join('<br>') + '</div>' : '') +
       '<div class="card-sub" style="margin-top:14px">POS sales import</div>' +
+      (salesMission ? '<div class="recon-strip">' + esc(salesMission.brief) + '</div>' : '') +
       '<div class="lr-meta" style="margin-bottom:8px">Upload the NRS sales CSV. Re-uploading the same export is safe.</div>' +
       '<div class="approve-row"><button class="btn cy" id="posBtn">Choose sales CSV</button></div>' +
       '<input type="file" id="posPicker" accept=".csv,text/csv" hidden>' +
@@ -736,7 +787,12 @@ export function createHud(world, zones, nav) {
       $('posMsg').textContent = 'Importing…';
       try {
         const res = await api.importPos(f);
-        $('posMsg').innerHTML = '<b style="color:var(--green)">Imported.</b> ' + esc(JSON.stringify(res).slice(0, 160));
+        const sm = res && res.summary ? res.summary : {};
+        $('posMsg').innerHTML = res && res.duplicate
+          ? '<b style="color:var(--green)">Already imported</b> — this export was counted before.'
+          : '<b style="color:var(--green)">Imported ' + esc(String(sm.row_count != null ? sm.row_count : '')) + ' rows</b>' +
+            (sm.period_start ? ' · ' + esc(sm.period_start) + ' → ' + esc(sm.period_end || '') : '') +
+            (res && res.matched != null ? ' · ' + esc(String(res.matched)) + ' matched to the catalog' : '');
         await nav.refreshAll();
       } catch (e) {
         $('posMsg').textContent = e.message;

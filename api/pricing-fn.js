@@ -42,5 +42,9 @@ app.use((req, res, next) => {
 app.use('/api/pricing', createPricingRouter());
 // Deployment health check (no auth, no store).
 app.get('/api/pricing/health', (_req, res) => res.json({ ok: true, service: 'pricing-hub-api' }));
+// Every depth of /api/pricing/* lands here, so unknown paths reach Express
+// too. Answer them in JSON like every other API error, not with Express's
+// HTML page.
+app.use('/api/pricing', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
 module.exports = app;

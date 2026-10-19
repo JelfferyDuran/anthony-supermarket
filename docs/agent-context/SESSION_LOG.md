@@ -249,6 +249,122 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
   - `anthony-supermarket-superkitchen` builds from `apps/superkitchen` and is unaffected.
 - Next safe action: owner runs the #54 URL checklist on the `kingdom-os` branch preview or a manual pricing-hub preview, and confirms no consumer fetches repo files from `kingdom-os`. Merge/promote only on the owner's explicit go.
 
+## 2026-10-10 11:05 ET — Claude Code — Pricing Hub operational game layer + deep API routing fix
+- Goal: owner asked for significant backend and frontend work: "develop the pricing hub as a full blown game but operational".
+- Changed (branch `feat/pricing-hub-ops-game`, stacked on #54):
+  - Deep `/api/pricing/*` routing: superseded by `main`'s `0df4412` (rewrite → `api/pricing-fn.js`); see the 12:05 entry.
+  - New `server/pricing-game.js`.
+  - `server/pricing-store.js`: game reads, `getProduct`, `downloadInvoiceObject`, `resolveUserNames`.
+  - `server/pricing-router.js`:
+    - `GET /game/state`;
+    - `POST /products/:id/apply-rule`;
+    - `POST /invoices/:id/extract`;
+    - failed reads reset to `uploaded`;
+    - duplicate uploads report `rescuable`;
+    - approvals link `invoice_line_id` (own lines only).
+  - New `server/pricing-game.test.js`, `server/pricing-game-router.test.js`, wired into `npm test`.
+  - Frontend:
+    - new `pricing-hub/js/game.js`;
+    - `api.js`: game calls, POS field `sales`, 401 handling;
+    - `hud.js`: rule button, rescue routing, history field, `invoice_line_id`, vault sales strip, share as %;
+    - `zones.js`: Rule Guard markers first on shelves, vault keys, integrity on hologram, pick passthrough;
+    - `world.js`: zone-scoped labels, pedestal health colour;
+    - `boot.js`: game wiring, name restore;
+    - `index.html` / `game.css`: player strip, missions button, XP floats, level-up overlay.
+  - `LOADING_DOCK.md`; decision note.
+- Verified:
+  - Server 132/133; the only failure is the pre-existing Gemini model assertion, also red on `main`.
+  - 16 new tests; mutation checks M1–M5 each fail the intended test.
+  - Guard 6/6.
+  - `vercel build` emulation: static 51 files, function bundles `pricing-game.js`, deep routes reach Express.
+  - Playwright desktop + mobile against the real router and a seeded store: 0 page or console errors; rule fix +15 XP; rescue; approve → level-up; screenshots reviewed.
+  - Read-only Supabase: schema and the approve / set-retail function bodies inspected; production counts above.
+- Not verified / blockers:
+  - Real Vercel preview (network policy + connector scope).
+  - Real OCR provider for rescues.
+  - Vercel function timeout vs a 30–90s read is unknown; if a read is killed, the scan is now rescuable after 10 min.
+- Security or rollback notes:
+  - No DB writes, no migration; all game reads are server-side under the existing manager gate.
+  - Leaderboard exposes only email local parts, never ids or full emails.
+  - Apply-rule ignores client prices.
+  - Rollback = revert the branch commits; the API stays backward compatible (only additions).
+- PR/issue/commit: draft PR (see PR thread), base `fix/vercel-public-allowlist` (#54).
+- Next safe action: merge #54 on owner go, preview this branch, approve one real invoice in the preview to confirm the deep routes, then promote on owner go.
+
+## 2026-10-10 12:05 ET — Claude Code — Adopt main's deep-routing fix in #54 and #55
+- Goal: bring both open PRs up to date with `main` (`58ca046` UPC lookup, `0df4412` routing fix by Noel) without two competing routing fixes.
+- Changed:
+  - #54 (`fix/vercel-public-allowlist`): merged `main`. `vercel.json` now holds the allowlist build plus main's `api/pricing-fn.js` functions entry and rewrite.
+  - #55 (`feat/pricing-hub-ops-game`): merged #54, kept main's rewrite, and dropped this branch's own `/api/pricing/:path*` → `[...path]` rewrite.
+  - The JSON 404 moved from `api/pricing/[...path].js` (reverted to main) into `api/pricing-fn.js`.
+  - The guard in `scripts/test-public-site.cjs` no longer pins one routing approach. It requires a `/api/pricing/:path*` rewrite whose target function exists, is configured, and receives the full path. Mutation-checked: dropping `__path`, or naming a missing function, fails it.
+- Verified:
+  - `vercel build` emulation of #54 after the merge: deep paths (`/products/:id/history`) reach the router through `pricing-fn`, both when the function sees the original URL and when it sees the destination URL.
+  - No internal file is served.
+  - Server suite: only the pre-existing Gemini assertion fails.
+- Not verified: a real Vercel deployment of either branch.
+- Next safe action: owner previews #54 and runs the URL checklist; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 13:05 ET — Claude Code — Bring Noel's UPC pipeline into #54 and #55
+- Goal: keep both open PRs current with `main` (`6452188`, `3180f54`, `f2e4d9c`: `PATCH /products/:id/upc`, "Find UPC" on review lines and product cards, bulk lookup results in `docs/upc-lookup-2026-10-10.json`).
+- Changed:
+  - #54: merged `main`; the `LOADING_DOCK.md` endpoint list now combines both sides.
+  - #55: merged #54. The product card keeps both the Rule Guard button and Find UPC. A saved UPC now calls `nav.refreshGame()`, because UPC coverage is 10% of Dock Integrity.
+- Verified:
+  - Server suite: only the pre-existing Gemini assertion fails. Guard 6/6.
+  - Headless Chromium (harness store with a UPC stub), desktop and mobile, 0 errors: product card shows "Fix to rule" and "Find UPC" together; picking a candidate saves it, hides the button, refreshes game state, and integrity goes 26 → 27.
+  - Full game regression driver: 0 errors.
+- Noted, not changed (owner/Noel decision): `setProductUpc` writes `pricing_products.upc` with no record of who set it. A UPC-assignment audit trail would also let the game award XP for barcodes (see `brain/Decisions/2026-10-10-pricing-hub-game-layer.md` follow-ups).
+- Next safe action: unchanged. Owner previews #54; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 13:59 ET — Claude Code — Merge `main`'s manual UPC entry; fix typed-digits save
+- Goal: keep #54 and #55 current with `main` (`c8b0ea2`, Noel: manual UPC entry plus the red-kidney-beans size split in `docs/upc-lookup-2026-10-10.json`).
+- Found a bug on `main`: the "type barcode digits" fallback was rendered in both lookup branches, but `wireManualUpc` ran only when the lookup returned candidates. When the public database had no match, the exact case the fallback exists for (for example the 46oz cans), "Save digits" did nothing.
+- Changed:
+  - #54: merged `main`, unchanged otherwise.
+  - #55: merged #54. `wireManualUpc` now runs after the if/else on both the review line and the product card. A manual save calls `nav.refreshGame()`, like the other UPC saves.
+- Verified (headless Chromium, harness store, public-database stub returning no products):
+  - With `main`'s `hud.js`: 0 `PATCH /products/:id/upc`, nothing saved. Reproduced.
+  - With this branch: 1 PATCH, "UPC saved" toast, barcode stored, game refreshed, 0 page errors.
+  - Candidate path re-run on desktop and mobile: 0 errors.
+  - Server suite: only the pre-existing Gemini failure. Guard 6/6.
+- Next safe action: Noel can apply the same two-line move on `main` now, since the bug is live there. Otherwise unchanged; merge/promote only on the owner's explicit go.
+
+## 2026-10-10 14:35 ET — Claude Code — 2D Pricing Hub at /hub (default), homepage staff link
+- Goal: the owner, now signed in, found the hub UI glitchy and wanted a front-end upgrade plus a standalone page on the public site. Their answers:
+  - fast 2D hub as the default, keep the game;
+  - `/hub` with only a small staff link on the homepage;
+  - they had been using the homepage-embedded hub.
+- Changed (branch `feat/pricing-hub-2d`, stacked on #55):
+  - New `hub/`: `index.html`, `hub.css`, `js/app.js`, `js/ui.js`, `js/upc.js`, `js/views/{today,review,products,intake,vault,me}.js`. No WebGL and no external scripts; it reuses `pricing-hub/js/api.js`.
+  - `server/pricing-router.js`: `GET /invoices/:id` (manager; every line; internals stripped), plus a test in `server/pricing-game-router.test.js`.
+  - `pricing-hub/js/api.js`: `getInvoice`, `getInvoiceSource`, `downloadLabels`.
+  - `scripts/build-public-site.js` allowlists `hub/`. `scripts/test-public-site.cjs` requires its files.
+  - `vercel.json`: `/hub` → `/hub/` redirect.
+  - `index.html`: hub iframe, "Pricing" nav link and hero button removed; staff footer link added. `links.html`: hub button points to `/hub/`.
+  - Docs: `LOADING_DOCK.md`, `CURRENT_STATE.md`, decision note.
+- Verified:
+  - Server suite 133/134 (only the pre-existing Gemini failure). Guard 6/6.
+  - Emulated `vercel build` plus smoke.
+  - Headless Chromium end to end on desktop and mobile with 0 errors (details in `CURRENT_STATE.md`).
+- Security/rollback:
+  - No secrets touched. The new route is read-only, manager-only, and strips storage internals.
+  - Rollback = revert the branch; the 3D dock at `/pricing-hub/` is unchanged.
+- Next safe action: merge #54 → #55 → this on the owner's explicit go, then check `/hub/` on a preview with a real sign-in.
+## 2026-10-10 15:32 ET — Claude Code — Merge main's retry-extract into #54/#55
+- `main` gained `4b7a8f5` (Noel):
+  - `POST /invoices/:id/retry-extract`;
+  - `GET /products/coverage`;
+  - a shared `runExtraction()`.
+- #54 merged `main` cleanly.
+- #55 conflicted where both sides had split the extraction step out of intake. Resolution:
+  - Noel's `runExtraction` is the core step;
+  - #55's `extractIntoInvoice` wraps it, so a failed read resets the invoice to `uploaded`;
+  - every read path (intake, `/extract`, `/retry-extract`) goes through the wrapper. Noel's route previously left a failed retry in `extracting`; his own comment says both paths should agree.
+- Test added: `retry-extract` failure resets to `uploaded`, success lands lines, reviewed work is refused (409), the operator token is refused (403). Mutation-checked against the old call.
+- Follow-up for the owner: `/extract` (#55, manager, refuses in-flight reads) and `/retry-extract` (main, approver, also re-reads untouched `needs_review` invoices) overlap. Consolidate into one route after these PRs land.
+- Still on `main`: the manual-UPC "Save digits" wiring bug (fixed in #55 only).
+
 ## 2026-10-11 05:28 ET — Claude Code — main's #52 polish merged into #54; polish.css allowlisted
 - `main` moved to `43ca4d5` (#52 Pricing Hub polish: `pricing-hub/polish.css`, `js/polish.js`, and a sign-in check that reports a preview without pricing config instead of a bad password).
 - Merged into `fix/vercel-public-allowlist` cleanly. The Public site guard then failed on `pricing-hub/index.html -> polish.css` (unpublished), so `pricing-hub/polish.css` joined `PUBLIC_FILES` and both new files joined the guard's required list.
@@ -256,6 +372,11 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Previews: per `main`'s 2026-10-09 checkpoint, previews report `storeConfigured:false`, so manager sign-in works only in production until the Preview env gets the server-only pricing variables.
 - Next safe action: the same `main` merge flows into #55 and #56; merge the stack only on the owner's explicit go.
 
+## 2026-10-11 05:35 ET — Claude Code — main's #52 polish merged through #55 and #56; 2D sign-in preview check
+- #55 (`feat/pricing-hub-ops-game`): merged the updated #54. The docs and the guard's required list conflicted (kept both sides). `boot.js`, `hud.js` and `index.html` auto-merged; main's preview check sits in the game layer's auth gate unchanged. The polish layer's taller zone rail overlapped the Missions button on phones, so it now uses the same 104px lift as `#fab`.
+- #56 (`feat/pricing-hub-2d`): merged #55 (allowlist conflict: kept `polish.css` and the `hub/` files). The 2D sign-in now mirrors main's check: on `storeConfigured:false` it explains the preview and never calls `/login`.
+- Verified: guard 6/6 and storefront resilience 4/4 on both; server suite 132/134 (#55) and 133/135 (#56), with only main's two known failures; 3D drive 0 errors (desktop and mobile); full 2D drive 0 errors; a no-store harness shows the 2D notice on desktop and mobile with no `/login` request.
+- Next safe action: owner's go to merge #54 → #55 → #56; the first authenticated check is production (previews lack the pricing env).
 
 ## 2026-10-15 18:45 ET — Codex
 - Goal: verify issue #45's live manager portal and authenticated `pricing-integrations` smoke-test path.
@@ -275,3 +396,9 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Security or rollback notes: no form submission, price change, alias write, or count mutation; no credentials read or entered.
 - PR/issue/commit: issue #45; documentation-only PR #57.
 - Next safe action: obtain a currently open manager-authenticated browser tab/identified portal route, then exercise only safe reads and approved test flows.
+
+## 2026-10-18 22:27 ET — Claude Code — #54 merged to main; #55 brought up to date and retargeted
+- The owner squash-merged #56 into #55's branch (`52f2254`, tree identical to #56's verified `be42090`) and then #54 into `main` (`c57ec8c`, tree identical to #54's head `b085a8e`).
+- #55: merged `main` with the `ours` strategy. Every conflict was a file #54 created and #55 later changed, and `main` held nothing beyond #54's head, which #55 already contained. The resulting tree is identical to `3463d4f`, so the diff against `main` is #55's 36 files only. Base retargeted from `fix/vercel-public-allowlist` (not deleted) to `main`, so merging #55 cannot land in the stale branch.
+- Deploy state: `kingdom-os` builds production from `main` (not verified here). The manually deployed `anthony-pricing-hub` and the project behind `anthony-supermarket.vercel.app` still serve old builds until `main` is deployed to them.
+- Next safe action: the owner merges #55 when ready, then deploys `main` to the manual Vercel projects and runs the #54/#56 checklists on production.

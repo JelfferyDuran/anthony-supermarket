@@ -11,6 +11,7 @@ export const state = {
   products: [],
   queue: [],          // needs_review lines, grouped on demand
   financials: null,
+  game: null,         // GET /game/state — player, missions, health, leaderboard
   cleared: 0,         // invoices approved this session (game counter)
 };
 
@@ -159,11 +160,17 @@ export const api = {
   importPos(file) {
     return new Promise((resolve, reject) => {
       const form = new FormData();
-      form.append('file', file, file.name);
+      // The server reads the export from the 'sales' field (posUpload.single('sales')).
+      form.append('sales', file, file.name);
       const xhr = new XMLHttpRequest();
       xhr.addEventListener('load', () => {
         let data = null;
         try { data = JSON.parse(xhr.responseText); } catch (_) { /* fall through */ }
+        if (xhr.status === 401) {
+          clearSession();
+          reject(new Error('Session expired — please sign in again.'));
+          return;
+        }
         if (xhr.status < 200 || xhr.status >= 300) {
           reject(new Error((data && data.error) || ('POS import failed (' + xhr.status + ')')));
           return;
@@ -207,6 +214,56 @@ export const api = {
 
   async calculate(unitCost, markupPct = 70) {
     return request('/calculate', { method: 'POST', body: { unitCost, markupPct } });
+  },
+
+  /* ---------- game layer ---------- */
+  async getGameState() {
+    state.game = await request('/game/state');
+    return state.game;
+  },
+
+  // The server computes the rule price from the cost on file; only the
+  // product is named here. 409 WOULD_LOWER_PRICE asks for allowDecrease.
+  async applyRule(productId, { allowDecrease = false } = {}) {
+    return request('/products/' + encodeURIComponent(productId) + '/apply-rule', {
+      method: 'POST',
+      body: { allowDecrease },
+    });
+  },
+
+  // Re-read a stored scan whose first extraction never finished.
+  async rescueInvoice(invoiceId) {
+    return request('/invoices/' + encodeURIComponent(invoiceId) + '/extract', { method: 'POST', body: {} });
+  },
+
+  /* ---------- review card helpers ---------- */
+  // One invoice with every line, rejected ones included: { invoice, lines }.
+  async getInvoice(invoiceId) {
+    return request('/invoices/' + encodeURIComponent(invoiceId));
+  },
+
+  // Short-lived signed URL for the original scan: { url, expiresInSeconds }.
+  async getInvoiceSource(invoiceId) {
+    return request('/invoices/' + encodeURIComponent(invoiceId) + '/source');
+  },
+
+  // Price-gun label CSV (all labels, or one invoice's). Returns a Blob.
+  async downloadLabels(invoiceId = null) {
+    const qs = invoiceId ? '?invoiceId=' + encodeURIComponent(invoiceId) : '';
+    let res;
+    try {
+      res = await fetch(BASE + '/export/labels' + qs, {
+        headers: state.token ? { Authorization: 'Bearer ' + state.token } : {},
+      });
+    } catch (e) {
+      throw new Error('Network error: could not reach the hub (' + e.message + ')');
+    }
+    if (res.status === 401) {
+      clearSession();
+      throw new Error('Session expired — please sign in again.');
+    }
+    if (!res.ok) throw new Error('Label export failed (' + res.status + ')');
+    return res.blob();
   },
 };
 

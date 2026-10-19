@@ -21,7 +21,17 @@ test('vercel.json publishes the allowlisted build, never the repo root', () => {
   const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
   assert.equal(cfg.outputDirectory, 'public-build');
   assert.match(cfg.buildCommand || '', /node scripts\/build-public-site\.js/);
-  assert.ok(cfg.functions && cfg.functions['api/pricing/[...path].js'], 'the /api/pricing function must stay configured');
+  // Without a rewrite Vercel routes only ONE segment after /api/pricing to a
+  // function: /invoices/:id/approve, /products/:id/history and friends 404.
+  // The rewrite must carry the full path to a function that exists and is
+  // configured (today api/pricing-fn.js, which restores it from __path).
+  const rewrite = (cfg.rewrites || []).find(r => r.source === '/api/pricing/:path*');
+  assert.ok(rewrite, 'the /api/pricing/:path* rewrite must stay configured');
+  const target = rewrite.destination.split('?')[0].replace(/^\//, '') + '.js';
+  assert.ok(fs.existsSync(path.join(ROOT, target)), `rewrite target ${target} must exist`);
+  assert.ok(cfg.functions && cfg.functions[target], `rewrite target ${target} must stay configured`);
+  assert.ok(rewrite.destination.includes(':path*') || target === 'api/pricing/[...path].js',
+    'the rewrite must pass the full /api/pricing path on');
 });
 
 test('the build refuses to clean the repository itself', () => {
@@ -29,12 +39,16 @@ test('the build refuses to clean the repository itself', () => {
   assert.throws(() => build(path.dirname(ROOT)), /refusing to build/);
 });
 
-test('the Pricing Hub client and the public pages ship', () => {
+test('the Pricing Hub clients (2D /hub and 3D dock) and the public pages ship', () => {
   const required = [
     'index.html', 'links.html', 'privacy.html', 'terms.html', 'sales.html', 'data/sale.json',
     'pricing-hub/index.html', 'pricing-hub/game.css', 'pricing-hub/polish.css',
     'pricing-hub/js/api.js', 'pricing-hub/js/boot.js', 'pricing-hub/js/hud.js',
-    'pricing-hub/js/world.js', 'pricing-hub/js/zones.js', 'pricing-hub/js/polish.js',
+    'hub/index.html', 'hub/hub.css', 'hub/js/app.js', 'hub/js/ui.js', 'hub/js/upc.js',
+    'hub/js/views/today.js', 'hub/js/views/review.js', 'hub/js/views/products.js',
+    'hub/js/views/intake.js', 'hub/js/views/vault.js', 'hub/js/views/me.js',
+    'pricing-hub/js/world.js', 'pricing-hub/js/zones.js', 'pricing-hub/js/game.js',
+    'pricing-hub/js/polish.js',
   ];
   for (const rel of required) assert.ok(published.includes(rel), `${rel} must be published`);
 });

@@ -34,7 +34,21 @@ export function createZones(world, hooks) {
       f.obj.position.y = f.baseY + Math.sin(t * 1.4 + f.phase) * f.amp;
       f.obj.rotation.y += 0.003;
     }
+    // Rule Guard items pulse red until they are repriced (unless a search
+    // highlight is driving the boxes right now).
+    if (!highlightActive) {
+      for (const m of productBoxes.values()) {
+        if (m.userData.leak) m.material.emissiveIntensity = 0.45 + Math.max(0, Math.sin(t * 4)) * 0.75;
+      }
+    }
   });
+  let highlightActive = false;
+
+  // Products the Rule Guard mission says sell under retail = cost x 1.70.
+  function leakIds() {
+    const m = state.game && state.game.missions ? state.game.missions.find((x) => x.key === 'rule_guard') : null;
+    return new Set(m ? m.items.map((i) => i.id) : []);
+  }
 
   /* ================= REVIEW LINE ================= */
   function refreshReview() {
@@ -51,7 +65,7 @@ export function createZones(world, hooks) {
         // crisp HTML invoice tag (anchored, follows the package)
         const tag = world.addLabel(
           '#' + String(inv.number).slice(0, 14) + ' · ' + inv.lines.length + ' LINES',
-          { cls: 'fl-tag', at: g, dy: 1.5, maxDist: 60 }
+          { cls: 'fl-tag', at: g, dy: 1.5, maxDist: 60, zone: 'review' }
         );
         g.userData.tag = tag;
         // generous invisible tap target
@@ -143,7 +157,11 @@ export function createZones(world, hooks) {
     productBoxes.clear();
     world.pickables.aisles.length = 0;
 
-    const items = state.products.slice(0, MAX_AISLE_BOXES);
+    // The shelves hold 48 boxes; work comes first — Rule Guard items, then
+    // owner-flagged items, then the rest of the catalog.
+    const leaks = leakIds();
+    const rank = (p) => (leaks.has(p.id) ? 0 : p.flagged ? 1 : 2);
+    const items = [...state.products].sort((a, b) => rank(a) - rank(b)).slice(0, MAX_AISLE_BOXES);
     const rows = world.anchors.shelfRows;
     const geo = new THREE.BoxGeometry(1.15, 0.95, 1.15);
     items.forEach((p, i) => {
@@ -157,7 +175,8 @@ export function createZones(world, hooks) {
       const m = new THREE.Mesh(geo, mat);
       m.position.set(x, board + 0.48, row.z);
       m.castShadow = true;
-      m.userData.baseEmissive = 0;
+      m.userData.leak = leaks.has(p.id);
+      if (m.userData.leak) mat.emissive.setHex(PALETTE.red);
       aisleGroup.add(m);
       // invisible, generous tap target (well over 48px on phones)
       const hit = new THREE.Mesh(hitGeoSmall, hitMat);
@@ -174,10 +193,11 @@ export function createZones(world, hooks) {
   function highlightProducts(ids) {
     const set = new Set(ids);
     const any = set.size > 0;
+    highlightActive = any;
     for (const [id, m] of productBoxes) {
       if (!any) {
-        m.material.emissive.setHex(0x000000);
-        m.material.emissiveIntensity = 0;
+        m.material.emissive.setHex(m.userData.leak ? PALETTE.red : 0x000000);
+        m.material.emissiveIntensity = m.userData.leak ? 0.6 : 0;
         m.scale.set(1, 1, 1);
       } else if (set.has(id)) {
         m.material.emissive.setHex(PALETTE.amber);
@@ -201,8 +221,8 @@ export function createZones(world, hooks) {
       }
       return null;
     };
-    const revenue = pick(['revenue', 'total_revenue', 'sales', 'total_sales']);
-    const cost = pick(['cost', 'total_cost', 'cogs', 'total_cogs']);
+    const revenue = pick(['gross_sales', 'revenue', 'total_revenue', 'sales', 'total_sales']);
+    const cost = pick(['cost_of_goods', 'cost', 'total_cost', 'cogs', 'total_cogs']);
     const profit = pick(['profit', 'total_profit', 'gross_profit', 'net_profit']);
     world.anchors.setVaultBars([
       { key: 'revenue', value: revenue, text: fmtMoney(revenue) },
@@ -222,10 +242,11 @@ export function createZones(world, hooks) {
       const r = productRetail(p);
       if (r != null) catalogValue += r;
     }
+    const g = state.game;
     world.anchors.updateHolo([
+      ...(g ? [`DOCK INTEGRITY  ${g.health.score} · ${g.health.grade}`] : []),
       `AWAITING REVIEW  ${awaiting}`,
-      `CATALOG  ${nProducts} items`,
-      `RETAIL VALUE  ${fmtMoney(catalogValue)}`,
+      `CATALOG  ${nProducts} items · ${fmtMoney(catalogValue)}`,
     ]);
   }
 
@@ -236,6 +257,7 @@ export function createZones(world, hooks) {
     else if (pick.type === 'tray') hooks.openUpload();
     else if (pick.type === 'reviewPkg') hooks.showInvoice(pick.invoiceId);
     else if (pick.type === 'product') hooks.showProduct(pick.productId);
+    else if (hooks.onPick) hooks.onPick(pick); // game layer: beacons, stuck scans
   }
 
   return {

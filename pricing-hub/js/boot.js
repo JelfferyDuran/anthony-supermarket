@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { createWorld } from './world.js';
 import { createZones } from './zones.js';
 import { createHud } from './hud.js';
+import { createGame } from './game.js';
 import { api, state, isAuthed, clearSession } from './api.js';
 
 const ZONES = ['dock', 'intake', 'review', 'aisles', 'vault'];
@@ -24,18 +25,32 @@ async function main() {
     currentZone: () => currentZone,
     goZone,
     refreshAll,
+    refreshGame: () => refreshGame(),
+    openMissions: (key) => game && game.openBoard(key || null),
   };
 
   // zones' hooks call hud methods; hud is assigned just below, before any tap.
   let hud = null;
+  let game = null;
   const zones = createZones(world, {
     goZone,
     setReviewBadge: (n) => hud.setReviewBadge(n),
     openUpload: () => hud.openUpload(),
     showInvoice: (id) => hud.showInvoice(id),
     showProduct: (id) => hud.showProduct(id),
+    onPick: (pick) => game && game.handlePick(pick),
   });
   hud = createHud(world, zones, nav);
+  game = createGame(world, hud, nav);
+
+  // Game state is derived server-side; refreshing it after any action is how
+  // XP, level-ups, badges and mission clears show up.
+  async function refreshGame() {
+    const g = await game.refresh();
+    if (g && g.player && g.player.email) hud.setUser(g.player.email);
+    try { zones.refreshHolo(); } catch (_) { /* best-effort */ }
+    return g;
+  }
 
   function goZone(zone) {
     if (!ZONES.includes(zone)) return;
@@ -52,6 +67,7 @@ async function main() {
       api.getQueue(),
       api.getFinancials(),
       api.getConfig(),
+      game.refresh(),
     ]);
     const rejected = results.find((r) => r.status === 'rejected');
     if (rejected && /session expired|401/i.test(rejected.reason.message)) {
@@ -63,6 +79,8 @@ async function main() {
     try { zones.refreshAisles(); } catch (_) { /* best-effort */ }
     try { zones.refreshVault(); } catch (_) { /* best-effort */ }
     try { zones.refreshHolo(); } catch (_) { /* best-effort */ }
+    const g = state.game;
+    if (g && g.player && g.player.email) hud.setUser(g.player.email);
   }
   nav.refreshAll = refreshAll;
 
