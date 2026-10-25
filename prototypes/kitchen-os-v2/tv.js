@@ -1,0 +1,19 @@
+'use strict';
+const screen=Number(new URLSearchParams(location.search).get('screen')||1);
+const root=document.getElementById('board');
+const money=p=>'$'+Number(p).toFixed(Number(p)%1?2:0);
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const header=(title,sub)=>`<div class="head"><div class="logo">▣ ANTHONY'S <small>SUPERMARKET</small></div><div class="kicker">SUPER KITCHEN · VISTA PREVIA</div></div><div class="titlebar"><h1>${title}</h1><div class="kicker">${sub}</div></div>`;
+const footer=()=>`<div class="foot"><span>ANTHONY'S · SABOR DOMINICANO</span><span>PRECIOS EN TIENDA · DEMO LOCAL</span></div>`;
+function render(data){const all=data.items||[];const get=id=>all.find(x=>x.id===id&&x.available&&x.status==='confirmed');const show=id=>{const i=get(id);return i?money(i.price):'—'};
+ if(screen===1){root.innerHTML=header('PLATOS DEL DÍA','FRESCO · HECHO AQUÍ')+`<div class="content"><div class="hero"><div class="placeholder">SABOR DE CASA<small>Foto real del almuerzo pendiente de aprobación</small></div></div><div class="cards"><div class="price"><span>ESPECIAL ESTUDIANTE<small>Arroz · habichuelas · carne</small></span><b>${show('student')}</b></div><div class="price"><span>PLATO REGULAR<small>Arroz · habichuelas · carne</small></span><b>${show('regular')}</b></div><div class="group"><h2>CARNES DEL DÍA</h2><p>Pollo guisado · Res guisada</p><p>Cerdo guisado · Chivo guisado</p><p style="color:#c6d3bd;font-size:1vw">Disponibilidad y recargos: confirmar en mostrador</p></div></div></div>`+footer();}
+ else if(screen===2){const groups=[['RES GUISADA','beef'],['CERDO GUISADO','pork'],['CHIVO GUISADO','goat'],['POLLO GUISADO','chicken'],['HABICHUELAS','beans']];root.innerHTML=header('CARNES Y PORCIONES','SERVIDO POR ENVASE')+`<div class="portion-grid">${groups.map(([name,p])=>`<div class="portion"><h2>${name}</h2>${[8,16,32].map(sz=>`<div class="line"><span>${sz} oz</span><strong>${show(p+sz)}</strong></div>`).join('')}</div>`).join('')}<div class="portion small"><h2>POR LIBRA</h2><div class="line"><span>Pernil</span><strong>${show('pernil')}/lb</strong></div><div class="line"><span>Chicharrón</span><strong>${show('chicharron')}/lb</strong></div></div></div>`+footer();}
+ else{root.innerHTML=header('PICADERAS','TRES CARNES FRITAS')+`<div class="pic-layout"><div class="pic-photo"><img src="assets/picadera-latest-natural-concept.jpg" alt="Real Anthony's reference picadera photograph"></div><div class="cards"><div class="pic-prices"><div class="pic-price"><h2>7 PULGADAS</h2><strong>${show('pic7')}</strong><small>3 CARNES</small></div><div class="pic-price"><h2>9 PULGADAS</h2><strong>${show('pic9')}</strong><small>3 CARNES</small></div></div><div class="group options"><strong>ELIGE TUS CARNES</strong><br>Chicken tenders · Chicharrón · Longaniza · Carne frita · Queso frito · Salami · Chuleta ahumada</div><div class="group options"><strong>ACOMPAÑAMIENTO · PAN 7”</strong><br>Papas · Tostones · Yuca · Plátano · Mezcla</div><div class="group"><h2>OTRAS ESPECIALIDADES</h2><p>Mangú Tres Golpes ${show('mangu7')} / ${show('mangu12')} · Empanadas ${show('empanada')}</p></div></div></div>`+footer();}
+}
+async function update(){try{const r=await fetch('/api/approved',{cache:'no-store'});if(!r.ok)throw Error();const data=await r.json();if(!data.items?.length){const seed=await fetch('/data/seed.json',{cache:'no-store'});render(await seed.json());}else render(data);}catch(e){try{
+    // Static preview mode: use browser-local approved snapshot if present, else seed.
+    const saved=localStorage.getItem('kitchen-os-approved-v2');
+    if(saved){const d=JSON.parse(saved);if(d.items?.length){render(d);return;}}
+    const seed=await fetch('data/seed.json',{cache:'no-store'});render(await seed.json());
+  }catch(e2){root.innerHTML='<div class="loading">PREVIEW UNAVAILABLE · START LOCAL SERVER</div>';}}}
+update();setInterval(update,5000);
