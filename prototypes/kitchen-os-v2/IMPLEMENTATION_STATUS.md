@@ -24,7 +24,7 @@ _Updated: 2026-10-24_
 - **The v2.1 preview contains zero Supabase calls** — fully functional without Supabase, per the task priority
 
 ## Blocked
-- **Vercel deployment** — no Vercel CLI auth/token available on this machine. Owner must provide a token (`vercel login` or `VERCEL_TOKEN`). Static adaptation is ready; deploy is one command once token exists.
+- ~~**Vercel deployment** — no Vercel CLI auth/token available on this machine. Owner must provide a token (`vercel login` or `VERCEL_TOKEN`). Static adaptation is ready; deploy is one command once token exists.~~ **RESOLVED 2026-10-24** — deployed to production URL: **https://anthonys-kitchen-os-v2-preview.vercel.app** (all pages + assets verified HTTP 200; TV1/2/3 render with approved prices; studio in STATIC PREVIEW MODE).
 
 ## Deferred (needs owner approval + design review)
 - Authenticated manager login

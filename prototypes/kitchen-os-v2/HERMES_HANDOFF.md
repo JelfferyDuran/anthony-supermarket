@@ -17,7 +17,7 @@ Full v2.1 package imported from `anthonys-kitchen-os-v2.1-latest-designs.zip` in
 - Picadera sides are a separate 7-inch pan; validate operational portions before production.
 
 ## Blocker
-- **Vercel deploy needs the owner's Vercel token** — `vercel login` at the laptop, or paste a `VERCEL_TOKEN`. Static adaptation is ready; then: `npx vercel deploy prototypes/kitchen-os-v2` (or via existing project).
+- ~~**Vercel deploy needs the owner's Vercel token** — `vercel login` at the laptop, or paste a `VERCEL_TOKEN`. Static adaptation is ready; then: `npx vercel deploy prototypes/kitchen-os-v2` (or via existing project).~~ **RESOLVED** — deployed: **https://anthonys-kitchen-os-v2-preview.vercel.app** (2026-10-24).
 
 ## Next development (with ChatGPT, owner-reviewed)
 Asset approval/manifest, item modifiers/portion containers, TV assignment + scheduler, manager auth, KFS canary adapter behind explicit publish approval, operational rollback.

@@ -4,3 +4,4 @@ data/draft.json
 data/approved.json
 data/approved-*.json
 *.pyc
+.vercel
