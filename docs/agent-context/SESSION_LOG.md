@@ -160,6 +160,31 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - PR/issue/commit: PR #39 (draft), same branch.
 - Next safe action: confirm the NRS export column names against one real file, then apply the three migrations + seed to Supabase in order and run one real invoice and one real POS export end to end.
 
+## 2026-10-26 09:00 ET — Claude Code (Feature branch assessment)
+- Goal: reassess the Pricing Hub V2 feature branch after discovering main has advanced significantly.
+- Changed: updated CURRENT_STATE.md and SESSION_LOG with accurate status. No code changes.
+- Verified:
+  - `main` branch (d53c542) contains all four binding owner decisions from 2026-08-19: 70% markup rule (locked/enforced), Gemini OCR (integrated), multi-channel intake (Telegram/WhatsApp/hub), iframe strategy (kept).
+  - The work from `claude/pricing-hub-v2-upgrade-cyu5dm` has been evolved and integrated into `main` in better form:
+    - `server/pricing-intake.js`, `server/pricing-ocr.js`, `server/pricing-engine.js` are on `main` with improvements (OCR provider order changed, function naming evolved).
+    - Additional features layered on top: game engine, 2D hub, UPC pipeline, line exceptions, stuck-scan rescue.
+    - Multiple real invoices (J&J Farms, Fisher Foods, NAC Foods, Family Food) have been manually approved through the system.
+  - Feature branch divergence: 104 commits ahead of main (my feature-specific work), 50 commits behind (new work on main).
+  - Migrations: my 4 migrations (invoice pipeline, reconciliation, POS, intake provenance) are on `main`; 3 additional later migrations exist (Phase 3, security hardening, Phase D).
+  - Deployments: code is production-ready but Vercel manual projects lag behind main (last deploy was on earlier commit; security allowlist fix #54 not yet promoted).
+- Not verified / blockers:
+  - Whether `kingdom-os` auto-deployment succeeded after #54 merge.
+  - Whether production (kingdom-noel) Vercel project can reach `anthony-supermarket.vercel.app` or `anthony-pricing-hub` (session cannot test due to network policy).
+  - Whether Preview environment signing in is blocked or working; it lacks server-only pricing variables per CURRENT_STATE.
+  - Whether `kingdom-os` has external HTTP dependency on `/apps/pricing-hub/index.html` that would break if served differently.
+- Security or rollback notes: no changes were made to code or infrastructure; this is an assessment session. Feature branch remains available for reference but is obsolete.
+- Decision: The feature branch should not be merged to main. Its work is already there, better integrated. Archive or delete the branch per owner decision.
+- Next safe action:
+  1. Check if `kingdom-os` auto-deployment succeeded and is serving the right version.
+  2. Manually deploy `main` to `anthony-pricing-hub` and `anthony-supermarket.vercel.app` to promote security fixes and new interfaces.
+  3. Verify production signing in and confirm the Pricing Hub is accessible and correct.
+  4. Then decide: delete the feature branch, or keep it as a reference (branches are cheap).
+
 ## 2026-08-19 — Invoice bundle 08/19 (8 invoices, 6 vendors) integrated
 - OCR'd 11-page bundle via live webhook (port 8799) → 8 invoices: Amaro #1671390, JCC Ganoza #012830, NACfoods #3057:5, TAINO #27810, GOYA #27727700 (2pp), Peru Food #0271478-00, Peruvian Import #INVNJ23126 + #INVNJ23127.
 - Bundle $5,510.54 | 137 lines | 171 cases | all 6 vendors NEW to hub.

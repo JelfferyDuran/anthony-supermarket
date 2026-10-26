@@ -1,6 +1,13 @@
 # Current State — Anthony's Supermarket
 
-Last updated: 2026-10-18 (#54 allowlist and #55 game layer + 2D hub merged to `main`; `kingdom-os` builds from `main`; the manually deployed Vercel projects still need a deploy of `main`)
+Last updated: 2026-10-26 (#54-#58 all merged and stable on `main`; `kingdom-os` auto-builds from `main`; `anthony-pricing-hub` and `anthony-supermarket.vercel.app` are manual deploys lagging behind `main`)
+
+## 2026-10-26 Assessment Update
+- **Feature branch status**: `claude/pricing-hub-v2-upgrade-cyu5dm` (104 commits ahead, 50 behind main) is obsolete; the work (70% markup, Gemini OCR, multi-channel intake) is already on `main` in evolved form with additional hardening and game layer.
+- **Code readiness**: `main` is production-ready with all owner decisions implemented and tested.
+- **Deployment lag**: The two manually-deployed Vercel projects have not been promoted to the current `main`, so they are not exposing the latest security fixes (#54 allowlist) or the new 2D hub interface (#55).
+- **Production verification needed**: Check if `kingdom-os` can reach the Pricing Hub file over HTTP (historical parsing dependency) and whether Preview environment signing in is blocked or working.
+- **Next action**: Promote `main` to the two manual Vercel projects, verify production, then decide on the feature branch.
 
 This file is operational context, not a secret store. **Live infrastructure is authoritative.** Verify live state before consequential actions.
 
