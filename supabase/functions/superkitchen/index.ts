@@ -4,7 +4,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const BOT_URL = Deno.env.get("BOT_URL") || "https://t.me/Anthonysuperkitchen_bot";
-const MINIAPP_URL = "https://jelfferyduran.github.io/anthony-supermarket/apps/superkitchen/dist/";
+const MINIAPP_URL = "https://anthony-supermarket-superkitchen.vercel.app";
 // Server-only secret. A historical token must never be reused here.
 const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
 
@@ -41,6 +41,7 @@ const MENU = {
 
 const ALLOWED_ORIGINS = new Set([
   "https://jelfferyduran.github.io",
+  "https://anthony-supermarket-superkitchen.vercel.app",
   "https://cbpdiiyzzmbavsymjysb.supabase.co",
 ]);
 
