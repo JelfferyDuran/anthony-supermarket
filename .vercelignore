@@ -1,0 +1,17 @@
+# Never upload secret / local-only material to Vercel (belt-and-braces with .gitignore)
+.env
+.env.*
+.env.bak*
+*.env.pulled
+*.env.prod.pulled
+server/.env
+server/.env.*
+server/data/
+nrs/.env
+.worktrees/
+deploy/pricing-hub/.env*
+node_modules/
+public-build/
+docs/invoices/*.pdf
+docs/pricing/*.csv
+assets/social/
