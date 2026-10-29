@@ -7,3 +7,4 @@ apps/superkitchen/dist/**/*.js          text eol=lf
 apps/superkitchen/dist/**/*.css         text eol=lf
 apps/superkitchen/dist/**/*.webmanifest text eol=lf
 apps/superkitchen/dist/**/*.json        text eol=lf
+apps/superkitchen/index.html           text eol=lf
