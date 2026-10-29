@@ -27,7 +27,7 @@ This is a **bilingual presentation platform** (English/Spanish) designed to show
 ### 🎨 Design
 - **Anthony's branding** — Green (#4CAF50) matching the logo
 - Community-focused messaging
-- "Serving Kearny for 9 years"
+- "Serving Kearny since 2012"
 - Modern glassmorphism UI
 - Smooth animations
 - Fully responsive (desktop & mobile)
@@ -153,7 +153,7 @@ To update the presentation:
 **Logo:** Shopping cart emoji 🛒 (green circle background)
 
 **Messaging:**
-- "Serving the Kearny community for 9 years"
+- "Serving the Kearny community since 2012"
 - "Fresh Fruit & Vegetables • Fresh Meat • Hot Food"
 - Community-focused, not corporate
 
@@ -164,7 +164,7 @@ To update the presentation:
 ```
 📍 288 Kearny Ave, Kearny, NJ 07032
 📞 (201) 428-1745
-🏪 Serving the community for 9 years
+🏪 Serving the community since 2012
 🥬 Fresh Fruit & Vegetables • Fresh Meat • Hot Food
 ```
 

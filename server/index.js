@@ -511,9 +511,9 @@ function startBot() {
         `🔍 /search <item> — Search items\n` +
         `🛍️ /cart — View your cart\n` +
         `✅ /checkout — Place your order\n\n` +
-        `🌐 Also order online: https://jelfferyduran.github.io/anthony-supermarket/\n` +
+        `🌐 Also order online: https://anthonyshopandsave.com/\n` +
         `🍗 Or try the Mini App: ${process.env.MINIAPP_URL || 'http://localhost:3002'}\n` +
-        `🕐 Mon–Sat 7AM–8PM | Sun CLOSED`,
+        `🕐 Mon–Sat 7AM–8PM | Sun 8AM–3PM`,
         { parse_mode: 'Markdown' }
       );
     });
@@ -883,8 +883,8 @@ function startBot() {
         `💬 WhatsApp: 732-925-5201\n\n` +
         `🕐 *Hours:*\n` +
         `Mon–Sat: 7:00 AM – 8:00 PM\n` +
-        `Sunday: CLOSED\n\n` +
-        `🌐 https://jelfferyduran.github.io/anthony-supermarket/`,
+        `Sunday: 8:00 AM – 3:00 PM\n\n` +
+        `🌐 https://anthonyshopandsave.com`,
         { parse_mode: 'Markdown' }
       );
     });
