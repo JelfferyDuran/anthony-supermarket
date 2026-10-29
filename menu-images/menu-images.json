@@ -1,0 +1,457 @@
+[
+ {
+  "name": "Mang\u00fa / Mashed Green Plantains",
+  "category": "Desayunos",
+  "slug": "mangu",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Tres Golpes / Three Hits",
+  "category": "Desayunos",
+  "slug": "tres-golpes",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batata / Sweet Potato",
+  "category": "Desayunos",
+  "slug": "batata",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Yuca / Cassava",
+  "category": "Desayunos",
+  "slug": "yuca",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chicharr\u00f3n (1 lb) / Crispy Pork",
+  "category": "Desayunos",
+  "slug": "chicharron",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chuleta Ahumada / Smoked Pork Chop",
+  "category": "Extras desayuno",
+  "slug": "chuleta-ahumada",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Salami",
+  "category": "Extras desayuno",
+  "slug": "salami",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Longaniza / Sausage",
+  "category": "Extras desayuno",
+  "slug": "longaniza",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Queso / Cheese",
+  "category": "Extras desayuno",
+  "slug": "queso",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Huevos / Eggs",
+  "category": "Extras desayuno",
+  "slug": "huevos",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Turkey Sandwich",
+  "category": "S\u00e1ndwiches",
+  "slug": "sandwich-pavo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Ham Sandwich",
+  "category": "S\u00e1ndwiches",
+  "slug": "sandwich-jamon",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Roasted Turkey Sandwich",
+  "category": "S\u00e1ndwiches",
+  "slug": "sandwich-pavo-asado",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chef's Special Sandwich",
+  "category": "S\u00e1ndwiches",
+  "slug": "sandwich-especial",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pollo al Horno / Roast Chicken",
+  "category": "Almuerzos",
+  "slug": "pollo-al-horno",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pollo Guisado / Stewed Chicken",
+  "category": "Almuerzos",
+  "slug": "pollo-guisado",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Res Guisada / Stewed Beef",
+  "category": "Almuerzos",
+  "slug": "res-guisada",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pernil / Roast Pork Shoulder",
+  "category": "Almuerzos",
+  "slug": "pernil",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chivo / Goat",
+  "category": "Almuerzos",
+  "slug": "chivo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Cerdo Guisado / Stewed Pork",
+  "category": "Almuerzos",
+  "slug": "cerdo-guisado",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Costillas al Horno / Roast Pork Ribs",
+  "category": "Almuerzos",
+  "slug": "costillas-al-horno",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Bacalao / Codfish",
+  "category": "Almuerzos",
+  "slug": "bacalao",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Mondongo / Beef Tripe",
+  "category": "Almuerzos",
+  "slug": "mondongo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Berenjena / Eggplant",
+  "category": "Almuerzos",
+  "slug": "berenjena",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pasta",
+  "category": "Almuerzos",
+  "slug": "pasta",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Sancocho / Hearty Dominican Soup",
+  "category": "Almuerzos",
+  "slug": "sancocho",
+  "notes": "16 oz y 32 oz: una sola imagen",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Sopa de Pollo / Chicken Soup",
+  "category": "Almuerzos",
+  "slug": "sopa-de-pollo",
+  "notes": "32 oz",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Arroz Blanco / White Rice",
+  "category": "Sides",
+  "slug": "arroz-blanco",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Moro Negro / Black Rice",
+  "category": "Sides",
+  "slug": "moro-negro",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Moro Rojo / Red Rice",
+  "category": "Sides",
+  "slug": "moro-rojo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Moro de Gandules / Pigeon Pea Rice",
+  "category": "Sides",
+  "slug": "moro-gandules",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Habichuela / Beans",
+  "category": "Sides",
+  "slug": "habichuela",
+  "notes": "8 oz y 16 oz: una sola imagen",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Maduros / Sweet Plantains",
+  "category": "Sides",
+  "slug": "maduros",
+  "notes": "8 oz",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Ensalada Verde / Green Salad",
+  "category": "Sides",
+  "slug": "ensalada-verde",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Ensalada Rusa / Potato Salad",
+  "category": "Sides",
+  "slug": "ensalada-rusa",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Ensalada de Coditos / Macaroni Salad",
+  "category": "Sides",
+  "slug": "ensalada-coditos",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Limonada / Lemonade",
+  "category": "Jugos (16 oz)",
+  "slug": "limonada",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chicha Morada / Purple Corn Juice",
+  "category": "Jugos (16 oz)",
+  "slug": "chicha-morada",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Maracuy\u00e1 (Chinola/Parcha) / Passion Fruit",
+  "category": "Jugos (16 oz)",
+  "slug": "chinola",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Maracuy\u00e1 con Avena / Oat Passion Fruit",
+  "category": "Jugos (16 oz)",
+  "slug": "chinola-avena",
+  "notes": "puede reusar imagen de chinola",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pi\u00f1a / Pineapple Juice",
+  "category": "Jugos (16 oz)",
+  "slug": "jugo-pina",
+  "notes": "tambi\u00e9n en batidos: una sola imagen",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batido de Mora / Blackberry",
+  "category": "Batidos (20 oz)",
+  "slug": "batido-mora",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batido de Fresa / Strawberry",
+  "category": "Batidos (20 oz)",
+  "slug": "batido-fresa",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batido Verde / Green",
+  "category": "Batidos (20 oz)",
+  "slug": "batido-verde",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batido de Guineo / Banana",
+  "category": "Batidos (20 oz)",
+  "slug": "batido-guineo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Batido de Lechoza / Papaya",
+  "category": "Batidos (20 oz)",
+  "slug": "batido-lechoza",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Soda Country Club (2 L)",
+  "category": "Refrescos (opcional)",
+  "slug": "soda-country-club",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Coca-Cola (2 L)",
+  "category": "Refrescos (opcional)",
+  "slug": "coca-cola-2l",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Coca-Cola (20 oz)",
+  "category": "Refrescos (opcional)",
+  "slug": "coca-cola-20oz",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Fanta Orange (20 oz)",
+  "category": "Refrescos (opcional)",
+  "slug": "fanta-20oz",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Sprite (20 oz)",
+  "category": "Refrescos (opcional)",
+  "slug": "sprite-20oz",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Agua Poland Spring (16 oz)",
+  "category": "Refrescos (opcional)",
+  "slug": "agua-poland-spring",
+  "notes": "OPCIONAL: usar foto del producto o solo texto",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Banana",
+  "category": "Frutas (opcional)",
+  "slug": "fruta-banana",
+  "notes": "OPCIONAL: gen\u00e9rica, f\u00e1cil de generar",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Manzana / Apple",
+  "category": "Frutas (opcional)",
+  "slug": "fruta-manzana",
+  "notes": "OPCIONAL: gen\u00e9rica, f\u00e1cil de generar",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Naranja / Orange",
+  "category": "Frutas (opcional)",
+  "slug": "fruta-naranja",
+  "notes": "OPCIONAL: gen\u00e9rica, f\u00e1cil de generar",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Habichuela con Dulce",
+  "category": "Postres",
+  "slug": "habichuela-con-dulce",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Prote\u00edna a la carta",
+  "category": "Nuevos",
+  "slug": "proteina-a-la-carta",
+  "notes": "8/16/32 oz: una sola imagen gen\u00e9rica",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Yaroa Peque\u00f1a / Small",
+  "category": "Mini App (actual)",
+  "slug": "yaroa-small",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Yaroa Grande / Large",
+  "category": "Mini App (actual)",
+  "slug": "yaroa-large",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Chimi",
+  "category": "Mini App (actual)",
+  "slug": "chimi",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Mofongo",
+  "category": "Mini App (actual)",
+  "slug": "mofongo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Pica Pollo / Chicken Tenders",
+  "category": "Mini App (actual)",
+  "slug": "pica-pollo",
+  "notes": "",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Empanadas",
+  "category": "Solo web/flyer",
+  "slug": "empanadas",
+  "notes": "precio flyer $2.00 SIN VERIFICAR",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Combo Estudiante",
+  "category": "Solo web/flyer",
+  "slug": "combo-estudiante",
+  "notes": "precio flyer $6.95 SIN VERIFICAR",
+  "status": "NEEDS PHOTO"
+ },
+ {
+  "name": "Combo Ni\u00f1os",
+  "category": "Solo web/flyer",
+  "slug": "combo-ninos",
+  "notes": "precio flyer $5.95 SIN VERIFICAR",
+  "status": "NEEDS PHOTO"
+ }
+]
