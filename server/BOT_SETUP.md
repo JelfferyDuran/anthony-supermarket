@@ -9,7 +9,8 @@ Customer -> @AnthonySuperBot -> Order API (port 3001) -> JSON store
                               -> WhatsApp webhook (optional)
                               -> n8n webhook (optional)
 
-Website (v4): https://jelfferyduran.github.io/anthony-supermarket/
+Website: https://anthonyshopandsave.com/
+Order Mini App: https://order.anthonyshopandsave.com/
   - Full bilingual EN/ES, 93 products, cart, checkout, search
 
 ## Quick Start

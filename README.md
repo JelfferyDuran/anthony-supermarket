@@ -3,7 +3,7 @@
 Professional grocery website with bilingual ordering system.
 288 Kearny Ave, Kearny NJ 07032 | (201) 428-1745
 
-Website: https://jelfferyduran.github.io/anthony-supermarket/
+Website: https://order.anthonyshopandsave.com/
 Instagram: @anthony_supermarket
 
 ## Features (v4)

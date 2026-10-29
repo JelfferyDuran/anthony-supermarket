@@ -3,7 +3,7 @@
 **For:** Claude Code / Codex / any coding agent taking over this task
 **Owner:** Noel Duran (JelfferyDuran) — Anthony's Supermarket, 288 Kearny Ave, Kearny NJ 07032
 **Repo:** `https://github.com/JelfferyDuran/anthony-supermarket` (pull/push access for owner-approved agents)
-**Live page:** `https://jelfferyduran.github.io/anthony-supermarket/sales.html`
+**Live page:** `https://order.anthonyshopandsave.com/`
 **Date:** 2026-08-12
 **Status:** 🟡 OPEN — spec approved by owner, not yet implemented
 

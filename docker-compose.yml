@@ -12,8 +12,8 @@ services:
       - server/.env
     environment:
       - NODE_ENV=production
-      - MINIAPP_API_URL=https://cbpdiiyzzmbavsymjysb.functions.supabase.co/superkitchen
-      - MINIAPP_URL=https://jelfferyduran.github.io/anthony-supermarket/apps/superkitchen/dist/
+      - MINIAPP_API_URL=https://cbpdiiyzzmbavsymjysb.supabase.co/functions/v1/superkitchen
+      - MINIAPP_URL=https://order.anthonyshopandsave.com/
     volumes:
       - ./server/data:/app/data
     restart: unless-stopped

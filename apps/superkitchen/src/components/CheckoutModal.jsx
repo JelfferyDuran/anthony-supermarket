@@ -6,6 +6,7 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
   const [tipoEntrega, setTipoEntrega] = useState('pickup');
+  const [pickupTime, setPickupTime] = useState('');
   const [notas, setNotas] = useState('');
   const [state, setState] = useState('form'); // form | submitting | done | error
   const [errorMsg, setErrorMsg] = useState('');
@@ -38,6 +39,7 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
         },
         tipoEntrega,
         direccion: tipoEntrega === 'delivery' ? direccion.trim() : '',
+        pickupTime: tipoEntrega === 'pickup' ? pickupTime.trim() : '',
         notas: notas.trim(),
         telegramInitData,
       });
@@ -73,7 +75,10 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
               {tipoEntrega === 'delivery' ? (
                 <p className="order-pickup-note">🚚 Delivery — we'll text you when it's on the way.</p>
               ) : (
-                <p className="order-pickup-note">📦 Pickup at 288 Kearny Ave, Kearny NJ — we'll have it ready for you!</p>
+                <p className="order-pickup-note">
+                  📦 Pickup at 288 Kearny Ave, Kearny NJ
+                  {pickupTime ? ` — ready around ${pickupTime}` : ' — we\'ll have it ready for you!'}
+                </p>
               )}
             </div>
             <pre className="order-summary">{buildSummary()}</pre>
@@ -121,6 +126,19 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
                   onChange={e => setDireccion(e.target.value)}
                   placeholder="Street, apt, city, zip"
                 />
+              </>
+            )}
+
+            {tipoEntrega === 'pickup' && (
+              <>
+                <label className="field-label">Pickup time (optional)</label>
+                <input
+                  className="field-input"
+                  type="time"
+                  value={pickupTime}
+                  onChange={e => setPickupTime(e.target.value)}
+                />
+                <p className="field-hint">Leave blank and we&apos;ll have it ready as soon as possible.</p>
               </>
             )}
 

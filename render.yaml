@@ -14,7 +14,7 @@ services:
       - key: TELEGRAM_BOT_URL
         value: https://t.me/Anthonysuperkitchen_bot
       - key: ALLOWED_ORIGINS
-        value: https://jelfferyduran.github.io
+        value: https://anthonyshopandsave.com,https://order.anthonyshopandsave.com
       - key: TAX_RATE
         value: "0"
 

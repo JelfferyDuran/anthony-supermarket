@@ -400,7 +400,7 @@ async function notifyKitchen(order) {
     `${itemsList}\n\n` +
     `*Total:* $${order.total.toFixed(2)}\n` +
     `*${order.tipoEntrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}*\n\n` +
-    `*Customer:* ${order.cliente.nome}\n` +
+    `*Customer:* ${order.cliente.nombre}\n` +
     (order.cliente.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
     (order.cliente.direccion ? `*Address:* ${order.cliente.direccion}\n` : '') +
     (order.notas ? `*Notes:* ${order.notas}\n` : '') +
@@ -512,7 +512,7 @@ function startBot() {
         `🛍️ /cart — View your cart\n` +
         `✅ /checkout — Place your order\n\n` +
         `🌐 Also order online: https://anthonyshopandsave.com/\n` +
-        `🍗 Or try the Mini App: ${process.env.MINIAPP_URL || 'http://localhost:3002'}\n` +
+        `🍗 Or try the Mini App: ${process.env.MINIAPP_URL || 'https://order.anthonyshopandsave.com'}\n` +
         `🕐 Mon–Sat 7AM–8PM | Sun 8AM–3PM`,
         { parse_mode: 'Markdown' }
       );

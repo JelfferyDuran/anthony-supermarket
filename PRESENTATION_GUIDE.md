@@ -1,6 +1,6 @@
 # 🦁 Anthony's Supermarket — Presentation Site
 
-**Live Demo:** https://jelfferyduran.github.io/anthony-supermarket/
+**Live Demo:** https://order.anthonyshopandsave.com/
 
 ---
 
@@ -123,7 +123,7 @@ The site works perfectly on phones:
 - Language toggle works on mobile
 - Pricing Hub table scrolls horizontally
 
-**Test on your phone:** Visit https://jelfferyduran.github.io/anthony-supermarket/
+**Test on your phone:** Visit https://order.anthonyshopandsave.com/
 
 ---
 

@@ -25,7 +25,7 @@
 
 | Resource | URL |
 |----------|-----|
-| Website (v4) | https://jelfferyduran.github.io/anthony-supermarket/ |
+| Website (v4) | https://order.anthonyshopandsave.com/ |
 | Repo | https://github.com/JelfferyDuran/anthony-supermarket |
 | Order API | http://localhost:3001 |
 | Kitchen Bot | @Anthonysuperkitchen_bot |

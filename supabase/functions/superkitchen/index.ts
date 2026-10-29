@@ -7,6 +7,7 @@ const BOT_URL = Deno.env.get("BOT_URL") || "https://t.me/Anthonysuperkitchen_bot
 const MINIAPP_URL = "https://order.anthonyshopandsave.com";
 // Server-only secret. A historical token must never be reused here.
 const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
+const KITCHEN_CHAT_ID = Deno.env.get("KITCHEN_CHAT_ID") || "";
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -42,7 +43,6 @@ const MENU = {
 const ALLOWED_ORIGINS = new Set([
   "https://anthonyshopandsave.com",
   "https://www.anthonyshopandsave.com",
-  "https://jelfferyduran.github.io",
   "https://anthony-supermarket-superkitchen.vercel.app",
   "https://order.anthonyshopandsave.com",
   "https://cbpdiiyzzmbavsymjysb.supabase.co",
@@ -51,7 +51,7 @@ const ALLOWED_ORIGINS = new Set([
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://jelfferyduran.github.io",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://order.anthonyshopandsave.com",
     "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Vary": "Origin",
@@ -224,7 +224,7 @@ async function handleCreateOrder(req: Request) {
     return json(req, { error: (e as Error).message === "REQUEST_TOO_LARGE" ? "Request too large" : "Invalid JSON" }, (e as Error).message === "REQUEST_TOO_LARGE" ? 413 : 400);
   }
 
-  const { items, customer, tipoEntrega, notas, telegramInitData } = body || {};
+  const { items, customer, tipoEntrega, notas, direccion, telegramInitData, pickupTime } = body || {};
   if (!Array.isArray(items) || items.length === 0 || items.length > 30) return json(req, { error: "Invalid cart" }, 400);
 
   const tg = await verifyTelegramInitData(telegramInitData);
@@ -236,6 +236,8 @@ async function handleCreateOrder(req: Request) {
   if (!nombre || nombre.length > 80) return json(req, { error: "Invalid customer name" }, 400);
   if (telefono.length > 32) return json(req, { error: "Invalid phone number" }, 400);
   if (safeNotas.length > 500) return json(req, { error: "Notes are too long" }, 400);
+  const safePickupTime = String(pickupTime || "").trim();
+  if (safePickupTime.length > 40) return json(req, { error: "Invalid pickup time" }, 400);
 
   const normalized: any[] = [];
   for (const raw of items) {
@@ -278,7 +280,14 @@ async function handleCreateOrder(req: Request) {
     total: subtotal,
     moneda: "USD",
     tipo_entrega: tipoEntrega === "delivery" ? "delivery" : "pickup",
-    cliente: { nombre, telefono },
+    cliente: {
+      nombre,
+      telefono,
+      // Pickup window + delivery address live inside the existing jsonb payload — no schema migration needed.
+      ...(tipoEntrega === "delivery"
+        ? { direccion: String(direccion || "").trim().slice(0, 200) }
+        : { pickup_time: safePickupTime }),
+    },
     notas: safeNotas,
     estado: "recibido",
     telegram_user_id: tg.verified ? tg.userId : null,
@@ -292,6 +301,9 @@ async function handleCreateOrder(req: Request) {
     console.error("order insert failed", error.message);
     return json(req, { error: "Failed to save order" }, 500);
   }
+
+  // Ping the kitchen group (best-effort; never blocks the customer response).
+  await notifyKitchen(order);
 
   return json(req, {
     ok: true,
@@ -330,6 +342,80 @@ async function handleListOrders(req: Request) {
   return json(req, data);
 }
 
+/**
+ * DM the customer when the kitchen marks an order ready.
+ * Requires TELEGRAM_BOT_TOKEN on this function's env; silently skips (with a log) when absent.
+ */
+async function notifyCustomerReady(orderId: string) {
+  const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  if (!token) {
+    console.warn("ready-DM skipped: TELEGRAM_BOT_TOKEN not set on function env");
+    return;
+  }
+  const { data, error } = await admin
+    .from("orders")
+    .select("telegram_user_id,tipo_entrega,cliente")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error || !data) return;
+  if (data.tipo_entrega !== "pickup") return;
+  const chatId = data.telegram_user_id;
+  if (!chatId) return; // walk-up / web order with no verified Telegram identity
+  const shortId = String(orderId).slice(0, 8);
+  const window = (data.cliente as any)?.pickup_time;
+  const text =
+    `✅ *Order #${shortId} is READY!* 🦁\n\n` +
+    `Pick up at Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.` +
+    (window ? `\nRequested window: *${window}*` : "");
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.warn("ready-DM rejected", res.status, await res.text());
+  } catch (e) {
+    console.warn("ready-DM failed", e instanceof Error ? e.message : "unknown");
+  }
+}
+
+/**
+ * Ping the kitchen group when a new order lands on the live (Mini App) path.
+ * Requires TELEGRAM_BOT_TOKEN + KITCHEN_CHAT_ID on this function's env; logs-and-skips when absent.
+ */
+async function notifyKitchen(order: any) {
+  if (!TELEGRAM_BOT_TOKEN || !KITCHEN_CHAT_ID) {
+    console.warn("kitchen-notify skipped: TELEGRAM_BOT_TOKEN or KITCHEN_CHAT_ID not set on function env");
+    return;
+  }
+  const shortId = String(order.id).slice(0, 8);
+  const c = order.cliente || {};
+  const when = order.tipo_entrega === "pickup"
+    ? (c.pickup_time ? `🛍 Pickup @ ${c.pickup_time}` : "🛍 Pickup")
+    : "🚚 Delivery";
+  const lines = (order.items || []).map((i: any) =>
+    `• ${i.qty}× ${i.name}${i.meat ? ` (${i.meat.name})` : ""}${i.side ? ` / ${i.side.name}` : ""} — $${Number(i.lineTotal).toFixed(2)}`
+  ).join("\n");
+  const text =
+    `🦁 *NEW ORDER #${shortId}*\n${when}\n` +
+    `👤 ${c.nombre || "—"}${c.telefono ? ` · 📞 ${c.telefono}` : ""}\n` +
+    (c.direccion ? `📍 ${c.direccion}\n` : "") +
+    `${lines}\n💰 Total: $${Number(order.total).toFixed(2)}` +
+    (order.notas ? `\n📝 ${order.notas}` : "");
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: KITCHEN_CHAT_ID, text, parse_mode: "Markdown" }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.warn("kitchen-notify rejected", res.status, await res.text());
+  } catch (e) {
+    console.warn("kitchen-notify failed", e instanceof Error ? e.message : "unknown");
+  }
+}
+
 async function handleUpdateStatus(req: Request, id: string) {
   const staff = await requireStaff(req);
   if (!staff) return json(req, { error: "Unauthorized" }, 401);
@@ -352,6 +438,7 @@ async function handleUpdateStatus(req: Request, id: string) {
     console.error("status update rejected", error.message);
     return json(req, { error: "Status change rejected" }, 409);
   }
+  if (next === "listo") await notifyCustomerReady(id);
   return json(req, data);
 }
 

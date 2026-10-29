@@ -56,6 +56,13 @@ function OrderCard({ order, token, role, onError }) {
         <span>{order.tipo_entrega === 'delivery' ? '🛵 Delivery' : '🏃 Pickup'}</span>
         <span className="k-order-total">${Number(order.total || 0).toFixed(2)}</span>
       </div>
+      <div className="k-order-customer">
+        <span className="k-cust-name">👤 {order.cliente?.nombre || 'Walk-up'}</span>
+        {order.cliente?.telefono && <span className="k-cust-phone">📞 {order.cliente.telefono}</span>}
+      </div>
+      {order.tipo_entrega !== 'delivery' && order.cliente?.pickup_time && (
+        <div className="k-order-pickup">🕒 Pickup {order.cliente.pickup_time}</div>
+      )}
       {order.notas && <div className="k-order-notes">📝 {order.notas}</div>}
       <div className="k-card-actions">
         {canAdvance && (
