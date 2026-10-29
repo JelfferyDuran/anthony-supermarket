@@ -302,8 +302,14 @@ async function handleCreateOrder(req: Request) {
     return json(req, { error: "Failed to save order" }, 500);
   }
 
-  // Ping the kitchen group (best-effort; never blocks the customer response).
-  await notifyKitchen(order);
+  // Ping the kitchen group in the BACKGROUND (best-effort; must never delay the
+  // customer's response). EdgeRuntime.waitUntil keeps the isolate alive for the
+  // detached task; fall back to awaiting on runtimes without it.
+  if (typeof EdgeRuntime !== "undefined" && typeof EdgeRuntime?.waitUntil === "function") {
+    EdgeRuntime.waitUntil(notifyKitchen(order));
+  } else {
+    await notifyKitchen(order);
+  }
 
   return json(req, {
     ok: true,
@@ -343,6 +349,22 @@ async function handleListOrders(req: Request) {
 }
 
 /**
+ * Escape user-supplied text for Telegram's legacy Markdown parse_mode.
+ * Telegram rejects the ENTIRE message (HTTP 400 "can't parse entities") on an
+ * unbalanced *_`[ — a customer typing "Mary_Jane" or a note with "[" would
+ * otherwise silently kill the notification. Every dynamic field is escaped.
+ */
+function mdEscape(value: unknown): string {
+  return String(value ?? "").replace(/([_*`\[\]])/g, "\\$1");
+}
+
+/** Telegram hard-caps message text at 4096 chars; clamp so a long note can't 400. */
+const TG_MAX_CHARS = 4000;
+function clampText(s: string): string {
+  return s.length <= TG_MAX_CHARS ? s : s.slice(0, TG_MAX_CHARS - 1) + "…";
+}
+
+/**
  * DM the customer when the kitchen marks an order ready.
  * Requires TELEGRAM_BOT_TOKEN on this function's env; silently skips (with a log) when absent.
  */
@@ -363,10 +385,11 @@ async function notifyCustomerReady(orderId: string) {
   if (!chatId) return; // walk-up / web order with no verified Telegram identity
   const shortId = String(orderId).slice(0, 8);
   const window = (data.cliente as any)?.pickup_time;
-  const text =
+  const text = clampText(
     `✅ *Order #${shortId} is READY!* 🦁\n\n` +
     `Pick up at Anthony's Supermarket, 288 Kearny Ave, Kearny NJ.` +
-    (window ? `\nRequested window: *${window}*` : "");
+    (window ? `\nRequested window: *${mdEscape(window)}*` : "")
+  );
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
@@ -392,17 +415,18 @@ async function notifyKitchen(order: any) {
   const shortId = String(order.id).slice(0, 8);
   const c = order.cliente || {};
   const when = order.tipo_entrega === "pickup"
-    ? (c.pickup_time ? `🛍 Pickup @ ${c.pickup_time}` : "🛍 Pickup")
+    ? (c.pickup_time ? `🛍 Pickup @ ${mdEscape(c.pickup_time)}` : "🛍 Pickup")
     : "🚚 Delivery";
   const lines = (order.items || []).map((i: any) =>
-    `• ${i.qty}× ${i.name}${i.meat ? ` (${i.meat.name})` : ""}${i.side ? ` / ${i.side.name}` : ""} — $${Number(i.lineTotal).toFixed(2)}`
+    `• ${Number(i.qty) || 0}× ${mdEscape(i.name)}${i.meat ? ` (${mdEscape(i.meat.name)})` : ""}${i.side ? ` / ${mdEscape(i.side.name)}` : ""} — $${(Number(i.lineTotal) || 0).toFixed(2)}`
   ).join("\n");
-  const text =
+  const text = clampText(
     `🦁 *NEW ORDER #${shortId}*\n${when}\n` +
-    `👤 ${c.nombre || "—"}${c.telefono ? ` · 📞 ${c.telefono}` : ""}\n` +
-    (c.direccion ? `📍 ${c.direccion}\n` : "") +
-    `${lines}\n💰 Total: $${Number(order.total).toFixed(2)}` +
-    (order.notas ? `\n📝 ${order.notas}` : "");
+    `👤 ${mdEscape(c.nombre) || "—"}${c.telefono ? ` · 📞 ${mdEscape(c.telefono)}` : ""}\n` +
+    (c.direccion ? `📍 ${mdEscape(c.direccion)}\n` : "") +
+    `${lines}\n💰 Total: $${(Number(order.total) || 0).toFixed(2)}` +
+    (order.notas ? `\n📝 ${mdEscape(order.notas)}` : "")
+  );
   try {
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
