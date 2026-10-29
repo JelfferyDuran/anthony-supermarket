@@ -8,6 +8,8 @@
 > use the "current published" value and flag the conflict.
 >
 > Last audited: 2026-10-26 by Hermes (repo-wide grep + external listings).
+> **Owner confirmation round 2026-10-25** resolved the three open items (hours, domain,
+> years in business) — see §1, §2, §3. All three are now ✅.
 
 ## 1. Identity
 
@@ -19,34 +21,33 @@
 | Instagram | **@anthony_supermarket** | ✅ consistent |
 | Address | **288 Kearny Ave, Kearny, NJ 07032** | ✅ verified (legacy site contact, WIC locator, Birdeye, Loc8NearMe) |
 | Phone | **(201) 428-1745** | ✅ verified (legacy site, Loc8NearMe, repo) |
-| Years in business | "Serving the Kearny community for 9 years" | 🟠 **OWNER-CONFIRM** — appears in `index.html`, `links.html`, `PRESENTATION_GUIDE.md`; may be stale |
+| Years in business | **Since 2012** (≈14 years as of 2026) | ✅ **OWNER-CONFIRMED 2026-10-25** — copy should read "Serving the Kearny community since 2012". The old "for 9 years" string is stale and has been corrected repo-wide. |
 
 > Note: `(973) 471-3252` in the repo is a **supplier** phone (Peimco invoice), not the store.
 
-## 2. Hours — 🟠 OWNER-CONFIRM (highest-priority conflict)
+## 2. Hours — ✅ OWNER-CONFIRMED 2026-10-25
 
-| Source | Mon–Sat | Sunday |
-|---|---|---|
-| Repo `README.md`, `CLAUDE_PROMPT.md` | 7AM–8PM | **CLOSED** |
-| Repo `index.html` JSON-LD `openingHoursSpecification` | 07:00–20:00 | **00:00–00:00 (closed)** |
-| Repo `index.html` hero / `assets/promos/.../flyer.html` | "**Open Daily**" / "Abrimos todos los días" | — |
-| Legacy `www.anthonyssupermarket.com` | **Closed** all 7 days (broken template) | **Closed** |
-| Birdeye listing (external) | 7:00 AM–8:00 PM | **8:00 AM–3:00 PM** |
-| Loc8NearMe (external) | 7AM–8PM | not stated |
+| Day | Hours |
+|---|---|
+| **Monday–Saturday** | **7:00 AM – 8:00 PM** |
+| **Sunday** | **8:00 AM – 3:00 PM** |
 
-**Best evidence:** Mon–Sat **7:00 AM–8:00 PM** is agreed by every source. **Sunday is
-unresolved** — repo says CLOSED, an external directory says 8AM–3PM. Confirm Sunday
-(and any holiday) hours before changing copy or structured data.
+**Resolved:** Sunday is **8AM–3PM**, not closed. The repo previously said CLOSED (README,
+CLAUDE_PROMPT, index.html JSON-LD, hero copy "Open Daily") while an external directory
+(Birdeye) already listed 8AM–3PM. All repo copy and structured data now match.
+**Holiday hours remain unconfirmed** — flag rather than guess.
 
 ## 3. Public web presence
 
 | Surface | URL | Notes |
 |---|---|---|
-| Legacy site | https://www.anthonyssupermarket.com/ | Live but stale; shows all days Closed. Ownership/DNS unverified. |
-| GitHub Pages | https://jelfferyduran.github.io/anthony-supermarket/ | Referenced in `README.md` |
-| Vercel | `anthony-supermarket.vercel.app` | Referenced in repo history; project access incomplete |
+| **Canonical public domain** | **https://anthonyshopandsave.com** | ✅ **OWNER-CONFIRMED 2026-10-25** — owned by the owner, DNS managed **through Cloudflare**. This is the address customers should be given. |
+| Legacy site | https://www.anthonyssupermarket.com/ | Live but stale (shows all days Closed). Do **not** treat as canonical; superseded by anthonyshopandsave.com. |
+| GitHub Pages | https://jelfferyduran.github.io/anthony-supermarket/ | Build/preview surface only — not customer-facing. |
+| Vercel | `anthony-supermarket.vercel.app` | Deployment/preview surface. anthonyshopandsave.com should resolve (via Cloudflare) to the production deployment. |
 
-🟠 **OWNER-CONFIRM:** which single domain customers should be sent to, and who controls DNS.
+**Do not** publish `www.anthonyssupermarket.com` or the legacy "Shop and Save" branding in
+new customer-facing copy.
 
 ## 4. Commercial rules (authoritative)
 

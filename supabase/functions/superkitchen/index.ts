@@ -40,6 +40,8 @@ const MENU = {
 };
 
 const ALLOWED_ORIGINS = new Set([
+  "https://anthonyshopandsave.com",
+  "https://www.anthonyshopandsave.com",
   "https://jelfferyduran.github.io",
   "https://anthony-supermarket-superkitchen.vercel.app",
   "https://order.anthonyshopandsave.com",
