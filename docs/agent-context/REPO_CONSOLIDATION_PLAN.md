@@ -21,12 +21,12 @@
 
 | Fact | Conflicting values | Resolution |
 |---|---|---|
-| **Sunday hours** | Repo: CLOSED · Birdeye: 8AM–3PM · legacy site: Closed all days | 🟠 owner must confirm |
-| **"Open Daily" vs Mon–Sat** | `index.html` hero + pasta flyer say "Open Daily"; README/schema say Mon–Sat + Sun closed | Fix copy once Sunday is confirmed |
+| **Sunday hours** | ~~Repo: CLOSED · Birdeye: 8AM–3PM · legacy site: Closed all days~~ | ✅ **RESOLVED 2026-10-25 — owner confirmed Sunday 8AM–3PM**; repo copy + schema updated |
+| **"Open Daily" vs Mon–Sat** | `index.html` hero + pasta flyer said "Open Daily"; README/schema said Mon–Sat + Sun closed | ✅ **FIXED** — all copy now "Mon–Sat 7AM–8PM · Sun 8AM–3PM" |
 | **Markup** | ×1.70 authoritative vs **65%** in 4 stale docs | Delete 65% everywhere |
 | **Product count** | 283 canonical (Supabase) vs 93 / 88 in old docs | Point docs at live catalog |
-| **Years in business** | "9 years" in site copy | 🟠 owner confirm |
-| **Canonical domain** | legacy `.com` vs GitHub Pages vs Vercel | 🟠 owner confirm |
+| **Years in business** | "9 years" in site copy | ✅ **RESOLVED 2026-10-25 — owner confirmed since 2012**; corrected repo-wide |
+| **Canonical domain** | legacy `.com` vs GitHub Pages vs Vercel | ✅ **RESOLVED 2026-10-25 — owner confirmed `anthonyshopandsave.com` (owned via Cloudflare)** |
 | **Store name** | "Anthony's Supermarket" vs "Shop and Save" vs "Super Kitchen" | Use STORE_FACTS mapping |
 
 ## C. Recommended order of work
@@ -37,7 +37,23 @@
 4. Archive stale root docs to `_archive/`; leave a pointer in `README.md`.
 5. Write `docs/agent-context/ENTRYPOINTS.md`; add it + `STORE_FACTS.md` to the `AGENTS.md` read order.
 6. Triage the 8 open PRs → merge or close with rationale.
-7. Owner confirms the 🟠 items in `STORE_FACTS.md`; propagate the confirmed values.
+7. ~~Owner confirms the 🟠 items in `STORE_FACTS.md`; propagate the confirmed values.~~ ✅ **DONE 2026-10-25** — owner confirmed Sunday 8AM–3PM, domain `anthonyshopandsave.com` (via Cloudflare), in business since 2012. Propagated repo-wide (site copy, JSON-LD, bot strings, docs).
+
+## E. Domain migration — done vs remaining
+
+**Canonical domain:** `anthonyshopandsave.com` (owner-confirmed, held at Cloudflare). **In business since 2012.**
+
+**Repointed to the canonical domain (done in this PR):**
+- `index.html` — JSON-LD `url`, footer website link, `og:url`, `rel=canonical`
+- `links.html` — `og:url`, "Visit Our Website", "Weekly Specials" buttons; staff hub link made relative (`/hub/`)
+- `server/index.js` — `/hours` reply and "order online" line
+- CORS **additively** allowed the new origin in `supabase/functions/superkitchen/index.ts` and `server/.env.example` (old origins kept so nothing breaks)
+
+**Remaining (needs the domain actually serving the site first — do NOT change blind):**
+- `docker-compose.yml` `MINIAPP_URL`, `render.yaml` `ALLOWED_ORIGINS`, `supabase/.../index.ts` `MINIAPP_URL` still point at the GitHub Pages deploy, which is where the mini-app currently lives. Repoint only after the canonical domain serves those paths, or the mini-app 404s.
+- Bot handle split: `@Anthonysuperkitchen_bot` (customer) vs `@Anthonysinvoicebot` (invoice) — decide one public handle and align `BOT_URL` / `TELEGRAM_BOT_URL`.
+- Cloudflare DNS: confirm `anthonyshopandsave.com` + `www` resolve to the live deploy (Pages/Vercel) before removing the fallback origins.
+- Holiday hours: still unconfirmed — flag, never guess.
 
 ## D. PR #59 assessment (kitchen OS staging)
 

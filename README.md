@@ -49,7 +49,7 @@ Deploy: GitHub Actions -> GitHub Pages
 
 288 Kearny Ave, Kearny, NJ 07032
 (201) 428-1745
-Mon-Sat 7AM-8PM | Sunday CLOSED
+Mon-Sat 7AM-8PM | Sunday 8AM-3PM
 Instagram: @anthony_supermarket
 
 

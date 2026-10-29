@@ -434,3 +434,12 @@ Append-only operational handoffs. Do not store secrets, passwords, tokens, servi
 - Merged, now-stale branches: `fix/vercel-public-allowlist`, `feat/pricing-hub-ops-game`, `feat/pricing-hub-2d` (not deleted).
 - Still open for the owner: the .99 rounding decision (`pricing-engine.test.js` expects 3.40, the engine proposes 2.99) and the Gemini model assertion; consolidating `/extract` with `/retry-extract`.
 - Next safe action: deploy `main` to the manually deployed projects, protect or delete their old deployment URLs, then run #56's checklist on production.
+
+## 2026-10-25 — Hermes — Owner confirmed canonical store facts; propagated repo-wide
+- Goal: resolve the three open store-fact conflicts blocking agents, then propagate the confirmed values across all customer-facing copy, structured data, and stale docs.
+- Owner confirmations (verbatim): "8-3pm , anthonyshopandsave.com and I own it thru cloudflare . Been in business since 2012".
+- Changed: `index.html` (JSON-LD Sunday 00:00/00:00 -> 08:00/15:00; hours grid Sunday CLOSED -> 8:00 AM - 3:00 PM; hero "Open Daily" -> "Mon-Sat 7AM-8PM - Sun 8AM-3PM"; tagline + og:description "9 years" -> "since 2012"), `links.html` (tagline + hours), `README.md`, `CLAUDE_PROMPT.md` (Sunday CLOSED -> 8AM-3PM), `PRESENTATION_GUIDE.md` (3x "9 years" -> "since 2012"), `assets/promos/2026-08-pasta-night/flyer.html` (EN + ES "Open daily"/"Abrimos todos los dias" -> real hours), `docs/agent-context/STORE_FACTS.md` (all three items now confirmed), `docs/agent-context/REPO_CONSOLIDATION_PLAN.md`, `docs/agent-context/CURRENT_STATE.md`, `docs/growth/CONVERSION_PLAN.md`.
+- Verified: canonical facts now consistent repo-wide — Mon-Sat 7AM-8PM, Sun 8AM-3PM, domain anthonyshopandsave.com (owned via Cloudflare), since 2012.
+- Not verified / blockers: holiday hours unconfirmed (flag, do not guess); bot handles still split (@Anthonysuperkitchen_bot vs @Anthonysinvoicebot); 65% markup + product-count drift not yet cleaned.
+- Security or rollback notes: docs/copy only; no secrets, no DB, no DNS change, no deploy. Branch `chore/agent-consolidation-store-facts` (PR #60).
+- Next safe action: clean the remaining stale values (65% markup, 93/88 product counts, bot handles), then work the 8 open PRs in a declared order.
