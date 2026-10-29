@@ -1,0 +1,9 @@
+# Normalize generated Pages artifacts to LF so the tracked dist matches the
+# CI (Linux) rebuild byte-for-byte. Without this, a Windows build writes CRLF
+# into dist/index.html and Super Kitchen CI's "tracked Pages build matches
+# source" check fails as "dist is stale".
+apps/superkitchen/dist/**/*.html        text eol=lf
+apps/superkitchen/dist/**/*.js          text eol=lf
+apps/superkitchen/dist/**/*.css         text eol=lf
+apps/superkitchen/dist/**/*.webmanifest text eol=lf
+apps/superkitchen/dist/**/*.json        text eol=lf
