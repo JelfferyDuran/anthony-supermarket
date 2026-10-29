@@ -8,6 +8,15 @@ cd "$(dirname "$0")/.."
 export PATH="$PATH:/c/Users/Jayto/AppData/Roaming/npm"
 REF=cbpdiiyzzmbavsymjysb
 
+# The supabase CLI is a Node program. PowerShell's `bash` is WSL, which has no Node —
+# so fail loudly instead of with a cryptic "exec: node: not found".
+if ! command -v node >/dev/null 2>&1; then
+  echo "!! node not found on PATH."
+  echo "   You are probably running this in WSL or via PowerShell's 'bash'."
+  echo "   Run it in Git Bash instead, or double-click scripts\\supabase-go-live.cmd"
+  exit 1
+fi
+
 echo "==> 1/4  Supabase auth"
 if supabase projects list >/dev/null 2>&1; then
   echo "     already logged in"
