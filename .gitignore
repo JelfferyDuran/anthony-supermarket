@@ -77,3 +77,9 @@ nrs/inbox/*.csv
 
 # pipeline artifacts
 __pycache__/
+.vercel
+.env*
+
+# keep templates tracked despite the .env* glob above
+!.env.example
+!**/.env.example
