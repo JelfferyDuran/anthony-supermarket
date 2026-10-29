@@ -321,7 +321,9 @@ app.post('/api/orders', async (req, res) => {
     cliente: {
       nombre: cliente.nombre,
       telefono: cliente.telefono || '',
-      direccion: cliente.direccion || ''
+      direccion: cliente.direccion || '',
+      pickup_time: cliente.pickup_time || '',
+      ...(cliente.front_door_photo ? { front_door_photo: cliente.front_door_photo } : {})
     },
     notas: notas || '',
     estado: 'recibido',
@@ -403,11 +405,22 @@ async function notifyKitchen(order) {
     `*Customer:* ${order.cliente.nome}\n` +
     (order.cliente.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
     (order.cliente.direccion ? `*Address:* ${order.cliente.direccion}\n` : '') +
+    (order.cliente.pickup_time ? `*Ready at:* ${order.cliente.pickup_time}\n` : '') +
     (order.notas ? `*Notes:* ${order.notas}\n` : '') +
     `\n🕐 ${new Date(order.createdAt).toLocaleTimeString()}`;
 
   try {
     await bot.sendMessage(KITCHEN_CHAT_ID, message, { parse_mode: 'Markdown' });
+    // Front-door photo (delivery): forward it so the driver can find the door.
+    if (order.cliente && order.cliente.front_door_photo) {
+      try {
+        await bot.sendPhoto(KITCHEN_CHAT_ID, order.cliente.front_door_photo, {
+          caption: `🚪 Front door for order #${order.id} — ${order.cliente.direccion || ''}`
+        });
+      } catch (e) {
+        console.error(`Front-door photo forward failed for #${order.id}: ${e.message}`);
+      }
+    }
     console.log(`👨‍🍳 Kitchen notified for order #${order.id}`);
   } catch (e) {
     console.error(`❌ Kitchen notification failed: ${e.message}`);
@@ -452,6 +465,93 @@ async function notifyWhatsApp(order) {
 
 let bot = null;
 const userCarts = {};
+// Checkout "next phase": after a customer taps Pickup or Delivery we hold the
+// cart here and ask ONE follow-up question — the time they want the food
+// (pickup) or their delivery address (delivery). The order is only placed once
+// that answer arrives, so no half-filled order ever reaches the kitchen.
+// userId -> { method: 'pickup'|'delivery', askedAt: <epoch ms> }
+const pendingCheckouts = {};
+// A pending question older than this is treated as abandoned (15 min).
+const PENDING_CHECKOUT_TTL_MS = 15 * 60 * 1000;
+// Only these keys are kept when a cart is parked for the follow-up question.
+const CHECKOUT_CART_KEYS = ['items', 'slug', 'restaurantSlug', 'restaurant_slug', 'moneda'];
+
+function stashCartForCheckout(cart) {
+  const stash = {};
+  for (const key of CHECKOUT_CART_KEYS) {
+    if (cart && cart[key] !== undefined) stash[key] = cart[key];
+  }
+  return stash;
+}
+
+// Free-text answers are attacker-controlled: strip newlines and cap the length
+// so a pasted wall of text can never break the Telegram message or the DB row.
+function cleanAnswer(value, max = 300) {
+  return String(value == null ? '' : value)
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+    .slice(0, max);
+}
+
+function describeDeliveryMethod(method) {
+  return method === 'delivery' ? '🚚 Delivery' : '📦 Pickup';
+}
+
+function buildOrderSummaryText(cart, method) {
+  const items = (cart && cart.items) || [];
+  const total = items.reduce((sum, i) => sum + i.precio * i.cantidad, 0);
+  let text = `✅ *Ready to Checkout*\n\n`;
+  items.forEach(i => { text += `• ${i.nombre} x${i.cantidad} — $${(i.precio * i.cantidad).toFixed(2)}\n`; });
+  text += `\n*Total: $${total.toFixed(2)}*`;
+  text += `\n\nChoose pickup or delivery:`;
+  return text;
+}
+
+// Places the order once the follow-up answer (time / address) is in hand.
+// `photoFileId` is the OPTIONAL front-door photo the customer sent (delivery).
+async function placeCheckoutOrder(chatId, userId, method, cart, detail, photoFileId) {
+  const answer = cleanAnswer(detail);
+  const cliente = {
+    nombre: 'Telegram Customer',
+    telefono: '',
+    direccion: '',
+    pickup_time: ''
+  };
+  if (method === 'delivery') cliente.direccion = answer;
+  else cliente.pickup_time = answer;
+  if (photoFileId) cliente.front_door_photo = photoFileId;
+
+  const res = await fetch(`http://localhost:${PORT}/api/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      items: cart.items,
+      tipoEntrega: method,
+      cliente,
+      notas: ''
+    })
+  });
+  const order = await res.json();
+
+  if (order && order.ok) {
+    userCarts[userId] = { items: [], slug: '' };
+
+    let text = `🎉 *Order Confirmed!*\n\n` +
+      `Order #${order.orderId}\n` +
+      `Total: *$${Number(order.total).toFixed(2)}*\n` +
+      `Type: ${describeDeliveryMethod(method)}\n\n`;
+    if (method === 'delivery') text += `🚚 Deliver to: ${answer}\n\n`;
+    else text += `🕐 Ready at: ${answer}\n\n`;
+    text += `📍 288 Kearny Ave, Kearny NJ 07032\n` +
+      `📞 (201) 428-1745\n\n` +
+      `We'll notify you when your order is ready! 🦁`;
+
+    await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
+  } else {
+    await bot.sendMessage(chatId, `❌ Order failed: ${(order && order.error) || 'unknown error'}`);
+  }
+}
 
 function startBot() {
   if (!TELEGRAM_TOKEN) {
@@ -720,6 +820,11 @@ function startBot() {
     });
 
     // Clear cart
+    bot.onText(/\/cancel/, (msg) => {
+      delete pendingCheckouts[msg.from.id];
+      bot.sendMessage(msg.chat.id, '❌ Order cancelled. Your cart is still saved.');
+    });
+
     bot.onText(/\/clear/, (msg) => {
       const userId = msg.from.id;
       if (userCarts[userId]) {
@@ -761,54 +866,163 @@ function startBot() {
 
       if (data.startsWith('checkout:')) {
         const method = data.split(':')[1];
+        const userId = query.from.id;
+
         if (method === 'cancel') {
+          delete pendingCheckouts[userId];
           await bot.answerCallbackQuery(query.id, { text: 'Order cancelled' });
+          return bot.sendMessage(chatId, '❌ Order cancelled. Your cart is still saved.');
+        }
+
+        // Customer chose to place the order without a front-door photo.
+        if (method === 'skip_photo') {
+          const pending = pendingCheckouts[userId];
+          if (!pending || pending.method !== 'delivery' || !pending.address) {
+            return bot.answerCallbackQuery(query.id, { text: 'Nothing pending' });
+          }
+          await bot.answerCallbackQuery(query.id, { text: '📦 Placing order' });
+          delete pendingCheckouts[userId];
+          try {
+            await placeCheckoutOrder(chatId, userId, 'delivery', pending.cart, pending.address, null);
+          } catch (e) {
+            await bot.sendMessage(chatId, `❌ Server error: ${e.message}`);
+          }
           return;
         }
 
-        const userId = query.from.id;
         const cart = userCarts[userId];
-        if (!cart || !cart.items.length) return;
-
-        try {
-          const res = await fetch(`http://localhost:${PORT}/api/orders`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              items: cart.items,
-              tipoEntrega: method,
-              cliente: {
-                nombre: query.from.first_name || 'Telegram Customer',
-                telefono: '',
-                direccion: method === 'delivery' ? 'Please provide address' : ''
-              },
-              notas: ''
-            })
-          });
-          const order = await res.json();
-
-          if (order.ok) {
-            userCarts[userId] = { items: [], slug: '' };
-
-            await bot.sendMessage(chatId,
-              `🎉 *Order Confirmed!*\n\n` +
-              `Order #${order.orderId}\n` +
-              `Total: *$${order.total.toFixed(2)}*\n` +
-              `Type: ${method === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}\n\n` +
-              `📍 288 Kearny Ave, Kearny NJ 07032\n` +
-              `📞 (201) 428-1745\n\n` +
-              `We'll notify you when your order is ready! 🦁`,
-              { parse_mode: 'Markdown' }
-            );
-          } else {
-            await bot.sendMessage(chatId, `❌ Order failed: ${order.error}`);
-          }
-        } catch (e) {
-          await bot.sendMessage(chatId, `❌ Server error: ${e.message}`);
+        if (!cart || !cart.items.length) {
+          return bot.answerCallbackQuery(query.id, { text: 'Cart is empty' });
         }
 
-        await bot.answerCallbackQuery(query.id);
+        // ── Next phase: ask the ONE question that matters for this method ──
+        // Delivery -> the address, then an OPTIONAL photo of the front door.
+        // Pickup -> the time they want the food.
+        // The order is placed only once the answer arrives, so the kitchen
+        // never receives a delivery with no address.
+        pendingCheckouts[userId] = {
+          method,
+          cart: stashCartForCheckout(cart),
+          askedAt: Date.now(),
+          stage: method === 'delivery' ? 'address' : 'time',
+          address: '',
+          photo: ''
+        };
+
+        if (method === 'delivery') {
+          await bot.answerCallbackQuery(query.id, { text: '🚚 Delivery selected' });
+          await bot.sendMessage(chatId,
+            `🚚 *Delivery selected*\n\n` +
+            `Please send the *address* where we should deliver your order.\n\n` +
+            `_Include apartment/unit number and a landmark if it helps._\n\n` +
+            `Type /cancel to stop.`,
+            { parse_mode: 'Markdown' }
+          );
+        } else {
+          await bot.answerCallbackQuery(query.id, { text: '📦 Pickup selected' });
+          await bot.sendMessage(chatId,
+            `📦 *Pickup selected*\n\n` +
+            `What *time* would you like your food ready?\n\n` +
+            `_For example: 6:30 PM, or as soon as possible._\n\n` +
+            `Type /cancel to stop.`,
+            { parse_mode: 'Markdown' }
+          );
+        }
+        return;
       }
+    });
+
+    // ── Next phase: answer to the pickup-time / delivery-address question ──
+    // Delivery is two answers: the address, then an OPTIONAL photo of the front
+    // door (helps the driver find them). Pickup is one: the time they want it.
+    // The order is placed only once the required answer is in hand.
+    bot.on('message', async (msg) => {
+      if (!msg || !msg.from) return undefined;
+      const userId = msg.from.id;
+      const pending = pendingCheckouts[userId];
+      if (!pending) return undefined;
+      // Only a private-chat answer counts; group/thread traffic falls through.
+      if (!msg.chat || msg.chat.type !== 'private') return undefined;
+
+      // Abandoned questions expire so a stale answer can't resurrect an old cart.
+      if (Date.now() - pending.askedAt > PENDING_CHECKOUT_TTL_MS) {
+        delete pendingCheckouts[userId];
+        return bot.sendMessage(msg.chat.id,
+          '⌛ That checkout timed out. Your cart is still saved — send /checkout to try again.');
+      }
+
+      // ── Delivery: the OPTIONAL front-door photo ──
+      if (pending.method === 'delivery' && msg.photo && msg.photo.length) {
+        const fileId = msg.photo[msg.photo.length - 1].file_id;
+        pending.photo = fileId;
+        pending.askedAt = Date.now();
+        if (!pending.address) {
+          pending.stage = 'address';
+          return bot.sendMessage(msg.chat.id,
+            '📸 Got the front-door photo! Now send your *delivery address* so we can place the order.',
+            { parse_mode: 'Markdown' });
+        }
+        delete pendingCheckouts[userId];
+        try {
+          await placeCheckoutOrder(msg.chat.id, userId, 'delivery', pending.cart, pending.address, fileId);
+        } catch (e) {
+          await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
+        }
+        return undefined;
+      }
+
+      // Text answers only from here on.
+      if (!msg.text) return undefined;
+      const text = cleanAnswer(msg.text);
+
+      // Let /cancel escape without placing an order.
+      if (/^\/cancel$/i.test(text)) {
+        delete pendingCheckouts[userId];
+        return bot.sendMessage(msg.chat.id, '❌ Order cancelled. Your cart is still saved.');
+      }
+      // Ignore other bot commands so /cart, /menu etc. still work mid-checkout.
+      if (text.startsWith('/')) return undefined;
+      if (!text) {
+        return bot.sendMessage(msg.chat.id, 'Please send a short text answer so we can place your order.');
+      }
+
+      if (pending.method === 'delivery') {
+        // Already have the address and asked for the photo: text here = no photo.
+        if (pending.stage === 'photo') {
+          return bot.sendMessage(msg.chat.id,
+            'Tap *Skip photo* below to place your order, or send a front-door photo 📸.',
+            { parse_mode: 'Markdown' });
+        }
+        pending.address = text;
+        pending.askedAt = Date.now();
+        // Photo already sent before the address? Place the order now.
+        if (pending.photo) {
+          delete pendingCheckouts[userId];
+          try {
+            await placeCheckoutOrder(msg.chat.id, userId, 'delivery', pending.cart, pending.address, pending.photo);
+          } catch (e) {
+            await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
+          }
+          return undefined;
+        }
+        pending.stage = 'photo';
+        return bot.sendMessage(msg.chat.id,
+          `📸 *Address saved.*\n\n` +
+          `Want to help the driver find you faster? Send a photo of your *front door* — or tap *Skip photo* to place the order now.`,
+          {
+            parse_mode: 'Markdown',
+            reply_markup: { inline_keyboard: [[{ text: '⏭️ Skip photo', callback_data: 'checkout:skip_photo' }]] }
+          });
+      }
+
+      // Pickup: the text IS the requested time -> place the order.
+      delete pendingCheckouts[userId];
+      try {
+        await placeCheckoutOrder(msg.chat.id, userId, 'pickup', pending.cart, text, null);
+      } catch (e) {
+        await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
+      }
+      return undefined;
     });
 
     // Kitchen Aide: customer DMs (relay to kitchen thread) + kitchen thread replies (relay to customer)
