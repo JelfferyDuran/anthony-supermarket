@@ -1,0 +1,7 @@
+# Kitchen OS v2 prototype — runtime artifacts (never commit)
+__pycache__/
+data/draft.json
+data/approved.json
+data/approved-*.json
+*.pyc
+.vercel
