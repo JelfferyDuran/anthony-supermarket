@@ -1,85 +1,72 @@
+
+!**/.env.example
+!.env.example
+!apps/command-center/
+!apps/menu/scripts/anthonys-seed.json
+!apps/pricing-hub/
 # Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-*.log
-
-# Production
-build/
-dist/
-.next/
-out/
-/public-build/
-
+# Docker
+# Documentation
 # Environment
-.env
-.env.local
-.env.*.local
-
+# IDE
+# keep templates tracked despite the .env* glob above
+# Local apps
+# Local worktrees
+# Logs
+# NRS pipeline
+# Obsidian local state
+# OS
+# pipeline artifacts
+# Production
+# Runtime data
 # Secrets / backup env files — never commit these
-.env.bak*
+# Testing
 *.bak_debug
 *.bak_env
 *.bak_escape
 *.bak_pii
 *.bak-social
-*.env.pulled
 *.env.prod.pulled
-
-# Local worktrees
-.worktrees/
-
-# IDE
-.vscode/
-.idea/
-*.swp
+*.env.pulled
+*.log
 *.swo
+*.swp
 *~
-
-# Obsidian local state
-.obsidian/
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Docker
-docker-compose.override.yml
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local apps
+.env
+.env*
+.env.*.local
+.env.bak*
+.env.local
+.idea/
+.next/
+.obsidian/
+.pnp
+.pnp.js
+.secrets.tmp
+.vercel
+.vercel/
+.vscode/
+.worktrees/
+/apps/pricing-hub/.vercel
+/public-build/
+__pycache__/
 apps/delivery/
 apps/inventory/
 apps/menu/
-!apps/menu/scripts/anthonys-seed.json
-!apps/pricing-hub/
-!apps/command-center/
-
-# Documentation
+build/
+coverage/
+dist/
+docker-compose.override.yml
 docs/invoices/*.pdf
 docs/pricing/*.csv
-
-# Runtime data
-server/data/
-
-# NRS pipeline
+node_modules/
+npm-debug.log*
 nrs/.env
 nrs/inbox/*.csv
-.vercel/
-/apps/pricing-hub/.vercel
-
-# pipeline artifacts
-__pycache__/
-.vercel
-.env*
-
-# keep templates tracked despite the .env* glob above
-!.env.example
-!**/.env.example
+out/
+server/data/
+supabase/.temp/
+Thumbs.db
+yarn-debug.log*
+yarn-error.log*
