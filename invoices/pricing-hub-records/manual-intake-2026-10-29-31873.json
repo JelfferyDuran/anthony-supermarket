@@ -19,15 +19,10 @@
   "account_balance": 1839.77
  },
  "pricing_rule": "suggested sale = unit cost x 1.70, rounded down to next .99; unit cost = Price Each / units per case as printed in description.",
- "pack_unknown": [
-  "Pasta de Tomate Victorina 29oz (072728002062)",
-  "Pringles BBQ 5.5oz (Gd) (00038000183669)",
-  "Sopa en Sobre Maggi Pollo/Fideo 2/1 (00028000234072)"
- ],
  "projected": {
-  "lines_priced": 30,
-  "revenue_at_suggested": 3111.06,
-  "profit_at_suggested": 1419.49
+  "lines_priced": 33,
+  "revenue_at_suggested": 3394.32,
+  "profit_at_suggested": 1554.55
  },
  "items": [
   {
@@ -280,14 +275,15 @@
   {
    "upc": "072728002062",
    "desc": "Pasta de Tomate Victorina 29oz",
-   "pack": "pack n/a",
-   "units_per_case": null,
+   "pack": "12 cans",
+   "units_per_case": 12,
    "qty": 3,
    "price_each": 31.25,
    "amount": 93.75,
-   "unit_cost": null,
-   "suggested_sale": null,
-   "note": "pack count not printed - set shelf price manually"
+   "unit_cost": 2.6,
+   "suggested_sale": 4.99,
+   "margin": 2.39,
+   "markup_pct": 91.6
   },
   {
    "upc": "710164444243",
@@ -331,14 +327,15 @@
   {
    "upc": "00038000183669",
    "desc": "Pringles BBQ 5.5oz (Gd)",
-   "pack": "pack n/a",
-   "units_per_case": null,
+   "pack": "14 cans",
+   "units_per_case": 14,
    "qty": 1,
    "price_each": 32.5,
    "amount": 32.5,
-   "unit_cost": null,
-   "suggested_sale": null,
-   "note": "pack count not printed - set shelf price manually"
+   "unit_cost": 2.32,
+   "suggested_sale": 3.99,
+   "margin": 1.67,
+   "markup_pct": 71.9
   },
   {
    "upc": "00038000845611",
@@ -421,14 +418,16 @@
   {
    "upc": "00028000234072",
    "desc": "Sopa en Sobre Maggi - Pollo/Fideo 2/1",
-   "pack": "pack n/a",
-   "units_per_case": null,
+   "pack": "2 boxes of 12 (UNCONFIRMED - Noel to verify)",
+   "units_per_case": 24,
    "qty": 1,
    "price_each": 21.95,
    "amount": 21.95,
-   "unit_cost": null,
-   "suggested_sale": null,
-   "note": "pack count not printed - set shelf price manually"
+   "unit_cost": 0.91,
+   "suggested_sale": 1.99,
+   "margin": 1.08,
+   "markup_pct": 117.6,
+   "tentative": true
   },
   {
    "upc": "710164444199",
@@ -456,5 +455,16 @@
    "margin": 3.0,
    "markup_pct": 100.5
   }
- ]
+ ],
+ "payment": {
+  "method": "check",
+  "check_number": "11612",
+  "status": "paid",
+  "note": "Check #11612 written on invoice page 2 (Noel, Oct 30)"
+ },
+ "pack_counts_confirmed": {
+  "072728002062": "12 units/case (Noel, Oct 30)",
+  "00038000183669": "14 units/case, like the other Gd Pringles (Noel, Oct 30)",
+  "00028000234072": "TENTATIVE: 2 boxes of 12 (Noel to verify)"
+ }
 }
