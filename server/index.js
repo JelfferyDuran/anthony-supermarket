@@ -498,6 +498,24 @@ function describeDeliveryMethod(method) {
   return method === 'delivery' ? '🚚 Delivery' : '📦 Pickup';
 }
 
+// The Telegram profile hands us the customer's real name for free, so the
+// kitchen never has to guess who the order belongs to. Fall back to @username,
+// then to a generic label only if the profile carries nothing usable.
+function customerNameFrom(from) {
+  if (!from) return 'Telegram Customer';
+  const full = [from.first_name, from.last_name].filter(Boolean).join(' ').trim();
+  if (full) return cleanAnswer(full, 80);
+  if (from.username) return cleanAnswer('@' + from.username, 80);
+  return 'Telegram Customer';
+}
+
+// A phone number is only worth sending to a driver if it can actually be
+// dialled: keep the punctuation they typed, but require >= 7 digits.
+function cleanPhone(value) {
+  const typed = cleanAnswer(value, 40);
+  return typed.replace(/\D/g, '').length >= 7 ? typed : '';
+}
+
 function buildOrderSummaryText(cart, method) {
   const items = (cart && cart.items) || [];
   const total = items.reduce((sum, i) => sum + i.precio * i.cantidad, 0);
@@ -510,11 +528,11 @@ function buildOrderSummaryText(cart, method) {
 
 // Places the order once the follow-up answer (time / address) is in hand.
 // `photoFileId` is the OPTIONAL front-door photo the customer sent (delivery).
-async function placeCheckoutOrder(chatId, userId, method, cart, detail, photoFileId) {
+async function placeCheckoutOrder(chatId, userId, method, cart, detail, photoFileId, customer) {
   const answer = cleanAnswer(detail);
   const cliente = {
-    nombre: 'Telegram Customer',
-    telefono: '',
+    nombre: (customer && customer.nombre) || 'Telegram Customer',
+    telefono: (customer && customer.telefono) || '',
     direccion: '',
     pickup_time: ''
   };
@@ -540,7 +558,10 @@ async function placeCheckoutOrder(chatId, userId, method, cart, detail, photoFil
     let text = `🎉 *Order Confirmed!*\n\n` +
       `Order #${order.orderId}\n` +
       `Total: *$${Number(order.total).toFixed(2)}*\n` +
-      `Type: ${describeDeliveryMethod(method)}\n\n`;
+      `Type: ${describeDeliveryMethod(method)}\n` +
+      `Name: ${cliente.nombre}\n` +
+      (cliente.telefono ? `Phone: ${cliente.telefono}\n` : '') +
+      `\n`;
     if (method === 'delivery') text += `🚚 Deliver to: ${answer}\n\n`;
     else text += `🕐 Ready at: ${answer}\n\n`;
     text += `📍 288 Kearny Ave, Kearny NJ 07032\n` +
@@ -550,6 +571,47 @@ async function placeCheckoutOrder(chatId, userId, method, cart, detail, photoFil
     await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
   } else {
     await bot.sendMessage(chatId, `❌ Order failed: ${(order && order.error) || 'unknown error'}`);
+  }
+}
+
+// Delivery is three quick steps: the address, the best phone number for the
+// driver, then the OPTIONAL front-door photo. Each step is one short message or
+// one tap, and the order is placed only once the last answer is in hand.
+function askForPhone(chatId) {
+  return bot.sendMessage(chatId,
+    `📞 *Address saved.*\n\n` +
+    `Send the best *phone number* for the driver — or tap *No phone* to continue.`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: { inline_keyboard: [[{ text: '⏭️ No phone', callback_data: 'checkout:skip_phone' }]] }
+    });
+}
+
+function askForFrontDoorPhoto(chatId) {
+  return bot.sendMessage(chatId,
+    `📸 *Saved.*\n\n` +
+    `Want to help the driver find you faster? Send a photo of your *front door* — or tap *Skip photo* to place the order now.`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: { inline_keyboard: [[{ text: '⏭️ Skip photo', callback_data: 'checkout:skip_photo' }]] }
+    });
+}
+
+// Called once the phone step is answered (or skipped): finish with the photo if
+// one is still missing, otherwise place the order.
+function finishDelivery(chatId, userId, pending) {
+  if (pending.photo) return completeDelivery(chatId, userId, pending);
+  pending.stage = 'photo';
+  return askForFrontDoorPhoto(chatId);
+}
+
+async function completeDelivery(chatId, userId, pending) {
+  delete pendingCheckouts[userId];
+  try {
+    await placeCheckoutOrder(chatId, userId, 'delivery', pending.cart, pending.address, pending.photo || null,
+      { nombre: pending.nombre, telefono: pending.telefono });
+  } catch (e) {
+    await bot.sendMessage(chatId, `❌ Server error: ${e.message}`);
   }
 }
 
@@ -874,6 +936,18 @@ function startBot() {
           return bot.sendMessage(chatId, '❌ Order cancelled. Your cart is still saved.');
         }
 
+        // Customer chose not to give a phone number.
+        if (method === 'skip_phone') {
+          const pending = pendingCheckouts[userId];
+          if (!pending || pending.method !== 'delivery' || !pending.address) {
+            return bot.answerCallbackQuery(query.id, { text: 'Nothing pending' });
+          }
+          pending.telefono = '';
+          pending.askedAt = Date.now();
+          await bot.answerCallbackQuery(query.id, { text: '👍 Continuing' });
+          return finishDelivery(chatId, userId, pending);
+        }
+
         // Customer chose to place the order without a front-door photo.
         if (method === 'skip_photo') {
           const pending = pendingCheckouts[userId];
@@ -881,13 +955,7 @@ function startBot() {
             return bot.answerCallbackQuery(query.id, { text: 'Nothing pending' });
           }
           await bot.answerCallbackQuery(query.id, { text: '📦 Placing order' });
-          delete pendingCheckouts[userId];
-          try {
-            await placeCheckoutOrder(chatId, userId, 'delivery', pending.cart, pending.address, null);
-          } catch (e) {
-            await bot.sendMessage(chatId, `❌ Server error: ${e.message}`);
-          }
-          return;
+          return completeDelivery(chatId, userId, pending);
         }
 
         const cart = userCarts[userId];
@@ -905,6 +973,8 @@ function startBot() {
           cart: stashCartForCheckout(cart),
           askedAt: Date.now(),
           stage: method === 'delivery' ? 'address' : 'time',
+          nombre: customerNameFrom(query.from),
+          telefono: '',
           address: '',
           photo: ''
         };
@@ -951,7 +1021,7 @@ function startBot() {
           '⌛ That checkout timed out. Your cart is still saved — send /checkout to try again.');
       }
 
-      // ── Delivery: the OPTIONAL front-door photo ──
+      // ── Delivery: the OPTIONAL front-door photo (may arrive at any step) ──
       if (pending.method === 'delivery' && msg.photo && msg.photo.length) {
         const fileId = msg.photo[msg.photo.length - 1].file_id;
         pending.photo = fileId;
@@ -962,13 +1032,9 @@ function startBot() {
             '📸 Got the front-door photo! Now send your *delivery address* so we can place the order.',
             { parse_mode: 'Markdown' });
         }
-        delete pendingCheckouts[userId];
-        try {
-          await placeCheckoutOrder(msg.chat.id, userId, 'delivery', pending.cart, pending.address, fileId);
-        } catch (e) {
-          await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
-        }
-        return undefined;
+        // Address in hand but the phone step is still open — keep that order.
+        if (pending.stage === 'phone') return askForPhone(msg.chat.id);
+        return completeDelivery(msg.chat.id, userId, pending);
       }
 
       // Text answers only from here on.
@@ -987,38 +1053,39 @@ function startBot() {
       }
 
       if (pending.method === 'delivery') {
-        // Already have the address and asked for the photo: text here = no photo.
+        // Waiting on the photo: text here means they didn't send one.
         if (pending.stage === 'photo') {
           return bot.sendMessage(msg.chat.id,
             'Tap *Skip photo* below to place your order, or send a front-door photo 📸.',
             { parse_mode: 'Markdown' });
         }
+        // Waiting on the phone number.
+        if (pending.stage === 'phone') {
+          const tel = cleanPhone(text);
+          if (!tel) {
+            return bot.sendMessage(msg.chat.id,
+              `That doesn't look like a phone number. Send the digits (e.g. 201-555-0134) or tap *No phone* to continue.`,
+              {
+                parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [[{ text: '⏭️ No phone', callback_data: 'checkout:skip_phone' }]] }
+              });
+          }
+          pending.telefono = tel;
+          pending.askedAt = Date.now();
+          return finishDelivery(msg.chat.id, userId, pending);
+        }
+        // First delivery answer: the address. Then ask for the phone.
         pending.address = text;
         pending.askedAt = Date.now();
-        // Photo already sent before the address? Place the order now.
-        if (pending.photo) {
-          delete pendingCheckouts[userId];
-          try {
-            await placeCheckoutOrder(msg.chat.id, userId, 'delivery', pending.cart, pending.address, pending.photo);
-          } catch (e) {
-            await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
-          }
-          return undefined;
-        }
-        pending.stage = 'photo';
-        return bot.sendMessage(msg.chat.id,
-          `📸 *Address saved.*\n\n` +
-          `Want to help the driver find you faster? Send a photo of your *front door* — or tap *Skip photo* to place the order now.`,
-          {
-            parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: [[{ text: '⏭️ Skip photo', callback_data: 'checkout:skip_photo' }]] }
-          });
+        pending.stage = 'phone';
+        return askForPhone(msg.chat.id);
       }
 
       // Pickup: the text IS the requested time -> place the order.
       delete pendingCheckouts[userId];
       try {
-        await placeCheckoutOrder(msg.chat.id, userId, 'pickup', pending.cart, text, null);
+        await placeCheckoutOrder(msg.chat.id, userId, 'pickup', pending.cart, text, null,
+          { nombre: pending.nombre, telefono: pending.telefono });
       } catch (e) {
         await bot.sendMessage(msg.chat.id, `❌ Server error: ${e.message}`);
       }
