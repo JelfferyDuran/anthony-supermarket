@@ -451,7 +451,40 @@ async function notifyWhatsApp(order) {
 // ─── Telegram Bot ─────────────────────────────────────────────────────
 
 let bot = null;
+
 const userCarts = {};
+
+// ─── Menu keyboard glow-up: 2-column item grid + live cart footer ────────────
+function cartCountTotal(cart) {
+  const count = cart ? cart.items.reduce((s, i) => s + (i.cantidad || 1), 0) : 0;
+  const total = cart ? cart.items.reduce((s, i) => s + i.precio * (i.cantidad || 1), 0) : 0;
+  return { count, total };
+}
+
+function buildItemKeyboard(slug, catName, items, cart) {
+  const keyboard = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const row = [];
+    for (let j = i; j < Math.min(i + 2, items.length); j++) {
+      const item = items[j];
+      row.push({
+        text: `➕ ${item.nombre} · $${item.precio.toFixed(2)}`,
+        callback_data: `add:${slug}:${catName}:${item.nombre}`
+      });
+    }
+    keyboard.push(row);
+  }
+  const { count, total } = cartCountTotal(cart);
+  if (count > 0) {
+    keyboard.push([{
+      text: `🛒 View Cart · ${count} item${count === 1 ? '' : 's'} · $${total.toFixed(2)}`,
+      callback_data: 'cart:view'
+    }]);
+  }
+  keyboard.push([{ text: '🔙 Back to Categories', callback_data: `back:${slug}` }]);
+  return keyboard;
+}
+
 
 function startBot() {
   if (!TELEGRAM_TOKEN) {
@@ -621,17 +654,15 @@ function startBot() {
         if (!cat) return bot.answerCallbackQuery(query.id, { text: 'Category not found' });
 
         let text = `*${cat.nombre}* — ${cat.items.length} items\n\n`;
-        const keyboard = [];
-
         cat.items.forEach(item => {
           text += `*${item.nombre}*\n`;
           text += `  💰 $${item.precio.toFixed(2)}\n`;
           if (item.descripcion) text += `  📝 ${item.descripcion}\n`;
           text += '\n';
-          keyboard.push([{ text: `➕ ${item.nombre} — $${item.precio.toFixed(2)}`, callback_data: `add:${slug}:${cat.nombre}:${item.nombre}` }]);
         });
 
-        keyboard.push([{ text: '🔙 Back', callback_data: `back:${slug}` }]);
+        const cart = userCarts[query.from.id];
+        const keyboard = buildItemKeyboard(slug, cat.nombre, cat.items, cart);
 
         await bot.answerCallbackQuery(query.id);
         await bot.sendMessage(chatId, text, {
@@ -666,11 +697,42 @@ function startBot() {
           });
         }
 
-        await bot.answerCallbackQuery(query.id, { text: `✅ Added ${item.nombre}` });
-        await bot.sendMessage(chatId,
-          `✅ *${item.nombre}* added to cart! ($${item.precio.toFixed(2)})`,
-          { parse_mode: 'Markdown' }
-        );
+        const count = cart.items.reduce((s, i) => s + (i.cantidad || 1), 0);
+        await bot.answerCallbackQuery(query.id, { text: `✅ ${item.nombre} added (${count} in cart)` });
+        // Refresh the keyboard in place — live cart footer, no new message, no scrolling.
+        try {
+          await bot.editMessageReplyMarkup(
+            { inline_keyboard: buildItemKeyboard(slug, cat.nombre, cat.items, cart) },
+            { chat_id: chatId, message_id: query.message.message_id }
+          );
+        } catch (e) {
+          console.error('Keyboard refresh failed:', e.message);
+        }
+      }
+
+      // View cart (from the live cart footer button)
+      if (data.startsWith('cart:view')) {
+        const userId = query.from.id;
+        const cart = userCarts[userId];
+        await bot.answerCallbackQuery(query.id);
+        if (!cart || !cart.items.length) {
+          return bot.sendMessage(chatId, '🛍️ Your cart is empty. Tap ➕ on any item to add it.');
+        }
+        let text = `🛍️ *Your Cart*\n\n`;
+        cart.items.forEach((item, i) => {
+          text += `${i + 1}. ${item.nombre} x${item.cantidad} = _$${(item.precio * item.cantidad).toFixed(2)}_\n`;
+        });
+        const total = cart.items.reduce((s, i) => s + i.precio * i.cantidad, 0);
+        text += `\n*Total: $${total.toFixed(2)}*`;
+        await bot.sendMessage(chatId, text, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '📦 Pickup', callback_data: 'checkout:pickup' }, { text: '🚚 Delivery', callback_data: 'checkout:delivery' }],
+              [{ text: '🗑️ Clear Cart', callback_data: 'checkout:clearcart' }]
+            ]
+          }
+        });
       }
 
       if (data.startsWith('back:')) {
@@ -764,6 +826,12 @@ function startBot() {
         if (method === 'cancel') {
           await bot.answerCallbackQuery(query.id, { text: 'Order cancelled' });
           return;
+        }
+        if (method === 'clearcart') {
+          const userId = query.from.id;
+          if (userCarts[userId]) userCarts[userId] = { items: [], slug: '' };
+          await bot.answerCallbackQuery(query.id, { text: '🗑️ Cart cleared' });
+          return bot.sendMessage(chatId, '🗑️ Cart cleared! Browse /menu to start a new order.');
         }
 
         const userId = query.from.id;
