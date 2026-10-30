@@ -402,8 +402,8 @@ async function notifyKitchen(order) {
     `${itemsList}\n\n` +
     `*Total:* $${order.total.toFixed(2)}\n` +
     `*${order.tipoEntrega === 'pickup' ? '📦 Pickup' : '🚚 Delivery'}*\n\n` +
-    `*Customer:* ${order.cliente.nome}\n` +
-    (order.cliente.telefono ? `*Phone:* ${order.cliente.telefono}\n` : '') +
+    `*Customer:* ${order.cliente.nombre || 'Telegram Customer'}\n` +
+    (order.cliente.telefono ? `*📞 Phone:* ${order.cliente.telefono}\n` : '') +
     (order.cliente.direccion ? `*Address:* ${order.cliente.direccion}\n` : '') +
     (order.cliente.pickup_time ? `*Ready at:* ${order.cliente.pickup_time}\n` : '') +
     (order.notas ? `*Notes:* ${order.notas}\n` : '') +
