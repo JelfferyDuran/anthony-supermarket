@@ -45,15 +45,26 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
       });
       setOrderId(res.orderId);
       setState('done');
-      // Telegram deep link: https://t.me/Anthonysuperkitchen_bot?start=ORDER_<orderId>
-      const botUrl = menuData.brand.botUrl || 'https://t.me/Anthonysuperkitchen_bot';
-      const deepLink = `${botUrl}?start=ORDER_${res.orderId}`;
-      // Open the bot (works inside Telegram webview too)
-      window.open(deepLink, '_blank');
+      // NOTE: do NOT auto-open the bot link here. window.open() with a t.me URL
+      // blanks the Mini App WebView on iOS (black screen). The user taps
+      // "Continue in Telegram" instead, which uses Telegram.WebApp.openTelegramLink.
     } catch (e) {
       setErrorMsg(e.message || 'Something went wrong placing your order.');
       setState('form');
     }
+  };
+
+  const openBotLink = () => {
+    const botUrl = (menuData && menuData.brand && menuData.brand.botUrl) || 'https://t.me/Anthonysuperkitchen_bot';
+    const deepLink = `${botUrl}?start=ORDER_${orderId}`;
+    try {
+      const wa = window.Telegram && window.Telegram.WebApp;
+      if (wa && typeof wa.openTelegramLink === 'function') {
+        wa.openTelegramLink(deepLink);
+        return;
+      }
+    } catch { /* fall through to window.open */ }
+    window.open(deepLink, '_blank');
   };
 
   const buildSummary = () =>
@@ -86,7 +97,8 @@ export default function CheckoutModal({ cart, menuData, onClose, onPlaced }) {
               Tap <strong>Continue in Telegram</strong> to confirm with the bot, or just come by!
             </p>
             <div className="modal-footer">
-              <button className="btn btn-primary btn-lg" onClick={onPlaced}>Done</button>
+              <button className="btn btn-primary btn-lg" onClick={openBotLink}>📲 Continue in Telegram</button>
+              <button className="btn btn-lg" onClick={onPlaced}>Done</button>
             </div>
           </>
         ) : (
