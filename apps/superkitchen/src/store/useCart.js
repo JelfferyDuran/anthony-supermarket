@@ -45,6 +45,7 @@ export function useCart() {
     const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
     return {
       subtotal,
+      total: subtotal, // alias — App.jsx sticky cart reads .total
       count: items.reduce((sum, i) => sum + i.qty, 0),
     };
   }, [items]);
