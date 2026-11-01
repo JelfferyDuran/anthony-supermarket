@@ -11,6 +11,7 @@ const kitchenAide = require('./kitchen-aide');
 const { createPricingRouter } = require('./pricing-router');
 const { retailFromUnitCost, unitCostFromCase } = require('./pricing-engine');
 const { resolveMenuDataPath, menuSeedCandidates, countMenuItems, resolveMenuBySlug } = require('./menu-seed');
+const { catData, addData, parseCat, parseAdd } = require('./bot-callbacks');
 
 const PORT = process.env.PORT || 3001;
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '';
@@ -461,7 +462,7 @@ function cartCountTotal(cart) {
   return { count, total };
 }
 
-function buildItemKeyboard(slug, catName, items, cart) {
+function buildItemKeyboard(slug, catIndex, items, cart) {
   const keyboard = [];
   for (let i = 0; i < items.length; i += 2) {
     const row = [];
@@ -469,7 +470,7 @@ function buildItemKeyboard(slug, catName, items, cart) {
       const item = items[j];
       row.push({
         text: `➕ ${item.nombre} · $${item.precio.toFixed(2)}`,
-        callback_data: `add:${slug}:${catName}:${item.nombre}`
+        callback_data: addData(slug, catIndex, j)
       });
     }
     keyboard.push(row);
@@ -624,14 +625,14 @@ function startBot() {
       let text = `*🍳 Anthony's SuperKitchen — Full Menu*\n${menu.subtitulo || ''}\n\n`;
       const keyboard = [];
 
-      menu.categorias.forEach(cat => {
+      menu.categorias.forEach((cat, catIndex) => {
         text += `*${cat.nombre}* — ${cat.items.length} items\n`;
         cat.items.slice(0, 3).forEach(item => {
           text += `  • ${item.nombre} — _$${item.precio.toFixed(2)}_\n`;
         });
         if (cat.items.length > 3) text += `  _+${cat.items.length - 3} more_\n`;
         text += '\n';
-        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: `cat:${menu.slug}:${cat.nombre}` }]);
+        keyboard.push([{ text: `📋 ${cat.nombre}`, callback_data: catData(menu.slug, catIndex) }]);
       });
 
       text += `\nTap a category or use /search <item> to find something.`;
@@ -648,9 +649,7 @@ function startBot() {
       const data = query.data || '';
 
       if (data.startsWith('cat:')) {
-        const [, slug, catName] = data.split(':');
-        const menu = resolveMenuBySlug(menuData, slug);
-        const cat = menu?.categorias.find(c => c.nombre === catName);
+        const { slug, cat, catIndex } = parseCat(data, s => resolveMenuBySlug(menuData, s));
         if (!cat) return bot.answerCallbackQuery(query.id, { text: 'Category not found' });
 
         let text = `*${cat.nombre}* — ${cat.items.length} items\n\n`;
@@ -662,7 +661,7 @@ function startBot() {
         });
 
         const cart = userCarts[query.from.id];
-        const keyboard = buildItemKeyboard(slug, cat.nombre, cat.items, cart);
+        const keyboard = buildItemKeyboard(slug, catIndex, cat.items, cart);
 
         await bot.answerCallbackQuery(query.id);
         await bot.sendMessage(chatId, text, {
@@ -673,11 +672,9 @@ function startBot() {
 
       // Add item to cart
       if (data.startsWith('add:')) {
-        const [, slug, catName, ...nameParts] = data.split(':');
-        const name = nameParts.join(':');
-        const menu = resolveMenuBySlug(menuData, slug);
-        const cat = menu?.categorias.find(c => c.nombre === catName);
-        const item = cat?.items.find(i => i.nombre === name);
+        const { slug, cat, catIndex, item } = parseAdd(data, s => resolveMenuBySlug(menuData, s));
+        const name = item?.nombre;
+        const catName = cat?.nombre;
         if (!item) return bot.answerCallbackQuery(query.id, { text: 'Item not found' });
 
         const userId = query.from.id;
@@ -702,7 +699,7 @@ function startBot() {
         // Refresh the keyboard in place — live cart footer, no new message, no scrolling.
         try {
           await bot.editMessageReplyMarkup(
-            { inline_keyboard: buildItemKeyboard(slug, cat.nombre, cat.items, cart) },
+            { inline_keyboard: buildItemKeyboard(slug, catIndex, cat.items, cart) },
             { chat_id: chatId, message_id: query.message.message_id }
           );
         } catch (e) {
