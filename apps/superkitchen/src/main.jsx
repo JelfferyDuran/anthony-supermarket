@@ -2,14 +2,11 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import StaffApp from './staff/StaffApp.jsx';
+import { configureTelegramChrome } from './lib/telegram.js';
 import './styles.css';
 
-// Telegram Mini App SDK (optional — enhances UX inside Telegram webview).
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-}
+// Telegram enhancements are progressive only; browser previews keep working.
+configureTelegramChrome();
 
 const params = new URLSearchParams(window.location.search);
 const staffMode = params.get('staff') === '1' || window.location.hash.toLowerCase() === '#staff';

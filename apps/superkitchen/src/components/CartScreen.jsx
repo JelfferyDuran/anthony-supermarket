@@ -1,42 +1,76 @@
 import { useState } from 'react';
+import { telegramHaptic } from '../lib/telegram.js';
 
 function CartLine({ item, cart }) {
   const [editing, setEditing] = useState(false);
   const [qty, setQty] = useState(item.qty);
 
+  const adjustQty = delta => {
+    telegramHaptic('light');
+    setQty(current => Math.max(1, current + delta));
+  };
+
+  const saveQty = () => {
+    cart.updateItem(item.key, { qty });
+    telegramHaptic('success');
+    setEditing(false);
+  };
+
+  const removeItem = () => {
+    telegramHaptic('warning');
+    cart.removeItem(item.key);
+  };
+
   return (
-    <div className="cart-line">
+    <article className="cart-line">
       <div className="cart-line-info">
-        <div className="cart-line-name">{item.name}</div>
-        {item.meat && <div className="cart-line-opt">Meat: {item.meat.name}{item.meat.priceDelta > 0 ? ` +$${item.meat.priceDelta.toFixed(2)}` : ''}</div>}
-        {item.side && <div className="cart-line-opt">Side: {item.side.name}</div>}
-        <div className="cart-line-price">${item.unitPrice.toFixed(2)} each</div>
+        <div className="cart-line-top">
+          <div className="cart-line-name">{item.name}</div>
+          <div className="cart-line-total">${(item.unitPrice * item.qty).toFixed(2)}</div>
+        </div>
+        <div className="cart-line-options">
+          {item.meat && <span>{item.meat.name}{item.meat.priceDelta > 0 ? ` +$${item.meat.priceDelta.toFixed(2)}` : ''}</span>}
+          {item.side && <span>{item.side.name}</span>}
+          <span>{item.qty} × ${item.unitPrice.toFixed(2)}</span>
+        </div>
       </div>
+
       <div className="cart-line-actions">
         {editing ? (
           <div className="qty-row small">
-            <button className="qty-btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+            <button type="button" className="qty-btn" onClick={() => adjustQty(-1)} aria-label="Decrease quantity">−</button>
             <span className="qty-value">{qty}</span>
-            <button className="qty-btn" onClick={() => setQty(q => q + 1)}>+</button>
-            <button className="btn btn-small" onClick={() => { cart.updateItem(item.key, { qty }); setEditing(false); }}>✓</button>
+            <button type="button" className="qty-btn" onClick={() => adjustQty(1)} aria-label="Increase quantity">+</button>
+            <button type="button" className="btn btn-small btn-save" onClick={saveQty}>Save</button>
           </div>
         ) : (
-          <button className="btn btn-small" onClick={() => setEditing(true)}>Edit qty</button>
+          <button type="button" className="btn btn-small" onClick={() => { telegramHaptic('selection'); setEditing(true); }}>Edit quantity</button>
         )}
-        <button className="btn btn-small btn-danger" onClick={() => cart.removeItem(item.key)}>Remove</button>
+        <button type="button" className="btn btn-small btn-danger" onClick={removeItem}>Remove</button>
       </div>
-      <div className="cart-line-total">${(item.unitPrice * item.qty).toFixed(2)}</div>
-    </div>
+    </article>
   );
 }
 
 export default function CartScreen({ cart, onBack, onCheckout }) {
   return (
-    <div className="cart-screen">
-      <button className="btn btn-back" onClick={onBack}>← Back to menu</button>
-      <h2>Your Cart</h2>
+    <main className="cart-screen">
+      <div className="cart-screen-head">
+        <button type="button" className="icon-back-btn" onClick={onBack} aria-label="Back to menu">←</button>
+        <div>
+          <span className="section-eyebrow">YOUR ORDER</span>
+          <h2>Cart</h2>
+        </div>
+        <span className="cart-screen-count">{cart.totals.count}</span>
+      </div>
+
       {cart.items.length === 0 ? (
-        <p className="empty-cart">Your cart is empty. Add something tasty!</p>
+        <div className="empty-cart">
+          <span aria-hidden="true">🛍️</span>
+          <h3>Your cart is empty</h3>
+          <p>Go back and add something hot from the kitchen.</p>
+          <button type="button" className="btn btn-primary" onClick={onBack}>Browse menu</button>
+        </div>
       ) : (
         <>
           <div className="cart-lines">
@@ -44,16 +78,23 @@ export default function CartScreen({ cart, onBack, onCheckout }) {
               <CartLine key={item.key} item={item} cart={cart} />
             ))}
           </div>
+
           <div className="cart-summary">
+            <div className="cart-summary-row"><span>Items</span><span>{cart.totals.count}</span></div>
             <div className="cart-summary-row"><span>Subtotal</span><span>${cart.totals.subtotal.toFixed(2)}</span></div>
             <div className="cart-summary-row total"><span>Total</span><span>${cart.totals.subtotal.toFixed(2)}</span></div>
+            <p className="cart-summary-note">Choose pickup or delivery on the next step.</p>
           </div>
+
           <div className="cart-actions">
-            <button className="btn btn-secondary" onClick={cart.clearCart}>Clear cart</button>
-            <button className="btn btn-primary btn-lg" onClick={onCheckout}>Continue in Telegram →</button>
+            <button type="button" className="btn btn-secondary" onClick={() => { telegramHaptic('warning'); cart.clearCart(); }}>Clear</button>
+            <button type="button" className="btn btn-primary btn-lg cart-checkout-btn" onClick={onCheckout}>
+              <span>Checkout</span>
+              <strong>${cart.totals.subtotal.toFixed(2)}</strong>
+            </button>
           </div>
         </>
       )}
-    </div>
+    </main>
   );
 }
