@@ -128,3 +128,7 @@ jobs:
             echo 'Service-role credentials must never appear in browser code.'
             exit 1
           fi
+      - name: Verify Phase 2B admin and traffic guardrails
+        run: |
+          node scripts/check-admin-guardrails.mjs
+          node --no-warnings scripts/test-invoice-pricing.mjs

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   isStaffRole,
   listOrders,
@@ -10,20 +10,24 @@ import {
   updateOrderStatus,
 } from './staffAuth.js';
 import './staff.css';
+import './staffReview.css';
 
-const STATUS_LABELS = {
-  recibido: 'New',
-  preparando: 'Cooking',
-  listo: 'Ready',
-  completado: 'Completed',
-  cancelado: 'Canceled',
-};
+const LANES = [
+  { status: 'recibido', title: 'New', subtitle: 'Needs attention' },
+  { status: 'preparando', title: 'Cooking', subtitle: 'In the kitchen' },
+  { status: 'listo', title: 'Ready', subtitle: 'Waiting for handoff' },
+  { status: 'completado', title: 'Done', subtitle: 'Recently completed' },
+];
 
 const NEXT_ACTION = {
   recibido: { status: 'preparando', label: 'Start cooking' },
   preparando: { status: 'listo', label: 'Mark ready' },
-  listo: { status: 'completado', label: 'Complete' },
+  listo: { status: 'completado', label: 'Complete order' },
 };
+
+// A ticket that sat in "New" for half a day should not look like a fresh kitchen ticket.
+// We keep it visible under Needs Review rather than silently changing/deleting it.
+const STALE_NEW_ORDER_MINUTES = 12 * 60;
 
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
@@ -37,6 +41,100 @@ function itemLabel(item) {
   return parts.length ? `${base} — ${parts.join(' / ')}` : base;
 }
 
+function elapsedMinutes(createdAt, now) {
+  const created = new Date(createdAt || 0).getTime();
+  if (!Number.isFinite(created) || created <= 0) return 0;
+  return Math.max(0, Math.floor((now - created) / 60000));
+}
+
+function elapsedLabel(minutes) {
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours < 24) return `${hours}h ${mins}m`;
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  return `${days}d ${remainingHours}h`;
+}
+
+function isStaleNewOrder(order, now) {
+  return order?.estado === 'recibido' && elapsedMinutes(order.created_at, now) >= STALE_NEW_ORDER_MINUTES;
+}
+
+function urgencyClass(minutes, status, reviewMode = false) {
+  if (reviewMode) return 'stale';
+  if (status === 'completado') return 'calm';
+  if (minutes >= 15) return 'late';
+  if (minutes >= 8) return 'watch';
+  return 'on-time';
+}
+
+function OrderCard({ order, now, busy, onAdvance, onCancel, reviewMode = false }) {
+  const next = NEXT_ACTION[order.estado];
+  const customer = order.cliente || {};
+  const minutes = elapsedMinutes(order.created_at, now);
+  const urgency = urgencyClass(minutes, order.estado, reviewMode);
+
+  return (
+    <article className={`kds-order-card status-${order.estado} urgency-${urgency} ${reviewMode ? 'review-order-card' : ''}`}>
+      {reviewMode ? <div className="kds-review-flag">⚠ Older unresolved order</div> : null}
+
+      <div className="kds-card-topline">
+        <div>
+          <div className="kds-order-number">#{order.id}</div>
+          <div className={`kds-timer ${urgency}`} aria-label={`Order age ${elapsedLabel(minutes)}`}>
+            <span className="kds-timer-dot" />
+            {elapsedLabel(minutes)}
+          </div>
+        </div>
+        <strong className="kds-order-total">{money(order.total)}</strong>
+      </div>
+
+      <div className="kds-order-type-row">
+        <span className={`kds-order-type ${order.tipo_entrega === 'delivery' ? 'delivery' : 'pickup'}`}>
+          {order.tipo_entrega === 'delivery' ? '🚚 Delivery' : '🛍️ Pickup'}
+        </span>
+        <span className="kds-customer-name">{customer.nombre || 'Customer'}</span>
+      </div>
+
+      <div className="kds-item-list">
+        {(order.items || []).map((item, index) => (
+          <div className="kds-item" key={`${order.id}-${index}`}>
+            {itemLabel(item)}
+          </div>
+        ))}
+      </div>
+
+      {order.notas ? (
+        <div className="kds-notes"><strong>⚠ Notes</strong><span>{order.notas}</span></div>
+      ) : null}
+
+      {(customer.telefono || (order.tipo_entrega === 'delivery' && customer.direccion)) ? (
+        <div className="kds-customer-details">
+          {customer.telefono ? <a href={`tel:${customer.telefono}`}>☎ {customer.telefono}</a> : null}
+          {order.tipo_entrega === 'delivery' && customer.direccion ? <span>📍 {customer.direccion}</span> : null}
+        </div>
+      ) : null}
+
+      {order.estado !== 'completado' ? (
+        <div className="kds-card-actions">
+          {next ? (
+            <button className="kds-action-primary" disabled={busy} onClick={() => onAdvance(order, next.status)}>
+              {busy ? 'Updating…' : (reviewMode && order.estado === 'recibido' ? 'Start anyway' : next.label)}
+            </button>
+          ) : null}
+          <button className="kds-action-more" disabled={busy} onClick={() => onCancel(order)} aria-label={`Cancel order ${order.id}`}>
+            •••
+          </button>
+        </div>
+      ) : (
+        <div className="kds-complete-stamp">✓ Completed</div>
+      )}
+    </article>
+  );
+}
+
 export default function StaffApp() {
   const [session, setSession] = useState(() => readStoredSession());
   const [orders, setOrders] = useState([]);
@@ -46,11 +144,56 @@ export default function StaffApp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
   const [busyOrder, setBusyOrder] = useState('');
+  const [lastSync, setLastSync] = useState(null);
+  const [online, setOnline] = useState(() => navigator.onLine);
+  const [now, setNow] = useState(Date.now());
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [newOrderAlert, setNewOrderAlert] = useState('');
+  const [showReview, setShowReview] = useState(false);
+  const seenOrderIds = useRef(new Set());
+  const initializedOrders = useRef(false);
+  const audioContextRef = useRef(null);
 
   const role = sessionRole(session);
   const authorized = isStaffRole(role);
+
+  const playNewOrderSound = () => {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = audioContextRef.current || new AudioCtx();
+      audioContextRef.current = ctx;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.5);
+    } catch {
+      // Sound is optional. The visible alert remains the reliable path.
+    }
+  };
+
+  const enableSound = async () => {
+    setSoundEnabled(true);
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = audioContextRef.current || new AudioCtx();
+        audioContextRef.current = ctx;
+        if (ctx.state === 'suspended') await ctx.resume();
+      }
+    } catch {
+      // Browser may block audio; visible alerts still work.
+    }
+  };
 
   const load = async (quiet = false) => {
     if (!session) {
@@ -60,14 +203,37 @@ export default function StaffApp() {
     if (!quiet) setLoading(true);
     try {
       const data = await listOrders();
-      setOrders(Array.isArray(data) ? data : []);
+      const nextOrders = Array.isArray(data) ? data : [];
+
+      if (!initializedOrders.current) {
+        nextOrders.forEach(order => seenOrderIds.current.add(order.id));
+        initializedOrders.current = true;
+      } else {
+        const checkTime = Date.now();
+        const freshNewOrders = nextOrders.filter(order => (
+          order.estado === 'recibido'
+          && !isStaleNewOrder(order, checkTime)
+          && !seenOrderIds.current.has(order.id)
+        ));
+        nextOrders.forEach(order => seenOrderIds.current.add(order.id));
+        if (freshNewOrders.length) {
+          const newest = freshNewOrders[0];
+          setNewOrderAlert(`New ${newest.tipo_entrega === 'delivery' ? 'delivery' : 'pickup'} order #${newest.id}`);
+          playNewOrderSound();
+        }
+      }
+
+      setOrders(nextOrders);
+      setLastSync(new Date());
+      setOnline(true);
       setError('');
     } catch (e) {
       if (e.status === 401) {
         setOrders([]);
         setError('');
       } else {
-        setError(e.message || 'Could not load orders.');
+        setOnline(false);
+        setError(e.message || 'Could not refresh orders. The board may be out of date.');
       }
     } finally {
       if (!quiet) setLoading(false);
@@ -89,24 +255,51 @@ export default function StaffApp() {
   }, []);
 
   useEffect(() => {
-    if (!session || !authorized) return undefined;
-    load();
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') load(true);
-    }, 10000);
-    return () => window.clearInterval(timer);
+    const handleOnline = () => { setOnline(true); if (session && authorized) load(true); };
+    const handleOffline = () => setOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [session?.access_token, authorized]);
 
-  const visibleOrders = useMemo(() => {
-    if (showHistory) return orders;
-    return orders.filter(o => !['completado', 'cancelado'].includes(o.estado));
-  }, [orders, showHistory]);
+  useEffect(() => {
+    if (!session || !authorized) return undefined;
+    load();
+    const refreshTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') load(true);
+    }, 5000);
+    const clockTimer = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => {
+      window.clearInterval(refreshTimer);
+      window.clearInterval(clockTimer);
+    };
+  }, [session?.access_token, authorized, soundEnabled]);
 
-  const counts = useMemo(() => ({
-    recibido: orders.filter(o => o.estado === 'recibido').length,
-    preparando: orders.filter(o => o.estado === 'preparando').length,
-    listo: orders.filter(o => o.estado === 'listo').length,
-  }), [orders]);
+  const staleNewOrders = useMemo(
+    () => orders.filter(order => isStaleNewOrder(order, now)),
+    [orders, now]
+  );
+
+  const laneOrders = useMemo(() => {
+    const grouped = Object.fromEntries(LANES.map(lane => [lane.status, []]));
+    orders.forEach(order => {
+      if (order.estado === 'recibido' && isStaleNewOrder(order, now)) return;
+      if (grouped[order.estado]) grouped[order.estado].push(order);
+    });
+    grouped.completado = grouped.completado.slice(0, 8);
+    return grouped;
+  }, [orders, now]);
+
+  const activeCount = useMemo(
+    () => orders.filter(order => (
+      ['recibido', 'preparando', 'listo'].includes(order.estado)
+      && !isStaleNewOrder(order, now)
+    )).length,
+    [orders, now]
+  );
 
   const handleAuth = async (event) => {
     event.preventDefault();
@@ -148,10 +341,6 @@ export default function StaffApp() {
   };
 
   const changeStatus = async (order, nextStatus) => {
-    if (nextStatus === 'cancelado') {
-      const ok = window.confirm(`Cancel order #${order.id}? This action is recorded in the audit log.`);
-      if (!ok) return;
-    }
     setBusyOrder(order.id);
     setError('');
     try {
@@ -164,15 +353,19 @@ export default function StaffApp() {
     }
   };
 
+  const cancelOrder = async (order) => {
+    const ok = window.confirm(`Cancel order #${order.id}? This action is recorded in the audit log.`);
+    if (!ok) return;
+    await changeStatus(order, 'cancelado');
+  };
+
   if (!session) {
     return (
       <main className="staff-shell auth-shell">
         <section className="staff-auth-card">
           <div className="staff-brand-mark">AK</div>
           <h1>Anthony's Kitchen Staff</h1>
-          <p className="staff-muted">
-            Protected staff access. Accounts are provisioned by management and cannot self-register here.
-          </p>
+          <p className="staff-muted">Protected staff access. Management creates staff accounts; there is no public signup.</p>
           <form onSubmit={handleAuth} className="staff-auth-form">
             <label>Email</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required />
@@ -195,9 +388,7 @@ export default function StaffApp() {
         <section className="staff-auth-card">
           <div className="staff-brand-mark">AK</div>
           <h1>Access not provisioned</h1>
-          <p className="staff-muted">
-            The login is valid, but this account does not have a kitchen, manager, or admin role. Roles can only be assigned server-side.
-          </p>
+          <p className="staff-muted">The login is valid, but this account does not have a kitchen, manager, or admin role. Roles are assigned server-side.</p>
           {message && <p className="staff-message">{message}</p>}
           {error && <p className="staff-error">{error}</p>}
           <button className="staff-primary" onClick={handleRefreshAccess} disabled={submitting}>{submitting ? 'Checking…' : 'Refresh access'}</button>
@@ -208,72 +399,109 @@ export default function StaffApp() {
   }
 
   return (
-    <main className="staff-shell">
-      <header className="staff-topbar">
-        <div>
+    <main className="staff-shell kds-shell">
+      <header className="kds-topbar">
+        <div className="kds-brand-block">
           <div className="staff-eyebrow">Anthony's Super Kitchen</div>
-          <h1>Kitchen Orders</h1>
+          <div className="kds-title-row">
+            <h1>Kitchen</h1>
+            <span className="kds-active-count">{activeCount} active</span>
+            {staleNewOrders.length ? (
+              <button className="kds-review-count" onClick={() => setShowReview(value => !value)}>
+                {staleNewOrders.length} review
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div className="staff-top-actions">
-          <span className="staff-role">{role}</span>
+
+        <div className="kds-system-controls">
+          <div className={`kds-connection ${online ? 'online' : 'offline'}`}>
+            <span className="kds-connection-dot" />
+            <div>
+              <strong>{online ? 'Live' : 'Offline'}</strong>
+              <small>{lastSync ? `Synced ${lastSync.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'Waiting for sync'}</small>
+            </div>
+          </div>
+          <button className={`kds-sound-toggle ${soundEnabled ? 'enabled' : ''}`} onClick={soundEnabled ? () => setSoundEnabled(false) : enableSound}>
+            {soundEnabled ? '🔊 Alerts on' : '🔇 Enable alerts'}
+          </button>
           <button className="staff-secondary small" onClick={() => load()}>Refresh</button>
+          <span className="staff-role">{role}</span>
           <button className="staff-secondary small" onClick={handleLogout}>Sign out</button>
         </div>
       </header>
 
-      <section className="staff-stats" aria-label="Order counts">
-        <div><strong>{counts.recibido}</strong><span>New</span></div>
-        <div><strong>{counts.preparando}</strong><span>Cooking</span></div>
-        <div><strong>{counts.listo}</strong><span>Ready</span></div>
-      </section>
+      {newOrderAlert ? (
+        <section className="kds-new-order-alert" role="status" aria-live="assertive">
+          <div><strong>🔔 NEW ORDER</strong><span>{newOrderAlert}</span></div>
+          <button onClick={() => setNewOrderAlert('')}>Acknowledge</button>
+        </section>
+      ) : null}
 
-      <section className="staff-toolbar">
-        <button className={!showHistory ? 'staff-filter active' : 'staff-filter'} onClick={() => setShowHistory(false)}>Active orders</button>
-        <button className={showHistory ? 'staff-filter active' : 'staff-filter'} onClick={() => setShowHistory(true)}>All recent</button>
-      </section>
+      {staleNewOrders.length ? (
+        <section className="kds-review-summary">
+          <div>
+            <strong>⚠ {staleNewOrders.length} older unresolved {staleNewOrders.length === 1 ? 'order' : 'orders'}</strong>
+            <span>Kept out of the live New lane so old tickets are not mistaken for fresh kitchen orders.</span>
+          </div>
+          <button onClick={() => setShowReview(value => !value)}>{showReview ? 'Hide review' : 'Review orders'}</button>
+        </section>
+      ) : null}
 
-      {error && <p className="staff-error staff-banner">{error}</p>}
-      {loading ? <p className="staff-muted staff-loading">Loading orders…</p> : null}
+      {showReview && staleNewOrders.length ? (
+        <section className="kds-review-panel" aria-label="Older unresolved orders">
+          <header>
+            <div>
+              <div className="staff-eyebrow">Manager attention</div>
+              <h2>Needs Review</h2>
+              <p>Nothing was deleted or auto-completed. Decide whether each old ticket should still be cooked or canceled.</p>
+            </div>
+          </header>
+          <div className="kds-review-grid">
+            {staleNewOrders.map(order => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                now={now}
+                busy={busyOrder === order.id}
+                onAdvance={changeStatus}
+                onCancel={cancelOrder}
+                reviewMode
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="staff-order-grid">
-        {!loading && visibleOrders.length === 0 ? <div className="staff-empty">No orders in this view.</div> : null}
-        {visibleOrders.map(order => {
-          const next = NEXT_ACTION[order.estado];
-          const customer = order.cliente || {};
+      {error ? <p className="staff-error kds-error-banner">{error}</p> : null}
+      {loading ? <p className="staff-muted staff-loading">Loading kitchen board…</p> : null}
+
+      <section className="kds-board" aria-label="Kitchen order board">
+        {LANES.map(lane => {
+          const laneItems = laneOrders[lane.status] || [];
           return (
-            <article className={`staff-order-card status-${order.estado}`} key={order.id}>
-              <div className="staff-order-head">
+            <section className={`kds-lane lane-${lane.status}`} key={lane.status}>
+              <header className="kds-lane-header">
                 <div>
-                  <span className="staff-order-id">#{order.id}</span>
-                  <span className={`staff-status ${order.estado}`}>{STATUS_LABELS[order.estado] || order.estado}</span>
+                  <h2>{lane.title}</h2>
+                  <p>{lane.subtitle}</p>
                 </div>
-                <strong>{money(order.total)}</strong>
+                <span className="kds-lane-count">{laneItems.length}</span>
+              </header>
+              <div className="kds-lane-orders">
+                {!loading && laneItems.length === 0 ? <div className="kds-lane-empty">No orders</div> : null}
+                {laneItems.map(order => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    now={now}
+                    busy={busyOrder === order.id}
+                    onAdvance={changeStatus}
+                    onCancel={cancelOrder}
+                  />
+                ))}
               </div>
-
-              <div className="staff-order-meta">
-                <span>{order.tipo_entrega === 'delivery' ? '🚚 Delivery' : '📦 Pickup'}</span>
-                <span>{customer.nombre || 'Customer'}</span>
-                {customer.telefono ? <a href={`tel:${customer.telefono}`}>{customer.telefono}</a> : null}
-                {order.tipo_entrega === 'delivery' && customer.direccion ? <span>📍 {customer.direccion}</span> : null}
-              </div>
-
-              <ul className="staff-items">
-                {(order.items || []).map((item, index) => <li key={`${order.id}-${index}`}>{itemLabel(item)}</li>)}
-              </ul>
-
-              {order.notas ? <div className="staff-notes"><strong>Notes:</strong> {order.notas}</div> : null}
-
-              <div className="staff-order-actions">
-                {next ? (
-                  <button className="staff-primary" disabled={busyOrder === order.id} onClick={() => changeStatus(order, next.status)}>
-                    {busyOrder === order.id ? 'Updating…' : next.label}
-                  </button>
-                ) : null}
-                {['recibido', 'preparando', 'listo'].includes(order.estado) ? (
-                  <button className="staff-danger" disabled={busyOrder === order.id} onClick={() => changeStatus(order, 'cancelado')}>Cancel</button>
-                ) : null}
-              </div>
-            </article>
+            </section>
           );
         })}
       </section>
